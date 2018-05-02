@@ -1,0 +1,34 @@
+{
+    "name": "hk-r/lib-indigo",
+    "description": "",
+    "keywords": ["indigo"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Kyota Hiyoshi",
+            "email": "hiyoshi-kyota@imjp.co.jp"
+        }
+    ],
+    "scripts":{
+        "test": [
+
+        ]
+    },
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "require-dev": {
+
+    },
+    "autoload": {
+        "files": [
+            "php/main.php"
+        ]
+    },
+    "extra": {
+        "px2package": {
+            "name": "lib-indigo",
+            "type": "plugin"
+        }
+    }
+}
