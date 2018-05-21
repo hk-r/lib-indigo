@@ -47,8 +47,15 @@ $ php res_install_script.php [resourceInstallPath(ex. ./res)]
 <script src="/[resourceInstallPath]/scripts/common.js"></script>
 ```
 
-### 3. indigoの実行
-#### 3-1. 初期化する
+### 3. jqueryのdatepickerを読込む
+```
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1/i18n/jquery.ui.datepicker-ja.min.js"></script>
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+```
+
+### 4. indigoの実行
+#### 4-1. 初期化する
 
 各種パラメータを設定し、lib-indigoのmainクラスを呼び出し初期化を行います。
 
@@ -94,7 +101,7 @@ $indigo = new indigo\main(
 );
 ```
 
-#### 3-2. indigoを実行する
+#### 4-2. indigoを実行する
 
 `run()` を実行します。
 
