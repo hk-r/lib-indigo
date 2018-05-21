@@ -1,0 +1,86 @@
+@charset "UTF-8";
+body {
+	background-color: #fff;
+	cursor: default;
+	color: #333;
+}
+
+table th {
+	text-align: center;
+	background-color: #666;
+	color: #fff;
+}
+
+.p-center {
+	text-align: center;
+}
+
+#loading{
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	margin-left: -110px;
+}
+
+#loader-bg {
+	display: none;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+	opacity: 0.7;
+	background: #FFF;
+	z-index: 999;
+}
+
+#main-contents{
+	text-align: center;
+	margin-top: 20%;
+}
+
+.dialog_box {
+	width: 80%;
+    margin: 3em auto;
+    background-color: #fff;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 5px 10px 10px rgba(0, 0, 0, 0.2);
+}
+
+.dialog-buttons {
+	text-align: center;
+}
+
+.alert_box {
+	/*width:80%;*/
+	padding:15px;
+	margin-bottom: 20px;
+	background: #FEDFE1;
+
+}
+
+.alert_box .alert_title {
+	font-weight: bold;
+	margin: 0 0 10px 0;
+}
+
+.alert_box .alert_content a {
+	color: #724938;
+	font-weight: bold;
+	/*text-decoration: underline;*/
+}
+
+.alert_box .alert_content {
+	/*color: #724938;*/
+
+	margin: 0;
+	line-height: 1.5;
+}
+
+.alert_box .error_message {
+	color: #724938;
+	margin: 0;
+	line-height: 1.5;
+}
