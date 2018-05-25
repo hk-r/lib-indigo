@@ -23,7 +23,7 @@
     "autoload": {
         "files": [
             "php/main.php",
-            "php/filesystem.php"
+            "php/file_control.php"
         ]
     },
     "extra": {
