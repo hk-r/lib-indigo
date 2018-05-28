@@ -6,6 +6,8 @@ class main
 {
 	public $options;
 
+	private $file_control;
+
 	/**
 	 * Delimiter
 	 *
@@ -25,12 +27,22 @@ class main
 	/**
 	 * 公開予約管理CSVファイル
 	 */
-	private $list_filename = '\res\csv\list.csv';
+	private $list_filename = '/res/csv/list.csv';
 
 	/**
 	 * 警告エラー時のお知らせCSVファイル
 	 */
-	private $alert_filename = '\res\csv\alert.csv';
+	private $alert_filename = '/res/csv/alert.csv';
+
+	/**
+	 * 矢印画像パス
+	 */
+	private $img_arrow_left = '/res/images/arrow_left.png';
+
+	/**
+	 * エラー画像パス
+	 */
+	private $img_error_icon = '/res/images/error_icon.png';
 
 	/**
 	 * コンストラクタ
@@ -38,6 +50,7 @@ class main
 	 */
 	public function __construct($options) {
 		$this->options = json_decode(json_encode($options));
+		$this->file_control = new file_control($this);
 	}
 
 	/**
@@ -48,6 +61,7 @@ class main
 	private function get_branch_list() {
 
 		$current_dir = realpath('.');
+		// echo $current_dir;
 
 		$output_array = array();
 		$result = array('status' => true,
@@ -155,7 +169,6 @@ class main
 		}
 
 		return $array_list;
-
 	}
 
 	/**
@@ -236,7 +249,7 @@ class main
 	 * 日付変換（Y-m-i H:i:s）
 	 *	 
 	 * @param $date = 日付
-	 * @param $time = 日時
+	 * @param $time = 時間
 	 *	 
 	 * @return 
 	 *  一致する場合：selected（文字列）
@@ -265,22 +278,22 @@ class main
 		
 		$ret = "";
 
-		$branch_selected_value = "";
-		$date = "";
-		$time = "";
+		$branch_select_value = "";
+		$reserve_date = "";
+		$reserve_time = "";
 		$comment = "";
 
 		// フォームパラメタが設定されている場合変数へ設定
-		if (isset($this->options->_POST->branch_selected_value)) {
-			$branch_selected_value = $this->options->_POST->branch_selected_value;
+		if (isset($this->options->_POST->branch_select_value)) {
+			$branch_select_value = $this->options->_POST->branch_select_value;
 		}
 
-		if (isset($this->options->_POST->date)) {
-			$date = $this->options->_POST->date;
+		if (isset($this->options->_POST->reserve_date)) {
+			$reserve_date = $this->options->_POST->reserve_date;
 		}
 
-		if (isset($this->options->_POST->time)) {
-			$time = $this->options->_POST->time;
+		if (isset($this->options->_POST->reserve_time)) {
+			$reserve_time = $this->options->_POST->reserve_time;
 		}
 		
 		if (isset($this->options->_POST->comment)) {
@@ -293,7 +306,7 @@ class main
 		$branch_list = $get_branch_ret->branch_list;
 
 		// ダイアログHTMLの作成
-		$ret = $this->create_dialog_html(true, $error_message_disp, $branch_list, $branch_selected_value, $date, $time, $comment, '');
+		$ret = $this->create_dialog_html(true, $error_message_disp, $branch_list, $branch_select_value, $reserve_date, $reserve_time, $comment, '');
 
 		return $ret;
 	}
@@ -307,32 +320,30 @@ class main
 				
 		$ret = "";
 
-		$branch_selected_value = "";
-		$date = "";
-		$time = "";
+		$branch_select_value = "";
+		$reserve_date = "";
+		$reserve_time = "";
 		$comment = "";
 
 		// フォームパラメタが設定されている場合変数へ設定
-		if (isset($this->options->_POST->branch_selected_value)) {
-			$branch_selected_value = $this->options->_POST->branch_selected_value;
+		if (isset($this->options->_POST->branch_select_value)) {
+			$branch_select_value = $this->options->_POST->branch_select_value;
 		}
 
-		if (isset($this->options->_POST->date)) {
-			$date = $this->options->_POST->date;
+		if (isset($this->options->_POST->reserve_date)) {
+			$reserve_date = $this->options->_POST->reserve_date;
 		}
 
-		if (isset($this->options->_POST->time)) {
-			$time = $this->options->_POST->time;
+		if (isset($this->options->_POST->reserve_time)) {
+			$reserve_time = $this->options->_POST->reserve_time;
 		}
 		
 		if (isset($this->options->_POST->comment)) {
 			$comment = $this->options->_POST->comment;
 		}
 
-		$selected_id = '';
-
 		// 確認ダイアログHTMLの作成
-		$ret = $this->create_check_dialog_html(true, $branch_selected_value, $date, $time, $comment, $selected_id);
+		$ret = $this->create_check_dialog_html($branch_select_value, $reserve_date, $reserve_time, $comment);
 
 		return $ret;
 	}
@@ -349,39 +360,39 @@ class main
 		
 		$ret = "";
 
-		$branch_selected_value = "";
-		$date = "";
-		$time = "";
+		$branch_select_value = "";
+		$reserve_date = "";
+		$reserve_time = "";
 		$comment = "";
 
 		$selected_id =  "";
 
 		// 初期表示画面の変更ボタンから遷移してきた場合
 		if (isset($this->options->_POST->radio_selected_id)) {
-
+			
 			// 選択されたID
 			$selected_id =  $this->options->_POST->radio_selected_id;
 			// 選択されたIDに紐づく情報を取得
 			$selected_ret = $this->get_selected_data();
 			
-			$branch_selected_value = $selected_ret['branch_name'];
-			$date = date('Y-m-d',  strtotime($selected_ret['reserve_datetime']));
-			$time = date('H:i',  strtotime($selected_ret['reserve_datetime']));
-			$comment = $selected_ret['comment'];;
+			$branch_select_value = $selected_ret['branch_name'];
+			$reserve_date = date('Y-m-d',  strtotime($selected_ret['reserve_datetime']));
+			$reserve_time = date('H:i',  strtotime($selected_ret['reserve_datetime']));
+			$comment = $selected_ret['comment'];
 
 		} else {
 
 			// フォームパラメタが設定されている場合変数へ設定
-			if (isset($this->options->_POST->branch_selected_value)) {
-				$branch_selected_value = $this->options->_POST->branch_selected_value;
+			if (isset($this->options->_POST->branch_select_value)) {
+				$branch_select_value = $this->options->_POST->branch_select_value;
 			}
 
-			if (isset($this->options->_POST->date)) {
-				$date = $this->options->_POST->date;
+			if (isset($this->options->_POST->reserve_date)) {
+				$reserve_date = $this->options->_POST->reserve_date;
 			}
 
-			if (isset($this->options->_POST->time)) {
-				$time = $this->options->_POST->time;
+			if (isset($this->options->_POST->reserve_time)) {
+				$reserve_time = $this->options->_POST->reserve_time;
 			}
 			
 			if (isset($this->options->_POST->comment)) {
@@ -399,7 +410,7 @@ class main
 		$branch_list = $get_branch_ret->branch_list;
 
 		// ダイアログHTMLの作成
-		$ret = $this->create_dialog_html(false, $error_message_disp, $branch_list, $branch_selected_value, $date, $time, $comment, $selected_id);
+		$ret = $this->create_dialog_html(false, $error_message_disp, $branch_list, $branch_select_value, $reserve_date, $reserve_time, $comment, $selected_id);
 
 		return $ret;
 	}
@@ -410,38 +421,9 @@ class main
 	 * @return 変更確認ダイアログの出力内容
 	 */
 	private function do_update_check_btn() {
-		
-		
-		$ret = "";
-
-		$branch_selected_value = "";
-		$date = "";
-		$time = "";
-		$comment = "";
-
-		// フォームパラメタが設定されている場合変数へ設定
-		if (isset($this->options->_POST->branch_selected_value)) {
-			$branch_selected_value = $this->options->_POST->branch_selected_value;
-		}
-
-		if (isset($this->options->_POST->date)) {
-			$date = $this->options->_POST->date;
-		}
-
-		if (isset($this->options->_POST->time)) {
-			$time = $this->options->_POST->time;
-		}
-		
-		if (isset($this->options->_POST->comment)) {
-			$comment = $this->options->_POST->comment;
-		}
-
-		if (isset($this->options->_POST->selected_id)) {
-			$selected_id = $this->options->_POST->selected_id;
-		}
-
+				
 		// 確認ダイアログHTMLの作成
-		$ret = $this->create_check_dialog_html(false, $branch_selected_value, $date, $time, $comment, $selected_id);
+		$ret = $this->create_change_check_dialog_html();
 
 		return $ret;
 	}
@@ -452,17 +434,17 @@ class main
 	 * @param $add_flg            = 新規フラグ
 	 * @param $error_message_disp = エラーメッセージ出力内容
 	 * @param $branch_list        = ブランチリスト
-	 * @param $branch_selected_value = ブランチ選択値
-	 * @param $date        = 日付
-	 * @param $time        = 日時
-	 * @param $comment     = コメント
-	 * @param $selected_id = 変更時の選択ID
+	 * @param $branch_select_value = ブランチ選択値
+	 * @param $reserve_date = 公開予定日時
+	 * @param $reserve_time = 公開予定時間
+	 * @param $comment      = コメント
+	 * @param $selected_id  = 変更時の選択ID
 	 *
 	 * @return 
 	 *  入力ダイアログ出力内容
 	 */
 	private function create_dialog_html($add_flg, $error_message_disp, $branch_list,
-		$branch_selected_value, $date, $time, $comment, $selected_id) {
+		$branch_select_value, $reserve_date, $reserve_time, $comment, $selected_id) {
 		
 		$ret = "";
 
@@ -487,42 +469,50 @@ class main
 			   
 		$ret .= '<form method="post">'
 			  . '<input type="hidden" name="selected_id" value="' . htmlspecialchars($selected_id) . '"/>'
-			  . '<table class="table table-bordered table-striped">'
+  			  . '<input type="hidden" name="change_before_branch_select_value" value="'. $branch_select_value . '"/></td>'
+  			  . '<input type="hidden" name="change_before_reserve_date" value="'. $reserve_date . '"/></td>'
+  			  . '<input type="hidden" name="change_before_reserve_time" value="'. $reserve_time . '"/></td>'
+  			  . '<input type="hidden" name="change_before_comment" value="'. $comment . '"/></td>'
+
+			  . '<table class="table table-striped">'
 			  . '<tr>'
-			  . '<td>ブランチ</td>'
-			  . '<td><select id="branch_list" class="form-control" name="branch_selected_value">';
+			  . '<td class="dialog_thead">ブランチ</td>'
+			  . '<td><select id="branch_list" class="form-control" name="branch_select_value">';
 
 				foreach ($branch_list as $branch) {
-					$ret .= '<option value="' . htmlspecialchars($branch) . '" ' . $this->compare_to_selected_value($branch_selected_value, $branch) . '>' . htmlspecialchars($branch) . '</option>';
+					$ret .= '<option value="' . htmlspecialchars($branch) . '" ' . $this->compare_to_selected_value($branch_select_value, $branch) . '>' . htmlspecialchars($branch) . '</option>';
 				}
 
 		$ret .= '</select></td>'
 			  . '</tr>'
 			  . '<tr>'
-			  . '<td>コミット</td>'
+			  . '<td class="dialog_thead">コミット</td>'
 			  . '<td>' . 'dummy' . '</td>'
 			  . '</tr>'
 			  . '<tr>'
-			  . '<td scope="row">公開予定日時</td>'
-			  . '<td scope="row"><span style="margin-right:10px;"><input type="text" id="datepicker" name="date" value="'. $date . '" /></span>'
-			  . '<input type="time" id="time" name="time" value="'. $time . '"/></td>'
+			  . '<td class="dialog_thead">公開予定日時</td>'
+			  . '<td scope="row"><span style="margin-right:10px;"><input type="text" id="datepicker" name="reserve_date" value="'. $reserve_date . '" autocomplete="off" /></span>'
+			  . '<input type="time" name="reserve_time" value="'. $reserve_time . '" /></td>'
 			  . '</tr>'
 			  . '<tr>'
-			  . '<td scope="row">コメント</td>'
-			  . '<td scope="row"><input type="text" id="comment" name="comment" size="50" value="' . htmlspecialchars($comment) . '" /></td>'
+			  . '<td class="dialog_thead">コメント</td>'
+			  . '<td><input type="text" id="comment" name="comment" size="50" value="' . htmlspecialchars($comment) . '" /></td>'
 			  . '</tr>'
 			  . '</tbody></table>'
 
-			  . '<div class="unit">'
-			  . '<div class="text-center">';
-		
+			  . '<div class="button_contents_box">'
+			  . '<div class="button_contents">'
+			  . '<ul>';
+
 		if ( $add_flg ) {
-			$ret .= '<input type="submit" id="add_check_btn" name="add_check_btn" class="btn btn-default" value="確認"/>';
+			$ret .= '<li><input type="submit" id="add_check_btn" name="add_check_btn" class="px2-btn px2-btn--primary" value="確認"/></li>';
 		} else {
-		  	$ret .= '<input type="submit" id="update_check_btn" name="update_check_btn" class="btn btn-default" value="確認"/>';
+		  	$ret .= '<li><input type="submit" id="update_check_btn" name="update_check_btn" class="px2-btn px2-btn--primary" value="確認"/></li>';
 		}
 
-		$ret .= '<input type="submit" id="close_btn" class="btn btn-default" value="キャンセル"/>'
+		$ret .= '<li><input type="submit" id="close_btn" class="px2-btn" value="キャンセル"/></li>'
+			  . '</ul>'
+			  . '</div>'
 			  . '</div>'
 			  . '</form>'
 			  . '</div>'
@@ -535,21 +525,99 @@ class main
 	}
 
 
+	// /**
+	//  * 新規・変更の出力確認ダイアログHTMLの作成
+	//  *	 
+	//  * @param $add_flg     = 新規フラグ
+	//  * @param $branch_select_value = ブランチ選択値
+	//  * @param $date        = 日付
+	//  * @param $time        = 日時
+	//  * @param $comment     = コメント
+	//  * @param $selected_id = 変更時の選択ID
+	//  *
+	//  * @return 
+	//  *  確認ダイアログ出力内容
+	//  */
+	// private function create_check_dialog_html($add_flg, $branch_select_value,
+	// 	$date, $time, $comment, $selected_id) {
+		
+	// 	$ret = "";
+
+	// 	$ret .= '<div class="dialog">'
+	// 		 . '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
+	// 		 . '<div style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; background: rgb(0, 0, 0); opacity: 0.5;"></div>'
+	// 		 . '<div style="position: absolute; left: 0px; top: 0px; padding-top: 4em; overflow: auto; width: 100%; height: 100%;">'
+	// 		 . '<div class="dialog_box">';
+			 
+	// 	if ( $add_flg ) {
+	// 		$ret .= '<h4>追加確認</h4>';
+	// 	} else {
+	// 	  	$ret .= '<h4>変更確認</h4>';
+	// 	}
+
+	// 	$ret .= '<form method="post">'
+	// 		 . '<input type="hidden" name="selected_id" value="' . $selected_id . '"/>'
+	// 		 . '<table class="table table-bordered table-striped">'
+	// 		 . '<tr>'
+	// 		 . '<td>' . 'ブランチ' . '</td>'
+	// 		 . '<td>' . $branch_select_value
+	// 		 . '<input type="hidden" name="branch_select_value" value="' . $branch_select_value . '"/>'
+	// 		 . '</td>'
+	// 		 . '</tr>'
+	// 		 . '<tr>'
+	// 		 . '<td>' . 'コミット' . '</td>'
+	// 		 . '<td>' . 'dummy' . '</td>'
+	// 		 . '</tr>'
+	// 		 . '<tr>'
+	// 		 . '<td scope="row">' . '公開予定日時' . '</td>'
+	// 		 . '<td>' . $date . ' ' . $time
+	// 		 . '<input type="hidden" name="date" value="' . $date . '"/>'
+	// 		 . '<input type="hidden" name="time" value="' . $time . '"/>'
+	// 		 . '</td>'
+	// 		 . '</tr>'
+	// 		 . '<tr>'
+	// 		 . '<td scope="row">' . 'コメント' . '</td>'
+	// 		 . '<td scope="row">' . htmlspecialchars($comment) . '</td>'
+	// 		 . '<input type="hidden" name="comment" value="' . htmlspecialchars($comment) . '"/>'
+	// 		 . '</tr>'
+	// 		 . '</tbody></table>'
+			
+	// 		. '<div class="unit">'
+	// 		. '<div class="text-center">';
+
+	// 	if ( $add_flg ) {
+	// 		$ret .= '<input type="submit" name="add_confirm_btn" class="btn btn-default" value="確定"/>'
+	// 			. '<input type="submit" name="add_back_btn" class="btn btn-default" value="戻る"/>';
+	// 	} else {
+	// 		$ret .= '<input type="submit" name="update_confirm_btn" class="btn btn-default" value="確定"/>'
+	// 			. '<input type="submit" name="update_back_btn" class="btn btn-default" value="戻る"/>';
+	// 	}
+
+	// 	$ret .= '</div>'
+	// 		. '</form>'
+	// 		. '</div>'
+
+	// 		 . '</div>'
+	// 		 . '</div>'
+	// 		 . '</div></div>';
+
+	// 	return $ret;
+	// }
+
 	/**
-	 * 新規・変更の出力確認ダイアログHTMLの作成
+	 * 新規の出力確認ダイアログHTMLの作成
 	 *	 
 	 * @param $add_flg     = 新規フラグ
-	 * @param $branch_selected_value = ブランチ選択値
-	 * @param $date        = 日付
-	 * @param $time        = 日時
-	 * @param $comment     = コメント
-	 * @param $selected_id = 変更時の選択ID
+	 * @param $branch_select_value = ブランチ選択値
+	 * @param $reserve_date = 公開予定日付
+	 * @param $reserve_time = 公開予定時間
+	 * @param $comment      = コメント
 	 *
 	 * @return 
 	 *  確認ダイアログ出力内容
 	 */
-	private function create_check_dialog_html($add_flg, $branch_selected_value,
-		$date, $time, $comment, $selected_id) {
+	private function create_check_dialog_html($branch_select_value,
+		$reserve_date, $reserve_time, $comment) {
 		
 		$ret = "";
 
@@ -559,35 +627,30 @@ class main
 			 . '<div style="position: absolute; left: 0px; top: 0px; padding-top: 4em; overflow: auto; width: 100%; height: 100%;">'
 			 . '<div class="dialog_box">';
 			 
-		if ( $add_flg ) {
-			$ret .= '<h4>追加確認</h4>';
-		} else {
-		  	$ret .= '<h4>変更確認</h4>';
-		}
+		$ret .= '<h4>追加確認</h4>';
 
 		$ret .= '<form method="post">'
-			 . '<input type="hidden" name="selected_id" value="' . $selected_id . '"/>'
-			 . '<table class="table table-bordered table-striped">'
+			 . '<table class="table table-striped">'
 			 . '<tr>'
-			 . '<td>' . 'ブランチ' . '</td>'
-			 . '<td>' . $branch_selected_value
-			 . '<input type="hidden" name="branch_selected_value" value="' . $branch_selected_value . '"/>'
+			 . '<td class="dialog_thead">' . 'ブランチ' . '</td>'
+			 . '<td>' . $branch_select_value
+			 . '<input type="hidden" name="branch_select_value" value="' . $branch_select_value . '"/>'
 			 . '</td>'
 			 . '</tr>'
 			 . '<tr>'
-			 . '<td>' . 'コミット' . '</td>'
+			 . '<td class="dialog_thead">' . 'コミット' . '</td>'
 			 . '<td>' . 'dummy' . '</td>'
 			 . '</tr>'
 			 . '<tr>'
-			 . '<td scope="row">' . '公開予定日時' . '</td>'
-			 . '<td>' . $date . ' ' . $time
-			 . '<input type="hidden" name="date" value="' . $date . '"/>'
-			 . '<input type="hidden" name="time" value="' . $time . '"/>'
+			 . '<td class="dialog_thead">' . '公開予定日時' . '</td>'
+			 . '<td>' . $reserve_date . ' ' . $reserve_time
+			 . '<input type="hidden" name="reserve_date" value="' . $reserve_date . '"/>'
+			 . '<input type="hidden" name="reserve_time" value="' . $reserve_time . '"/>'
 			 . '</td>'
 			 . '</tr>'
 			 . '<tr>'
-			 . '<td scope="row">' . 'コメント' . '</td>'
-			 . '<td scope="row">' . htmlspecialchars($comment) . '</td>'
+			 . '<td class="dialog_thead">' . 'コメント' . '</td>'
+			 . '<td>' . htmlspecialchars($comment) . '</td>'
 			 . '<input type="hidden" name="comment" value="' . htmlspecialchars($comment) . '"/>'
 			 . '</tr>'
 			 . '</tbody></table>'
@@ -595,15 +658,117 @@ class main
 			. '<div class="unit">'
 			. '<div class="text-center">';
 
-		if ( $add_flg ) {
-			$ret .= '<input type="submit" name="add_confirm_btn" class="btn btn-default" value="確定"/>'
-				. '<input type="submit" name="add_back_btn" class="btn btn-default" value="戻る"/>';
-		} else {
-			$ret .= '<input type="submit" name="update_confirm_btn" class="btn btn-default" value="確定"/>'
-				. '<input type="submit" name="update_back_btn" class="btn btn-default" value="戻る"/>';
-		}
+		$ret .= '<div class="button_contents_box">'
+			. '<div class="button_contents">'
+			. '<ul>';
 
-		$ret .= '</div>'
+		$ret .= '<li><input type="submit" name="add_confirm_btn" class="px2-btn px2-btn--primary" value="確定"/></li>'
+			. '<li><input type="submit" name="add_back_btn" class="px2-btn" value="戻る"/></li>';
+
+		$ret .= '</ul>'
+			. '</div>'
+			. '</div>'
+			. '</form>'
+			. '</div>'
+
+			 . '</div>'
+			 . '</div>'
+			 . '</div></div>';
+
+		return $ret;
+	}
+
+
+	/**
+	 * 変更の出力確認ダイアログHTMLの作成（変更前後の比較有）
+	 *
+	 * @return 
+	 *  確認ダイアログ出力内容
+	 */
+	private function create_change_check_dialog_html() {
+		
+		$img_filename = realpath('.') . $this->img_arrow_left;
+
+		$ret = '<div class="dialog">'
+			 . '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
+			 . '<div style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; background: rgb(0, 0, 0); opacity: 0.5;"></div>'
+			 . '<div style="position: absolute; left: 0px; top: 0px; padding-top: 4em; overflow: auto; width: 100%; height: 100%;">'
+			 . '<div class="dialog_box">';
+			 
+		$ret .= '<h4>変更確認</h4>'
+			. '<form method="post">'
+			. '<div class="colum_3">'
+			. '<div class="left_box">';
+
+		$ret .= '<input type="hidden" name="selected_id" value="' . $this->options->_POST->selected_id . '"/>'
+			 . '<table class="table table-striped">'
+			 . '<tr>'
+			 . '<td class="dialog_thead">' . 'ブランチ' . '</td>'
+			 . '<td>' . $this->options->_POST->change_before_branch_select_value
+			 . '</td>'
+			 . '</tr>'
+			 . '<tr>'
+			 . '<td class="dialog_thead">' . 'コミット' . '</td>'
+			 . '<td>' . 'dummy' . '</td>'
+			 . '</tr>'
+			 . '<tr>'
+			 . '<td class="dialog_thead">' . '公開予定日時' . '</td>'
+			 . '<td>' . $this->options->_POST->change_before_reserve_date . ' ' . $this->options->_POST->change_before_reserve_time
+			 . '</td>'
+			 . '</tr>'
+			 . '<tr>'
+			 . '<td class="dialog_thead">' . 'コメント' . '</td>'
+			 . '<td>' . htmlspecialchars($this->options->_POST->change_before_comment) . '</td>'
+			 . '</tr>'
+			 . '</tbody></table>'
+			
+		     . '</div>'
+
+		     . '<div class="center_box">'
+		     . '<img src="'. $this->img_arrow_left .'"/>'
+		     . '</div>'
+
+             . '<div class="right_box">'
+			 . '<table class="table table-striped" style="width: 100%">'
+			 . '<tr>'
+			 . '<td class="dialog_thead">' . 'ブランチ' . '</td>'
+			 . '<td>' . $this->options->_POST->branch_select_value
+			 . '<input type="hidden" name="branch_select_value" value="' . $this->options->_POST->branch_select_value . '"/>'
+			 . '</td>'
+			 . '</tr>'
+			 . '<tr>'
+			 . '<td class="dialog_thead">' . 'コミット' . '</td>'
+			 . '<td>' . 'dummy' . '</td>'
+			 . '</tr>'
+			 . '<tr>'
+			 . '<td class="dialog_thead">' . '公開予定日時' . '</td>'
+			 . '<td>' . $this->options->_POST->reserve_date . ' ' . $this->options->_POST->reserve_time
+			 . '<input type="hidden" name="reserve_date" value="' . $this->options->_POST->reserve_date . '"/>'
+			 . '<input type="hidden" name="reserve_time" value="' . $this->options->_POST->reserve_time . '"/>'
+			 . '<input type="hidden" name="change_before_reserve_date" value="' . $this->options->_POST->change_before_reserve_date . '"/>'
+			 . '<input type="hidden" name="change_before_reserve_time" value="' . $this->options->_POST->change_before_reserve_time . '"/>'
+			 . '</td>'
+			 . '</tr>'
+			 . '<tr>'
+			 . '<td class="dialog_thead">' . 'コメント' . '</td>'
+			 . '<td>' . htmlspecialchars($this->options->_POST->comment) . '</td>'
+			 . '<input type="hidden" name="comment" value="' . htmlspecialchars($this->options->_POST->comment) . '"/>'
+			 . '</tr>'
+			 . '</tbody></table>'
+
+		    . '</div>'
+		 	. '</div>'
+
+			. '<div class="button_contents_box">'
+			. '<div class="button_contents">'
+			. '<ul>';
+
+		$ret .= '<li><input type="submit" name="update_confirm_btn" class="px2-btn px2-btn--primary" value="確定"/></li>'
+			. '<li><input type="submit" name="update_back_btn" class="px2-btn" value="戻る"/></li>';
+
+		$ret .= '</ul>'
+			. '</div>'
+			. '</div>'
 			. '</form>'
 			. '</div>'
 
@@ -625,23 +790,23 @@ class main
 				
 		$ret = "";
 
-		$branch_selected_value = "";
-		$date = "";
-		$time = "";
+		$branch_select_value = "";
+		$reserve_date = "";
+		$reserve_time = "";
 		$comment = "";
 		$selected_id = "";
 
 		// フォームパラメタが設定されている場合変数へ設定
-		if (isset($this->options->_POST->branch_selected_value)) {
-			$branch_selected_value = $this->options->_POST->branch_selected_value;
+		if (isset($this->options->_POST->branch_select_value)) {
+			$branch_select_value = $this->options->_POST->branch_select_value;
 		}
 
-		if (isset($this->options->_POST->date)) {
-			$date = $this->options->_POST->date;
+		if (isset($this->options->_POST->reserve_date)) {
+			$reserve_date = $this->options->_POST->reserve_date;
 		}
 
-		if (isset($this->options->_POST->time)) {
-			$time = $this->options->_POST->time;
+		if (isset($this->options->_POST->reserve_time)) {
+			$reserve_time = $this->options->_POST->reserve_time;
 		}
 		
 		if (isset($this->options->_POST->comment)) {
@@ -659,7 +824,7 @@ class main
 		if ($add_flg) {
 
 			// TODO:定数化
-			$max = 5;
+			$max = 10;
 
 			if ($max <= count($data_list)) {
 				$ret .= '<p class="error_message">公開予約は最大' . $max . '件までの登録になります。</p>';
@@ -667,7 +832,7 @@ class main
 		}
 
 		// 日付の妥当性チェック
-		list($Y, $m, $d) = explode('-', $this->options->_POST->date);
+		list($Y, $m, $d) = explode('-', $this->options->_POST->reserve_date);
 
 		if (!checkdate(intval($m), intval($d), intval($Y))) {
 			$ret .= '<p class="error_message">「公開予定日時」の日付が有効ではありません。</p>';
@@ -675,19 +840,19 @@ class main
 
 		// 公開予定日時の未来日時チェック
 		$now = date("Y-m-d H:i:s");
-		$target_day = $this->options->_POST->date . ' ' . date('H:i:s',  strtotime($this->options->_POST->time));
+		$target_day = $this->options->_POST->reserve_date . ' ' . date('H:i:s',  strtotime($this->options->_POST->reserve_time));
 
 		if (strtotime($now) > strtotime($target_day)) {
 			$ret .= '<p class="error_message">「公開予定日時」は未来日時を設定してください。</p>';
 		}
 
 		// ブランチの重複チェック
-		if (!$this->check_exist_branch($data_list, $branch_selected_value, $selected_id)) {
+		if (!$this->check_exist_branch($data_list, $branch_select_value, $selected_id)) {
 			$ret .= '<p class="error_message">1つのブランチで複数の公開予定を作成することはできません。</p>';
 		}
 
 		// 公開予定日時の重複チェック
-		if (!$this->check_exist_reserve($data_list, $this->convert_reserve_datetime($date, $time), $selected_id)) {
+		if (!$this->check_exist_reserve($data_list, $this->convert_reserve_datetime($reserve_date, $reserve_time), $selected_id)) {
 			$ret .= '<p class="error_message">入力された日時はすでに公開予定が作成されています。</p>';
 		}
 
@@ -719,7 +884,8 @@ class main
 			// データリスト
 			foreach ($alert_list as $data) {
 				
-				$ret .= '<p class="alert_content">'
+				$ret .= '<p class="alert_content" style="vertical-align: middle;">'
+					. '<span style="padding-right: 5px;"><img src="'. $this->img_error_icon . '"/></span>'
 					. '<a onClick="document.formA.submit();return false;" >'
 					. $data['reserve_datetime'] . '　' . $data['content']
 					. '</a></p>';
@@ -730,21 +896,27 @@ class main
 				. '</form>';
 		}
 
-		$ret .= '<div class="unit" style="overflow:hidden">'
-			. '<form id="form_tbl" method="post">'
-			. '<div style="float:left">'
-			. '<input type="submit" name="add" class="btn btn-default" value="新規"/>'
+		$ret .= '<div class="button_contents_box">'
+			. '<form id="form_table" method="post">'
+			. '<div class="button_contents" style="float:left">'
+			. '<ul>'
+			. '<li><input type="submit" name="add" class="px2-btn" value="新規"/></li>'
+			. '</ul>'
 			. '</div>'
-			. '<div style="float:right;">'
-			. '<input type="submit" id="update_btn" name="update" class="btn btn-default" value="変更"/>'
-			. '<input type="submit" id="delete_btn" name="delete" class="btn btn-default" value="削除"/>'
-			. '<input type="submit" id="public_btn" name="public" class="btn btn-default" value="即時公開"/>'
-			. '<input type="submit" id="history_btn" name="history" class="btn btn-default" value="履歴"/>'
+			. '<div class="button_contents" style="float:right;">'
+			// . '<input type="submit" id="update_btn" name="update" class="btn btn-default" value="変更"/>'
+			. '<ul>'
+			. '<li><input type="submit" id="update_btn" name="update" class="px2-btn" value="変更"/></li>'
+			. '<li><input type="submit" id="delete_btn" name="delete" class="px2-btn px2-btn--danger" value="削除"/></li>'
+			. '<li><input type="submit" id="release_btn" name="release" class="px2-btn px2-btn--primary" value="即時公開"/></li>'
+			. '<li><input type="submit" id="history_btn" name="history" class="px2-btn" value="履歴"/></li>'
+			. '</ul>'
 			. '</div>'
 			. '</div>';
 
 		// テーブルヘッダー
-		$ret .= '<table name="list_tbl" class="table table-bordered table-striped">'
+		$ret .= '<div>'
+		    . '<table name="list_tbl" class="table table-striped">'
 			. '<thead>'
 			. '<tr>'
 			. '<th scope="row"></th>'
@@ -762,10 +934,10 @@ class main
 		foreach ($data_list as $array) {
 			
 			$ret .= '<tr>'
-				. '<td><input type="radio" id="reserve_' . $array['id'] . '" name="target" value="' . $array['id'] . '"/></td>'
-				. '<td>' . date('Y-m-d H:i',  strtotime($array['reserve_datetime'])) . '</td>'
-				. '<td>' . $array['commit'] . '</td>'
-				. '<td>' . $array['branch_name'] . '</td>'
+				. '<td class="p-center"><input type="radio" id="reserve_' . $array['id'] . '" name="target" value="' . $array['id'] . '"/></td>'
+				. '<td class="p-center">' . date('Y-m-d H:i',  strtotime($array['reserve_datetime'])) . '</td>'
+				. '<td class="p-center">' . $array['commit'] . '</td>'
+				. '<td class="p-center">' . $array['branch_name'] . '</td>'
 				. '<td>' . $array['comment'] . '</td>'
 				// . '<td>' . $array['id'] . '</td>'
 				// . '<td>' . $this->convert_status($array['status']) . '</td>'
@@ -773,7 +945,10 @@ class main
 		}
 
 		$ret .= '</tbody></table>'
-			. '</form>';
+			. '</form>'
+			// . '</div>'
+			. '</div>';
+
 
 		return $ret;
 	}
@@ -792,20 +967,21 @@ class main
 		// 取得したリストをソートする
 		$data_list = $this->sort_list($data_list, 'reserve_datetime', SORT_ASC);
 
-		$ret .= '<div class="unit" style="overflow:hidden">'
+		$ret .= '<div style="overflow:hidden">'
 			. '<form method="post">'
-			. '<div style="float:right;">'
-			. '<input type="submit" name="log" class="btn btn-default" value="ログ"/>'
-			. '<input type="submit" name="recovory" class="btn btn-default" value="復元"/>'
+			. '<div class="button_contents" style="float:right;">'
+			. '<ul>'
+			. '<li><input type="submit" name="log" class="px2-btn px2-btn--primary" value="ログ"/></li>'
+			. '<li><input type="submit" name="recovory" class="px2-btn px2-btn--primary" value="復元"/></li>'
 			. '</div>'
 			. '</div>';
 
 		// ヘッダー
-		$ret .= '<table name="list_tbl" class="table table-bordered table-striped">'
+		$ret .= '<table name="list_tbl" class="table table-striped">'
 				. '<thead>'
 				. '<tr>'
 				. '<th scope="row"></th>'
-				. '<th scope="row"></th>'
+				. '<th scope="row">状態</th>'
 				. '<th scope="row">公開予定日時</th>'
 				. '<th scope="row">コミット</th>'
 				. '<th scope="row">ブランチ</th>'
@@ -818,20 +994,23 @@ class main
 		foreach ($data_list as $array) {
 			
 			$ret .= '<tr>'
-				. '<td><input type="radio" id="reserve_' . $array['id'] . '" name="target" value="' . $array['id'] . '"/></td>'
-				. '<td>' . $this->convert_status( $array['status'] ). '</td>'
-				. '<td>' . date('Y-m-d H:i',  strtotime($array['reserve_datetime'])) . '</td>'
-				. '<td>' . $array['commit'] . '</td>'
-				. '<td>' . $array['branch_name'] . '</td>'
+				. '<td class="p-center"><input type="radio" id="reserve_' . $array['id'] . '" name="target" value="' . $array['id'] . '"/></td>'
+				. '<td class="p-center">' . $this->convert_status( $array['status'] ). '</td>'
+				. '<td class="p-center">' . date('Y-m-d H:i',  strtotime($array['reserve_datetime'])) . '</td>'
+				. '<td class="p-center">' . $array['commit'] . '</td>'
+				. '<td class="p-center">' . $array['branch_name'] . '</td>'
 				. '<td>' . $array['comment'] . '</td>'
 				. '</tr>';
 		}
 
 		$ret .= '</tbody></table>';
 		
-		$ret .= '<div class="unit">'
-			. '<div class="text-center">'
-			. '<input type="submit" id="history_back_btn" class="btn btn-default" value="戻る"/>'
+		$ret .= '<div class="button_contents_box">'
+			. '<div class="button_contents">'
+			. '<ul>'
+			. '<li><input type="submit" id="history_back_btn" class="px2-btn px2-btn--primary" value="戻る"/></li>'
+			. '</ul>'
+			. '</div>'
 			. '</div>'
 			. '</form>'
 			. '</div>';
@@ -843,7 +1022,7 @@ class main
 	 * 
 	 */
 	public function run() {
-
+	
 		// ダイアログの表示
 		$dialog_disp = '';
 
@@ -863,11 +1042,12 @@ class main
 			$this->do_delete_btn();
 
 		// 即時公開ボタンが押下された場合
-		} elseif (isset($this->options->_POST->public)) {
+		} elseif (isset($this->options->_POST->release)) {
 		
-			// TODO:未実装
-			echo '即時公開ボタン押下';
+			// echo '即時公開ボタン押下';
 			
+			$this->manual_release();
+
 		// // 履歴ボタンが押下された場合
 		// } elseif (isset($this->options->_POST->history)) {
 		
@@ -887,10 +1067,13 @@ class main
 			
 		// 新規ダイアログの確定ボタンが押下された場合
 		} elseif (isset($this->options->_POST->add_confirm_btn)) {
-			
-			// 入力情報の追加
+
+			// Gitファイルの取得
+			$this->file_copy();
+	
+			// CSV入力情報の追加
 			$this->insert_list_csv_data();
-		
+
 		// 新規確認ダイアログの戻るボタンが押下された場合
 		} elseif (isset($this->options->_POST->add_back_btn)) {
 		
@@ -912,7 +1095,10 @@ class main
 		// 変更ダイアログの確定ボタンが押下された場合
 		} elseif (isset($this->options->_POST->update_confirm_btn)) {
 			
-			// 入力情報の変更
+			// Gitファイルの取得
+			$this->file_update();
+
+			// CSV入力情報の変更
 			$this->do_update_btn();
 		
 		// 変更確認ダイアログの戻るボタンが押下された場合
@@ -1092,6 +1278,10 @@ class main
 				    $ret_array = array_combine ($title_array, $rowData) ;
 				}
 			}
+
+
+			// Close file
+			fclose($handle);
 		}
 		return $ret_array;
 	}
@@ -1138,22 +1328,27 @@ class main
 
 			// Open file
 			$handle = fopen( $filename, 'a+' );
-			$date = date("Y-m-d H:i:s");
+			$now = date("Y-m-d H:i:s");
 
 			// id, ブランチ名, コミット, 公開予定日時, コメント, 状態, 設定日時
 			$array = array(
 				$max,
-				$this->options->_POST->branch_selected_value,
+				$this->options->_POST->branch_select_value,
 				"dummy",
-				$this->convert_reserve_datetime($this->options->_POST->date, $this->options->_POST->time),
+				$this->convert_reserve_datetime($this->options->_POST->reserve_date, $this->options->_POST->reserve_time),
 				$this->options->_POST->comment,
 				0,
-				$date
+				$now
 			);
 
 			fputcsv( $handle, $array, $this->_delimiter, $this->_enclosure);
+			
 			fclose( $handle);
 		}
+
+
+		// Close file
+		fclose($handle_r);
 	}
 
 	/**
@@ -1193,6 +1388,9 @@ class main
 				$cnt++;
 			}
 		}
+
+		// Close file
+		fclose($handle);
 	}
 
 	/**
@@ -1252,21 +1450,411 @@ class main
 
 			// Open file
 			$handle = fopen( $filename, 'a+' );
-			$date = date("Y-m-d H:i:s");
+			$now = date("Y-m-d H:i:s");
 
 			// id, ブランチ, 公開予定日時, 状態, 設定日時
 			$array = array(
 				$max,
-				$this->options->_POST->branch_selected_value,
+				$this->options->_POST->branch_select_value,
 				"update",
-				$this->convert_reserve_datetime($this->options->_POST->date, $this->options->_POST->time),
+				$this->convert_reserve_datetime($this->options->_POST->reserve_date, $this->options->_POST->reserve_time),
 				$this->options->_POST->comment,
 				0,
-				$date
+				$now
 			);
 
 			fputcsv( $handle, $array, $this->_delimiter, $this->_enclosure);
 			fclose( $handle);
 		}
+
+		// Close file
+		fclose($handle_r);
 	}
+
+	/**
+	 * 新規追加時のGitファイルのコピー
+	 *
+	 * @return なし
+	 */
+	private function file_copy()
+	{
+		$current_dir = realpath('.');
+
+		$output = "";
+		$result = array('status' => true,
+						'message' => '');
+	
+		$path = "./copy/" . date("YmdHis", 
+			strtotime($this->convert_reserve_datetime($this->options->_POST->reserve_date, $this->options->_POST->reserve_time)));
+
+		// 選択したブランチ
+		$branch_name = trim(str_replace("origin/", "", $this->options->_POST->branch_select_value));
+
+		try {
+
+			// コピー先のディレクトリが既に存在する場合は終了
+			if ( !file_exists($path) ) {
+
+				// デプロイ先のディレクトリを作成
+				if ( !mkdir($path, 0777)) {
+
+					echo 'ディレクトリの作成が失敗しました。';
+					// エラー処理
+					throw new Exception('Creation of copy directory failed.');
+				}
+
+			} else {
+				echo '同じ名前のディレクトリが存在します。';
+				throw new Exception('Creation of copy directory failed.');
+			}
+
+			// ディレクトリ移動
+			if ( chdir($path) ) {
+
+				// git init
+				exec('git init', $output);
+
+				// git urlのセット
+				$url = $this->options->git->protocol . "://" . urlencode($this->options->git->username) . ":" . urlencode($this->options->git->password) . "@" . $this->options->git->url;
+				
+				// initしたリポジトリに名前を付ける
+				exec( 'git remote add origin ' . $url, $output);
+
+				// git fetch（リモートリポジトリの指定ブランチの情報をローカルブランチに取得）
+				exec( 'git fetch origin' . ' ' . $branch_name, $output);
+
+				// git pull（）pullはリモート取得ブランチを任意のローカルブランチにマージするコマンド
+				// exec( 'git pull origin master', $output);
+				exec( 'git pull origin' . ' ' . $branch_name, $output);
+				
+				// 現在のブランチ取得
+				exec( 'git branch', $output);
+
+			} else {
+				// コピー用のディレクトリが存在しない場合
+
+				// エラー処理
+				throw new Exception('Copy directory not found.');
+			}
+		
+		} catch (Exception $e) {
+
+			set_time_limit(30);
+
+			$result['status'] = false;
+			$result['message'] = $e->getMessage();
+
+			chdir($current_dir);
+			return json_encode($result);
+		}
+
+		set_time_limit(30);
+
+		$result['status'] = false;
+		
+		chdir($current_dir);
+		return json_encode($result);
+
+	}
+
+	/**
+	 * 変更時のGitファイルのチェックアウト
+	 *
+	 * @return なし
+	 */
+	private function file_update()
+	{
+		$current_dir = realpath('.');
+
+		$copy_dir = realpath('.') . "./copy/";
+
+		$output = "";
+		$result = array('status' => true,
+						'message' => '');
+
+		$before_dir_name = date("YmdHis", strtotime($this->convert_reserve_datetime($this->options->_POST->change_before_reserve_date, $this->options->_POST->change_before_reserve_time)));
+
+		$before_path = "./copy/" . $before_dir_name;
+
+
+		$dir_name = date("YmdHis", strtotime($this->convert_reserve_datetime($this->options->_POST->reserve_date, $this->options->_POST->reserve_time)));
+
+		$path = "./copy/" . $dir_name;
+
+		// 選択したブランチ
+		$branch_name = trim(str_replace("origin/", "", $this->options->_POST->branch_select_value));
+
+		try {
+
+			// デプロイ先のディレクトリがない場合は終了
+			if ( !file_exists($before_path) ) {
+
+				echo 'ディレクトリが存在しません。';
+				throw new Exception('Creation of preview server directory failed.');
+			}
+
+			// ディレクトリ移動
+			if ( chdir( $before_path ) ) {
+
+				// 現在のブランチ取得
+				exec( 'git branch', $output);
+
+				// $now_branch;
+				$already_branch_checkout = false;
+				foreach ( $output as $value ) {
+
+					// 「*」の付いてるブランチを現在のブランチと判定
+					if ( strpos($value, '*') !== false ) {
+
+						$value = trim(str_replace("* ", "", $value));
+						// $now_branch = $value;
+
+					} else {
+
+						$value = trim($value);
+
+					}
+
+					// 選択された(切り替える)ブランチがブランチの一覧に含まれているか判定
+					if ( $value == $branch_name ) {
+						$already_branch_checkout = true;
+					}
+				}
+
+				// git fetch
+				exec( 'git fetch origin', $output );
+
+				// 現在のブランチと選択されたブランチが異なる場合は、ブランチを切り替える
+				// if ( $now_branch !== $to_branch_rep ) {
+
+				if ($already_branch_checkout) {
+					// 選択された(切り替える)ブランチが既にチェックアウト済みの場合
+					echo 'チェックアウト済み';
+					exec( 'git checkout ' . $branch_name, $output);
+
+				} else {
+					// 選択された(切り替える)ブランチがまだチェックアウトされてない場合
+					echo 'チェックアウトまだ';
+					exec( 'git checkout -b ' . $branch_name, $output);
+				}
+
+				// ディレクトリをリネームする
+				if( file_exists( $before_dir_name ) && !file_exists( $dir_name ) ){
+					print 'in';
+					chdir( $copy_dir );
+
+					rename( $before_dir_name, $dir_name );
+				}else{
+					print $before_dir_name. ',' . $dir_name;
+					print 'ディレクトリ名が変更できませんでした。';
+					throw new Exception('Copy directory name could not be changed.');
+				}
+			} else {
+				// コピー用のディレクトリが存在しない場合
+
+				// エラー処理
+				throw new Exception('Copy directory not found.');
+			}
+		
+		} catch (Exception $e) {
+
+			set_time_limit(30);
+
+			$result['status'] = false;
+			$result['message'] = $e->getMessage();
+
+			chdir($current_dir);
+			return json_encode($result);
+		}
+
+		set_time_limit(30);
+
+		$result['status'] = true;
+
+		chdir($current_dir);
+		return json_encode($result);
+
+	}
+
+	/**
+	 * 即時公開
+	 */
+	private function manual_release() {
+
+		$current_dir = realpath('.');
+
+		$output = "";
+		$result = array('status' => true,
+						'message' => '');
+
+		set_time_limit(0);
+
+		// 選択されたID
+		$selected_id =  $this->options->_POST->radio_selected_id;
+		// 選択されたIDに紐づく情報を取得
+		$selected_ret = $this->get_selected_data();
+
+		$path = "./copy/" . date("YmdHis", strtotime($selected_ret['reserve_datetime'])) . "/";
+
+		// $path = "./copy/" . date("YmdHis") . "/";
+
+		// $server_list = $this->options->preview_server;
+		// array_push($server_list, json_decode(json_encode(array(
+		// 	'name'=>'master',
+		// 	'path'=>$this->options->git->repository,
+		// ))));
+
+		set_time_limit(0);
+
+		// $path = "./copy/" . "20180530100000/";
+
+
+// ディレクトリ作成
+		try {
+
+			// echo realpath('.');
+
+			chmod("./copy/20180526111100", 0777);
+
+			// デプロイ先のディレクトリがある場合は削除
+			if ( file_exists( $path) ) {
+
+				// chmod("./copy/20180530200000//.git/objects/pack/pack-e27356d06188babb8e7db9a5586747127701fc2c.idx", 0755);
+
+				echo '削除実行';
+				$this->remove_dir($path);
+
+				// .gitで管理しているファイルを削除してくれる
+				exec ('git rm -r --ignore-unmatch  ./*');
+
+				// ディレクトリ作成
+				// if ( !mkdir( $path, 0777) ) {
+				// }
+
+		// chdir($current_dir . '/copy/');
+
+				// rmdir ($path);
+			}
+
+			// chdir($current_dir);
+
+
+			// // デプロイ先のディレクトリが無い場合
+			// if ( !file_exists( $path) ) {
+			// 	// echo ('ディレクトリ存在しない');
+			// 	// デプロイ先のディレクトリを作成
+			// 	if ( !mkdir( $path, 0777)) {
+			// 		// ディレクトリが作成できない場合
+
+			// 		// エラー処理
+			// 		throw new Exception('Creation of preview server directory failed.');
+			// 	}
+			// }
+
+			// // ディレクトリ移動
+			// if ( chdir( $path ) ) {
+
+			// 	// git セットアップ
+			// 	exec('git init', $output);
+
+			// 	// git urlのセット
+			// 	$url = $this->options->git->protocol . "://" . urlencode($this->options->git->username) . ":" . urlencode($this->options->git->password) . "@" . $this->options->git->url;
+			// 	exec('git remote add origin ' . $url, $output);
+
+			// 	// git fetch
+			// 	exec( 'git fetch origin', $output);
+
+			// 	// git pull
+			// 	exec( 'git pull origin master', $output);
+
+			// 	chdir($current_dir);
+			// } else {
+			// 	// プレビューサーバのディレクトリが存在しない場合
+
+			// 	// エラー処理
+			// 	throw new Exception('Preview server directory not found.');
+			// }
+		
+		} catch (Exception $e) {
+
+			set_time_limit(30);
+
+			$result['status'] = false;
+			$result['message'] = $e->getMessage();
+
+			chdir($current_dir);
+			return json_encode($result);
+		}
+
+		set_time_limit(30);
+
+		$result['status'] = true;
+
+		return json_encode($result);
+	}
+
+
+	/**
+	 * ディレクトリ削除関数
+	 */
+	private function remove_dir($path) {
+		
+		$list = scandir($path);
+		$length = count($list);
+		
+		for ($i=0; $i<$length; $i++){
+
+			if ($list[$i] != '.' && $list[$i] != '..') {
+				if (is_dir($path.'/'.$list[$i])) {
+
+					echo $list[$i];
+					echo '</br>';
+					echo $this->get_permission($path);
+					echo '</br>';
+
+					$this->remove_dir($path.'/'.$list[$i]);
+
+
+				}else{
+
+						echo $list[$i];
+						echo '</br>';
+						echo $this->get_permission($path);
+						echo '</br>';
+
+					if (is_writable($path)) {
+						echo $this->get_permission($path);
+
+						echo $list[$i];
+						echo '</br>';
+						echo $this->get_permission($path);
+						echo '</br>';
+
+					    echo 'このファイルは書き込み可能です';
+					} else {
+					    echo $path. '：★このファイルは書き込みできません';
+					}
+					unlink($path.'/'.$list[$i]);
+				}
+			}
+		}
+
+		rmdir($path);
+	}
+	/**
+	 * パーミッション情報を調べ、3桁の数字で返す。
+	 *
+	 * @param string $path 対象のパス
+	 * @return int|bool 成功時に 3桁の数字、失敗時に `false` を返します。
+	 */
+	private function get_permission( $path ){
+		// $path = $this->localize_path($path);
+
+		if( !@file_exists( $path ) ){
+			return false;
+		}
+		$perm = rtrim( sprintf( "%o\n" , fileperms( $path ) ) );
+		$start = strlen( $perm ) - 3;
+		return substr( $perm , $start , 3 );
+	}//get_permission()
 }

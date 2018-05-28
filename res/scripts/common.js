@@ -57,21 +57,22 @@ $(function($){
 			}
 
 			// 「OK」時の処理開始 ＋ 確認ダイアログの表示
-			if(window.confirm('本当に予定を削除してよろしいですか？')){
+			if(window.confirm('本当に予定を削除してよろしいですか？')) {
 
-				$("#form_tbl").submit(function(){
+				$("#form_table").submit(function(){
 					$('<input />').attr('type', 'hidden')
 					 .attr('name', 'radio_selected_id')
 					 .attr('value', str)
-					 .appendTo('#form_tbl');
+					 .appendTo('#form_table');
 					});
 
 			}
 
 			// 「キャンセル」時の処理開始
-			else{
+			else {
 				var $dialog = $('.dialog');
 				$dialog.remove();
+				return false;
 			}
 			// 「キャンセル」時の処理終了
 		});
@@ -100,11 +101,11 @@ $(function($){
 				return false;
 			}
 
-			$("#form_tbl").submit(function(){
+			$("#form_table").submit(function(){
 				$('<input />').attr('type', 'hidden')
 				 .attr('name', 'radio_selected_id')
 				 .attr('value', str)
-				 .appendTo('#form_tbl');
+				 .appendTo('#form_table');
 			});
 
 		});
@@ -121,7 +122,40 @@ $(function($){
 			if (!check_validation()) {
 				return false;
 			}
-		});		
+		});	
+
+		// 即時公開ボタン押下
+		$('#release_btn').on('click', function() {
+			
+			var selected_flg = false;
+			
+			var element = document.getElementsByName('target');
+			
+			var str = "";
+
+			for (var i = 0; i < element.length; i++) {
+
+				if (element[i].checked) {
+					selected_flg = true;
+					str = element[i].value;
+					break;
+				}
+			}
+
+			if (!selected_flg) {
+				
+				alert('選択されていません');
+				return false;
+			}
+
+			$("#form_table").submit(function(){
+				$('<input />').attr('type', 'hidden')
+				 .attr('name', 'radio_selected_id')
+				 .attr('value', str)
+				 .appendTo('#form_table');
+			});
+
+		});	
 	})
 
 	function check_validation () {
