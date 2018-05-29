@@ -1,44 +1,15 @@
 $(function($){
 	$(window).load(function(){
 
-		$('#init_btn').on('click', function() {
-
-			// 画面ロック
-			var h = $(window).height();
-			$('#loader-bg ,#loader').height(h).css('display','block');
-
-			var $form = $('<form>').attr({
-				action : '',
-				method: 'post'
-			});
-			$('body').append($form);
-
-			var $input = $('<input>').attr({
-				type : 'hidden',
-				name : 'initialize',
-				value: 'value'
-			});
-			
-			$form.append($input);
-			$form.submit();
-		});
-
-		$('.reflect').on('click', function() {
-			
-
-		});
-
-		$('#close_btn').on('click', function() {
-			var $dialog = $('.dialog');
-			$dialog.remove();
-		});
-
+		/*
+		 * 削除ボタン
+		 */
 		$('#delete_btn').on('click', function() {
-			
+
 			var selected_flg = false;
-			
+				
 			var element = document.getElementsByName('target');
-			
+				
 			var str = "";
 
 			for (i = 0; i < element.length; i++) {
@@ -61,7 +32,7 @@ $(function($){
 
 				$("#form_table").submit(function(){
 					$('<input />').attr('type', 'hidden')
-					 .attr('name', 'radio_selected_id')
+					 .attr('name', 'selected_id')
 					 .attr('value', str)
 					 .appendTo('#form_table');
 					});
@@ -74,16 +45,20 @@ $(function($){
 				$dialog.remove();
 				return false;
 			}
-			// 「キャンセル」時の処理終了
-		});
 
-		// 変更ボタン押下
+			// 画面ロック
+			display_lock();
+		});	
+
+		/*
+		 * 変更ボタン
+		 */
 		$('#update_btn').on('click', function() {
-			
+
 			var selected_flg = false;
-			
+				
 			var element = document.getElementsByName('target');
-			
+				
 			var str = "";
 
 			for (var i = 0; i < element.length; i++) {
@@ -103,30 +78,43 @@ $(function($){
 
 			$("#form_table").submit(function(){
 				$('<input />').attr('type', 'hidden')
-				 .attr('name', 'radio_selected_id')
+				 .attr('name', 'selected_id')
 				 .attr('value', str)
 				 .appendTo('#form_table');
 			});
 
-		});
-
-		$('#add_check_btn').on('click', function() {
-
-			if (!check_validation()) {
-				return false;
-			}
-		});		
-
-		$('#update_check_btn').on('click', function() {
-
-			if (!check_validation()) {
-				return false;
-			}
+			// 画面ロック
+			display_lock();
 		});	
 
-		// 即時公開ボタン押下
+		/*
+		 * 新規変更ダイアログ[確認]ボタン
+		 */
+		$('#add_check_btn, #update_check_btn').on('click', function() {
+
+			/// 入力チェック
+			if (!check_validation()) {
+				return false;
+			}
+
+			// ダイアログ画面ロック
+			display_lock();
+		});	
+
+		/*
+		 * [新規][履歴]戻る][確定]ボタン
+		 */
+		$('#add_btn, #confirm_btn, #back_btn, #history_btn').on('click', function() {
+
+			// ダイアログ画面ロック
+			display_lock();
+		});	
+
+		/*
+		 * 即時公開ボタン
+		 */
 		$('#release_btn').on('click', function() {
-			
+
 			var selected_flg = false;
 			
 			var element = document.getElementsByName('target');
@@ -150,26 +138,39 @@ $(function($){
 
 			$("#form_table").submit(function(){
 				$('<input />').attr('type', 'hidden')
-				 .attr('name', 'radio_selected_id')
+				 .attr('name', 'selected_id')
 				 .attr('value', str)
 				 .appendTo('#form_table');
 			});
 
+			// 画面ロック
+			display_lock();
 		});	
-	})
 
+		/*
+		 * 状態ダイアログ[閉じる]ボタン
+		 */
+		$('#close_btn').on('click', function() {
+
+			var dialog = document.getElementById('modal_dialog');
+			dialog.remove();
+
+			// // 画面ロック
+			// display_lock();
+		});	
+	});
+
+	/*
+	 * 入力チェック
+	 */
 	function check_validation () {
-		document.getElementById('datepicker').style.backgroundColor = '#FFFFFF';
-        document.getElementById('time').style.backgroundColor = '#FFFFFF';
 
 		var date = document.getElementById('datepicker').value;
-		var time = document.getElementById('time').value;
+		var time = document.getElementById('reserve_time').value;
 
 	    if(date == "" || time == ""){
 	      
-	        alert("公開予定日時を入力して下さい。");
-	        document.getElementById('datepicker').style.backgroundColor = 'mistyrose';
-	        document.getElementById('time').style.backgroundColor = 'mistyrose';
+	        alert("日付と時間を入力して下さい。");
 
 	        var now = new Date();
 
@@ -180,10 +181,25 @@ $(function($){
 
 		    alert("日付の形式が正しくありません。YYYY-MM-DDの形式で入力してください。");
 
-		    document.getElementById('datepicker').style.backgroundColor = 'mistyrose';
-
 		    return false;
 		 }
 		 return true;
 	}
+
+	/*
+	 * 画面ロック
+	 */
+	function display_lock() {
+
+		var h = window.innerHeight;
+
+		var loader_bg = document.getElementById('loader-bg');
+		loader_bg.style.height = h + "px";
+		loader_bg.style.display = 'block';
+
+		var loading = document.getElementById('loading');
+		loading.style.height = h + "px";
+		loading.style.display = 'block';
+	}
+
 });

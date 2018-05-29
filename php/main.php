@@ -54,6 +54,96 @@ class main
 	}
 
 	/**
+	 * Gitのmaster情報を取得
+	 */
+	private function init() {
+
+		$current_dir = realpath('.');
+
+		$output = "";
+		$result = array('status' => true,
+						'message' => '');
+
+		$master_path = $this->options->git->repository;
+
+		// $server_list = $this->options->preview_server;
+		// array_push($server_list, json_decode(json_encode(array(
+		// 	'name'=>'master',
+		// 	'path'=>$this->options->git->repository,
+		// ))));
+
+		set_time_limit(0);
+
+		// foreach ( $server_list as $preview_server ) {
+			chdir($current_dir);
+
+			try {
+
+				// if ( strlen($preview_server->path) ) {
+
+					// デプロイ先のディレクトリが無い場合は作成
+					if ( !file_exists( $master_path) ) {
+						// 存在しない場合
+
+						// ディレクトリ作成
+						if ( !mkdir( $master_path, 0777, true) ) {
+							// ディレクトリが作成できない場合
+
+							// エラー処理
+							throw new Exception('Creation of master directory failed.');
+						}
+					}
+
+					// 「.git」フォルダが存在すれば初期化済みと判定
+					if ( !file_exists( $master_path . "/.git") ) {
+						// 存在しない場合
+
+						// ディレクトリ移動
+						if ( chdir( $master_path ) ) {
+
+							// git セットアップ
+							exec('git init', $output);
+
+							// git urlのセット
+							$url = $this->options->git->protocol . "://" . urlencode($this->options->git->username) . ":" . urlencode($this->options->git->password) . "@" . $this->options->git->url;
+							exec('git remote add origin ' . $url, $output);
+
+							// git fetch
+							exec( 'git fetch origin', $output);
+
+							// git pull
+							exec( 'git pull origin master', $output);
+
+							chdir($current_dir);
+
+						} else {
+							// プレビューサーバのディレクトリが存在しない場合
+
+							// エラー処理
+							throw new Exception('master directory not found.');
+						}
+					}
+				// }
+
+			} catch (Exception $e) {
+				set_time_limit(30);
+
+				$result['status'] = false;
+				$result['message'] = $e->getMessage();
+
+				chdir($current_dir);
+				return json_encode($result);
+			}
+
+		// }
+		set_time_limit(30);
+
+		$result['status'] = true;
+
+		return json_encode($result);
+	}
+
+	/**
 	 * ブランチリストを取得
 	 *	 
 	 * @return 指定リポジトリ内のブランチリストを返す
@@ -270,11 +360,11 @@ class main
 	/**
 	 * 初期表示画面の新規ボタン押下時
 	 *	 
-	 * @param $error_message_disp = エラーメッセージ出力内容
+	 * @param $error_message = エラーメッセージ出力内容
 	 *
 	 * @return 新規ダイアログの出力内容
 	 */
-	private function disp_add_dialog($error_message_disp) {
+	private function disp_add_dialog($error_message) {
 		
 		$ret = "";
 
@@ -287,15 +377,12 @@ class main
 		if (isset($this->options->_POST->branch_select_value)) {
 			$branch_select_value = $this->options->_POST->branch_select_value;
 		}
-
 		if (isset($this->options->_POST->reserve_date)) {
 			$reserve_date = $this->options->_POST->reserve_date;
 		}
-
 		if (isset($this->options->_POST->reserve_time)) {
 			$reserve_time = $this->options->_POST->reserve_time;
 		}
-		
 		if (isset($this->options->_POST->comment)) {
 			$comment = $this->options->_POST->comment;
 		}
@@ -306,7 +393,7 @@ class main
 		$branch_list = $get_branch_ret->branch_list;
 
 		// ダイアログHTMLの作成
-		$ret = $this->create_dialog_html(true, $error_message_disp, $branch_list, $branch_select_value, $reserve_date, $reserve_time, $comment, '');
+		$ret = $this->create_dialog_html(true, false, $error_message, $branch_list, $branch_select_value, $reserve_date, $reserve_time, $comment);
 
 		return $ret;
 	}
@@ -329,15 +416,12 @@ class main
 		if (isset($this->options->_POST->branch_select_value)) {
 			$branch_select_value = $this->options->_POST->branch_select_value;
 		}
-
 		if (isset($this->options->_POST->reserve_date)) {
 			$reserve_date = $this->options->_POST->reserve_date;
 		}
-
 		if (isset($this->options->_POST->reserve_time)) {
 			$reserve_time = $this->options->_POST->reserve_time;
 		}
-		
 		if (isset($this->options->_POST->comment)) {
 			$comment = $this->options->_POST->comment;
 		}
@@ -352,26 +436,27 @@ class main
 	/**
 	 * 変更ダイアログの表示
 	 *	 
-	 * @param $error_message_disp = エラーメッセージ出力内容
+	 * @param $init_trans_flg = 初期表示画面遷移フラグ
+	 * @param $error_message  = エラーメッセージ出力内容
 	 *
 	 * @return 変更ダイアログの出力内容
 	 */
-	private function disp_update_dialog($error_message_disp) {
+	private function disp_update_dialog($init_trans_flg, $error_message) {
 		
-		$ret = "";
+		// $ret = "";
 
 		$branch_select_value = "";
 		$reserve_date = "";
 		$reserve_time = "";
 		$comment = "";
 
-		$selected_id =  "";
+		// $selected_id =  "";
 
 		// 初期表示画面の変更ボタンから遷移してきた場合
-		if (isset($this->options->_POST->radio_selected_id)) {
+		if ($init_trans_flg) {
 			
-			// 選択されたID
-			$selected_id =  $this->options->_POST->radio_selected_id;
+			// // 選択されたID
+			// $selected_id =  $this->options->_POST->selected_id;
 			// 選択されたIDに紐づく情報を取得
 			$selected_ret = $this->get_selected_data();
 			
@@ -386,22 +471,15 @@ class main
 			if (isset($this->options->_POST->branch_select_value)) {
 				$branch_select_value = $this->options->_POST->branch_select_value;
 			}
-
 			if (isset($this->options->_POST->reserve_date)) {
 				$reserve_date = $this->options->_POST->reserve_date;
 			}
-
 			if (isset($this->options->_POST->reserve_time)) {
 				$reserve_time = $this->options->_POST->reserve_time;
 			}
-			
 			if (isset($this->options->_POST->comment)) {
 				$comment = $this->options->_POST->comment;
 			}
-
-			if (isset($this->options->_POST->selected_id)) {
-				$selected_id = $this->options->_POST->selected_id;
-			}	
 		}
 
 		// ブランチリストを取得
@@ -410,7 +488,7 @@ class main
 		$branch_list = $get_branch_ret->branch_list;
 
 		// ダイアログHTMLの作成
-		$ret = $this->create_dialog_html(false, $error_message_disp, $branch_list, $branch_select_value, $reserve_date, $reserve_time, $comment, $selected_id);
+		$ret = $this->create_dialog_html(false, $init_trans_flg, $error_message, $branch_list, $branch_select_value, $reserve_date, $reserve_time, $comment);
 
 		return $ret;
 	}
@@ -431,9 +509,9 @@ class main
 	/**
 	 * 新規・変更の入力ダイアログHTMLの作成
 	 *	 
-	 * @param $add_flg            = 新規フラグ
-	 * @param $error_message_disp = エラーメッセージ出力内容
-	 * @param $branch_list        = ブランチリスト
+	 * @param $add_flg       = 新規フラグ
+	 * @param $error_message = エラーメッセージ出力内容
+	 * @param $branch_list   = ブランチリスト
 	 * @param $branch_select_value = ブランチ選択値
 	 * @param $reserve_date = 公開予定日時
 	 * @param $reserve_time = 公開予定時間
@@ -443,21 +521,21 @@ class main
 	 * @return 
 	 *  入力ダイアログ出力内容
 	 */
-	private function create_dialog_html($add_flg, $error_message_disp, $branch_list,
-		$branch_select_value, $reserve_date, $reserve_time, $comment, $selected_id) {
+	private function create_dialog_html($add_flg, $init_trans_flg, $error_message, $branch_list,
+		$branch_select_value, $reserve_date, $reserve_time, $comment) {
 		
 		$ret = "";
 
-		$ret .= '<div class="dialog">'
+		$ret .= '<div class="dialog" id="modal_dialog">'
 			  . '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
 			  . '<div style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; background: rgb(0, 0, 0); opacity: 0.5;"></div>'
 			  . '<div style="position: absolute; left: 0px; top: 0px; padding-top: 4em; overflow: auto; width: 100%; height: 100%;">'
 			  . '<div class="dialog_box">';
-
-		 if ($error_message_disp != '') {
+		
+		 if ($error_message != '') {
 		 // エラーメッセージの出力
 			$ret .= '<div class="alert_box">'
-				. $error_message_disp
+				. $error_message
 				. '</div>';
 		 }
 
@@ -467,14 +545,16 @@ class main
 		  	$ret .= '<h4>変更</h4>';
 		}
 			   
-		$ret .= '<form method="post">'
-			  . '<input type="hidden" name="selected_id" value="' . htmlspecialchars($selected_id) . '"/>'
-  			  . '<input type="hidden" name="change_before_branch_select_value" value="'. $branch_select_value . '"/></td>'
-  			  . '<input type="hidden" name="change_before_reserve_date" value="'. $reserve_date . '"/></td>'
-  			  . '<input type="hidden" name="change_before_reserve_time" value="'. $reserve_time . '"/></td>'
-  			  . '<input type="hidden" name="change_before_comment" value="'. $comment . '"/></td>'
+		$ret .= '<form method="post">';
 
-			  . '<table class="table table-striped">'
+		// 変更モードの場合
+		if ( !$add_flg) {
+
+			$ret .= $this->create_change_before_hidden_html($init_trans_flg);
+
+		}
+
+		$ret .= '<table class="table table-striped">'
 			  . '<tr>'
 			  . '<td class="dialog_thead">ブランチ</td>'
 			  . '<td><select id="branch_list" class="form-control" name="branch_select_value">';
@@ -492,7 +572,7 @@ class main
 			  . '<tr>'
 			  . '<td class="dialog_thead">公開予定日時</td>'
 			  . '<td scope="row"><span style="margin-right:10px;"><input type="text" id="datepicker" name="reserve_date" value="'. $reserve_date . '" autocomplete="off" /></span>'
-			  . '<input type="time" name="reserve_time" value="'. $reserve_time . '" /></td>'
+			  . '<input type="time" id="reserve_time" name="reserve_time" value="'. $reserve_time . '" /></td>'
 			  . '</tr>'
 			  . '<tr>'
 			  . '<td class="dialog_thead">コメント</td>'
@@ -505,9 +585,9 @@ class main
 			  . '<ul>';
 
 		if ( $add_flg ) {
-			$ret .= '<li><input type="submit" id="add_check_btn" name="add_check_btn" class="px2-btn px2-btn--primary" value="確認"/></li>';
+			$ret .= '<li><input type="submit" id="add_check_btn" name="add_check" class="px2-btn px2-btn--primary" value="確認"/></li>';
 		} else {
-		  	$ret .= '<li><input type="submit" id="update_check_btn" name="update_check_btn" class="px2-btn px2-btn--primary" value="確認"/></li>';
+		  	$ret .= '<li><input type="submit" id="update_check_btn" name="update_check" class="px2-btn px2-btn--primary" value="確認"/></li>';
 		}
 
 		$ret .= '<li><input type="submit" id="close_btn" class="px2-btn" value="キャンセル"/></li>'
@@ -524,6 +604,62 @@ class main
 		return $ret;
 	}
 
+
+	/**
+	 * 変更前hidden項目HTMLの作成
+	 *	 
+	 * @param $add_flg       = 新規フラグ
+	 * @param $error_message = エラーメッセージ出力内容
+	 * @param $branch_list   = ブランチリスト
+	 * @param $branch_select_value = ブランチ選択値
+	 * @param $reserve_date = 公開予定日時
+	 * @param $reserve_time = 公開予定時間
+	 * @param $comment      = コメント
+	 * @param $selected_id  = 変更時の選択ID
+	 *
+	 * @return 
+	 *  入力ダイアログ出力内容
+	 */
+	private function create_change_before_hidden_html($init_trans_flg) {
+		
+		$selected_id = '';
+		$branch_select_value = '';
+		$reserve_date = '';
+		$reserve_time = '';
+		$comment = '';
+
+		// 初期画面より遷移
+		if ($init_trans_flg) {
+
+			echo "初期画面より遷移";
+			// 選択されたID
+			$selected_id =  $this->options->_POST->selected_id;
+			// 選択されたIDに紐づく情報を取得
+			$selected_ret = $this->get_selected_data();
+			
+			$branch_select_value = $selected_ret['branch_name'];
+			$reserve_date = date('Y-m-d',  strtotime($selected_ret['reserve_datetime']));
+			$reserve_time = date('H:i',  strtotime($selected_ret['reserve_datetime']));
+			$comment = $selected_ret['comment'];
+	
+		} else {
+
+			echo "初期画面でない";
+			$selected_id =  $this->options->_POST->selected_id;		
+			$branch_select_value = $this->options->_POST->change_before_branch_select_value;
+			$reserve_date = $this->options->_POST->change_before_reserve_date;
+			$reserve_time = $this->options->_POST->change_before_reserve_time;
+			$comment = $this->options->_POST->change_before_comment;
+		}
+
+		$ret = '<input type="hidden" name="selected_id" value="' . $selected_id . '"/>'
+  			  . '<input type="hidden" name="change_before_branch_select_value" value="'. $branch_select_value . '"/>'
+  			  . '<input type="hidden" name="change_before_reserve_date" value="'. $reserve_date . '"/>'
+  			  . '<input type="hidden" name="change_before_reserve_time" value="'. $reserve_time . '"/>'
+  			  . '<input type="hidden" name="change_before_comment" value="'. $comment . '"/>';
+
+		return $ret;
+	}
 
 	// /**
 	//  * 新規・変更の出力確認ダイアログHTMLの作成
@@ -621,39 +757,39 @@ class main
 		
 		$ret = "";
 
-		$ret .= '<div class="dialog">'
-			 . '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
-			 . '<div style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; background: rgb(0, 0, 0); opacity: 0.5;"></div>'
-			 . '<div style="position: absolute; left: 0px; top: 0px; padding-top: 4em; overflow: auto; width: 100%; height: 100%;">'
-			 . '<div class="dialog_box">';
-			 
+		$ret .= '<div class="dialog" id="modal_dialog">'
+			. '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
+			. '<div style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; background: rgb(0, 0, 0); opacity: 0.5;"></div>'
+			. '<div style="position: absolute; left: 0px; top: 0px; padding-top: 4em; overflow: auto; width: 100%; height: 100%;">'
+			. '<div class="dialog_box">';
+		
 		$ret .= '<h4>追加確認</h4>';
 
 		$ret .= '<form method="post">'
-			 . '<table class="table table-striped">'
-			 . '<tr>'
-			 . '<td class="dialog_thead">' . 'ブランチ' . '</td>'
-			 . '<td>' . $branch_select_value
-			 . '<input type="hidden" name="branch_select_value" value="' . $branch_select_value . '"/>'
-			 . '</td>'
-			 . '</tr>'
-			 . '<tr>'
-			 . '<td class="dialog_thead">' . 'コミット' . '</td>'
-			 . '<td>' . 'dummy' . '</td>'
-			 . '</tr>'
-			 . '<tr>'
-			 . '<td class="dialog_thead">' . '公開予定日時' . '</td>'
-			 . '<td>' . $reserve_date . ' ' . $reserve_time
-			 . '<input type="hidden" name="reserve_date" value="' . $reserve_date . '"/>'
-			 . '<input type="hidden" name="reserve_time" value="' . $reserve_time . '"/>'
-			 . '</td>'
-			 . '</tr>'
-			 . '<tr>'
-			 . '<td class="dialog_thead">' . 'コメント' . '</td>'
-			 . '<td>' . htmlspecialchars($comment) . '</td>'
-			 . '<input type="hidden" name="comment" value="' . htmlspecialchars($comment) . '"/>'
-			 . '</tr>'
-			 . '</tbody></table>'
+			. '<table class="table table-striped">'
+			. '<tr>'
+			. '<td class="dialog_thead">' . 'ブランチ' . '</td>'
+			. '<td>' . $branch_select_value
+			. '<input type="hidden" name="branch_select_value" value="' . $branch_select_value . '"/>'
+			. '</td>'
+			. '</tr>'
+			. '<tr>'
+			. '<td class="dialog_thead">' . 'コミット' . '</td>'
+			. '<td>' . 'dummy' . '</td>'
+			. '</tr>'
+			. '<tr>'
+			. '<td class="dialog_thead">' . '公開予定日時' . '</td>'
+			. '<td>' . $reserve_date . ' ' . $reserve_time
+			. '<input type="hidden" name="reserve_date" value="' . $reserve_date . '"/>'
+			. '<input type="hidden" name="reserve_time" value="' . $reserve_time . '"/>'
+			. '</td>'
+			. '</tr>'
+			. '<tr>'
+			. '<td class="dialog_thead">' . 'コメント' . '</td>'
+			. '<td>' . htmlspecialchars($comment) . '</td>'
+			. '<input type="hidden" name="comment" value="' . htmlspecialchars($comment) . '"/>'
+			. '</tr>'
+			. '</tbody></table>'
 			
 			. '<div class="unit">'
 			. '<div class="text-center">';
@@ -662,18 +798,19 @@ class main
 			. '<div class="button_contents">'
 			. '<ul>';
 
-		$ret .= '<li><input type="submit" name="add_confirm_btn" class="px2-btn px2-btn--primary" value="確定"/></li>'
-			. '<li><input type="submit" name="add_back_btn" class="px2-btn" value="戻る"/></li>';
+		$ret .= '<li><input type="submit" id="confirm_btn" name="add_confirm" class="px2-btn px2-btn--primary" value="確定"/></li>'
+			. '<li><input type="submit" id="back_btn" name="add_back" class="px2-btn" value="戻る"/></li>';
 
 		$ret .= '</ul>'
 			. '</div>'
 			. '</div>'
-			. '</form>'
-			. '</div>'
 
+			. '</div>'
 			 . '</div>'
+
+			. '</form>'
 			 . '</div>'
-			 . '</div></div>';
+			 . '</div></div></div>';
 
 		return $ret;
 	}
@@ -689,72 +826,77 @@ class main
 		
 		$img_filename = realpath('.') . $this->img_arrow_left;
 
-		$ret = '<div class="dialog">'
-			 . '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
-			 . '<div style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; background: rgb(0, 0, 0); opacity: 0.5;"></div>'
-			 . '<div style="position: absolute; left: 0px; top: 0px; padding-top: 4em; overflow: auto; width: 100%; height: 100%;">'
-			 . '<div class="dialog_box">';
-			 
+		$ret = '<div class="dialog" id="modal_dialog">'
+			. '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
+			. '<div style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; background: rgb(0, 0, 0); opacity: 0.5;"></div>'
+			. '<div style="position: absolute; left: 0px; top: 0px; padding-top: 4em; overflow: auto; width: 100%; height: 100%;">'
+			. '<div class="dialog_box">';
+		
 		$ret .= '<h4>変更確認</h4>'
 			. '<form method="post">'
 			. '<div class="colum_3">'
 			. '<div class="left_box">';
 
 		$ret .= '<input type="hidden" name="selected_id" value="' . $this->options->_POST->selected_id . '"/>'
-			 . '<table class="table table-striped">'
-			 . '<tr>'
-			 . '<td class="dialog_thead">' . 'ブランチ' . '</td>'
-			 . '<td>' . $this->options->_POST->change_before_branch_select_value
-			 . '</td>'
-			 . '</tr>'
-			 . '<tr>'
-			 . '<td class="dialog_thead">' . 'コミット' . '</td>'
-			 . '<td>' . 'dummy' . '</td>'
-			 . '</tr>'
-			 . '<tr>'
-			 . '<td class="dialog_thead">' . '公開予定日時' . '</td>'
-			 . '<td>' . $this->options->_POST->change_before_reserve_date . ' ' . $this->options->_POST->change_before_reserve_time
-			 . '</td>'
-			 . '</tr>'
-			 . '<tr>'
-			 . '<td class="dialog_thead">' . 'コメント' . '</td>'
-			 . '<td>' . htmlspecialchars($this->options->_POST->change_before_comment) . '</td>'
-			 . '</tr>'
-			 . '</tbody></table>'
+
+			. '<input type="hidden" name="change_before_branch_select_value" value="' . $this->options->_POST->change_before_branch_select_value . '"/>'
+			. '<input type="hidden" name="change_before_reserve_date" value="' . $this->options->_POST->change_before_reserve_date . '"/>'
+			. '<input type="hidden" name="change_before_reserve_time" value="' . $this->options->_POST->change_before_reserve_time . '"/>' 
+			. '<input type="hidden" name="change_before_comment" value="' . htmlspecialchars($this->options->_POST->change_before_comment) . '"/>'
+
+			. '<input type="hidden" name="branch_select_value" value="' . $this->options->_POST->branch_select_value . '"/>'
+			. '<input type="hidden" name="reserve_date" value="' . $this->options->_POST->reserve_date . '"/>'
+			. '<input type="hidden" name="reserve_time" value="' . $this->options->_POST->reserve_time . '"/>'	 
+			. '<input type="hidden" name="comment" value="' . htmlspecialchars($this->options->_POST->comment) . '"/>'
+
+			. '<table class="table table-striped">'
+			. '<tr>'
+			. '<td class="dialog_thead">' . 'ブランチ' . '</td>'
+			. '<td>' . $this->options->_POST->change_before_branch_select_value
+			. '</td>'
+			. '</tr>'
+			. '<tr>'
+			. '<td class="dialog_thead">' . 'コミット' . '</td>'
+			. '<td>' . 'dummy' . '</td>'
+			. '</tr>'
+			. '<tr>'
+			. '<td class="dialog_thead">' . '公開予定日時' . '</td>'
+			. '<td>' . $this->options->_POST->change_before_reserve_date . ' ' . $this->options->_POST->change_before_reserve_time
+			. '</td>'
+			. '</tr>'
+			. '<tr>'
+			. '<td class="dialog_thead">' . 'コメント' . '</td>'
+			. '<td>' . htmlspecialchars($this->options->_POST->change_before_comment) . '</td>'
+			. '</tr>'
+			. '</tbody></table>'
 			
-		     . '</div>'
+		    . '</div>'
 
-		     . '<div class="center_box">'
-		     . '<img src="'. $this->img_arrow_left .'"/>'
-		     . '</div>'
+		    . '<div class="center_box">'
+		    . '<img src="'. $this->img_arrow_left .'"/>'
+		    . '</div>'
 
-             . '<div class="right_box">'
-			 . '<table class="table table-striped" style="width: 100%">'
-			 . '<tr>'
-			 . '<td class="dialog_thead">' . 'ブランチ' . '</td>'
-			 . '<td>' . $this->options->_POST->branch_select_value
-			 . '<input type="hidden" name="branch_select_value" value="' . $this->options->_POST->branch_select_value . '"/>'
-			 . '</td>'
-			 . '</tr>'
-			 . '<tr>'
-			 . '<td class="dialog_thead">' . 'コミット' . '</td>'
-			 . '<td>' . 'dummy' . '</td>'
-			 . '</tr>'
-			 . '<tr>'
-			 . '<td class="dialog_thead">' . '公開予定日時' . '</td>'
-			 . '<td>' . $this->options->_POST->reserve_date . ' ' . $this->options->_POST->reserve_time
-			 . '<input type="hidden" name="reserve_date" value="' . $this->options->_POST->reserve_date . '"/>'
-			 . '<input type="hidden" name="reserve_time" value="' . $this->options->_POST->reserve_time . '"/>'
-			 . '<input type="hidden" name="change_before_reserve_date" value="' . $this->options->_POST->change_before_reserve_date . '"/>'
-			 . '<input type="hidden" name="change_before_reserve_time" value="' . $this->options->_POST->change_before_reserve_time . '"/>'
-			 . '</td>'
-			 . '</tr>'
-			 . '<tr>'
-			 . '<td class="dialog_thead">' . 'コメント' . '</td>'
-			 . '<td>' . htmlspecialchars($this->options->_POST->comment) . '</td>'
-			 . '<input type="hidden" name="comment" value="' . htmlspecialchars($this->options->_POST->comment) . '"/>'
-			 . '</tr>'
-			 . '</tbody></table>'
+            . '<div class="right_box">'
+			. '<table class="table table-striped" style="width: 100%">'
+			. '<tr>'
+			. '<td class="dialog_thead">' . 'ブランチ' . '</td>'
+			. '<td>' . $this->options->_POST->branch_select_value
+			. '</td>'
+			. '</tr>'
+			. '<tr>'
+			. '<td class="dialog_thead">' . 'コミット' . '</td>'
+			. '<td>' . 'dummy' . '</td>'
+			. '</tr>'
+			. '<tr>'
+			. '<td class="dialog_thead">' . '公開予定日時' . '</td>'
+			. '<td>' . $this->options->_POST->reserve_date . ' ' . $this->options->_POST->reserve_time
+			. '</td>'
+			. '</tr>'
+			. '<tr>'
+			. '<td class="dialog_thead">' . 'コメント' . '</td>'
+			. '<td>' . htmlspecialchars($this->options->_POST->comment) . '</td>'
+			. '</tr>'
+			. '</tbody></table>'
 
 		    . '</div>'
 		 	. '</div>'
@@ -763,8 +905,8 @@ class main
 			. '<div class="button_contents">'
 			. '<ul>';
 
-		$ret .= '<li><input type="submit" name="update_confirm_btn" class="px2-btn px2-btn--primary" value="確定"/></li>'
-			. '<li><input type="submit" name="update_back_btn" class="px2-btn" value="戻る"/></li>';
+		$ret .= '<li><input type="submit" id="confirm_btn" name="update_confirm" class="px2-btn px2-btn--primary" value="確定"/></li>'
+			. '<li><input type="submit" id="back_btn" name="update_back" class="px2-btn" value="戻る"/></li>';
 
 		$ret .= '</ul>'
 			. '</div>'
@@ -772,9 +914,9 @@ class main
 			. '</form>'
 			. '</div>'
 
-			 . '</div>'
-			 . '</div>'
-			 . '</div></div>';
+			. '</div>'
+			. '</div>'
+			. '</div></div>';
 
 		return $ret;
 	}
@@ -840,9 +982,9 @@ class main
 
 		// 公開予定日時の未来日時チェック
 		$now = date("Y-m-d H:i:s");
-		$target_day = $this->options->_POST->reserve_date . ' ' . date('H:i:s',  strtotime($this->options->_POST->reserve_time));
+		$datetime = $this->options->_POST->reserve_date . ' ' . date('H:i:s',  strtotime($this->options->_POST->reserve_time));
 
-		if (strtotime($now) > strtotime($target_day)) {
+		if (strtotime($now) > strtotime($datetime)) {
 			$ret .= '<p class="error_message">「公開予定日時」は未来日時を設定してください。</p>';
 		}
 
@@ -900,18 +1042,17 @@ class main
 			. '<form id="form_table" method="post">'
 			. '<div class="button_contents" style="float:left">'
 			. '<ul>'
-			. '<li><input type="submit" name="add" class="px2-btn" value="新規"/></li>'
+			. '<li><input type="submit" id="add_btn" name="add" class="px2-btn" value="新規"/></li>'
 			. '</ul>'
 			. '</div>'
 			. '<div class="button_contents" style="float:right;">'
-			// . '<input type="submit" id="update_btn" name="update" class="btn btn-default" value="変更"/>'
 			. '<ul>'
 			. '<li><input type="submit" id="update_btn" name="update" class="px2-btn" value="変更"/></li>'
 			. '<li><input type="submit" id="delete_btn" name="delete" class="px2-btn px2-btn--danger" value="削除"/></li>'
 			. '<li><input type="submit" id="release_btn" name="release" class="px2-btn px2-btn--primary" value="即時公開"/></li>'
 			. '<li><input type="submit" id="history_btn" name="history" class="px2-btn" value="履歴"/></li>'
 			. '</ul>'
-			. '</div>'
+			// . '</div>'
 			. '</div>';
 
 		// テーブルヘッダー
@@ -934,7 +1075,7 @@ class main
 		foreach ($data_list as $array) {
 			
 			$ret .= '<tr>'
-				. '<td class="p-center"><input type="radio" id="reserve_' . $array['id'] . '" name="target" value="' . $array['id'] . '"/></td>'
+				. '<td class="p-center"><input type="radio" name="target" value="' . $array['id'] . '"/></td>'
 				. '<td class="p-center">' . date('Y-m-d H:i',  strtotime($array['reserve_datetime'])) . '</td>'
 				. '<td class="p-center">' . $array['commit'] . '</td>'
 				. '<td class="p-center">' . $array['branch_name'] . '</td>'
@@ -945,11 +1086,10 @@ class main
 		}
 
 		$ret .= '</tbody></table>'
+			. '</div>'
 			. '</form>'
-			// . '</div>'
 			. '</div>';
-
-
+		
 		return $ret;
 	}
 
@@ -994,7 +1134,7 @@ class main
 		foreach ($data_list as $array) {
 			
 			$ret .= '<tr>'
-				. '<td class="p-center"><input type="radio" id="reserve_' . $array['id'] . '" name="target" value="' . $array['id'] . '"/></td>'
+				. '<td class="p-center"><input type="radio" name="target" value="' . $array['id'] . '"/></td>'
 				. '<td class="p-center">' . $this->convert_status( $array['status'] ). '</td>'
 				. '<td class="p-center">' . date('Y-m-d H:i',  strtotime($array['reserve_datetime'])) . '</td>'
 				. '<td class="p-center">' . $array['commit'] . '</td>'
@@ -1008,13 +1148,13 @@ class main
 		$ret .= '<div class="button_contents_box">'
 			. '<div class="button_contents">'
 			. '<ul>'
-			. '<li><input type="submit" id="history_back_btn" class="px2-btn px2-btn--primary" value="戻る"/></li>'
+			. '<li><input type="submit" id="back_btn" class="px2-btn px2-btn--primary" value="戻る"/></li>'
 			. '</ul>'
 			. '</div>'
 			. '</div>'
 			. '</form>'
 			. '</div>';
-
+		
 		return $ret;
 	}
 
@@ -1026,6 +1166,24 @@ class main
 		// ダイアログの表示
 		$dialog_disp = '';
 
+		// gitのmaster情報取得
+		$init_ret = $this->init();
+		$init_ret = json_decode($init_ret);
+
+		// 初期表示画面から遷移されたか
+		$init_trans_flg = false;
+
+		if ( !$init_ret->status ) {
+			// 初期化失敗
+
+			// エラーメッセージ
+			$init_error_msg = '
+			<script type="text/javascript">
+				console.error("' . $init_ret->message . '");
+				alert("initialize faild");
+			</script>';
+		}
+
 		// 新規ボタンが押下された場合
 		if (isset($this->options->_POST->add)) {
 		
@@ -1034,11 +1192,16 @@ class main
 		// 変更ボタンが押下された場合
 		} elseif (isset($this->options->_POST->update)) {
 		
-			$dialog_disp = $this->disp_update_dialog(null);
+			$init_trans_flg = true;
+
+			$dialog_disp = $this->disp_update_dialog($init_trans_flg, null);
 
 		// 削除ボタンが押下された場合
 		} elseif (isset($this->options->_POST->delete)) {
 		
+			// Gitファイルの削除
+			$this->file_delete();
+	
 			$this->do_delete_btn();
 
 		// 即時公開ボタンが押下された場合
@@ -1052,21 +1215,21 @@ class main
 		// } elseif (isset($this->options->_POST->history)) {
 		
 		// 新規作成ダイアログの「確認」ボタンが押下された場合
-		} elseif (isset($this->options->_POST->add_check_btn)) {
+		} elseif (isset($this->options->_POST->add_check)) {
 
 			// 入力チェック
-			$error_message_disp = $this->do_check_validation(true);
+			$error_message = $this->do_check_validation(true);
 
-			if ($error_message_disp != '') {
+			if ($error_message != '') {
 				// 入力チェックエラーがあった場合はそのままの画面
-				$dialog_disp = $this->disp_add_dialog($error_message_disp);
+				$dialog_disp = $this->disp_add_dialog($error_message);
 			} else {
 				// 入力チェックエラーがなかった場合は確認ダイアログへ遷移
 				$dialog_disp = $this->do_add_check_btn();
 			}
 			
 		// 新規ダイアログの確定ボタンが押下された場合
-		} elseif (isset($this->options->_POST->add_confirm_btn)) {
+		} elseif (isset($this->options->_POST->add_confirm)) {
 
 			// Gitファイルの取得
 			$this->file_copy();
@@ -1075,25 +1238,25 @@ class main
 			$this->insert_list_csv_data();
 
 		// 新規確認ダイアログの戻るボタンが押下された場合
-		} elseif (isset($this->options->_POST->add_back_btn)) {
+		} elseif (isset($this->options->_POST->add_back)) {
 		
 			$dialog_disp = $this->disp_add_dialog(null);
 
 		// 変更ダイアログの確認ボタンが押下された場合
-		} elseif (isset($this->options->_POST->update_check_btn)) {
+		} elseif (isset($this->options->_POST->update_check)) {
 		
-			$error_message_disp = $this->do_check_validation(false);
+			$error_message = $this->do_check_validation(false);
 
-			if ($error_message_disp != '') {
+			if ($error_message != '') {
 				// 入力チェックエラーがあった場合はそのままの画面
-				$dialog_disp = $this->disp_update_dialog($error_message_disp);
+				$dialog_disp = $this->disp_update_dialog($init_trans_flg, $error_message);
 			} else {
 				// 入力チェックエラーがなかった場合は確認ダイアログへ遷移
 				$dialog_disp = $this->do_update_check_btn();
 			}	
 
 		// 変更ダイアログの確定ボタンが押下された場合
-		} elseif (isset($this->options->_POST->update_confirm_btn)) {
+		} elseif (isset($this->options->_POST->update_confirm)) {
 			
 			// Gitファイルの取得
 			$this->file_update();
@@ -1102,9 +1265,9 @@ class main
 			$this->do_update_btn();
 		
 		// 変更確認ダイアログの戻るボタンが押下された場合
-		} elseif (isset($this->options->_POST->update_back_btn)) {
+		} elseif (isset($this->options->_POST->update_back)) {
 		
-			$dialog_disp = $this->disp_update_dialog(null);
+			$dialog_disp = $this->disp_update_dialog($init_trans_flg, null);
 
 		}
 
@@ -1118,9 +1281,12 @@ class main
 			// 初期表示画面の表示
 			$disp = $this->create_top_contents();
 		}
-		
+
+		// 画面ロック用
+		$disp_lock = '<div id="loader-bg"><div id="loading"></div></div>';	
+
 		// 画面表示
-		return $disp . $dialog_disp;
+		return $disp . $disp_lock . $dialog_disp;
 	}
 
 	/**
@@ -1241,7 +1407,7 @@ class main
 
 		$filename = realpath('.') . $this->list_filename;
 
-		$selected_id =  $this->options->_POST->radio_selected_id;
+		$selected_id =  $this->options->_POST->selected_id;
 
 		$ret_array = array();
 
@@ -1360,10 +1526,10 @@ class main
 
 		$filename = realpath('.') . $this->list_filename;
 
-		$selected_id =  $this->options->_POST->radio_selected_id;
+		$selected_id =  $this->options->_POST->selected_id;
 
-		if (!file_exists($filename) && !empty($selected_id)) {
-			echo 'ファイルが存在しない';
+		if (!file_exists($filename) && empty($selected_id)) {
+			echo 'ファイルが存在しない、または、選択IDが不正です。';
 
 		} else {
 
@@ -1402,8 +1568,10 @@ class main
 
 		$filename = realpath('.') . $this->list_filename;
 
-		if (!file_exists($filename)) {
-			echo 'ファイルが存在しない';
+		$selected_id =  $this->options->_POST->selected_id;
+
+		if (!file_exists($filename) && !$selected_id) {
+			echo 'ファイルが存在しない、または、選択IDが不正です。';
 
 		} else {
 
@@ -1414,8 +1582,6 @@ class main
 			
 			$cnt = 0;
 			$max = 0;
-
-			$selected_id =  $this->options->_POST->selected_id;
 
 			$is_first = true;
 
@@ -1496,7 +1662,7 @@ class main
 			if ( !file_exists($path) ) {
 
 				// デプロイ先のディレクトリを作成
-				if ( !mkdir($path, 0777)) {
+				if ( !mkdir($path, 0777, true)) {
 
 					echo 'ディレクトリの作成が失敗しました。';
 					// エラー処理
@@ -1582,14 +1748,16 @@ class main
 		$path = "./copy/" . $dir_name;
 
 		// 選択したブランチ
-		$branch_name = trim(str_replace("origin/", "", $this->options->_POST->branch_select_value));
+		$branch_name_org = $this->options->_POST->branch_select_value;
+		// 選択したブランチ（origin無し）
+		$branch_name = trim(str_replace("origin/", "", $branch_name_org));
 
 		try {
 
 			// デプロイ先のディレクトリがない場合は終了
 			if ( !file_exists($before_path) ) {
 
-				echo 'ディレクトリが存在しません。';
+				echo $before_path . '：ディレクトリが存在しません。';
 				throw new Exception('Creation of preview server directory failed.');
 			}
 
@@ -1599,7 +1767,7 @@ class main
 				// 現在のブランチ取得
 				exec( 'git branch', $output);
 
-				// $now_branch;
+				$now_branch;
 				$already_branch_checkout = false;
 				foreach ( $output as $value ) {
 
@@ -1607,7 +1775,7 @@ class main
 					if ( strpos($value, '*') !== false ) {
 
 						$value = trim(str_replace("* ", "", $value));
-						// $now_branch = $value;
+						$now_branch = $value;
 
 					} else {
 
@@ -1625,30 +1793,96 @@ class main
 				exec( 'git fetch origin', $output );
 
 				// 現在のブランチと選択されたブランチが異なる場合は、ブランチを切り替える
-				// if ( $now_branch !== $to_branch_rep ) {
+				if ( $now_branch !== $branch_name ) {
 
-				if ($already_branch_checkout) {
-					// 選択された(切り替える)ブランチが既にチェックアウト済みの場合
-					echo 'チェックアウト済み';
-					exec( 'git checkout ' . $branch_name, $output);
+					if ($already_branch_checkout) {
+						// 選択された(切り替える)ブランチが既にチェックアウト済みの場合
+						// echo 'チェックアウト済み';
+						exec( 'git checkout ' . $branch_name, $output);
 
-				} else {
-					// 選択された(切り替える)ブランチがまだチェックアウトされてない場合
-					echo 'チェックアウトまだ';
-					exec( 'git checkout -b ' . $branch_name, $output);
+					} else {
+						// 選択された(切り替える)ブランチがまだチェックアウトされてない場合
+						// echo 'チェックアウトまだ';
+						exec( 'git checkout -b ' . $branch_name . ' ' . $branch_name_org, $output);
+					}
 				}
 
-				// ディレクトリをリネームする
-				if( file_exists( $before_dir_name ) && !file_exists( $dir_name ) ){
-					print 'in';
-					chdir( $copy_dir );
+				chdir( $copy_dir );
 
-					rename( $before_dir_name, $dir_name );
+				// ディレクトリ名が変更になる場合はリネームする
+				if ($before_dir_name != $dir_name) {
+
+					if( file_exists( $before_dir_name ) && !file_exists( $dir_name ) ){
+						
+						rename( $before_dir_name, $dir_name );
+					}else{
+						// print $before_dir_name. ',' . $dir_name;
+						// print 'ディレクトリ名が変更できませんでした。';
+						throw new Exception('Copy directory name could not be changed.');
+					}
+				}
+				
+			} else {
+				// コピー用のディレクトリが存在しない場合
+
+				// エラー処理
+				throw new Exception('Copy directory not found.');
+			}
+		
+		} catch (Exception $e) {
+
+			set_time_limit(30);
+
+			$result['status'] = false;
+			$result['message'] = $e->getMessage();
+
+			chdir($current_dir);
+			return json_encode($result);
+		}
+
+		set_time_limit(30);
+
+		$result['status'] = true;
+
+		chdir($current_dir);
+		return json_encode($result);
+
+	}
+
+	/**
+	 * Gitファイルの削除（※ゆくゆくはLINUXコマンドでディレクトリごと削除する）
+	 *
+	 * @return なし
+	 */
+	private function file_delete()
+	{
+		$current_dir = realpath('.');
+
+		$copy_dir = realpath('.') . "./copy/";
+
+		$output = "";
+		$result = array('status' => true,
+						'message' => '');
+
+		$selected_ret = $this->get_selected_data();
+
+		$dir_name = date("YmdHis", strtotime($selected_ret['reserve_datetime']));
+
+		try {
+
+			// ディレクトリ移動
+			if ( chdir( $copy_dir ) ) {
+
+				if( file_exists( $dir_name )){
+					
+					rename( $dir_name,  'BK_' . $dir_name );
+
 				}else{
-					print $before_dir_name. ',' . $dir_name;
-					print 'ディレクトリ名が変更できませんでした。';
+					// print $before_dir_name. ',' . $dir_name;
+					print '削除のコピーディレクトリがみつかりません。';
 					throw new Exception('Copy directory name could not be changed.');
 				}
+		
 			} else {
 				// コピー用のディレクトリが存在しない場合
 
@@ -1680,181 +1914,70 @@ class main
 	 * 即時公開
 	 */
 	private function manual_release() {
-
-		$current_dir = realpath('.');
-
-		$output = "";
-		$result = array('status' => true,
-						'message' => '');
-
-		set_time_limit(0);
-
-		// 選択されたID
-		$selected_id =  $this->options->_POST->radio_selected_id;
-		// 選択されたIDに紐づく情報を取得
-		$selected_ret = $this->get_selected_data();
-
-		$path = "./copy/" . date("YmdHis", strtotime($selected_ret['reserve_datetime'])) . "/";
-
-		// $path = "./copy/" . date("YmdHis") . "/";
-
-		// $server_list = $this->options->preview_server;
-		// array_push($server_list, json_decode(json_encode(array(
-		// 	'name'=>'master',
-		// 	'path'=>$this->options->git->repository,
-		// ))));
-
-		set_time_limit(0);
-
-		// $path = "./copy/" . "20180530100000/";
-
-
-// ディレクトリ作成
-		try {
-
-			// echo realpath('.');
-
-			chmod("./copy/20180526111100", 0777);
-
-			// デプロイ先のディレクトリがある場合は削除
-			if ( file_exists( $path) ) {
-
-				// chmod("./copy/20180530200000//.git/objects/pack/pack-e27356d06188babb8e7db9a5586747127701fc2c.idx", 0755);
-
-				echo '削除実行';
-				$this->remove_dir($path);
-
-				// .gitで管理しているファイルを削除してくれる
-				exec ('git rm -r --ignore-unmatch  ./*');
-
-				// ディレクトリ作成
-				// if ( !mkdir( $path, 0777) ) {
-				// }
-
-		// chdir($current_dir . '/copy/');
-
-				// rmdir ($path);
-			}
-
-			// chdir($current_dir);
-
-
-			// // デプロイ先のディレクトリが無い場合
-			// if ( !file_exists( $path) ) {
-			// 	// echo ('ディレクトリ存在しない');
-			// 	// デプロイ先のディレクトリを作成
-			// 	if ( !mkdir( $path, 0777)) {
-			// 		// ディレクトリが作成できない場合
-
-			// 		// エラー処理
-			// 		throw new Exception('Creation of preview server directory failed.');
-			// 	}
-			// }
-
-			// // ディレクトリ移動
-			// if ( chdir( $path ) ) {
-
-			// 	// git セットアップ
-			// 	exec('git init', $output);
-
-			// 	// git urlのセット
-			// 	$url = $this->options->git->protocol . "://" . urlencode($this->options->git->username) . ":" . urlencode($this->options->git->password) . "@" . $this->options->git->url;
-			// 	exec('git remote add origin ' . $url, $output);
-
-			// 	// git fetch
-			// 	exec( 'git fetch origin', $output);
-
-			// 	// git pull
-			// 	exec( 'git pull origin master', $output);
-
-			// 	chdir($current_dir);
-			// } else {
-			// 	// プレビューサーバのディレクトリが存在しない場合
-
-			// 	// エラー処理
-			// 	throw new Exception('Preview server directory not found.');
-			// }
-		
-		} catch (Exception $e) {
-
-			set_time_limit(30);
-
-			$result['status'] = false;
-			$result['message'] = $e->getMessage();
-
-			chdir($current_dir);
-			return json_encode($result);
-		}
-
-		set_time_limit(30);
-
-		$result['status'] = true;
-
-		return json_encode($result);
+		echo 'TODO:未実装';
 	}
 
-
-	/**
-	 * ディレクトリ削除関数
-	 */
-	private function remove_dir($path) {
+	// /**
+	//  * ディレクトリ削除関数
+	//  */
+	// private function remove_dir($path) {
 		
-		$list = scandir($path);
-		$length = count($list);
+	// 	$list = scandir($path);
+	// 	$length = count($list);
 		
-		for ($i=0; $i<$length; $i++){
+	// 	for ($i=0; $i<$length; $i++){
 
-			if ($list[$i] != '.' && $list[$i] != '..') {
-				if (is_dir($path.'/'.$list[$i])) {
+	// 		if ($list[$i] != '.' && $list[$i] != '..') {
+	// 			if (is_dir($path.'/'.$list[$i])) {
 
-					echo $list[$i];
-					echo '</br>';
-					echo $this->get_permission($path);
-					echo '</br>';
+	// 				echo $list[$i];
+	// 				echo '</br>';
+	// 				echo $this->get_permission($path);
+	// 				echo '</br>';
 
-					$this->remove_dir($path.'/'.$list[$i]);
+	// 				$this->remove_dir($path.'/'.$list[$i]);
 
 
-				}else{
+	// 			}else{
 
-						echo $list[$i];
-						echo '</br>';
-						echo $this->get_permission($path);
-						echo '</br>';
+	// 					echo $list[$i];
+	// 					echo '</br>';
+	// 					echo $this->get_permission($path);
+	// 					echo '</br>';
 
-					if (is_writable($path)) {
-						echo $this->get_permission($path);
+	// 				if (is_writable($path)) {
+	// 					echo $this->get_permission($path);
 
-						echo $list[$i];
-						echo '</br>';
-						echo $this->get_permission($path);
-						echo '</br>';
+	// 					echo $list[$i];
+	// 					echo '</br>';
+	// 					echo $this->get_permission($path);
+	// 					echo '</br>';
 
-					    echo 'このファイルは書き込み可能です';
-					} else {
-					    echo $path. '：★このファイルは書き込みできません';
-					}
-					unlink($path.'/'.$list[$i]);
-				}
-			}
-		}
+	// 				    echo 'このファイルは書き込み可能です';
+	// 				} else {
+	// 				    echo $path. '：★このファイルは書き込みできません';
+	// 				}
+	// 				unlink($path.'/'.$list[$i]);
+	// 			}
+	// 		}
+	// 	}
 
-		rmdir($path);
-	}
-	/**
-	 * パーミッション情報を調べ、3桁の数字で返す。
-	 *
-	 * @param string $path 対象のパス
-	 * @return int|bool 成功時に 3桁の数字、失敗時に `false` を返します。
-	 */
-	private function get_permission( $path ){
-		// $path = $this->localize_path($path);
+	// 	rmdir($path);
+	// }
+	// /**
+	//  * パーミッション情報を調べ、3桁の数字で返す。
+	//  *
+	//  * @param string $path 対象のパス
+	//  * @return int|bool 成功時に 3桁の数字、失敗時に `false` を返します。
+	//  */
+	// private function get_permission( $path ){
+	// 	// $path = $this->localize_path($path);
 
-		if( !@file_exists( $path ) ){
-			return false;
-		}
-		$perm = rtrim( sprintf( "%o\n" , fileperms( $path ) ) );
-		$start = strlen( $perm ) - 3;
-		return substr( $perm , $start , 3 );
-	}//get_permission()
+	// 	if( !@file_exists( $path ) ){
+	// 		return false;
+	// 	}
+	// 	$perm = rtrim( sprintf( "%o\n" , fileperms( $path ) ) );
+	// 	$start = strlen( $perm ) - 3;
+	// 	return substr( $perm , $start , 3 );
+	// }//get_permission()
 }
