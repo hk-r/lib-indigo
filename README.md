@@ -75,7 +75,7 @@ $indigo = new indigo\main(
 			
 			// リポジトリのパス
 			// ウェブプロジェクトのリポジトリパスを設定。
-			'repository' => './../repos/master/',
+			'repository' => './repos/master/',
 
 			// プロトコル
 			// ※現在はhttpsのみ対応
@@ -87,7 +87,7 @@ $indigo = new indigo\main(
 
 			// url
 			// Gitリポジトリのhostを設定。
-			'url' => 'github.com/hk-r/px2-sample-project.git',
+			'url' => 'github.com/gushikawa/indigo-test-project.git',
 
 			// ユーザ名
 			// Gitリポジトリのユーザ名を設定。
