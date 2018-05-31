@@ -10,17 +10,11 @@ class main
 
 	/**
 	 * Delimiter
-	 *
-	 * @access	private
-	 * @var string
 	 */
 	private $_delimiter		= ',';
 
 	/**
 	 * Enclosure
-	 *
-	 * @access	private
-	 * @var	string
 	 */
 	private $_enclosure		= '"';
 
@@ -1915,6 +1909,8 @@ class main
 	 */
 	private function manual_release() {
 		echo 'TODO:未実装';
+
+		$this->file_control->process();
 	}
 
 	// /**
