@@ -449,7 +449,9 @@ echo '★3';
 	 * @return 新規確認ダイアログの出力内容
 	 */
 	private function do_add_check_btn() {
-				
+		
+		echo('★ do_add_check_btn start');
+
 		$ret = "";
 
 		$branch_select_value = "";
@@ -473,6 +475,8 @@ echo '★3';
 
 		// 確認ダイアログHTMLの作成
 		$ret = $this->create_check_dialog_html($branch_select_value, $reserve_date, $reserve_time, $comment);
+
+		echo('★ do_add_check_btn end');
 
 		return $ret;
 	}
@@ -569,6 +573,8 @@ echo '★3';
 	private function create_dialog_html($add_flg, $init_trans_flg, $error_message, $branch_list,
 		$branch_select_value, $reserve_date, $reserve_time, $comment) {
 		
+		echo('★ create_dialog_html start');
+
 		$ret = "";
 
 		$ret .= '<div class="dialog" id="modal_dialog">'
@@ -645,6 +651,8 @@ echo '★3';
 			  . '</div>'
 			  . '</div>'
 			  . '</div></div>';
+
+		echo('★ create_dialog_html end');
 
 		return $ret;
 	}
