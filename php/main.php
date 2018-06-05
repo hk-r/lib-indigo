@@ -119,14 +119,15 @@ echo '★2:' . $master_path;
 					// デプロイ先のディレクトリが無い場合は作成
 					if ( !file_exists( $master_path) ) {
 						// 存在しない場合
-
+echo '★2-1';
 						// ディレクトリ作成
-						if ( !mkdir( $master_path, 0777, true) ) {
+						if ( !mkdir( $master_path, 0777) ) {
 							// ディレクトリが作成できない場合
-
+echo '★2-2';
 							// エラー処理
 							throw new Exception('Creation of master directory failed.');
 						}
+echo '★2-3';
 					}
 echo '★3';
 					// 「.git」フォルダが存在すれば初期化済みと判定
