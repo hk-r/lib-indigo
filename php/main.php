@@ -27,22 +27,22 @@ class main
 	/**
 	 * 公開予約管理CSVファイル
 	 */
-	private $list_filename = './res/csv/list.csv';
+	private $list_filename = './../res/csv/list.csv';
 
 	/**
 	 * 警告エラー時のお知らせCSVファイル
 	 */
-	private $alert_filename = './res/csv/alert.csv';
+	private $alert_filename = './../res/csv/alert.csv';
 
 	/**
 	 * 矢印画像パス
 	 */
-	private $img_arrow_left = './res/images/arrow_left.png';
+	private $img_arrow_left = './../res/images/arrow_left.png';
 
 	/**
 	 * エラー画像パス
 	 */
-	private $img_error_icon = './res/images/error_icon.png';
+	private $img_error_icon = './../res/images/error_icon.png';
 
 
 	/**
@@ -184,7 +184,7 @@ echo '★3';
 		set_time_limit(30);
 
 		$result['status'] = true;
-		
+
 		return json_encode($result);
 	}
 
