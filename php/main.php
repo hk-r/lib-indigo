@@ -92,7 +92,7 @@ class main
 	 * Gitのmaster情報を取得
 	 */
 	private function init() {
-		echo '★0';
+		echo '★0:' . realpath('.');
 		$current_dir = realpath('.');
 
 		$output = "";
@@ -121,7 +121,7 @@ echo '★2:' . $master_path;
 						// 存在しない場合
 
 						// ディレクトリ作成
-						if ( !mkdir( $current_dir . $master_path, 0777, true) ) {
+						if ( !mkdir( $master_path, 0777, true) ) {
 							// ディレクトリが作成できない場合
 
 							// エラー処理
