@@ -111,7 +111,7 @@ class main
 		echo '★1';
 		// foreach ( $server_list as $preview_server ) {
 			chdir($current_dir);
-echo '★2';
+echo '★2:' . $master_path;
 			try {
 
 				// if ( strlen($preview_server->path) ) {
@@ -121,7 +121,7 @@ echo '★2';
 						// 存在しない場合
 
 						// ディレクトリ作成
-						if ( !mkdir( $master_path, 0777, true) ) {
+						if ( !mkdir( $current_dir . $master_path, 0777, true) ) {
 							// ディレクトリが作成できない場合
 
 							// エラー処理
