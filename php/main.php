@@ -92,15 +92,15 @@ class main
 	 * Gitのmaster情報を取得
 	 */
 	private function init() {
-
+		echo '★0';
 		$current_dir = realpath('.');
 
 		$output = "";
 		$result = array('status' => true,
 						'message' => '');
-
+		echo '★0-1';
 		$master_path = $this->options->git->repository;
-
+		echo '★0-2';
 		// $server_list = $this->options->preview_server;
 		// array_push($server_list, json_decode(json_encode(array(
 		// 	'name'=>'master',
