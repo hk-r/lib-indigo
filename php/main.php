@@ -92,15 +92,15 @@ class main
 	 * Gitのmaster情報を取得
 	 */
 	private function init() {
-		echo '★0:' . realpath('.');
+
 		$current_dir = realpath('.');
 
 		$output = "";
 		$result = array('status' => true,
 						'message' => '');
-		echo '★0-1';
+
 		$master_path = $this->options->git->repository;
-		echo '★0-2';
+
 		// $server_list = $this->options->preview_server;
 		// array_push($server_list, json_decode(json_encode(array(
 		// 	'name'=>'master',
@@ -108,10 +108,10 @@ class main
 		// ))));
 
 		set_time_limit(0);
-		echo '★1';
+
 		// foreach ( $server_list as $preview_server ) {
-			chdir($current_dir);
-echo '★2:' . $current_dir . $master_path;
+		echo '★current_dir:' . $current_dir;
+		echo '★master_path:' . $master_path;
 			try {
 
 				// if ( strlen($preview_server->path) ) {
@@ -119,7 +119,7 @@ echo '★2:' . $current_dir . $master_path;
 					// デプロイ先のディレクトリが無い場合は作成
 					if ( !file_exists( $master_path) ) {
 						// 存在しない場合
-echo '★2-1';
+
 						// ディレクトリ作成
 // 						if ( !mkdir( $master_path, 0777, true) ) {
 // 							// ディレクトリが作成できない場合
@@ -136,16 +136,15 @@ echo '★2-1';
 							echo '▼' . $value;	
 							echo '<br>';
 						}
-echo '★2-3';
 					}
 echo '★3';
 					// 「.git」フォルダが存在すれば初期化済みと判定
 					if ( !file_exists( $master_path . "/.git") ) {
 						// 存在しない場合
-echo '★3-1';
+
 						// ディレクトリ移動
 						if ( chdir( $master_path ) ) {
-echo '★3-2';
+
 							// git セットアップ
 							exec('git init', $output);
 
@@ -160,7 +159,7 @@ echo '★3-2';
 							exec( 'git pull origin master', $output);
 
 							chdir($current_dir);
-echo '★4';
+
 						} else {
 							// プレビューサーバのディレクトリが存在しない場合
 
@@ -169,9 +168,9 @@ echo '★4';
 						}
 					}
 				// }
-echo '★5';
+
 			} catch (\Exception $e) {
-echo '★キャッチ';
+
 				set_time_limit(30);
 
 				$result['status'] = false;
@@ -183,9 +182,9 @@ echo '★キャッチ';
 
 		// }
 		set_time_limit(30);
-echo '★6';
-		$result['status'] = true;
 
+		$result['status'] = true;
+		
 		return json_encode($result);
 	}
 
