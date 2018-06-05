@@ -1207,7 +1207,7 @@ class main
 	 */
 	public function run() {
 	
-		echo realpath('.');
+		echo '1';
 
 		// ダイアログの表示
 		$dialog_disp = '';
@@ -1229,7 +1229,7 @@ class main
 				alert("initialize faild");
 			</script>';
 		}
-
+echo '2';
 		// 新規ボタンが押下された場合
 		if (isset($this->options->_POST->add)) {
 		
@@ -1319,7 +1319,7 @@ class main
 
 		// // 画面表示
 		$disp = '';  
-
+echo 'post:' . $this->options->_POST->history;
 		if (isset($this->options->_POST->history)) {
 			// 履歴表示画面の表示
 			$disp = $this->create_history_contents();
@@ -1327,10 +1327,10 @@ class main
 			// 初期表示画面の表示
 			$disp = $this->create_top_contents();
 		}
-
+echo '3';
 		// 画面ロック用
 		$disp_lock = '<div id="loader-bg"><div id="loading"></div></div>';	
-
+echo '4';
 		// 画面表示
 		return $disp . $disp_lock . $dialog_disp;
 	}
