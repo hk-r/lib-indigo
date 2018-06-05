@@ -128,7 +128,7 @@ echo '★2-1';
 // 							throw new \Exception('Creation of master directory failed.');
 // 						}
 
-						exec('mkdir -p /repos/master/', $output, $return_var);
+						exec('mkdir -p ../repos/master', $output, $return_var);
 
 						echo '▼' . $return_var;	
 						foreach ($output as $key => $value) {
