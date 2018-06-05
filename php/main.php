@@ -162,8 +162,9 @@ echo '★4';
 				// }
 echo '★5';
 			} catch (Exception $e) {
-				set_time_limit(30);
 echo '★キャッチ';
+				set_time_limit(30);
+
 				$result['status'] = false;
 				$result['message'] = $e->getMessage();
 
