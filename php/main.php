@@ -127,7 +127,7 @@ echo '★2-1';
 // 							// エラー処理
 // 							throw new \Exception('Creation of master directory failed.');
 // 						}
-						chmod($current_dir, 0777);
+						// chmod($current_dir, 0777);
 						exec('mkdir -p ./repos/master 2>&1', $output, $return_var);
 
 						echo '▼' . $return_var;	
