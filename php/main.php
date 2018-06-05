@@ -108,10 +108,10 @@ class main
 		// ))));
 
 		set_time_limit(0);
-
+		echo '★1';
 		// foreach ( $server_list as $preview_server ) {
 			chdir($current_dir);
-
+echo '★2';
 			try {
 
 				// if ( strlen($preview_server->path) ) {
@@ -128,7 +128,7 @@ class main
 							throw new Exception('Creation of master directory failed.');
 						}
 					}
-
+echo '★3';
 					// 「.git」フォルダが存在すれば初期化済みと判定
 					if ( !file_exists( $master_path . "/.git") ) {
 						// 存在しない場合
@@ -150,7 +150,7 @@ class main
 							exec( 'git pull origin master', $output);
 
 							chdir($current_dir);
-
+echo '★4';
 						} else {
 							// プレビューサーバのディレクトリが存在しない場合
 
@@ -159,7 +159,7 @@ class main
 						}
 					}
 				// }
-
+echo '★5';
 			} catch (Exception $e) {
 				set_time_limit(30);
 
@@ -172,7 +172,7 @@ class main
 
 		// }
 		set_time_limit(30);
-
+echo '★6';
 		$result['status'] = true;
 
 		return json_encode($result);
