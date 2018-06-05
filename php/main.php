@@ -1216,8 +1216,12 @@ class main
 		$init_ret = $this->init();
 		$init_ret = json_decode($init_ret);
 
+		echo '1-1';
+
 		// 初期表示画面から遷移されたか
 		$init_trans_flg = false;
+
+		echo '1-2';
 
 		if ( !$init_ret->status ) {
 			// 初期化失敗
