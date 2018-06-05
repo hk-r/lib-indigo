@@ -10,33 +10,74 @@ class main
 
 	/**
 	 * Delimiter
+	 *
+	 * @access	private
+	 * @var string
 	 */
 	private $_delimiter		= ',';
 
 	/**
 	 * Enclosure
+	 *
+	 * @access	private
+	 * @var	string
 	 */
 	private $_enclosure		= '"';
 
 	/**
 	 * 公開予約管理CSVファイル
 	 */
-	private $list_filename = '/res/csv/list.csv';
+	private $list_filename = './res/csv/list.csv';
 
 	/**
 	 * 警告エラー時のお知らせCSVファイル
 	 */
-	private $alert_filename = '/res/csv/alert.csv';
+	private $alert_filename = './res/csv/alert.csv';
 
 	/**
 	 * 矢印画像パス
 	 */
-	private $img_arrow_left = '/res/images/arrow_left.png';
+	private $img_arrow_left = './res/images/arrow_left.png';
 
 	/**
 	 * エラー画像パス
 	 */
-	private $img_error_icon = '/res/images/error_icon.png';
+	private $img_error_icon = './res/images/error_icon.png';
+
+
+	/**
+	 * 本番環境ディレクトリパス
+	 */
+	private $honban_path = './../honban/';
+
+	/**
+	 * backupディレクトリパス
+	 */
+	private $backup_path = './backup/';
+
+	/**
+	 * copyディレクトリパス
+	 */
+	private $copy_path = './copy/';
+
+	/**
+	 * logディレクトリパス
+	 */
+	private $log_path = './log/';
+
+	/**
+	 * 公開予約管理CSVファイル
+	 */
+	private $reserve_filename = './res/csv/list.csv';
+
+	/**
+	 * 公開予約管理CSV カラム列
+	 */
+	// 「ステータス」の列
+	private $reserve_column_status = 5;
+	// 「公開予約日時」の列
+	private $reserve_column_datetime = 3;
+
 
 	/**
 	 * コンストラクタ
@@ -1009,45 +1050,54 @@ class main
 		// 取得したリストをソートする
 		$data_list = $this->sort_list($data_list, 'reserve_datetime', SORT_ASC);
 
-		// お知らせリストの取得
-		$alert_list = $this->get_csv_alert_list();
+		// // お知らせリストの取得
+		// $alert_list = $this->get_csv_alert_list();
 
-		if (count($alert_list) != 0) {
-			// お知らせリストの表示
-			$ret .= '<form name="formA" method="post">'
-				. '<div class="alert_box">'
-				. '<p class="alert_title">お知らせ</p>';
-			// データリスト
-			foreach ($alert_list as $data) {
+		// if (count($alert_list) != 0) {
+		// 	// お知らせリストの表示
+		// 	$ret .= '<form name="formA" method="post">'
+		// 		. '<div class="alert_box">'
+		// 		. '<p class="alert_title">お知らせ</p>';
+		// 	// データリスト
+		// 	foreach ($alert_list as $data) {
 				
-				$ret .= '<p class="alert_content" style="vertical-align: middle;">'
-					. '<span style="padding-right: 5px;"><img src="'. $this->img_error_icon . '"/></span>'
-					. '<a onClick="document.formA.submit();return false;" >'
-					. $data['reserve_datetime'] . '　' . $data['content']
-					. '</a></p>';
-			}
+		// 		$ret .= '<p class="alert_content" style="vertical-align: middle;">'
+		// 			. '<span style="padding-right: 5px;"><img src="'. $this->img_error_icon . '"/></span>'
+		// 			. '<a onClick="document.formA.submit();return false;" >'
+		// 			. $data['reserve_datetime'] . '　' . $data['content']
+		// 			. '</a></p>';
+		// 	}
 
-			$ret .=  '<input type="hidden" name="history" value="履歴">'
-				. '</div>'
-				. '</form>';
-		}
+		// 	$ret .=  '<input type="hidden" name="history" value="履歴">'
+		// 		. '</div>'
+		// 		. '</form>';
+		// }
 
 		$ret .= '<div class="button_contents_box">'
-			. '<form id="form_table" method="post">'
-			. '<div class="button_contents" style="float:left">'
-			. '<ul>'
-			. '<li><input type="submit" id="add_btn" name="add" class="px2-btn" value="新規"/></li>'
-			. '</ul>'
-			. '</div>'
-			. '<div class="button_contents" style="float:right;">'
-			. '<ul>'
-			. '<li><input type="submit" id="update_btn" name="update" class="px2-btn" value="変更"/></li>'
-			. '<li><input type="submit" id="delete_btn" name="delete" class="px2-btn px2-btn--danger" value="削除"/></li>'
-			. '<li><input type="submit" id="release_btn" name="release" class="px2-btn px2-btn--primary" value="即時公開"/></li>'
-			. '<li><input type="submit" id="history_btn" name="history" class="px2-btn" value="履歴"/></li>'
-			. '</ul>'
-			// . '</div>'
-			. '</div>';
+			. '<form id="form_table" method="post">';
+
+		// $ret .= '<div class="button_contents_box">'
+		// 	. '<form id="form_table" method="post">'
+		// 	. '<div class="button_contents" style="float:left">'
+		// 	. '<ul>'
+		// 	. '<li><input type="submit" id="add_btn" name="add" class="px2-btn" value="新規"/></li>'
+		// 	. '</ul>'
+		// 	. '</div>'
+		// 	. '<div class="button_contents" style="float:right;">'
+		// 	. '<ul>'
+		// 	. '<li><input type="submit" id="update_btn" name="update" class="px2-btn" value="変更"/></li>'
+		// 	. '<li><input type="submit" id="delete_btn" name="delete" class="px2-btn px2-btn--danger" value="削除"/></li>'
+		// 	. '<li><input type="submit" id="release_btn" name="release" class="px2-btn px2-btn--primary" value="即時公開"/></li>'
+		// 	. '<li><input type="submit" id="history_btn" name="history" class="px2-btn" value="履歴"/></li>'
+		// 	. '</ul>'
+		// 	// . '</div>'
+		// 	. '</div>';
+
+		$ret .= '<div><input type="submit" id="add_btn" name="add" class="px2-btn" value="新規"/>'
+			. '<input type="submit" id="update_btn" name="update" class="px2-btn" value="変更"/>'
+			. '<input type="submit" id="delete_btn" name="delete" class="px2-btn px2-btn--danger" value="削除"/>'
+			. '<input type="submit" id="release_btn" name="release" class="px2-btn px2-btn--primary" value="即時公開"/>'
+			. '<input type="submit" id="history_btn" name="history" class="px2-btn" value="履歴"/></div>';
 
 		// テーブルヘッダー
 		$ret .= '<div>'
@@ -1157,6 +1207,8 @@ class main
 	 */
 	public function run() {
 	
+		echo realpath('.');
+
 		// ダイアログの表示
 		$dialog_disp = '';
 
@@ -1908,10 +1960,214 @@ class main
 	 * 即時公開
 	 */
 	private function manual_release() {
-		echo 'TODO:未実装';
 
-		$this->file_control->process();
+
+		try {
+
+			// *** 公開予定から本番環境へ置き換えるものを1件抽出する。（抽出されたものが実行中の場合はスキップする　※処理終了）
+			// 現在時刻
+			$now = date("Y-m-d H:i:s");
+			echo $now;
+			// 公開予約の一覧を取得
+			$data_list = $this->get_csv_data_list_cron(0, $now);
+
+			if (!empty($data_list)) {
+
+				// 取得した一覧から最新の1件を取得
+				$datetime_str = $this->get_datetime_str($data_list, 'reserve_datetime', SORT_DESC);
+
+				echo '<br>' . '実行する公開予約日時：';
+				echo($datetime_str);
+			}
+
+			// *** 本番環境よりバックアップ取得
+
+			// #本番環境ディレクトリのパス取得（１）
+			// 本番環境の絶対パスを取得
+			$honban_real_path = realpath('.') . $this->honban_path;
+			echo '<br>' . '本番環境絶対パス：';
+			echo $honban_real_path;
+
+			// backupディレクトリの絶対パスを取得
+			$bk_real_path = realpath('.') . $this->backup_path;
+			echo '<br>' . 'バックアップフォルダの絶対パス：';
+			echo $bk_real_path;
+
+			// copyディレクトリの絶対パスを取得
+			$copy_real_path = realpath('.') . $this->copy_path;
+			echo '<br>' . 'コピーフォルダの絶対パス：';
+			echo $copy_real_path;
+
+			// logディレクトリの絶対パスを取得
+			$log_real_path = realpath('.') . $this->log_path;
+			echo '<br>' . 'ログフォルダの絶対パス：';
+			echo $log_real_path;
+
+			// #backupディレクトリに公開予定日時を名前としたフォルダを作成（２）
+			if (!file_exists($bk_real_path . $datetime_str)) {
+
+				// ディレクトリ作成
+				if (!mkdir($bk_real_path . $datetime_str, 0777, true)) {
+					// ディレクトリが作成できない場合
+
+					// エラー処理
+					throw new Exception('Creation of backup directory failed.');
+				}
+			}
+
+			// #（１）の中身を（２）へコピー
+			$command = 'cp -r '. $honban_real_path . '* ' . $bk_real_path . $datetime_str . ' 2>&1';
+			exec($command, $output, $status);
+			error_log('['.date(DATE_ATOM).'] '.$command."\n".'return code : '.$status."\n", 3, '../logs/ansible-view.log');
+			foreach($output as $row){
+	    		error_log($row."\n", 3, '/var/log/test/test.log');
+			}
+			var_dump($output);
+			// **成功したら
+			//   （１）の中身を削除
+			//       *成功したら
+			//        TODO:実行処理追加！
+			 		if (chdir($honban_real_path)) {
+			       		exec('rm -rf ./* ./.*', $output);
+			 		}
+
+			//      次の処理へ！
+
+			//       *失敗したら
+			// 			・失敗ログを残し、処理終了
+			 		if (chdir($honban_real_path)) {
+			       		exec('rm -rf ./* ./.*', $output);
+			 		}
+
+
+			// 			・中途半端に残っている（１）の中身を一旦削除して、
+			// 			 backupディレクトリから戻す！
+			// 			 ※そこも失敗してしまったら、本番環境が壊れているので手動で戻してもらわないといけない
+
+			// **失敗したら
+			//   ・失敗ログを残し、処理終了
+			//   ・backupディレクトリは削除？
+
+
+			// *** 該当するcopyディレクトリの内容を本番環境へ反映
+			
+			// cron処理で実行対象として認識されたcopyディレクトリのパス取得（３）
+			
+			// （３）の中身を（１）へコピー
+
+			// ★LINUXコマンドだとフォルダごとコピーできる！
+			// TODO:実行処理追加！
+			 exec('cp -r '. $copy_real_path . $datetime_str . '* ' . $honban_real_path . $datetime_str, $output);
+
+			// **成功したら
+			//   ・成功ログを出力し、処理を終了する
+
+			// **失敗したら
+			//   ・失敗ログを残し、処理終了
+			//   ・中途半端にアップロードした（１）の中身をすべて削除して、
+			// 	  backupディレクトリから戻す！
+			// 	  ※そこも失敗してしまったら、本番環境が壊れているので手動で戻してもらわないといけない
+		
+		} catch (Exception $e) {
+
+			echo "例外キャッチ：", $e->getMessage(), "<br>";
+		}
 	}
+
+	
+	/**
+	 * CSVから公開前のリストを取得する
+	 *
+	 * @param $status = 取得対象のステータス
+	 * @return データリスト
+	 */
+	private function get_csv_data_list_cron($status, $now) {
+
+		$ret_array = array();
+
+		$filename = realpath('.') . $this->reserve_filename;
+
+		if (!file_exists($filename)) {
+		
+			echo 'ファイルが存在しない';
+		
+		} else {
+
+			// Open file
+			$handle = fopen($filename, "r");
+
+			$title_array = array();
+
+			$is_first = true;
+
+			// CSVリストをループ
+			while ($rowData = fgetcsv($handle, 0, $this->_delimiter, $this->_enclosure)) {
+
+				if($is_first){
+			        // タイトル行
+			        foreach ($rowData as $k => $v) {
+			        	$title_array[] = $v;
+			        }
+			        $is_first = false;
+			        continue;
+			    }
+			    
+				$set_flg = true;
+
+			    // 指定ステータスと一致しない場合
+			    if (isset($status) && ($rowData[$this->reserve_column_status] != $status)) {
+					$set_flg = false;
+			    }
+
+			    // 指定日時より未来日時の場合
+			    if (isset($now) && ($rowData[$this->reserve_column_datetime] > $now)) {
+			    	$set_flg = false;
+			    }
+
+			    if ($set_flg) {
+			    	// タイトルと値の2次元配列作成
+			    	$ret_array[] = array_combine ($title_array, $rowData);
+			    }
+			}
+
+			// Close file
+			fclose($handle);
+
+		}
+					
+		return $ret_array;
+	}
+
+	/**
+	 * 公開予約一覧用の配列を「公開予定日時の昇順」へソートし返却する
+	 *	 
+	 * @param $array_list = ソート対象の配列
+	 * @param $sort_name  = ソートするキー名称
+	 * @param $sort_kind  = ソートの種類
+	 *	 
+	 * @return ソート後の配列
+	 */
+	private function get_datetime_str($array_list, $sort_name, $sort_kind) {
+
+		$ret = '';
+
+		if (!empty($array_list)) {
+
+			$sort_array = array();
+
+			foreach($array_list as $key => $value) {
+				$sort_array[$key] = $value[$sort_name];
+			}
+
+			// 公開予定日時の昇順へソート	
+			array_multisort($sort_array, $sort_kind, $array_list);
+			// 先頭行の公開予約日時
+			$ret = date('YmdHis', strtotime($array_list[0][$sort_name]));
+		}
+
+		return $ret;
+	}
+
 
 	// /**
 	//  * ディレクトリ削除関数
