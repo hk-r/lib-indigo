@@ -1412,7 +1412,7 @@ echo '4';
 		$filename = realpath('.') . $this->list_filename;
 
 		if (!file_exists($filename)) {
-			echo 'ファイルが存在しない';
+			echo $filename . 'ファイルが存在しない';
 
 		} else {
 
