@@ -163,7 +163,7 @@ echo '★4';
 echo '★5';
 			} catch (Exception $e) {
 				set_time_limit(30);
-
+echo '★キャッチ';
 				$result['status'] = false;
 				$result['message'] = $e->getMessage();
 
