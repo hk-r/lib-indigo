@@ -411,6 +411,8 @@ echo '★3';
 	 */
 	private function disp_add_dialog($error_message) {
 		
+		echo('★ disp_add_dialog start');
+
 		$ret = "";
 
 		$branch_select_value = "";
@@ -439,6 +441,8 @@ echo '★3';
 
 		// ダイアログHTMLの作成
 		$ret = $this->create_dialog_html(true, false, $error_message, $branch_list, $branch_select_value, $reserve_date, $reserve_time, $comment);
+
+		echo('★ disp_add_dialog end');
 
 		return $ret;
 	}
