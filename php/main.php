@@ -1407,9 +1407,11 @@ echo '4';
 	private function get_csv_data_list($status)
 	{
 
+		$current_dir = realpath('.');
+
 		$ret_array = array();
 
-		$filename = realpath('.') . $this->list_filename;
+		$filename = $this->list_filename;
 
 		if (!file_exists($filename)) {
 			echo $filename . 'ファイルが存在しない';
@@ -1453,7 +1455,9 @@ echo '4';
 			fclose($handle);
 
 		}
-					
+		
+		chdir($current_dir);
+		
 		return $ret_array;
 	}
 
