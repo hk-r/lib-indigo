@@ -195,6 +195,9 @@ echo '★3';
 	 */
 	private function get_branch_list() {
 
+
+		echo('★ get_branch_list start');
+
 		$current_dir = realpath('.');
 		// echo $current_dir;
 
@@ -202,44 +205,49 @@ echo '★3';
 		$result = array('status' => true,
 						'message' => '');
 
+		echo('▼ 1');
+
 		try {
 
 			if ( chdir( $this->options->git->repository )) {
 
 				// fetch
 				exec( 'git fetch', $output );
-
+echo('▼ 2');
 				// ブランチの一覧取得
 				exec( 'git branch -r', $output );
-
+echo('▼ 3');
 				foreach ($output as $key => $value) {
 					if( strpos($value, '/HEAD') !== false ){
 						continue;
 					}
 					$output_array[] = trim($value);
 				}
-
+echo('▼ 4');
 				$result['branch_list'] = $output_array;
 
 			} else {
 				// 指定リポジトリのディレクトリが存在しない場合
-
+echo('▼ 5');
 				// エラー処理
-				throw new Exception('Repository directory not found.');
+				throw new \Exception('Repository directory not found.');
 			}
 
-		} catch (Exception $e) {
-
+		} catch (\Exception $e) {
+echo('▼ 6');
 			$result['status'] = false;
 			$result['message'] = $e->getMessage();
 
 			chdir($current_dir);
 			return json_encode($result);
 		}
-
+echo('▼ 7');
 		$result['status'] = true;
 
 		chdir($current_dir);
+
+
+		echo('★ get_branch_list end');
 		return json_encode($result);
 
 	}
