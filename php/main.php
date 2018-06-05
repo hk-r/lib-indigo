@@ -128,7 +128,8 @@ echo '★2-1';
 // 							throw new \Exception('Creation of master directory failed.');
 // 						}
 						// chmod($current_dir, 0777);
-						exec('mkdir -p ./repos/master 2>&1', $output, $return_var);
+						// exec('mkdir -p ./repos/master 2>&1', $output, $return_var);
+						exec('mkdir repos 2>&1', $output, $return_var);
 
 						echo '▼' . $return_var;	
 						foreach ($output as $key => $value) {
