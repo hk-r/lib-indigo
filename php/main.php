@@ -128,17 +128,17 @@ echo '★2-1';
 // 							throw new \Exception('Creation of master directory failed.');
 // 						}
 
-						exec('mkdir ' . $master_path, $output);
+						exec('mkdir -p /var/www/html/sample-lib-indigo/repos/master/', $output);
 echo '★2-3';
 					}
 echo '★3';
 					// 「.git」フォルダが存在すれば初期化済みと判定
 					if ( !file_exists( $master_path . "/.git") ) {
 						// 存在しない場合
-
+echo '★3-1';
 						// ディレクトリ移動
 						if ( chdir( $master_path ) ) {
-
+echo '★3-2';
 							// git セットアップ
 							exec('git init', $output);
 
