@@ -125,7 +125,7 @@ echo '★2-1';
 							// ディレクトリが作成できない場合
 echo '★2-2';
 							// エラー処理
-							throw new Exception('Creation of master directory failed.');
+							throw new \Exception('Creation of master directory failed.');
 						}
 echo '★2-3';
 					}
@@ -156,7 +156,7 @@ echo '★4';
 							// プレビューサーバのディレクトリが存在しない場合
 
 							// エラー処理
-							throw new Exception('master directory not found.');
+							throw new \Exception('master directory not found.');
 						}
 					}
 				// }
