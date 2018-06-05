@@ -129,6 +129,11 @@ echo '★2-1';
 // 						}
 
 						exec('mkdir -p /var/www/html/sample-lib-indigo/repos/master/', $output);
+
+						foreach ($output as $key => $value) {
+							echo '▼' . $value;	
+							echo '<br>';
+						}
 echo '★2-3';
 					}
 echo '★3';
