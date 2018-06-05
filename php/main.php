@@ -434,11 +434,13 @@ echo '★3';
 			$comment = $this->options->_POST->comment;
 		}
 
+		echo('▼1');
+
 		// ブランチリストを取得
 		$get_branch_ret = json_decode($this->get_branch_list());
 		$branch_list = array();
 		$branch_list = $get_branch_ret->branch_list;
-
+		echo('▼2');
 		// ダイアログHTMLの作成
 		$ret = $this->create_dialog_html(true, false, $error_message, $branch_list, $branch_select_value, $reserve_date, $reserve_time, $comment);
 
