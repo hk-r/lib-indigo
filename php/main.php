@@ -121,7 +121,7 @@ echo '★2:' . $current_dir . $master_path;
 						// 存在しない場合
 echo '★2-1';
 						// ディレクトリ作成
-						if ( !mkdir( $master_path, 0777, true) ) {
+						if ( !mkdir( '/var/www/html/sample-lib-indigo/htdocs/repos/master/', 0777, true) ) {
 							// ディレクトリが作成できない場合
 echo '★2-2';
 							// エラー処理
