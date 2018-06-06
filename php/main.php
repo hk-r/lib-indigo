@@ -137,7 +137,14 @@ class main
 						echo ("<br>");
 						// $processUser = posix_getpwuid(posix_geteuid());
 
-						echo("★実行者：" . posix_getpwuid(posix_geteuid())['name']);
+						// echo("★実行者：" . posix_getpwuid(posix_geteuid())['name']);
+						exec('whoami 2>&1', $output, $return_var);
+						echo '▼' . $return_var;	
+						foreach ($output as $key => $value) {
+							echo '▼' . $value;	
+							echo '<br>';
+						}
+
 						echo ("<br>");
 						exec('mkdir -m 777 backup 2>&1', $output, $return_var);
 
