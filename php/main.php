@@ -230,7 +230,7 @@ echo('▼ 4');
 				// 指定リポジトリのディレクトリが存在しない場合
 echo('▼ 5');
 				// エラー処理
-				throw new Exception('Repository directory not found.');
+				throw new \Exception('Repository directory not found.');
 			}
 
 		} catch (\Exception $e) {
