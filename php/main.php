@@ -230,7 +230,7 @@ echo('▼ 4');
 				// 指定リポジトリのディレクトリが存在しない場合
 echo('▼ 5');
 				// エラー処理
-				throw new \Exception('Repository directory not found.');
+				throw new Exception('Repository directory not found.');
 			}
 
 		} catch (\Exception $e) {
@@ -1752,12 +1752,12 @@ echo '4';
 
 					echo 'ディレクトリの作成が失敗しました。';
 					// エラー処理
-					throw new Exception('Creation of copy directory failed.');
+					throw new \Exception('Creation of copy directory failed.');
 				}
 
 			} else {
 				echo '同じ名前のディレクトリが存在します。';
-				throw new Exception('Creation of copy directory failed.');
+				throw new \Exception('Creation of copy directory failed.');
 			}
 
 			// ディレクトリ移動
@@ -1786,10 +1786,10 @@ echo '4';
 				// コピー用のディレクトリが存在しない場合
 
 				// エラー処理
-				throw new Exception('Copy directory not found.');
+				throw new \Exception('Copy directory not found.');
 			}
 		
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 
 			set_time_limit(30);
 
@@ -1844,7 +1844,7 @@ echo '4';
 			if ( !file_exists($before_path) ) {
 
 				echo $before_path . '：ディレクトリが存在しません。';
-				throw new Exception('Creation of preview server directory failed.');
+				throw new \Exception('Creation of preview server directory failed.');
 			}
 
 			// ディレクトリ移動
@@ -1904,7 +1904,7 @@ echo '4';
 					}else{
 						// print $before_dir_name. ',' . $dir_name;
 						// print 'ディレクトリ名が変更できませんでした。';
-						throw new Exception('Copy directory name could not be changed.');
+						throw new \Exception('Copy directory name could not be changed.');
 					}
 				}
 				
@@ -1912,10 +1912,10 @@ echo '4';
 				// コピー用のディレクトリが存在しない場合
 
 				// エラー処理
-				throw new Exception('Copy directory not found.');
+				throw new \Exception('Copy directory not found.');
 			}
 		
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 
 			set_time_limit(30);
 
@@ -1966,17 +1966,17 @@ echo '4';
 				}else{
 					// print $before_dir_name. ',' . $dir_name;
 					print '削除のコピーディレクトリがみつかりません。';
-					throw new Exception('Copy directory name could not be changed.');
+					throw new \Exception('Copy directory name could not be changed.');
 				}
 		
 			} else {
 				// コピー用のディレクトリが存在しない場合
 
 				// エラー処理
-				throw new Exception('Copy directory not found.');
+				throw new \Exception('Copy directory not found.');
 			}
 		
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 
 			set_time_limit(30);
 
@@ -2051,7 +2051,7 @@ echo '4';
 					// ディレクトリが作成できない場合
 
 					// エラー処理
-					throw new Exception('Creation of backup directory failed.');
+					throw new \Exception('Creation of backup directory failed.');
 				}
 			}
 
@@ -2108,7 +2108,7 @@ echo '4';
 			// 	  backupディレクトリから戻す！
 			// 	  ※そこも失敗してしまったら、本番環境が壊れているので手動で戻してもらわないといけない
 		
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 
 			echo "例外キャッチ：", $e->getMessage(), "<br>";
 		}
