@@ -121,13 +121,23 @@ class main
 // 						}
 						// chmod($current_dir, 0777);
 						// exec('mkdir -p ./repos/master 2>&1', $output, $return_var);
-						exec('mkdir repos 2>&1', $output, $return_var);
+						// ディレクトリ作成
+						if (!mkdir("/var/www/html/sample-lib-indigo/indigo_dir/backup", 0777, true)) {
+							// ディレクトリが作成できない場合
 
-						echo '▼' . $return_var;	
-						foreach ($output as $key => $value) {
-							echo '▼' . $value;	
-							echo '<br>';
+							echo 'error';
+
+							// エラー処理
+							throw new \Exception('Creation of backup directory failed.');
 						}
+
+						// exec('mkdir repos 2>&1', $output, $return_var);
+
+						// echo '▼' . $return_var;	
+						// foreach ($output as $key => $value) {
+						// 	echo '▼' . $value;	
+						// 	echo '<br>';
+						// }
 					}
 
 					// 「.git」フォルダが存在すれば初期化済みと判定
