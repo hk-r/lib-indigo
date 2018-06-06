@@ -135,9 +135,9 @@ class main
 
 						echo ("★カレントパス：" . realpath('.'));
 						echo ("<br>");
-						$processUser = posix_getpwuid(posix_geteuid());
+						// $processUser = posix_getpwuid(posix_geteuid());
 
-						echo("★実行者：" . $processUser['name']);
+						// echo("★実行者：" . $processUser['name']);
 						echo ("<br>");
 						exec('mkdir backup 2>&1', $output, $return_var);
 
