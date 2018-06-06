@@ -131,7 +131,10 @@ class main
 						// 	throw new \Exception('Creation of backup directory failed.');
 						// }
 
-						exec('mkdir /var/www/html/sample-lib-indigo/indigo_dir/backup 2>&1', $output, $return_var);
+						chdir( "./../indigo_dir" );
+
+						echo ("★：" . realpath('.'));
+						exec('mkdir backup 2>&1', $output, $return_var);
 
 						echo '▼' . $return_var;	
 						foreach ($output as $key => $value) {
