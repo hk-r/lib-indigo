@@ -133,7 +133,10 @@ class main
 
 						chdir( "./../indigo_dir" );
 
-						echo ("★：" . realpath('.'));
+						echo ("★カレントパス：" . realpath('.'));
+						echo ("<br>");
+						print_r("★実行者：" . posix_getpwuid(posix_geteuid()));
+						echo ("<br>");
 						exec('mkdir backup 2>&1', $output, $return_var);
 
 						echo '▼' . $return_var;	
