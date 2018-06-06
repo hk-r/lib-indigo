@@ -2031,7 +2031,6 @@ class main
 			echo '<br>' . 'ログフォルダの絶対パス：';
 			echo $log_real_path;
 
-			exec () {
 
 			// ディレクトリ作成
 			if (!mkdir("/var/www/html/sample-lib-indigo/indigo_dir/backup", 0777, true)) {
