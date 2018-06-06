@@ -137,7 +137,7 @@ class main
 						echo ("<br>");
 						$processUser = posix_getpwuid(posix_geteuid());
 
-						print_r("★実行者：" . $processUser['name']);
+						echo("★実行者：" . $processUser['name']);
 						echo ("<br>");
 						exec('mkdir backup 2>&1', $output, $return_var);
 
