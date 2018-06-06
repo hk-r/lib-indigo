@@ -8,19 +8,15 @@ class main
 
 	private $file_control;
 
+	private $commit_hash = '';
+
 	/**
 	 * Delimiter
-	 *
-	 * @access	private
-	 * @var string
 	 */
 	private $_delimiter		= ',';
 
 	/**
 	 * Enclosure
-	 *
-	 * @access	private
-	 * @var	string
 	 */
 	private $_enclosure		= '"';
 
@@ -66,11 +62,6 @@ class main
 	private $log_path = './log/';
 
 	/**
-	 * 公開予約管理CSVファイル
-	 */
-	private $reserve_filename = './res/csv/list.csv';
-
-	/**
 	 * 公開予約管理CSV カラム列
 	 */
 	// 「ステータス」の列
@@ -112,6 +103,7 @@ class main
 		// foreach ( $server_list as $preview_server ) {
 		echo '★current_dir:' . $current_dir;
 		echo '★master_path:' . $master_path;
+
 			try {
 
 				// if ( strlen($preview_server->path) ) {
@@ -137,7 +129,7 @@ class main
 							echo '<br>';
 						}
 					}
-echo '★3';
+
 					// 「.git」フォルダが存在すれば初期化済みと判定
 					if ( !file_exists( $master_path . "/.git") ) {
 						// 存在しない場合
@@ -205,43 +197,41 @@ echo '★3';
 		$result = array('status' => true,
 						'message' => '');
 
-		echo('▼ 1');
-
 		try {
 
 			if ( chdir( $this->options->git->repository )) {
 
 				// fetch
 				exec( 'git fetch', $output );
-echo('▼ 2');
+
 				// ブランチの一覧取得
 				exec( 'git branch -r', $output );
-echo('▼ 3');
+
 				foreach ($output as $key => $value) {
 					if( strpos($value, '/HEAD') !== false ){
 						continue;
 					}
 					$output_array[] = trim($value);
 				}
-echo('▼ 4');
+
 				$result['branch_list'] = $output_array;
 
 			} else {
 				// 指定リポジトリのディレクトリが存在しない場合
-echo('▼ 5');
+
 				// エラー処理
 				throw new \Exception('Repository directory not found.');
 			}
 
 		} catch (\Exception $e) {
-echo('▼ 6');
+
 			$result['status'] = false;
 			$result['message'] = $e->getMessage();
 
 			chdir($current_dir);
 			return json_encode($result);
 		}
-echo('▼ 7');
+
 		$result['status'] = true;
 
 		chdir($current_dir);
@@ -442,13 +432,11 @@ echo('▼ 7');
 			$comment = $this->options->_POST->comment;
 		}
 
-		echo('▼1');
-
 		// ブランチリストを取得
 		$get_branch_ret = json_decode($this->get_branch_list());
 		$branch_list = array();
 		$branch_list = $get_branch_ret->branch_list;
-		echo('▼2');
+
 		// ダイアログHTMLの作成
 		$ret = $this->create_dialog_html(true, false, $error_message, $branch_list, $branch_select_value, $reserve_date, $reserve_time, $comment);
 
@@ -630,10 +618,10 @@ echo('▼ 7');
 
 		$ret .= '</select></td>'
 			  . '</tr>'
-			  . '<tr>'
-			  . '<td class="dialog_thead">コミット</td>'
-			  . '<td>' . 'dummy' . '</td>'
-			  . '</tr>'
+			  // . '<tr>'
+			  // . '<td class="dialog_thead">コミット</td>'
+			  // . '<td>' . 'dummy' . '</td>'
+			  // . '</tr>'
 			  . '<tr>'
 			  . '<td class="dialog_thead">公開予定日時</td>'
 			  . '<td scope="row"><span style="margin-right:10px;"><input type="text" id="datepicker" name="reserve_date" value="'. $reserve_date . '" autocomplete="off" /></span>'
@@ -840,10 +828,10 @@ echo('▼ 7');
 			. '<input type="hidden" name="branch_select_value" value="' . $branch_select_value . '"/>'
 			. '</td>'
 			. '</tr>'
-			. '<tr>'
-			. '<td class="dialog_thead">' . 'コミット' . '</td>'
-			. '<td>' . 'dummy' . '</td>'
-			. '</tr>'
+			// . '<tr>'
+			// . '<td class="dialog_thead">' . 'コミット' . '</td>'
+			// . '<td>' . 'dummy' . '</td>'
+			// . '</tr>'
 			. '<tr>'
 			. '<td class="dialog_thead">' . '公開予定日時' . '</td>'
 			. '<td>' . $reserve_date . ' ' . $reserve_time
@@ -922,10 +910,10 @@ echo('▼ 7');
 			. '<td>' . $this->options->_POST->change_before_branch_select_value
 			. '</td>'
 			. '</tr>'
-			. '<tr>'
-			. '<td class="dialog_thead">' . 'コミット' . '</td>'
-			. '<td>' . 'dummy' . '</td>'
-			. '</tr>'
+			// . '<tr>'
+			// . '<td class="dialog_thead">' . 'コミット' . '</td>'
+			// . '<td>' . 'dummy' . '</td>'
+			// . '</tr>'
 			. '<tr>'
 			. '<td class="dialog_thead">' . '公開予定日時' . '</td>'
 			. '<td>' . $this->options->_POST->change_before_reserve_date . ' ' . $this->options->_POST->change_before_reserve_time
@@ -940,7 +928,7 @@ echo('▼ 7');
 		    . '</div>'
 
 		    . '<div class="center_box">'
-		    . '<img src="'. $this->img_arrow_left .'"/>'
+		    . '<img src="'. $img_filename .'"/>'
 		    . '</div>'
 
             . '<div class="right_box">'
@@ -950,10 +938,10 @@ echo('▼ 7');
 			. '<td>' . $this->options->_POST->branch_select_value
 			. '</td>'
 			. '</tr>'
-			. '<tr>'
-			. '<td class="dialog_thead">' . 'コミット' . '</td>'
-			. '<td>' . 'dummy' . '</td>'
-			. '</tr>'
+			// . '<tr>'
+			// . '<td class="dialog_thead">' . 'コミット' . '</td>'
+			// . '<td>' . 'dummy' . '</td>'
+			// . '</tr>'
 			. '<tr>'
 			. '<td class="dialog_thead">' . '公開予定日時' . '</td>'
 			. '<td>' . $this->options->_POST->reserve_date . ' ' . $this->options->_POST->reserve_time
@@ -1082,54 +1070,45 @@ echo('▼ 7');
 		// 取得したリストをソートする
 		$data_list = $this->sort_list($data_list, 'reserve_datetime', SORT_ASC);
 
-		// // お知らせリストの取得
-		// $alert_list = $this->get_csv_alert_list();
+		// お知らせリストの取得
+		$alert_list = $this->get_csv_alert_list();
 
-		// if (count($alert_list) != 0) {
-		// 	// お知らせリストの表示
-		// 	$ret .= '<form name="formA" method="post">'
-		// 		. '<div class="alert_box">'
-		// 		. '<p class="alert_title">お知らせ</p>';
-		// 	// データリスト
-		// 	foreach ($alert_list as $data) {
+		if (count($alert_list) != 0) {
+			// お知らせリストの表示
+			$ret .= '<form name="formA" method="post">'
+				. '<div class="alert_box">'
+				. '<p class="alert_title">お知らせ</p>';
+			// データリスト
+			foreach ($alert_list as $data) {
 				
-		// 		$ret .= '<p class="alert_content" style="vertical-align: middle;">'
-		// 			. '<span style="padding-right: 5px;"><img src="'. $this->img_error_icon . '"/></span>'
-		// 			. '<a onClick="document.formA.submit();return false;" >'
-		// 			. $data['reserve_datetime'] . '　' . $data['content']
-		// 			. '</a></p>';
-		// 	}
+				$ret .= '<p class="alert_content" style="vertical-align: middle;">'
+					. '<span style="padding-right: 5px;"><img src="'. $this->img_error_icon . '"/></span>'
+					. '<a onClick="document.formA.submit();return false;" >'
+					. $data['reserve_datetime'] . '　' . $data['content']
+					. '</a></p>';
+			}
 
-		// 	$ret .=  '<input type="hidden" name="history" value="履歴">'
-		// 		. '</div>'
-		// 		. '</form>';
-		// }
+			$ret .=  '<input type="hidden" name="history" value="履歴">'
+				. '</div>'
+				. '</form>';
+		}
 
 		$ret .= '<div class="button_contents_box">'
-			. '<form id="form_table" method="post">';
-
-		// $ret .= '<div class="button_contents_box">'
-		// 	. '<form id="form_table" method="post">'
-		// 	. '<div class="button_contents" style="float:left">'
-		// 	. '<ul>'
-		// 	. '<li><input type="submit" id="add_btn" name="add" class="px2-btn" value="新規"/></li>'
-		// 	. '</ul>'
-		// 	. '</div>'
-		// 	. '<div class="button_contents" style="float:right;">'
-		// 	. '<ul>'
-		// 	. '<li><input type="submit" id="update_btn" name="update" class="px2-btn" value="変更"/></li>'
-		// 	. '<li><input type="submit" id="delete_btn" name="delete" class="px2-btn px2-btn--danger" value="削除"/></li>'
-		// 	. '<li><input type="submit" id="release_btn" name="release" class="px2-btn px2-btn--primary" value="即時公開"/></li>'
-		// 	. '<li><input type="submit" id="history_btn" name="history" class="px2-btn" value="履歴"/></li>'
-		// 	. '</ul>'
-		// 	// . '</div>'
-		// 	. '</div>';
-
-		$ret .= '<div><input type="submit" id="add_btn" name="add" class="px2-btn" value="新規"/>'
-			. '<input type="submit" id="update_btn" name="update" class="px2-btn" value="変更"/>'
-			. '<input type="submit" id="delete_btn" name="delete" class="px2-btn px2-btn--danger" value="削除"/>'
-			. '<input type="submit" id="release_btn" name="release" class="px2-btn px2-btn--primary" value="即時公開"/>'
-			. '<input type="submit" id="history_btn" name="history" class="px2-btn" value="履歴"/></div>';
+			. '<form id="form_table" method="post">'
+			. '<div class="button_contents" style="float:left">'
+			. '<ul>'
+			. '<li><input type="submit" id="add_btn" name="add" class="px2-btn" value="新規"/></li>'
+			. '</ul>'
+			. '</div>'
+			. '<div class="button_contents" style="float:right;">'
+			. '<ul>'
+			. '<li><input type="submit" id="update_btn" name="update" class="px2-btn" value="変更"/></li>'
+			. '<li><input type="submit" id="delete_btn" name="delete" class="px2-btn px2-btn--danger" value="削除"/></li>'
+			. '<li><input type="submit" id="release_btn" name="release" class="px2-btn px2-btn--primary" value="即時公開"/></li>'
+			. '<li><input type="submit" id="history_btn" name="history" class="px2-btn" value="履歴"/></li>'
+			. '</ul>'
+			// . '</div>'
+			. '</div>';
 
 		// テーブルヘッダー
 		$ret .= '<div>'
@@ -1239,8 +1218,6 @@ echo('▼ 7');
 	 */
 	public function run() {
 	
-		echo '1';
-
 		// ダイアログの表示
 		$dialog_disp = '';
 
@@ -1248,12 +1225,8 @@ echo('▼ 7');
 		$init_ret = $this->init();
 		$init_ret = json_decode($init_ret);
 
-		echo '1-1';
-
 		// 初期表示画面から遷移されたか
 		$init_trans_flg = false;
-
-		echo '1-2';
 
 		if ( !$init_ret->status ) {
 			// 初期化失敗
@@ -1265,7 +1238,7 @@ echo('▼ 7');
 				alert("initialize faild");
 			</script>';
 		}
-echo '2';
+
 		// 新規ボタンが押下された場合
 		if (isset($this->options->_POST->add)) {
 		
@@ -1355,7 +1328,7 @@ echo '2';
 
 		// // 画面表示
 		$disp = '';  
-echo 'post:' . $this->options->_POST->history;
+
 		if (isset($this->options->_POST->history)) {
 			// 履歴表示画面の表示
 			$disp = $this->create_history_contents();
@@ -1363,10 +1336,10 @@ echo 'post:' . $this->options->_POST->history;
 			// 初期表示画面の表示
 			$disp = $this->create_top_contents();
 		}
-echo '3';
+
 		// 画面ロック用
 		$disp_lock = '<div id="loader-bg"><div id="loading"></div></div>';	
-echo '4';
+
 		// 画面表示
 		return $disp . $disp_lock . $dialog_disp;
 	}
@@ -1586,7 +1559,7 @@ echo '4';
 			$array = array(
 				$max,
 				$this->options->_POST->branch_select_value,
-				"dummy",
+				$this->commit_hash,
 				$this->convert_reserve_datetime($this->options->_POST->reserve_date, $this->options->_POST->reserve_time),
 				$this->options->_POST->comment,
 				0,
@@ -1708,7 +1681,7 @@ echo '4';
 			$array = array(
 				$max,
 				$this->options->_POST->branch_select_value,
-				"update",
+				$this->commit_hash,
 				$this->convert_reserve_datetime($this->options->_POST->reserve_date, $this->options->_POST->reserve_time),
 				$this->options->_POST->comment,
 				0,
@@ -1781,6 +1754,13 @@ echo '4';
 				
 				// 現在のブランチ取得
 				exec( 'git branch', $output);
+
+				// コミットハッシュ値の取得
+				exec( 'git rev-parse --short HEAD', $hash);
+
+				foreach ( $hash as $value ) {
+					$this->commit_hash = $value;
+				}
 
 			} else {
 				// コピー用のディレクトリが存在しない場合
@@ -1893,15 +1873,20 @@ echo '4';
 					}
 				}
 
-				chdir( $copy_dir );
+				// コミットハッシュ値の取得
+				exec( 'git rev-parse --short HEAD', $hash);
 
+				foreach ( $hash as $value ) {
+					$this->commit_hash = $value;
+				}
+				
 				// ディレクトリ名が変更になる場合はリネームする
 				if ($before_dir_name != $dir_name) {
 
-					if( file_exists( $before_dir_name ) && !file_exists( $dir_name ) ){
+					if ( file_exists( $before_dir_name ) && !file_exists( $dir_name ) ){
 						
 						rename( $before_dir_name, $dir_name );
-					}else{
+					} else {
 						// print $before_dir_name. ',' . $dir_name;
 						// print 'ディレクトリ名が変更できませんでした。';
 						throw new \Exception('Copy directory name could not be changed.');
@@ -2004,6 +1989,9 @@ echo '4';
 
 		try {
 
+			// TODO:後で別クラスへ分割;
+			// $this->file_control->process();
+
 			// *** 公開予定から本番環境へ置き換えるものを1件抽出する。（抽出されたものが実行中の場合はスキップする　※処理終了）
 			// 現在時刻
 			$now = date("Y-m-d H:i:s");
@@ -2043,17 +2031,30 @@ echo '4';
 			echo '<br>' . 'ログフォルダの絶対パス：';
 			echo $log_real_path;
 
-			// #backupディレクトリに公開予定日時を名前としたフォルダを作成（２）
-			if (!file_exists($bk_real_path . $datetime_str)) {
+			exec () {
 
-				// ディレクトリ作成
-				if (!mkdir($bk_real_path . $datetime_str, 0777, true)) {
-					// ディレクトリが作成できない場合
+			// ディレクトリ作成
+			if (!mkdir("/var/www/html/sample-lib-indigo/indigo_dir/backup", 0777, true)) {
+				// ディレクトリが作成できない場合
 
-					// エラー処理
-					throw new \Exception('Creation of backup directory failed.');
-				}
+				echo 'error';
+
+				// エラー処理
+				throw new \Exception('Creation of backup directory failed.');
 			}
+
+
+			// // #backupディレクトリに公開予定日時を名前としたフォルダを作成（２）
+			// if (!file_exists($bk_real_path . $datetime_str)) {
+
+			// 	// ディレクトリ作成
+			// 	if (!mkdir($bk_real_path . $datetime_str, 0777, true)) {
+			// 		// ディレクトリが作成できない場合
+
+			// 		// エラー処理
+			// 		throw new \Exception('Creation of backup directory failed.');
+			// 	}
+			// }
 
 			// #（１）の中身を（２）へコピー
 			$command = 'cp -r '. $honban_real_path . '* ' . $bk_real_path . $datetime_str . ' 2>&1';
@@ -2125,7 +2126,7 @@ echo '4';
 
 		$ret_array = array();
 
-		$filename = realpath('.') . $this->reserve_filename;
+		$filename = realpath('.') . $this->list_filename;
 
 		if (!file_exists($filename)) {
 		
