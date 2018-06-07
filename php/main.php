@@ -1740,7 +1740,7 @@ class main
 		$result = array('status' => true,
 						'message' => '');
 	
-		$path = $copy_path . date("YmdHis", 
+		$path = $this->copy_path . date("YmdHis", 
 			strtotime($this->convert_reserve_datetime($this->options->_POST->reserve_date, $this->options->_POST->reserve_time)));
 		echo('▼ path' . $path);
 
