@@ -49,17 +49,17 @@ class main
 	/**
 	 * backupディレクトリパス
 	 */
-	private $backup_path = './backup/';
+	private $backup_path = './../indigo_dir/backup/';
 
 	/**
 	 * copyディレクトリパス
 	 */
-	private $copy_path = './copy/';
+	private $copy_path = './../indigo_dir/copy/';
 
 	/**
 	 * logディレクトリパス
 	 */
-	private $log_path = './log/';
+	private $log_path = './../indigo_dir/log/';
 
 	/**
 	 * 公開予約管理CSV カラム列
@@ -113,12 +113,12 @@ class main
 						// 存在しない場合
 
 						// ディレクトリ作成
-// 						if ( !mkdir( $master_path, 0777, true) ) {
-// 							// ディレクトリが作成できない場合
-// echo '★2-2';
-// 							// エラー処理
-// 							throw new \Exception('Creation of master directory failed.');
-// 						}
+						if ( !mkdir( $master_path, 0777, true) ) {
+							// ディレクトリが作成できない場合
+
+							// エラー処理
+							throw new \Exception('Creation of master directory failed.');
+						}
 						// chmod($current_dir, 0777);
 						// exec('mkdir -p ./repos/master 2>&1', $output, $return_var);
 						// ディレクトリ作成
@@ -131,28 +131,10 @@ class main
 						// 	throw new \Exception('Creation of backup directory failed.');
 						// }
 
-						chdir( "./../indigo_dir" );
+						// chdir( "./../indigo_dir" );
 
-						echo ("★カレントパス：" . realpath('.'));
-						echo ("<br>");
-						// $processUser = posix_getpwuid(posix_geteuid());
-
-						// echo("★実行者：" . posix_getpwuid(posix_geteuid())['name']);
-						exec('whoami 2>&1', $output, $return_var);
-						echo '▼' . $return_var;	
-						foreach ($output as $key => $value) {
-							echo '▼' . $value;	
-							echo '<br>';
-						}
-
-						echo ("<br>");
-						exec('mkdir -m 777 backup 2>&1', $output, $return_var);
-
-						echo '▼' . $return_var;	
-						foreach ($output as $key => $value) {
-							echo '▼' . $value;	
-							echo '<br>';
-						}
+						
+						// }
 					}
 
 					// 「.git」フォルダが存在すれば初期化済みと判定
@@ -1382,7 +1364,7 @@ class main
 		$filename = realpath('.') . $this->alert_filename;
 
 		if (!file_exists($filename)) {
-			echo 'ファイルが存在しない';
+			echo 'お知らせ一覧ファイルが存在しない';
 
 		} else {
 
@@ -1434,7 +1416,7 @@ class main
 		$filename = $this->list_filename;
 
 		if (!file_exists($filename)) {
-			echo $filename . 'ファイルが存在しない';
+			echo $filename . '公開予約一覧ファイルが存在しない';
 
 		} else {
 
@@ -1496,7 +1478,7 @@ class main
 		$ret_array = array();
 
 		if (!file_exists($filename) && !empty($selected_id)) {
-			echo 'ファイルが存在しない';
+			echo '公開予約一覧ファイルが存在しない';
 
 		} else {
 
@@ -1547,7 +1529,7 @@ class main
 		$filename = realpath('.') . $this->list_filename;
 
 		if (!file_exists($filename)) {
-			echo 'ファイルが存在しない';
+			echo '公開予約一覧ファイルが存在しない';
 
 		} else {
 
