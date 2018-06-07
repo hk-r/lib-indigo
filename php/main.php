@@ -1480,7 +1480,8 @@ class main
 
 		echo('★ get_selected_data start');
 
-		$filename = realpath('.') . $this->list_filename;
+		// $filename = realpath('.') . $this->list_filename;
+		$filename = $this->list_filename;
 
 		$selected_id =  $this->options->_POST->selected_id;
 
@@ -1611,6 +1612,7 @@ echo '■ 6 ';
 			$result['message'] = $e->getMessage();
 
 			chdir($current_dir);
+			
 			return json_encode($result);
 		}
 
@@ -1618,6 +1620,8 @@ echo '■ 6 ';
 
 		$result['status'] = true;
 
+		chdir($current_dir);
+			
 		echo('★ insert_list_csv_data end');
 
 		return json_encode($result);
@@ -2181,7 +2185,8 @@ echo '■ 6 ';
 
 		$ret_array = array();
 
-		$filename = realpath('.') . $this->list_filename;
+		// $filename = realpath('.') . $this->list_filename;
+		$filename = $this->list_filename;
 
 		if (!file_exists($filename)) {
 		
