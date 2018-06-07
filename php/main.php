@@ -134,7 +134,7 @@ class main
 						// chdir( "./../indigo_dir" );
 
 						
-						}
+						// }
 					}
 
 					// 「.git」フォルダが存在すれば初期化済みと判定
