@@ -101,8 +101,6 @@ class main
 		set_time_limit(0);
 
 		// foreach ( $server_list as $preview_server ) {
-		echo '★current_dir:' . $current_dir;
-		echo '★master_path:' . $master_path;
 
 			try {
 
@@ -1541,65 +1539,86 @@ class main
 
 		echo('★ insert_list_csv_data start');
 
-		// $filename = realpath('.') . $this->list_filename;
-		$filename = $this->list_filename;
+		try {
 
-		if (!file_exists($filename)) {
-			echo '公開予約一覧ファイルが存在しない';
+			// $filename = realpath('.') . $this->list_filename;
+			$filename = $this->list_filename;
 
-		} else {
+			
 
-			// Open file
-			$handle_r = fopen( $filename, "r" );
-			$is_first = true;
+			if (!file_exists($filename)) {
+				echo '公開予約一覧ファイルが存在しない';
 
-			$max = 0;
+			} else {
+echo '■ 1 ';
 
-			// Loop through each line of the file in turn
-			while ($rowData = fgetcsv($handle_r, 0, $this->_delimiter, $this->_enclosure)) {
+				// Open file
+				$handle_r = fopen( $filename, "r" );
+				$is_first = true;
 
-				if($is_first){
-			        // タイトル行
+				$max = 0;
+echo '■ 2 ';
+				// Loop through each line of the file in turn
+				while ($rowData = fgetcsv($handle_r, 0, $this->_delimiter, $this->_enclosure)) {
 
-			        $is_first = false;
-			        continue;
-			    }
+					if($is_first){
+				        // タイトル行
 
-			    $num = intval($rowData[0]);
+				        $is_first = false;
+				        continue;
+				    }
 
-			    if ($num > $max) {
-					$max = $num;
+				    $num = intval($rowData[0]);
+
+				    if ($num > $max) {
+						$max = $num;
+					}
 				}
+
+				$max++;
+echo '■ 3 ';
+				// Open file
+				$handle = fopen( $filename, 'a+' );
+				$now = date("Y-m-d H:i:s");
+echo '■ 4 ';
+				// id, ブランチ名, コミット, 公開予定日時, コメント, 状態, 設定日時
+				$array = array(
+					$max,
+					$this->options->_POST->branch_select_value,
+					$this->commit_hash,
+					$this->convert_reserve_datetime($this->options->_POST->reserve_date, $this->options->_POST->reserve_time),
+					$this->options->_POST->comment,
+					0,
+					$now
+				);
+echo '■ 5 ';
+				fputcsv( $handle, $array, $this->_delimiter, $this->_enclosure);
+echo '■ 6 ';		
+				fclose( $handle);
 			}
 
-			$max++;
 
-			// Open file
-			$handle = fopen( $filename, 'a+' );
-			$now = date("Y-m-d H:i:s");
+			// Close file
+			fclose($handle_r);
 
-			// id, ブランチ名, コミット, 公開予定日時, コメント, 状態, 設定日時
-			$array = array(
-				$max,
-				$this->options->_POST->branch_select_value,
-				$this->commit_hash,
-				$this->convert_reserve_datetime($this->options->_POST->reserve_date, $this->options->_POST->reserve_time),
-				$this->options->_POST->comment,
-				0,
-				$now
-			);
+		} catch (\Exception $e) {
 
-			fputcsv( $handle, $array, $this->_delimiter, $this->_enclosure);
-			
-			fclose( $handle);
+			// set_time_limit(30);
+
+			$result['status'] = false;
+			$result['message'] = $e->getMessage();
+
+			chdir($current_dir);
+			return json_encode($result);
 		}
 
+		// set_time_limit(30);
 
-		// Close file
-		fclose($handle_r);
+		$result['status'] = true;
 
 		echo('★ insert_list_csv_data end');
 
+		return json_encode($result);
 	}
 
 	/**
