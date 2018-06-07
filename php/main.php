@@ -1866,7 +1866,7 @@ echo '■ 6 ';
 
 		$before_dir_name = date("YmdHis", strtotime($this->convert_reserve_datetime($this->options->_POST->change_before_reserve_date, $this->options->_POST->change_before_reserve_time)));
 
-		$before_path = "./copy/" . $before_dir_name;
+		$before_path = $this->copy_path . $before_dir_name;
 
 
 		$dir_name = date("YmdHis", strtotime($this->convert_reserve_datetime($this->options->_POST->reserve_date, $this->options->_POST->reserve_time)));
@@ -1989,7 +1989,8 @@ echo '■ 6 ';
 	{
 		$current_dir = realpath('.');
 
-		$copy_dir = realpath('.') . "./copy/";
+		// $copy_dir = realpath('.') . "./copy/";
+		$copy_dir = $copy_path;
 
 		$output = "";
 		$result = array('status' => true,
