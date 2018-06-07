@@ -1593,7 +1593,7 @@ echo '■ 4 max:' . $max;
 					$now
 				);
 echo '■ 5 ';
-var_dump('array:' . $array);
+var_dump($array);
 				fputcsv( $handle, $array, $this->_delimiter, $this->_enclosure);
 echo '■ 6 ';		
 				fclose( $handle);
