@@ -1359,6 +1359,8 @@ class main
 	private function get_csv_alert_list()
 	{
 
+		echo('★ get_csv_alert_list start');
+
 		$ret_array = array();
 
 		$filename = realpath('.') . $this->alert_filename;
@@ -1396,6 +1398,8 @@ class main
 
 		}
 
+		echo('★ get_csv_alert_list end');
+
 		return $ret_array;
 	}
 
@@ -1408,6 +1412,8 @@ class main
 	 */
 	private function get_csv_data_list($status)
 	{
+
+		echo('★ get_csv_data_list start');
 
 		$current_dir = realpath('.');
 
@@ -1460,6 +1466,8 @@ class main
 		
 		chdir($current_dir);
 		
+		echo('★ get_csv_data_list end');
+
 		return $ret_array;
 	}
 
@@ -1470,6 +1478,8 @@ class main
 	 * @return 選択行の情報
 	 */
 	private function get_selected_data() {
+
+		echo('★ get_selected_data start');
 
 		$filename = realpath('.') . $this->list_filename;
 
@@ -1515,6 +1525,9 @@ class main
 			// Close file
 			fclose($handle);
 		}
+
+		echo('★ get_selected_data end');
+
 		return $ret_array;
 	}
 
@@ -1525,6 +1538,8 @@ class main
 	 */
 	private function insert_list_csv_data()
 	{
+
+		echo('★ insert_list_csv_data start');
 
 		$filename = realpath('.') . $this->list_filename;
 
@@ -1581,6 +1596,9 @@ class main
 
 		// Close file
 		fclose($handle_r);
+
+		echo('★ insert_list_csv_data end');
+
 	}
 
 	/**
@@ -1710,6 +1728,8 @@ class main
 	 */
 	private function file_copy()
 	{
+		echo('★ file_copy start');
+
 		$current_dir = realpath('.');
 
 		$output = "";
@@ -1792,6 +1812,9 @@ class main
 		$result['status'] = false;
 		
 		chdir($current_dir);
+
+		echo('★ file_copy end');
+
 		return json_encode($result);
 
 	}
