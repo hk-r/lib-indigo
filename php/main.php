@@ -1541,7 +1541,8 @@ class main
 
 		echo('★ insert_list_csv_data start');
 
-		$filename = realpath('.') . $this->list_filename;
+		// $filename = realpath('.') . $this->list_filename;
+		$filename = $this->list_filename;
 
 		if (!file_exists($filename)) {
 			echo '公開予約一覧ファイルが存在しない';
@@ -1608,7 +1609,8 @@ class main
 	 */
 	private function do_delete_btn() {
 
-		$filename = realpath('.') . $this->list_filename;
+		// $filename = realpath('.') . $this->list_filename;
+		$filename = $this->list_filename;
 
 		$selected_id =  $this->options->_POST->selected_id;
 
@@ -1650,7 +1652,8 @@ class main
 	 */
 	private function do_update_btn() {
 
-		$filename = realpath('.') . $this->list_filename;
+		// $filename = realpath('.') . $this->list_filename;
+		$filename = $this->list_filename;
 
 		$selected_id =  $this->options->_POST->selected_id;
 
@@ -1731,6 +1734,7 @@ class main
 		echo('★ file_copy start');
 
 		$current_dir = realpath('.');
+		echo('▼ カレントディレクトリ：' . $current_dir);
 
 		$output = "";
 		$result = array('status' => true,
@@ -1738,6 +1742,7 @@ class main
 	
 		$path = $copy_path . date("YmdHis", 
 			strtotime($this->convert_reserve_datetime($this->options->_POST->reserve_date, $this->options->_POST->reserve_time)));
+		echo('▼ path' . $path);
 
 		// 選択したブランチ
 		$branch_name = trim(str_replace("origin/", "", $this->options->_POST->branch_select_value));
