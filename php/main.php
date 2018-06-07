@@ -134,7 +134,7 @@ class main
 						// chdir( "./../indigo_dir" );
 
 						
-						// }
+						}
 					}
 
 					// 「.git」フォルダが存在すれば初期化済みと判定
@@ -1716,7 +1716,7 @@ class main
 		$result = array('status' => true,
 						'message' => '');
 	
-		$path = "./copy/" . date("YmdHis", 
+		$path = $copy_path . date("YmdHis", 
 			strtotime($this->convert_reserve_datetime($this->options->_POST->reserve_date, $this->options->_POST->reserve_time)));
 
 		// 選択したブランチ
