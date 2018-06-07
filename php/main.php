@@ -1361,7 +1361,8 @@ class main
 
 		$ret_array = array();
 
-		$filename = realpath('.') . $this->alert_filename;
+		// $filename = realpath('.') . $this->alert_filename;
+		$filename = $this->alert_filename;
 
 		if (!file_exists($filename)) {
 			echo 'お知らせ一覧ファイルが存在しない';
@@ -1580,7 +1581,7 @@ echo '■ 3 ';
 				// Open file
 				$handle = fopen( $filename, 'a+' );
 				$now = date("Y-m-d H:i:s");
-echo '■ 4 ';
+echo '■ 4 max:' . $max;
 				// id, ブランチ名, コミット, 公開予定日時, コメント, 状態, 設定日時
 				$array = array(
 					$max,
@@ -1592,6 +1593,7 @@ echo '■ 4 ';
 					$now
 				);
 echo '■ 5 ';
+var_dump('array:' . $array);
 				fputcsv( $handle, $array, $this->_delimiter, $this->_enclosure);
 echo '■ 6 ';		
 				fclose( $handle);
