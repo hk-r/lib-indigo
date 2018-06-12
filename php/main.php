@@ -2249,6 +2249,8 @@ echo '■ 6 ';
 	 */
 	private function is_exists_mkdir($dirname) {
 
+		echo('■ is_exists_mkdir start');
+
 		$ret = true;
 
 		if ( !file_exists($dirname) ) {
@@ -2259,6 +2261,8 @@ echo '■ 6 ';
 				$ret = false;
 			}
 		}
+
+		echo('■ is_exists_mkdir end');
 
 		return $ret;
 	}
@@ -2271,6 +2275,8 @@ echo '■ 6 ';
 	 * @return ソート後の配列
 	 */
 	private function is_exists_remkdir($dirpath, $dirname) {
+		
+		echo('■ is_exists_remkdir start');
 
 		if ( file_exists($dirname) ) {
 
@@ -2291,11 +2297,15 @@ echo '■ 6 ';
 
 			return false;
 		}
+	
+		echo('■ is_exists_remkdir end');
 
 		return true;
 	}
 
 	function execute($command, $captureStderr) {
+	
+		echo('■ execute start');
 
 	    $output = array();
 	    $return = 0;
@@ -2308,6 +2318,8 @@ echo '■ 6 ';
 	    exec($command, $output, $return);
 
 	    $output = implode("\n", $output);
+	
+		echo('■ execute end');
 
 	    return array('output' => $output, 'return' => $return);
 	}
