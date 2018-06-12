@@ -1783,7 +1783,7 @@ echo '■ 6 ';
 				}
 
 				// コピーディレクトリへ移動
-				if ( chdir($this->copy_path . $dirname) ) {
+				if ( chdir($dirname) ) {
 
 					// git init
 					exec('git init', $output);
