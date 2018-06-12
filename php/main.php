@@ -2275,19 +2275,41 @@ echo '■ 6 ';
 		if ( file_exists($dirname) ) {
 
 			// 削除
-			if ( !unlink($dirpath . $dirname)) {
+			$command = 'rm -rf '. $dirname;
+			$ret = $this->execute($command, true);
 
+			echo $ret['output'];
+
+			if ( !$ret['return'] ) {
+				echo '削除失敗';
 				return false;
 			}
-
 		}
 
 		// デプロイ先のディレクトリを作成
-		if ( !mkdir($dirname, 0777) ) {
+		if ( file_exists($dirname) || !mkdir($dirname, 0777) ) {
 
 			return false;
 		}
 
 		return true;
 	}
+
+	function execute($command, $captureStderr) {
+
+	    $output = array();
+	    $return = 0;
+
+	    // 標準出力とエラー出力を両方とも出力する
+	    if ($captureStderr === true) {
+	        $command .= ' 2>&1';
+	    }
+
+	    exec($command, $output, $return);
+
+	    $output = implode("\n", $output);
+
+	    return array('output' => $output, 'return' => $return);
+	}
+
 }
