@@ -2286,7 +2286,7 @@ echo '■ 6 ';
 
 			echo $ret['output'];
 
-			if ( !$ret['return'] ) {
+			if ( $ret['return'] !== 0 ) {
 				echo '削除失敗';
 				return false;
 			}
