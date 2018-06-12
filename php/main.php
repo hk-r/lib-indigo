@@ -1765,42 +1765,57 @@ echo '■ 6 ';
 
 		try {
 
-			$ret = $this->mkdir($this->copy_path, $dirname);
-			$ret = json_decode($ret);
+			// コピーディレクトリが存在しない場合は作成
+			if ( !$this->is_exists_mkdir($this->copy_path) ) {
 
-			if ( !$ret->status ) {
-
-				// エラー処理
-				throw new \Exception('File copy failed.');
+					// エラー処理
+					throw new \Exception('Creation of copy directory failed.');
 			}
 
 			// コピーディレクトリへ移動
-			if ( chdir($this->copy_path . $dirname) ) {
+			if ( chdir($this->copy_path) ) {
 
-				// git init
-				exec('git init', $output);
+				// コピーディレクトリをデリートインサート
+				if ( !$this->is_exists_remkdir($dirname) ) {
 
-				// git urlのセット
-				$url = $this->options->git->protocol . "://" . urlencode($this->options->git->username) . ":" . urlencode($this->options->git->password) . "@" . $this->options->git->url;
-				
-				// initしたリポジトリに名前を付ける
-				exec( 'git remote add origin ' . $url, $output);
+					// エラー処理
+					throw new \Exception('Creation of copy publish directory failed.');
+				}
 
-				// git fetch（リモートリポジトリの指定ブランチの情報をローカルブランチに取得）
-				exec( 'git fetch origin' . ' ' . $branch_name, $output);
+				// コピーディレクトリへ移動
+				if ( chdir($this->copy_path . $dirname) ) {
 
-				// git pull（）pullはリモート取得ブランチを任意のローカルブランチにマージするコマンド
-				// exec( 'git pull origin master', $output);
-				exec( 'git pull origin' . ' ' . $branch_name, $output);
-				
-				// 現在のブランチ取得
-				exec( 'git branch', $output);
+					// git init
+					exec('git init', $output);
 
-				// コミットハッシュ値の取得
-				exec( 'git rev-parse --short HEAD', $hash);
+					// git urlのセット
+					$url = $this->options->git->protocol . "://" . urlencode($this->options->git->username) . ":" . urlencode($this->options->git->password) . "@" . $this->options->git->url;
+					
+					// initしたリポジトリに名前を付ける
+					exec( 'git remote add origin ' . $url, $output);
 
-				foreach ( $hash as $value ) {
-					$this->commit_hash = $value;
+					// git fetch（リモートリポジトリの指定ブランチの情報をローカルブランチに取得）
+					exec( 'git fetch origin' . ' ' . $branch_name, $output);
+
+					// git pull（）pullはリモート取得ブランチを任意のローカルブランチにマージするコマンド
+					// exec( 'git pull origin master', $output);
+					exec( 'git pull origin' . ' ' . $branch_name, $output);
+					
+					// 現在のブランチ取得
+					exec( 'git branch', $output);
+
+					// コミットハッシュ値の取得
+					exec( 'git rev-parse --short HEAD', $hash);
+
+					foreach ( $hash as $value ) {
+						$this->commit_hash = $value;
+					}
+
+				} else {
+					// コピー用のディレクトリが存在しない場合
+
+					// エラー処理
+					throw new \Exception('Copy publish directory not found.');
 				}
 
 			} else {
@@ -1809,7 +1824,7 @@ echo '■ 6 ';
 				// エラー処理
 				throw new \Exception('Copy directory not found.');
 			}
-		
+
 		} catch (\Exception $e) {
 
 			set_time_limit(30);
@@ -1823,7 +1838,7 @@ echo '■ 6 ';
 
 		set_time_limit(30);
 
-		$result['status'] = false;
+		$result['status'] = true;
 		
 		chdir($current_dir);
 
@@ -2226,55 +2241,63 @@ echo '■ 6 ';
 
 
 	/**
-	 * ディレクトリの作成
+	 * ディレクトリの存在チェックをし、存在しなかった場合は作成する
 	 *	 
 	 * @param $path = 作成ディレクトリ名
 	 *	 
 	 * @return ソート後の配列
 	 */
-	private function mkdir($dirpath, $dirname) {
+	private function is_exists_mkdir($dirname) {
 
-		$ret = '';
+		$ret = true;
+
 		$current_dir = realpath('.');
 
-		set_time_limit(0);
+		if ( !file_exists($dirname) ) {
 
-		try {
+			// デプロイ先のディレクトリを作成
+			if ( !mkdir($dirname, 0777)) {
 
-			if ( chdir($dirpath) ) {
-
-				if ( !file_exists($dirname) ) {
-
-					// デプロイ先のディレクトリを作成
-					if ( !mkdir($dirname, 0777)) {
-
-						// エラー処理
-						throw new \Exception('Creation of directory failed.');
-					}
-				}
-
-			} else {
-				
-				// エラー処理
-				throw new \Exception('Directory not found.');
+				$ret = false;
 			}
-
-		} catch (\Exception $e) {
-
-			set_time_limit(30);
-
-			$result['status'] = false;
-			$result['message'] = $e->getMessage();
-
-			chdir($current_dir);
-			return json_encode($result);
 		}
 
-		set_time_limit(30);
-
-		$result['status'] = false;
-		
 		chdir($current_dir);
-		return json_encode($result);
+
+		return $ret;
+	}
+
+	/**
+	 * ディレクトリの存在チェックをし、存在しなかった場合は削除し、再作成作成する
+	 *	 
+	 * @param $path = 作成ディレクトリ名
+	 *	 
+	 * @return ソート後の配列
+	 */
+	private function is_exists_remkdir($dirname) {
+
+		$ret = true;
+
+		$current_dir = realpath('.');
+
+		if ( file_exists($dirname) ) {
+
+			// 削除
+			if ( !unlink($dirname)) {
+
+				$ret = false;
+			}
+
+		}
+
+		// デプロイ先のディレクトリを作成
+		if ( !$ret && !mkdir($dirname, 0777)) {
+
+			$ret = false;
+		}
+
+		chdir($current_dir);
+
+		return $ret;
 	}
 }
