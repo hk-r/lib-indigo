@@ -1282,11 +1282,13 @@ class main
 					console.error("' . $add_ret->message . '");
 					alert("add faild");
 				</script>';
-				break;
-			}
 
-			// CSV入力情報の追加
-			$this->insert_list_csv_data();
+			} else {
+				
+				// CSV入力情報の追加
+				$this->insert_list_csv_data();
+
+			}
 
 		// 新規確認ダイアログの戻るボタンが押下された場合
 		} elseif (isset($this->options->_POST->add_back)) {
