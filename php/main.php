@@ -1269,8 +1269,22 @@ class main
 		} elseif (isset($this->options->_POST->add_confirm)) {
 
 			// Gitファイルの取得
-			$this->file_copy();
+			$add_ret = $this->file_copy();
 	
+			$add_ret = json_decode($add_ret);
+
+			if ( !$add_ret->status ) {
+				// デプロイ失敗
+
+				// エラーメッセージ
+				$error_msg = '
+				<script type="text/javascript">
+					console.error("' . $add_ret->message . '");
+					alert("add faild");
+				</script>';
+				break;
+			}
+
 			// CSV入力情報の追加
 			$this->insert_list_csv_data();
 
