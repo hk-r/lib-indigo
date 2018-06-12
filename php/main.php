@@ -1284,7 +1284,7 @@ class main
 				</script>';
 
 			} else {
-				
+
 				// CSV入力情報の追加
 				$this->insert_list_csv_data();
 
@@ -1747,18 +1747,17 @@ echo '■ 6 ';
 	 *
 	 * @return なし
 	 */
-	private function file_copy()
-	{
+	private function file_copy() {
 		echo('■ file_copy start');
 
 		$current_dir = realpath('.');
-		echo('▼ カレントディレクトリ：' . $current_dir);
 
 		$output = "";
 		$result = array('status' => true,
 						'message' => '');
 	
-		$path = $this->copy_path . date("YmdHis", 
+		// ディレクトリ名
+		$dirname = date("YmdHis", 
 			strtotime($this->convert_reserve_datetime($this->options->_POST->reserve_date, $this->options->_POST->reserve_time)));
 
 		// 選択したブランチ
@@ -1766,24 +1765,17 @@ echo '■ 6 ';
 
 		try {
 
-			// コピー先のディレクトリが既に存在する場合は終了
-			if ( !file_exists($path) ) {
+			$ret = $this->mkdir($this->copy_path, $dirname);
+			$ret = json_decode($ret);
 
-				// デプロイ先のディレクトリを作成
-				if ( !mkdir($path, 0777, true)) {
+			if ( !$ret->status ) {
 
-					echo 'ディレクトリの作成が失敗しました。';
-					// エラー処理
-					throw new \Exception('Creation of copy directory failed.');
-				}
-
-			} else {
-				echo '同じ名前のディレクトリが存在します。';
-				throw new \Exception('Creation of copy directory failed.');
+				// エラー処理
+				throw new \Exception('File copy failed.');
 			}
 
-			// ディレクトリ移動
-			if ( chdir($path) ) {
+			// コピーディレクトリへ移動
+			if ( chdir($this->copy_path . $dirname) ) {
 
 				// git init
 				exec('git init', $output);
@@ -2230,5 +2222,59 @@ echo '■ 6 ';
 		}
 
 		return $ret;
+	}
+
+
+	/**
+	 * ディレクトリの作成
+	 *	 
+	 * @param $path = 作成ディレクトリ名
+	 *	 
+	 * @return ソート後の配列
+	 */
+	private function mkdir($dirpath, $dirname) {
+
+		$ret = '';
+		$current_dir = realpath('.');
+
+		set_time_limit(0);
+
+		try {
+
+			if ( chdir($dirpath) ) {
+
+				if ( !file_exists($dirname) ) {
+
+					// デプロイ先のディレクトリを作成
+					if ( !mkdir($dirname, 0777)) {
+
+						// エラー処理
+						throw new \Exception('Creation of directory failed.');
+					}
+				}
+
+			} else {
+				
+				// エラー処理
+				throw new \Exception('Directory not found.');
+			}
+
+		} catch (\Exception $e) {
+
+			set_time_limit(30);
+
+			$result['status'] = false;
+			$result['message'] = $e->getMessage();
+
+			chdir($current_dir);
+			return json_encode($result);
+		}
+
+		set_time_limit(30);
+
+		$result['status'] = false;
+		
+		chdir($current_dir);
+		return json_encode($result);
 	}
 }
