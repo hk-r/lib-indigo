@@ -1776,7 +1776,7 @@ echo '■ 6 ';
 			if ( chdir($this->copy_path) ) {
 
 				// コピーディレクトリをデリートインサート
-				if ( !$this->is_exists_remkdir($dirname) ) {
+				if ( !$this->is_exists_remkdir($this->copy_path, $dirname) ) {
 
 					// エラー処理
 					throw new \Exception('Creation of copy publish directory failed.');
@@ -2270,12 +2270,12 @@ echo '■ 6 ';
 	 *	 
 	 * @return ソート後の配列
 	 */
-	private function is_exists_remkdir($dirname) {
+	private function is_exists_remkdir($dirpath, $dirname) {
 
 		if ( file_exists($dirname) ) {
 
 			// 削除
-			if ( !unlink($dirname)) {
+			if ( !unlink($dirpath . $dirname)) {
 
 				return false;
 			}
