@@ -2251,8 +2251,6 @@ echo '■ 6 ';
 
 		$ret = true;
 
-		$current_dir = realpath('.');
-
 		if ( !file_exists($dirname) ) {
 
 			// デプロイ先のディレクトリを作成
@@ -2261,8 +2259,6 @@ echo '■ 6 ';
 				$ret = false;
 			}
 		}
-
-		chdir($current_dir);
 
 		return $ret;
 	}
@@ -2276,28 +2272,22 @@ echo '■ 6 ';
 	 */
 	private function is_exists_remkdir($dirname) {
 
-		$ret = true;
-
-		$current_dir = realpath('.');
-
 		if ( file_exists($dirname) ) {
 
 			// 削除
 			if ( !unlink($dirname)) {
 
-				$ret = false;
+				return false;
 			}
 
 		}
 
 		// デプロイ先のディレクトリを作成
-		if ( !$ret && !mkdir($dirname, 0777)) {
+		if ( !mkdir($dirname, 0777) ) {
 
-			$ret = false;
+			return false;
 		}
 
-		chdir($current_dir);
-
-		return $ret;
+		return true;
 	}
 }
