@@ -1277,7 +1277,7 @@ class main
 				// デプロイ失敗
 
 				// エラーメッセージ
-				$error_msg = '
+				$dialog_disp = '
 				<script type="text/javascript">
 					console.error("' . $add_ret->message . '");
 					alert("add faild");
