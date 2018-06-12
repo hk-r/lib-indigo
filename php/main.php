@@ -42,7 +42,7 @@ class main
 
 
 	/**
-	 * 本番環境ディレクトリパス
+	 * 本番環境ディレクトリパス（仮）
 	 */
 	private $honban_path = './../honban/';
 
@@ -69,7 +69,6 @@ class main
 	// 「公開予約日時」の列
 	private $reserve_column_datetime = 3;
 
-
 	/**
 	 * コンストラクタ
 	 * @param $options = オプション
@@ -92,96 +91,74 @@ class main
 
 		$master_path = $this->options->git->repository;
 
-		// $server_list = $this->options->preview_server;
-		// array_push($server_list, json_decode(json_encode(array(
-		// 	'name'=>'master',
-		// 	'path'=>$this->options->git->repository,
-		// ))));
-
 		set_time_limit(0);
 
-		// foreach ( $server_list as $preview_server ) {
+		try {
 
-			try {
+			if ( strlen($master_path) ) {
 
-				// if ( strlen($preview_server->path) ) {
+				// デプロイ先のディレクトリが無い場合は作成
+				if ( !file_exists( $master_path ) ) {
+					// 存在しない場合
 
-					// デプロイ先のディレクトリが無い場合は作成
-					if ( !file_exists( $master_path) ) {
-						// 存在しない場合
+					// ディレクトリ作成
+					if ( !mkdir( $master_path, 0777, true ) ) {
+						// ディレクトリが作成できない場合
 
-						// ディレクトリ作成
-						if ( !mkdir( $master_path, 0777, true) ) {
-							// ディレクトリが作成できない場合
-
-							// エラー処理
-							throw new \Exception('Creation of master directory failed.');
-						}
-						// chmod($current_dir, 0777);
-						// exec('mkdir -p ./repos/master 2>&1', $output, $return_var);
-						// ディレクトリ作成
-						// if (!mkdir("/var/www/html/sample-lib-indigo/indigo_dir/backup", 0777, true)) {
-						// 	// ディレクトリが作成できない場合
-
-						// 	echo 'error';
-
-						// 	// エラー処理
-						// 	throw new \Exception('Creation of backup directory failed.');
-						// }
-
-						// chdir( "./../indigo_dir" );
-
-						
-						// }
+						// エラー処理
+						throw new \Exception('Creation of master directory failed.');
 					}
+					
+					// コマンドでディレクトリを作成する場合
+					// exec('mkdir -p ' . $master_path . '2>&1', $output, $return_var);
+				}
 
-					// 「.git」フォルダが存在すれば初期化済みと判定
-					if ( !file_exists( $master_path . "/.git") ) {
-						// 存在しない場合
+				// 「.git」フォルダが存在すれば初期化済みと判定
+				if ( !file_exists( $master_path . "/.git") ) {
+					// 存在しない場合
 
-						// ディレクトリ移動
-						if ( chdir( $master_path ) ) {
+					// ディレクトリ移動
+					if ( chdir( $master_path ) ) {
 
-							// git セットアップ
-							exec('git init', $output);
+						// git セットアップ
+						exec('git init', $output);
 
-							// git urlのセット
-							$url = $this->options->git->protocol . "://" . urlencode($this->options->git->username) . ":" . urlencode($this->options->git->password) . "@" . $this->options->git->url;
-							exec('git remote add origin ' . $url, $output);
+						// git urlのセット
+						$url = $this->options->git->protocol . "://" . urlencode($this->options->git->username) . ":" . urlencode($this->options->git->password) . "@" . $this->options->git->url;
 
-							// git fetch
-							exec( 'git fetch origin', $output);
+						exec('git remote add origin ' . $url, $output);
 
-							// git pull
-							exec( 'git pull origin master', $output);
+						// git fetch
+						exec( 'git fetch origin', $output);
 
-							chdir($current_dir);
+						// git pull
+						exec( 'git pull origin master', $output);
 
-						} else {
-							// プレビューサーバのディレクトリが存在しない場合
+					} else {
+						// ディレクトリが存在しない場合
 
-							// エラー処理
-							throw new \Exception('master directory not found.');
-						}
+						// エラー処理
+						throw new \Exception('master directory not found.');
 					}
-				// }
-
-			} catch (\Exception $e) {
-
-				set_time_limit(30);
-
-				$result['status'] = false;
-				$result['message'] = $e->getMessage();
-
-				chdir($current_dir);
-				return json_encode($result);
+				}
 			}
 
-		// }
+		} catch (\Exception $e) {
+
+			set_time_limit(30);
+
+			$result['status'] = false;
+			$result['message'] = $e->getMessage();
+
+			chdir($current_dir);
+			return json_encode($result);
+		}
+
 		set_time_limit(30);
 
 		$result['status'] = true;
 
+		chdir($current_dir);
 		return json_encode($result);
 	}
 
@@ -193,7 +170,7 @@ class main
 	private function get_branch_list() {
 
 
-		echo('★ get_branch_list start');
+		echo('■ get_branch_list start');
 
 		$current_dir = realpath('.');
 		// echo $current_dir;
@@ -242,7 +219,7 @@ class main
 		chdir($current_dir);
 
 
-		echo('★ get_branch_list end');
+		echo('■ get_branch_list end');
 		return json_encode($result);
 
 	}
@@ -414,7 +391,7 @@ class main
 	 */
 	private function disp_add_dialog($error_message) {
 		
-		echo('★ disp_add_dialog start');
+		echo('■ disp_add_dialog start');
 
 		$ret = "";
 
@@ -445,7 +422,7 @@ class main
 		// ダイアログHTMLの作成
 		$ret = $this->create_dialog_html(true, false, $error_message, $branch_list, $branch_select_value, $reserve_date, $reserve_time, $comment);
 
-		echo('★ disp_add_dialog end');
+		echo('■ disp_add_dialog end');
 
 		return $ret;
 	}
@@ -457,7 +434,7 @@ class main
 	 */
 	private function do_add_check_btn() {
 		
-		echo('★ do_add_check_btn start');
+		echo('■ do_add_check_btn start');
 
 		$ret = "";
 
@@ -483,7 +460,7 @@ class main
 		// 確認ダイアログHTMLの作成
 		$ret = $this->create_check_dialog_html($branch_select_value, $reserve_date, $reserve_time, $comment);
 
-		echo('★ do_add_check_btn end');
+		echo('■ do_add_check_btn end');
 
 		return $ret;
 	}
@@ -580,7 +557,7 @@ class main
 	private function create_dialog_html($add_flg, $init_trans_flg, $error_message, $branch_list,
 		$branch_select_value, $reserve_date, $reserve_time, $comment) {
 		
-		echo('★ create_dialog_html start');
+		echo('■ create_dialog_html start');
 
 		$ret = "";
 
@@ -659,7 +636,7 @@ class main
 			  . '</div>'
 			  . '</div></div>';
 
-		echo('★ create_dialog_html end');
+		echo('■ create_dialog_html end');
 
 		return $ret;
 	}
@@ -1357,7 +1334,7 @@ class main
 	private function get_csv_alert_list()
 	{
 
-		echo('★ get_csv_alert_list start');
+		echo('■ get_csv_alert_list start');
 
 		$ret_array = array();
 
@@ -1397,7 +1374,7 @@ class main
 
 		}
 
-		echo('★ get_csv_alert_list end');
+		echo('■ get_csv_alert_list end');
 
 		return $ret_array;
 	}
@@ -1412,7 +1389,7 @@ class main
 	private function get_csv_data_list($status)
 	{
 
-		echo('★ get_csv_data_list start');
+		echo('■ get_csv_data_list start');
 
 		$current_dir = realpath('.');
 
@@ -1465,7 +1442,7 @@ class main
 		
 		chdir($current_dir);
 		
-		echo('★ get_csv_data_list end');
+		echo('■ get_csv_data_list end');
 
 		return $ret_array;
 	}
@@ -1478,7 +1455,7 @@ class main
 	 */
 	private function get_selected_data() {
 
-		echo('★ get_selected_data start');
+		echo('■ get_selected_data start');
 
 		// $filename = realpath('.') . $this->list_filename;
 		$filename = $this->list_filename;
@@ -1526,7 +1503,7 @@ class main
 			fclose($handle);
 		}
 
-		echo('★ get_selected_data end');
+		echo('■ get_selected_data end');
 
 		return $ret_array;
 	}
@@ -1539,7 +1516,7 @@ class main
 	private function insert_list_csv_data()
 	{
 
-		echo('★ insert_list_csv_data start');
+		echo('■ insert_list_csv_data start');
 
 		try {
 
@@ -1622,7 +1599,7 @@ echo '■ 6 ';
 
 		chdir($current_dir);
 			
-		echo('★ insert_list_csv_data end');
+		echo('■ insert_list_csv_data end');
 
 		return json_encode($result);
 	}
@@ -1756,7 +1733,7 @@ echo '■ 6 ';
 	 */
 	private function file_copy()
 	{
-		echo('★ file_copy start');
+		echo('■ file_copy start');
 
 		$current_dir = realpath('.');
 		echo('▼ カレントディレクトリ：' . $current_dir);
@@ -1767,7 +1744,6 @@ echo '■ 6 ';
 	
 		$path = $this->copy_path . date("YmdHis", 
 			strtotime($this->convert_reserve_datetime($this->options->_POST->reserve_date, $this->options->_POST->reserve_time)));
-		echo('▼ path' . $path);
 
 		// 選択したブランチ
 		$branch_name = trim(str_replace("origin/", "", $this->options->_POST->branch_select_value));
@@ -1843,7 +1819,7 @@ echo '■ 6 ';
 		
 		chdir($current_dir);
 
-		echo('★ file_copy end');
+		echo('■ file_copy end');
 
 		return json_encode($result);
 
@@ -1858,8 +1834,6 @@ echo '■ 6 ';
 	{
 		$current_dir = realpath('.');
 
-		$copy_dir = realpath('.') . "./copy/";
-
 		$output = "";
 		$result = array('status' => true,
 						'message' => '');
@@ -1870,8 +1844,6 @@ echo '■ 6 ';
 
 
 		$dir_name = date("YmdHis", strtotime($this->convert_reserve_datetime($this->options->_POST->reserve_date, $this->options->_POST->reserve_time)));
-
-		$path = "./copy/" . $dir_name;
 
 		// 選択したブランチ
 		$branch_name_org = $this->options->_POST->branch_select_value;
@@ -1989,9 +1961,6 @@ echo '■ 6 ';
 	{
 		$current_dir = realpath('.');
 
-		// $copy_dir = realpath('.') . "./copy/";
-		$copy_dir = $copy_path;
-
 		$output = "";
 		$result = array('status' => true,
 						'message' => '');
@@ -2003,15 +1972,14 @@ echo '■ 6 ';
 		try {
 
 			// ディレクトリ移動
-			if ( chdir( $copy_dir ) ) {
+			if ( chdir( $this->copy_path ) ) {
 
 				if( file_exists( $dir_name )){
 					
 					rename( $dir_name,  'BK_' . $dir_name );
 
 				}else{
-					// print $before_dir_name. ',' . $dir_name;
-					print '削除のコピーディレクトリがみつかりません。';
+					
 					throw new \Exception('Copy directory name could not be changed.');
 				}
 		
@@ -2120,10 +2088,13 @@ echo '■ 6 ';
 			$command = 'cp -r '. $honban_real_path . '* ' . $bk_real_path . $datetime_str . ' 2>&1';
 			exec($command, $output, $status);
 			error_log('['.date(DATE_ATOM).'] '.$command."\n".'return code : '.$status."\n", 3, '../logs/ansible-view.log');
+			
 			foreach($output as $row){
 	    		error_log($row."\n", 3, '/var/log/test/test.log');
 			}
+			
 			var_dump($output);
+			
 			// **成功したら
 			//   （１）の中身を削除
 			//       *成功したら
@@ -2141,34 +2112,9 @@ echo '■ 6 ';
 			 		}
 
 
-			// 			・中途半端に残っている（１）の中身を一旦削除して、
-			// 			 backupディレクトリから戻す！
-			// 			 ※そこも失敗してしまったら、本番環境が壊れているので手動で戻してもらわないといけない
-
-			// **失敗したら
-			//   ・失敗ログを残し、処理終了
-			//   ・backupディレクトリは削除？
-
-
-			// *** 該当するcopyディレクトリの内容を本番環境へ反映
-			
-			// cron処理で実行対象として認識されたcopyディレクトリのパス取得（３）
-			
 			// （３）の中身を（１）へコピー
-
-			// ★LINUXコマンドだとフォルダごとコピーできる！
-			// TODO:実行処理追加！
 			 exec('cp -r '. $copy_real_path . $datetime_str . '* ' . $honban_real_path . $datetime_str, $output);
 
-			// **成功したら
-			//   ・成功ログを出力し、処理を終了する
-
-			// **失敗したら
-			//   ・失敗ログを残し、処理終了
-			//   ・中途半端にアップロードした（１）の中身をすべて削除して、
-			// 	  backupディレクトリから戻す！
-			// 	  ※そこも失敗してしまったら、本番環境が壊れているので手動で戻してもらわないといけない
-		
 		} catch (\Exception $e) {
 
 			echo "例外キャッチ：", $e->getMessage(), "<br>";
@@ -2269,69 +2215,4 @@ echo '■ 6 ';
 
 		return $ret;
 	}
-
-
-	// /**
-	//  * ディレクトリ削除関数
-	//  */
-	// private function remove_dir($path) {
-		
-	// 	$list = scandir($path);
-	// 	$length = count($list);
-		
-	// 	for ($i=0; $i<$length; $i++){
-
-	// 		if ($list[$i] != '.' && $list[$i] != '..') {
-	// 			if (is_dir($path.'/'.$list[$i])) {
-
-	// 				echo $list[$i];
-	// 				echo '</br>';
-	// 				echo $this->get_permission($path);
-	// 				echo '</br>';
-
-	// 				$this->remove_dir($path.'/'.$list[$i]);
-
-
-	// 			}else{
-
-	// 					echo $list[$i];
-	// 					echo '</br>';
-	// 					echo $this->get_permission($path);
-	// 					echo '</br>';
-
-	// 				if (is_writable($path)) {
-	// 					echo $this->get_permission($path);
-
-	// 					echo $list[$i];
-	// 					echo '</br>';
-	// 					echo $this->get_permission($path);
-	// 					echo '</br>';
-
-	// 				    echo 'このファイルは書き込み可能です';
-	// 				} else {
-	// 				    echo $path. '：★このファイルは書き込みできません';
-	// 				}
-	// 				unlink($path.'/'.$list[$i]);
-	// 			}
-	// 		}
-	// 	}
-
-	// 	rmdir($path);
-	// }
-	// /**
-	//  * パーミッション情報を調べ、3桁の数字で返す。
-	//  *
-	//  * @param string $path 対象のパス
-	//  * @return int|bool 成功時に 3桁の数字、失敗時に `false` を返します。
-	//  */
-	// private function get_permission( $path ){
-	// 	// $path = $this->localize_path($path);
-
-	// 	if( !@file_exists( $path ) ){
-	// 		return false;
-	// 	}
-	// 	$perm = rtrim( sprintf( "%o\n" , fileperms( $path ) ) );
-	// 	$start = strlen( $perm ) - 3;
-	// 	return substr( $perm , $start , 3 );
-	// }//get_permission()
 }
