@@ -1560,7 +1560,6 @@ class main
 				$is_first = true;
 
 				$max = 0;
-;
 
 				// Loop through each line of the file in turn
 				while ($rowData = fgetcsv($handle_r, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
