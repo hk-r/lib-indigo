@@ -2483,7 +2483,7 @@ class main
 
 	    exec($command, $output, $return);
 
-	    $output = implode("\n", $output);
+	    // $output = implode("\n", $output);
 	
 		$this->debug_echo('■ execute end');
 
