@@ -2396,7 +2396,7 @@ class main
 		// サーバのタイムゾーン取得
 		$timezone = date_default_timezone_get();
 
-		$this->debug_echo('　□ 1');
+		$this->debug_echo('　□ 1：' . $input_datetime);
 
 		$t = new DateTime($input_datetime, new DateTimeZone('Asia/Tokyo'));
 
