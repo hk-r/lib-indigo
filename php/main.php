@@ -1943,7 +1943,7 @@ class main
 					$command = 'git rev-parse --short HEAD';
 					$ret = $this->execute($command, true);
 
-					foreach ( $output as $element ) {
+					foreach ( $ret['output'] as $element ) {
 						$this->commit_hash = $element;
 					}
 
