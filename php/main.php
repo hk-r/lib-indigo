@@ -2003,7 +2003,7 @@ class main
 		// $before_path = self::PATH_COPY . $before_dir_name;
 
 		// 今回作成するディレクトリ名
-		$dirname = date(self::DATETIME_FORMAT_SAVE, strtotime($combine_reserve_time);
+		$dirname = date(self::DATETIME_FORMAT_SAVE, strtotime($combine_reserve_time));
 
 		// 選択したブランチ
 		$branch_name_org = $this->options->_POST->branch_select_value;
