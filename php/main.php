@@ -58,10 +58,10 @@ class main
 	/**
 	 * 公開予定管理CSVの列番号定義
 	 */
-	// 「入力値_公開予約日時」のカラム数
-	const CSV_COLUMN_INPUT_DATETIME = 3;
 	// 「公開予約日時」のカラム数
-	const CSV_COLUMN_DATETIME = 4;
+	const CSV_COLUMN_DATETIME = 3;
+	// 「サーバ用_公開予約日時」のカラム数
+	const CSV_COLUMN_SERVER_DATETIME = 4;
 	// 「ステータス」列のカラム数
 	const CSV_COLUMN_STATUS = 6;
 	/**
@@ -504,8 +504,8 @@ class main
 			$selected_ret = $this->get_selected_data();
 			
 			$branch_select_value = $selected_ret['branch_name'];
-			$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($selected_ret['input_reserve_datetime']));
-			$reserve_time = date(self::TIME_FORMAT_HI,  strtotime($selected_ret['input_reserve_datetime']));
+			$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($selected_ret['reserve_datetime']));
+			$reserve_time = date(self::TIME_FORMAT_HI,  strtotime($selected_ret['reserve_datetime']));
 			$comment = $selected_ret['comment'];
 
 		} else {
@@ -684,8 +684,8 @@ class main
 			$selected_ret = $this->get_selected_data();
 			
 			$branch_select_value = $selected_ret['branch_name'];
-			$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($selected_ret['input_reserve_datetime']));
-			$reserve_time = date(self::TIME_FORMAT_HI,  strtotime($selected_ret['input_reserve_datetime']));
+			$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($selected_ret['reserve_datetime']));
+			$reserve_time = date(self::TIME_FORMAT_HI,  strtotime($selected_ret['reserve_datetime']));
 			$comment = $selected_ret['comment'];
 	
 		} else {
@@ -1122,8 +1122,8 @@ class main
 			
 			$ret .= '<tr>'
 				. '<td class="p-center"><input type="radio" name="target" value="' . $array['id'] . '"/></td>'
-				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array['input_reserve_datetime'])) . '</td>'
 				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array['reserve_datetime'])) . '</td>'
+				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array['server_reserve_datetime'])) . '</td>'
 				. '<td class="p-center">' . $array['commit'] . '</td>'
 				. '<td class="p-center">' . $array['branch_name'] . '</td>'
 				. '<td>' . $array['comment'] . '</td>'
@@ -1184,8 +1184,8 @@ class main
 			$ret .= '<tr>'
 				. '<td class="p-center"><input type="radio" name="target" value="' . $array['id'] . '"/></td>'
 				. '<td class="p-center">' . $this->convert_status( $array['status'] ). '</td>'
-				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array['input_reserve_datetime'])) . '</td>'
 				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array['reserve_datetime'])) . '</td>'
+				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array['server_reserve_datetime'])) . '</td>'
 				. '<td class="p-center">' . $array['commit'] . '</td>'
 				. '<td class="p-center">' . $array['branch_name'] . '</td>'
 				. '<td>' . $array['comment'] . '</td>'
@@ -2314,7 +2314,7 @@ class main
 			    }
 
 			    // 指定日時より未来日時の場合
-			    if (isset($now) && ($rowData[self::CSV_COLUMN_DATETIME] > $now)) {
+			    if (isset($now) && ($rowData[self::CSV_COLUMN_SERVER_DATETIME] > $now)) {
 			    	$set_flg = false;
 			    }
 
@@ -2460,14 +2460,14 @@ class main
 	 *	 
 	 * @return ソート後の配列
 	 */
-	function convert_timezone_datetime($input_datetime, $format) {
+	function convert_timezone_datetime($reserve_datetime, $format) {
 	
 		$this->debug_echo('■ convert_timezone_datetime start');
 
 		// サーバのタイムゾーン取得
 		$timezone = date_default_timezone_get();
 
-		$t = new \DateTime($input_datetime, new \DateTimeZone(self::TIME_ZONE));
+		$t = new \DateTime($reserve_datetime, new \DateTimeZone(self::TIME_ZONE));
 
 		// タイムゾーン変更
 		$t->setTimeZone(new \DateTimeZone($timezone));
