@@ -8,66 +8,67 @@ class main
 
 	private $file_control;
 
+
+	// サーバのタイムゾーン
+	const TIME_ZONE = 'Asia/Tokyo';
+	// 時間フォーマット_表示用（Y-m-d H:i:s）
+	const TIME_FORMAT_DISPLAY = "Y-m-d H:i:s";
+	// 時間フォーマット_登録用（YmdHis）
+	const TIME_FORMAT_SET = "YmdHis";
+
+	// CSV区切り文字
+	const CSV_DELIMITER		= ',';
+	// CSV囲み文字
+	const CSV_ENCLOSURE		= '"';
+
+	// 公開予約管理CSVファイル
+	const CSV_LIST_FILENAME = './../indigo_dir/csv/list.csv';
+	// // 警告エラー時のお知らせCSVファイル
+	// const CSV_LIST_FILENAME = './../indigo_dir/csv/alert.csv';
+
+	/**
+	 * 画像パス定義
+	 */
+	// 右矢印
+	const IMG_ARROW_RIGHT = './../indigo_dir/images/arrow_right.png';
+	// エラーアイコン
+	const IMG_ERROR_ICON = './../indigo_dir/images/error_icon.png';
+
+
+	/**
+	 * 公開用の操作ディレクトリパス定義
+	 */
+	// backupディレクトリパス
+	const PATH_BACKUP = './../indigo_dir/backup/';
+	// copyディレクトリパス
+	const PATH_COPY = './../indigo_dir/copy/';
+	// logディレクトリパス
+	const PATH_LOG = './../indigo_dir/log/';
+
+
+	/**
+	 * 公開予定管理CSVの列番号定義
+	 */
+	// 「入力値_公開予約日時」のカラム数
+	const CSV_COLUMN_INPUT_DATETIME = 3;
+	// 「公開予約日時」のカラム数
+	const CSV_COLUMN_DATETIME = 4;
+	// 「ステータス」列のカラム数
+	const CSV_COLUMN_STATUS = 6;
+	/**
+	 * コミットハッシュ値
+	 */
 	private $commit_hash = '';
 
 	/**
-	 * Delimiter
+	 * サーバのタイムゾーン
 	 */
-	private $_delimiter		= ',';
-
-	/**
-	 * Enclosure
-	 */
-	private $_enclosure		= '"';
-
-	/**
-	 * 公開予約管理CSVファイル
-	 */
-	private $list_filename = './../indigo_dir/csv/list.csv';
-
-	/**
-	 * 警告エラー時のお知らせCSVファイル
-	 */
-	private $alert_filename = './../indigo_dir/csv/alert.csv';
-
-	/**
-	 * 矢印画像パス
-	 */
-	private $img_arrow_left = './../indigo_dir/images/arrow_left.png';
-
-	/**
-	 * エラー画像パス
-	 */
-	private $img_error_icon = './../indigo_dir/images/error_icon.png';
-
+	private $server_timezone = '';
 
 	/**
 	 * 本番環境ディレクトリパス（仮）
 	 */
 	private $honban_path = './../honban/';
-
-	/**
-	 * backupディレクトリパス
-	 */
-	private $backup_path = './../indigo_dir/backup/';
-
-	/**
-	 * copyディレクトリパス
-	 */
-	private $copy_path = './../indigo_dir/copy/';
-
-	/**
-	 * logディレクトリパス
-	 */
-	private $log_path = './../indigo_dir/log/';
-
-	/**
-	 * 公開予約管理CSV カラム列
-	 */
-	// 「ステータス」の列
-	private $reserve_column_status = 5;
-	// 「公開予約日時」の列
-	private $reserve_column_datetime = 3;
 
 	/**
 	 * コンストラクタ
@@ -170,7 +171,7 @@ class main
 	private function get_branch_list() {
 
 
-		echo('■ get_branch_list start');
+		$this->debug_echo('■ get_branch_list start');
 
 		$current_dir = realpath('.');
 		// echo $current_dir;
@@ -219,7 +220,7 @@ class main
 		chdir($current_dir);
 
 
-		echo('■ get_branch_list end');
+		$this->debug_echo('■ get_branch_list end');
 		return json_encode($result);
 
 	}
@@ -370,7 +371,7 @@ class main
 	 *  一致する場合：selected（文字列）
 	 *  一致しない場合：空文字
 	 */
-	private function convert_reserve_datetime($date, $time) {
+	private function combine_date_time($date, $time) {
 
 		$ret = '';
 
@@ -391,7 +392,7 @@ class main
 	 */
 	private function disp_add_dialog($error_message) {
 		
-		echo('■ disp_add_dialog start');
+		$this->debug_echo('■ disp_add_dialog start');
 
 		$ret = "";
 
@@ -422,7 +423,7 @@ class main
 		// ダイアログHTMLの作成
 		$ret = $this->create_dialog_html(true, false, $error_message, $branch_list, $branch_select_value, $reserve_date, $reserve_time, $comment);
 
-		echo('■ disp_add_dialog end');
+		$this->debug_echo('■ disp_add_dialog end');
 
 		return $ret;
 	}
@@ -434,7 +435,7 @@ class main
 	 */
 	private function do_add_check_btn() {
 		
-		echo('■ do_add_check_btn start');
+		$this->debug_echo('■ do_add_check_btn start');
 
 		$ret = "";
 
@@ -460,7 +461,7 @@ class main
 		// 確認ダイアログHTMLの作成
 		$ret = $this->create_check_dialog_html($branch_select_value, $reserve_date, $reserve_time, $comment);
 
-		echo('■ do_add_check_btn end');
+		$this->debug_echo('■ do_add_check_btn end');
 
 		return $ret;
 	}
@@ -557,7 +558,7 @@ class main
 	private function create_dialog_html($add_flg, $init_trans_flg, $error_message, $branch_list,
 		$branch_select_value, $reserve_date, $reserve_time, $comment) {
 		
-		echo('■ create_dialog_html start');
+		$this->debug_echo('■ create_dialog_html start');
 
 		$ret = "";
 
@@ -605,7 +606,7 @@ class main
 			  // . '<td>' . 'dummy' . '</td>'
 			  // . '</tr>'
 			  . '<tr>'
-			  . '<td class="dialog_thead">公開予定日時</td>'
+			  . '<td class="dialog_thead">公開予定日時（日本時間）</td>'
 			  . '<td scope="row"><span style="margin-right:10px;"><input type="text" id="datepicker" name="reserve_date" value="'. $reserve_date . '" autocomplete="off" /></span>'
 			  . '<input type="time" id="reserve_time" name="reserve_time" value="'. $reserve_time . '" /></td>'
 			  . '</tr>'
@@ -636,7 +637,7 @@ class main
 			  . '</div>'
 			  . '</div></div>';
 
-		echo('■ create_dialog_html end');
+		$this->debug_echo('■ create_dialog_html end');
 
 		return $ret;
 	}
@@ -668,7 +669,6 @@ class main
 		// 初期画面より遷移
 		if ($init_trans_flg) {
 
-			echo "初期画面より遷移";
 			// 選択されたID
 			$selected_id =  $this->options->_POST->selected_id;
 			// 選択されたIDに紐づく情報を取得
@@ -681,7 +681,6 @@ class main
 	
 		} else {
 
-			echo "初期画面でない";
 			$selected_id =  $this->options->_POST->selected_id;		
 			$branch_select_value = $this->options->_POST->change_before_branch_select_value;
 			$reserve_date = $this->options->_POST->change_before_reserve_date;
@@ -861,7 +860,7 @@ class main
 	 */
 	private function create_change_check_dialog_html() {
 		
-		$img_filename = realpath('.') . $this->img_arrow_left;
+		$img_filename = realpath('.') . self::IMG_ARROW_RIGHT;
 
 		$ret = '<div class="dialog" id="modal_dialog">'
 			. '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
@@ -1018,7 +1017,7 @@ class main
 		}
 
 		// 公開予定日時の未来日時チェック
-		$now = date("Y-m-d H:i:s");
+		$now = date(self::TIME_FORMAT_DISPLAY);
 		$datetime = $this->options->_POST->reserve_date . ' ' . date('H:i:s',  strtotime($this->options->_POST->reserve_time));
 
 		if (strtotime($now) > strtotime($datetime)) {
@@ -1031,7 +1030,7 @@ class main
 		}
 
 		// 公開予定日時の重複チェック
-		if (!$this->check_exist_reserve($data_list, $this->convert_reserve_datetime($reserve_date, $reserve_time), $selected_id)) {
+		if (!$this->check_exist_reserve($data_list, $this->combine_date_time($reserve_date, $reserve_time), $selected_id)) {
 			$ret .= '<p class="error_message">入力された日時はすでに公開予定が作成されています。</p>';
 		}
 
@@ -1052,28 +1051,28 @@ class main
 		// 取得したリストをソートする
 		$data_list = $this->sort_list($data_list, 'reserve_datetime', SORT_ASC);
 
-		// お知らせリストの取得
-		$alert_list = $this->get_csv_alert_list();
+		// // お知らせリストの取得
+		// $alert_list = $this->get_csv_alert_list();
 
-		if (count($alert_list) != 0) {
-			// お知らせリストの表示
-			$ret .= '<form name="formA" method="post">'
-				. '<div class="alert_box">'
-				. '<p class="alert_title">お知らせ</p>';
-			// データリスト
-			foreach ($alert_list as $data) {
+		// if (count($alert_list) != 0) {
+		// 	// お知らせリストの表示
+		// 	$ret .= '<form name="formA" method="post">'
+		// 		. '<div class="alert_box">'
+		// 		. '<p class="alert_title">お知らせ</p>';
+		// 	// データリスト
+		// 	foreach ($alert_list as $data) {
 				
-				$ret .= '<p class="alert_content" style="vertical-align: middle;">'
-					. '<span style="padding-right: 5px;"><img src="'. $this->img_error_icon . '"/></span>'
-					. '<a onClick="document.formA.submit();return false;" >'
-					. $data['reserve_datetime'] . '　' . $data['content']
-					. '</a></p>';
-			}
+		// 		$ret .= '<p class="alert_content" style="vertical-align: middle;">'
+		// 			. '<span style="padding-right: 5px;"><img src="'. $this->img_error_icon . '"/></span>'
+		// 			. '<a onClick="document.formA.submit();return false;" >'
+		// 			. $data['reserve_datetime'] . '　' . $data['content']
+		// 			. '</a></p>';
+		// 	}
 
-			$ret .=  '<input type="hidden" name="history" value="履歴">'
-				. '</div>'
-				. '</form>';
-		}
+		// 	$ret .=  '<input type="hidden" name="history" value="履歴">'
+		// 		. '</div>'
+		// 		. '</form>';
+		// }
 
 		$ret .= '<div class="button_contents_box">'
 			. '<form id="form_table" method="post">'
@@ -1350,7 +1349,7 @@ class main
 	private function get_csv_alert_list()
 	{
 
-		echo('■ get_csv_alert_list start');
+		$this->debug_echo('■ get_csv_alert_list start');
 
 		$ret_array = array();
 
@@ -1358,7 +1357,7 @@ class main
 		$filename = $this->alert_filename;
 
 		if (!file_exists($filename)) {
-			echo 'お知らせ一覧ファイルが存在しない';
+			$this->debug_echo('お知らせ一覧ファイルが存在しない');
 
 		} else {
 
@@ -1390,7 +1389,7 @@ class main
 
 		}
 
-		echo('■ get_csv_alert_list end');
+		$this->debug_echo('■ get_csv_alert_list end');
 
 		return $ret_array;
 	}
@@ -1405,16 +1404,16 @@ class main
 	private function get_csv_data_list($status)
 	{
 
-		echo('■ get_csv_data_list start');
+		$this->debug_echo('■ get_csv_data_list start');
 
 		$current_dir = realpath('.');
 
 		$ret_array = array();
 
-		$filename = $this->list_filename;
+		$filename = self::CSV_LIST_FILENAME;
 
 		if (!file_exists($filename)) {
-			echo $filename . '公開予約一覧ファイルが存在しない';
+			$this->debug_echo($filename . '公開予約一覧ファイルが存在しない');
 
 		} else {
 
@@ -1458,7 +1457,7 @@ class main
 		
 		chdir($current_dir);
 		
-		echo('■ get_csv_data_list end');
+		$this->debug_echo('■ get_csv_data_list end');
 
 		return $ret_array;
 	}
@@ -1471,17 +1470,17 @@ class main
 	 */
 	private function get_selected_data() {
 
-		echo('■ get_selected_data start');
+		$this->debug_echo('■ get_selected_data start');
 
 		// $filename = realpath('.') . $this->list_filename;
-		$filename = $this->list_filename;
+		$filename = self::CSV_LIST_FILENAME;
 
 		$selected_id =  $this->options->_POST->selected_id;
 
 		$ret_array = array();
 
 		if (!file_exists($filename) && !empty($selected_id)) {
-			echo '公開予約一覧ファイルが存在しない';
+			$this->debug_echo('公開予約一覧ファイルが存在しない');
 
 		} else {
 
@@ -1519,7 +1518,7 @@ class main
 			fclose($handle);
 		}
 
-		echo('■ get_selected_data end');
+		$this->debug_echo('■ get_selected_data end');
 
 		return $ret_array;
 	}
@@ -1532,27 +1531,30 @@ class main
 	private function insert_list_csv_data()
 	{
 
-		echo('■ insert_list_csv_data start');
+		$this->debug_echo('■ insert_list_csv_data start');
 
 		try {
 
 			// $filename = realpath('.') . $this->list_filename;
-			$filename = $this->list_filename;
-
-			
+			$filename = self::CSV_LIST_FILENAME;
 
 			if (!file_exists($filename)) {
-				echo '公開予約一覧ファイルが存在しない';
+				$this->debug_echo('公開予約一覧ファイルが存在しない');
 
 			} else {
-echo '■ 1 ';
 
 				// Open file
 				$handle_r = fopen( $filename, "r" );
+
+				if ($handle_r === false) {
+					// スロー処理！
+					// throw new PHPExcel_Writer_Exception("Could not open file $pFilename for writing.");
+				}
+
 				$is_first = true;
 
 				$max = 0;
-echo '■ 2 ';
+
 				// Loop through each line of the file in turn
 				while ($rowData = fgetcsv($handle_r, 0, $this->_delimiter, $this->_enclosure)) {
 
@@ -1571,25 +1573,45 @@ echo '■ 2 ';
 				}
 
 				$max++;
-echo '■ 3 ';
+
 				// Open file
 				$handle = fopen( $filename, 'a+' );
-				$now = date("Y-m-d H:i:s");
-echo '■ 4 max:' . $max;
+
+
+				if ($handle === false) {
+					// スロー処理！
+					// throw new PHPExcel_Writer_Exception("Could not open file $pFilename for writing.");
+				}
+
+				// 現在時刻
+				$now = date(self::TIME_FORMAT_DISPLAY);
+
+				// 日付と時刻を結合
+				$combine_reserve_time = combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
+
+				// サーバのタイムゾーン日時へ変換
+				$convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::TIME_FORMAT_DISPLAY);
+
+
+				if ( is_null($convert_reserve_time) || !isset($convert_reserve_time)) {
+					// スロー処理！
+					// throw new PHPExcel_Writer_Exception("Could not open file $pFilename for writing.");
+				}
+
 				// id, ブランチ名, コミット, 公開予定日時, コメント, 状態, 設定日時
 				$array = array(
 					$max,
 					$this->options->_POST->branch_select_value,
 					$this->commit_hash,
-					$this->convert_reserve_datetime($this->options->_POST->reserve_date, $this->options->_POST->reserve_time),
+					$this->$combine_reserve_time,
+					$this->$convert_reserve_time,
 					$this->options->_POST->comment,
 					0,
 					$now
 				);
-echo '■ 5 ';
-var_dump($array);
+
 				fputcsv( $handle, $array, $this->_delimiter, $this->_enclosure);
-echo '■ 6 ';		
+
 				fclose( $handle);
 			}
 
@@ -1615,7 +1637,7 @@ echo '■ 6 ';
 
 		chdir($current_dir);
 			
-		echo('■ insert_list_csv_data end');
+		$this->debug_echo('■ insert_list_csv_data end');
 
 		return json_encode($result);
 	}
@@ -1628,12 +1650,12 @@ echo '■ 6 ';
 	private function do_delete_btn() {
 
 		// $filename = realpath('.') . $this->list_filename;
-		$filename = $this->list_filename;
+		$filename = self::CSV_LIST_FILENAME;
 
 		$selected_id =  $this->options->_POST->selected_id;
 
 		if (!file_exists($filename) && empty($selected_id)) {
-			echo 'ファイルが存在しない、または、選択IDが不正です。';
+			$this->debug_echo('ファイルが存在しない、または、選択IDが不正です。');
 
 		} else {
 
@@ -1671,12 +1693,12 @@ echo '■ 6 ';
 	private function do_update_btn() {
 
 		// $filename = realpath('.') . $this->list_filename;
-		$filename = $this->list_filename;
+		$filename = self::CSV_LIST_FILENAME;
 
 		$selected_id =  $this->options->_POST->selected_id;
 
 		if (!file_exists($filename) && !$selected_id) {
-			echo 'ファイルが存在しない、または、選択IDが不正です。';
+			$this->debug_echo('ファイルが存在しない、または、選択IDが不正です。');
 
 		} else {
 
@@ -1721,14 +1743,30 @@ echo '■ 6 ';
 
 			// Open file
 			$handle = fopen( $filename, 'a+' );
-			$now = date("Y-m-d H:i:s");
+
+
+			// 現在時刻
+			$now = date(self::TIME_FORMAT_DISPLAY);
+
+			// 日付と時刻を結合
+			$combine_reserve_time = combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
+
+			// サーバのタイムゾーン日時へ変換
+			$convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::TIME_FORMAT_DISPLAY);
+
+
+			if ( is_null($convert_reserve_time) || !isset($convert_reserve_time)) {
+				// スロー処理！
+				// throw new PHPExcel_Writer_Exception("Could not open file $pFilename for writing.");
+			}
 
 			// id, ブランチ, 公開予定日時, 状態, 設定日時
 			$array = array(
 				$max,
 				$this->options->_POST->branch_select_value,
 				$this->commit_hash,
-				$this->convert_reserve_datetime($this->options->_POST->reserve_date, $this->options->_POST->reserve_time),
+				$this->$combine_reserve_time,
+				$this->$convert_reserve_time,
 				$this->options->_POST->comment,
 				0,
 				$now
@@ -1748,7 +1786,8 @@ echo '■ 6 ';
 	 * @return なし
 	 */
 	private function file_copy() {
-		echo('■ file_copy start');
+
+		$this->debug_echo('■ file_copy start');
 
 		$current_dir = realpath('.');
 
@@ -1757,8 +1796,8 @@ echo '■ 6 ';
 						'message' => '');
 	
 		// ディレクトリ名
-		$dirname = date("YmdHis", 
-			strtotime($this->convert_reserve_datetime($this->options->_POST->reserve_date, $this->options->_POST->reserve_time)));
+		$dirname = date(self::TIME_FORMAT_SET, 
+			strtotime($this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time)));
 
 		// 選択したブランチ
 		$branch_name = trim(str_replace("origin/", "", $this->options->_POST->branch_select_value));
@@ -1766,17 +1805,17 @@ echo '■ 6 ';
 		try {
 
 			// コピーディレクトリが存在しない場合は作成
-			if ( !$this->is_exists_mkdir($this->copy_path) ) {
+			if ( !$this->is_exists_mkdir(self::PATH_COPY) ) {
 
 					// エラー処理
 					throw new \Exception('Creation of copy directory failed.');
 			}
 
 			// コピーディレクトリへ移動
-			if ( chdir($this->copy_path) ) {
+			if ( chdir(self::PATH_COPY) ) {
 
 				// コピーディレクトリをデリートインサート
-				if ( !$this->is_exists_remkdir($this->copy_path, $dirname) ) {
+				if ( !$this->is_exists_remkdir(self::PATH_COPY, $dirname) ) {
 
 					// エラー処理
 					throw new \Exception('Creation of copy publish directory failed.');
@@ -1842,7 +1881,7 @@ echo '■ 6 ';
 		
 		chdir($current_dir);
 
-		echo('■ file_copy end');
+		$this->debug_echo('■ file_copy end');
 
 		return json_encode($result);
 
@@ -1861,12 +1900,12 @@ echo '■ 6 ';
 		$result = array('status' => true,
 						'message' => '');
 
-		$before_dir_name = date("YmdHis", strtotime($this->convert_reserve_datetime($this->options->_POST->change_before_reserve_date, $this->options->_POST->change_before_reserve_time)));
+		$before_dir_name = date(self::TIME_FORMAT_SET, strtotime($this->combine_date_time($this->options->_POST->change_before_reserve_date, $this->options->_POST->change_before_reserve_time)));
 
-		$before_path = $this->copy_path . $before_dir_name;
+		$before_path = self::PATH_COPY . $before_dir_name;
 
 
-		$dir_name = date("YmdHis", strtotime($this->convert_reserve_datetime($this->options->_POST->reserve_date, $this->options->_POST->reserve_time)));
+		$dir_name = date(self::TIME_FORMAT_SET, strtotime($this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time)));
 
 		// 選択したブランチ
 		$branch_name_org = $this->options->_POST->branch_select_value;
@@ -1878,7 +1917,7 @@ echo '■ 6 ';
 			// デプロイ先のディレクトリがない場合は終了
 			if ( !file_exists($before_path) ) {
 
-				echo $before_path . '：ディレクトリが存在しません。';
+				$this->debug_echo($before_path . '：ディレクトリが存在しません。');
 				throw new \Exception('Creation of preview server directory failed.');
 			}
 
@@ -1990,12 +2029,12 @@ echo '■ 6 ';
 
 		$selected_ret = $this->get_selected_data();
 
-		$dir_name = date("YmdHis", strtotime($selected_ret['reserve_datetime']));
+		$dir_name = date(self::TIME_FORMAT_SET, strtotime($selected_ret['reserve_datetime']));
 
 		try {
 
 			// ディレクトリ移動
-			if ( chdir( $this->copy_path ) ) {
+			if ( chdir( self::PATH_COPY ) ) {
 
 				if( file_exists( $dir_name )){
 					
@@ -2046,8 +2085,8 @@ echo '■ 6 ';
 
 			// *** 公開予定から本番環境へ置き換えるものを1件抽出する。（抽出されたものが実行中の場合はスキップする　※処理終了）
 			// 現在時刻
-			$now = date("Y-m-d H:i:s");
-			echo $now;
+			$now = date(self::TIME_FORMAT_DISPLAY);
+			
 			// 公開予約の一覧を取得
 			$data_list = $this->get_csv_data_list_cron(0, $now);
 
@@ -2055,9 +2094,6 @@ echo '■ 6 ';
 
 				// 取得した一覧から最新の1件を取得
 				$datetime_str = $this->get_datetime_str($data_list, 'reserve_datetime', SORT_DESC);
-
-				echo '<br>' . '実行する公開予約日時：';
-				echo($datetime_str);
 			}
 
 			// *** 本番環境よりバックアップ取得
@@ -2065,30 +2101,30 @@ echo '■ 6 ';
 			// #本番環境ディレクトリのパス取得（１）
 			// 本番環境の絶対パスを取得
 			$honban_real_path = realpath('.') . $this->honban_path;
-			echo '<br>' . '本番環境絶対パス：';
-			echo $honban_real_path;
+			// echo '<br>' . '本番環境絶対パス：';
+			// echo $honban_real_path;
 
 			// backupディレクトリの絶対パスを取得
-			$bk_real_path = realpath('.') . $this->backup_path;
-			echo '<br>' . 'バックアップフォルダの絶対パス：';
-			echo $bk_real_path;
+			$bk_real_path = realpath('.') . self::PATH_BACKUP;
+			// echo '<br>' . 'バックアップフォルダの絶対パス：';
+			// echo $bk_real_path;
 
 			// copyディレクトリの絶対パスを取得
-			$copy_real_path = realpath('.') . $this->copy_path;
-			echo '<br>' . 'コピーフォルダの絶対パス：';
-			echo $copy_real_path;
+			$copy_real_path = realpath('.') . self::PATH_COPY;
+			// echo '<br>' . 'コピーフォルダの絶対パス：';
+			// echo $copy_real_path;
 
 			// logディレクトリの絶対パスを取得
-			$log_real_path = realpath('.') . $this->log_path;
-			echo '<br>' . 'ログフォルダの絶対パス：';
-			echo $log_real_path;
+			$log_real_path = realpath('.') . self::PATH_LOG;
+			// echo '<br>' . 'ログフォルダの絶対パス：';
+			// echo $log_real_path;
 
 
 			// ディレクトリ作成
 			if (!mkdir("/var/www/html/sample-lib-indigo/indigo_dir/backup", 0777, true)) {
 				// ディレクトリが作成できない場合
 
-				echo 'error';
+				$this->debug_echo('error');
 
 				// エラー処理
 				throw new \Exception('Creation of backup directory failed.');
@@ -2140,7 +2176,7 @@ echo '■ 6 ';
 
 		} catch (\Exception $e) {
 
-			echo "例外キャッチ：", $e->getMessage(), "<br>";
+			$this->debug_echo("例外キャッチ：", $e->getMessage());
 		}
 	}
 
@@ -2156,11 +2192,11 @@ echo '■ 6 ';
 		$ret_array = array();
 
 		// $filename = realpath('.') . $this->list_filename;
-		$filename = $this->list_filename;
+		$filename = self::CSV_LIST_FILENAME;
 
 		if (!file_exists($filename)) {
 		
-			echo 'ファイルが存在しない';
+			$this->debug_echo('ファイルが存在しない');
 		
 		} else {
 
@@ -2186,12 +2222,12 @@ echo '■ 6 ';
 				$set_flg = true;
 
 			    // 指定ステータスと一致しない場合
-			    if (isset($status) && ($rowData[$this->reserve_column_status] != $status)) {
+			    if (isset($status) && ($rowData[self::CSV_COLUMN_STATUS] != $status)) {
 					$set_flg = false;
 			    }
 
 			    // 指定日時より未来日時の場合
-			    if (isset($now) && ($rowData[$this->reserve_column_datetime] > $now)) {
+			    if (isset($now) && ($rowData[self::CSV_COLUMN_DATETIME] > $now)) {
 			    	$set_flg = false;
 			    }
 
@@ -2249,7 +2285,7 @@ echo '■ 6 ';
 	 */
 	private function is_exists_mkdir($dirname) {
 
-		echo('■ is_exists_mkdir start');
+		$this->debug_echo('■ is_exists_mkdir start');
 
 		$ret = true;
 
@@ -2262,7 +2298,7 @@ echo '■ 6 ';
 			}
 		}
 
-		echo('■ is_exists_mkdir end');
+		$this->debug_echo('■ is_exists_mkdir end');
 
 		return $ret;
 	}
@@ -2276,7 +2312,7 @@ echo '■ 6 ';
 	 */
 	private function is_exists_remkdir($dirpath, $dirname) {
 		
-		echo('■ is_exists_remkdir start');
+		$this->debug_echo('■ is_exists_remkdir start');
 
 		if ( file_exists($dirname) ) {
 
@@ -2284,10 +2320,8 @@ echo '■ 6 ';
 			$command = 'rm -rf '. $dirname;
 			$ret = $this->execute($command, true);
 
-			echo $ret['output'];
-
 			if ( $ret['return'] !== 0 ) {
-				echo '削除失敗';
+				$this->debug_echo('削除失敗');
 				return false;
 			}
 		}
@@ -2298,14 +2332,21 @@ echo '■ 6 ';
 			return false;
 		}
 	
-		echo('■ is_exists_remkdir end');
+		$this->debug_echo('■ is_exists_remkdir end');
 
 		return true;
 	}
 
+	/**
+	 * コマンド実行処理
+	 *	 
+	 * @param $path = 作成ディレクトリ名
+	 *	 
+	 * @return ソート後の配列
+	 */
 	function execute($command, $captureStderr) {
 	
-		echo('■ execute start');
+		$this->debug_echo('■ execute start');
 
 	    $output = array();
 	    $return = 0;
@@ -2319,9 +2360,47 @@ echo '■ 6 ';
 
 	    $output = implode("\n", $output);
 	
-		echo('■ execute end');
+		$this->debug_echo('■ execute end');
 
 	    return array('output' => $output, 'return' => $return);
+	}
+
+
+	/**
+	 * 入力された日時をサーバのタイムゾーンの日時へ変換する
+	 *	 
+	 * @param $path = 作成ディレクトリ名
+	 *	 
+	 * @return ソート後の配列
+	 */
+	function convert_timezone_datetime($input_datetime, $format) {
+	
+		$this->debug_echo('■ convert_timezone_datetime start');
+
+		// サーバのタイムゾーン取得
+		$timezone = date_default_timezone_get();
+
+		$t = new DateTime($input_datetime, new DateTimeZone('Asia/Tokyo'));
+
+		// タイムゾーン変更
+		$t->setTimeZone(new DateTimeZone($timezone));
+	
+		$ret = $t->format($format);
+		
+		$this->debug_echo($t->format($format));
+		$this->debug_echo('■ convert_timezone_datetime end');
+
+	    return $ret;
+	}
+
+	/**
+	 * ※デバッグ用
+	 *	 
+	 */
+	function debug_echo($text) {
+	
+		echo strval($text) . PHP_EOL;
+		return;
 	}
 
 }
