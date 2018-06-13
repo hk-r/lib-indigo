@@ -2398,7 +2398,8 @@ class main
 
 		$this->debug_echo('　□ 1：' . $input_datetime);
 
-		$t = new DateTime($input_datetime, new DateTimeZone('Asia/Tokyo'));
+		// $t = new DateTime($input_datetime, new DateTimeZone(self::TIME_ZONE));
+		$t = new DateTime("2018-06-14 00:00:00", new DateTimeZone(self::TIME_ZONE));
 
 		$this->debug_echo('　□ 2');
 
