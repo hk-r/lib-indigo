@@ -1561,6 +1561,8 @@ class main
 
 				$max = 0;
 
+$this->debug_echo('★1');
+
 				// Loop through each line of the file in turn
 				while ($rowData = fgetcsv($handle_r, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
 
@@ -1582,21 +1584,29 @@ class main
 
 				// Open file
 				$handle = fopen( $filename, 'a+' );
-
+$this->debug_echo('★2');
 
 				if ($handle === false) {
 					// スロー処理！
 					// throw new PHPExcel_Writer_Exception("Could not open file $pFilename for writing.");
 				}
-
+$this->debug_echo('★3');
 				// 現在時刻
 				$now = date(self::TIME_FORMAT_CONV);
-
+$this->debug_echo('★4');
 				// 日付と時刻を結合
 				$combine_reserve_time = combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
-
+		
+				if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
+					throw new \Exception("Combine date time failed.");
+				}
+$this->debug_echo('★5');
 				// サーバのタイムゾーン日時へ変換
 				$convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::TIME_FORMAT_CONV);
+				
+				if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
+					throw new \Exception("Convert time zone failed.");
+				}
 
 
 				if ( is_null($convert_reserve_time) || !isset($convert_reserve_time)) {
@@ -2405,7 +2415,7 @@ class main
 	 */
 	function debug_echo($text) {
 	
-		echo strval($text) . PHP_EOL;
+		echo strval($text) , PHP_EOL;
 		return;
 	}
 
