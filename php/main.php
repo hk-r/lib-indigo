@@ -1701,8 +1701,6 @@ class main
 			$result['status'] = false;
 			$result['message'] = $e->getMessage();
 
-			chdir($current_dir);
-			
 			return json_encode($result);
 		}
 
@@ -1710,8 +1708,6 @@ class main
 
 		$result['status'] = true;
 
-		chdir($current_dir);
-			
 		$this->debug_echo('■ insert_list_csv_data end');
 
 		return json_encode($result);
@@ -1729,89 +1725,110 @@ class main
 
 		$selected_id =  $this->options->_POST->selected_id;
 
-		if (!file_exists($filename) && !$selected_id) {
-			$this->debug_echo('ファイルが存在しない、または、選択IDが不正です。');
+		try {
 
-		} else {
+			if (!file_exists($filename) && !$selected_id) {
+				$this->debug_echo('ファイルが存在しない、または、選択IDが不正です。');
 
-			$file = file($filename);
+			} else {
 
-			// Open file
-			$handle_r = fopen( $filename, "r" );
-			
-			$cnt = 0;
-			$max = 0;
+				$file = file($filename);
 
-			$is_first = true;
+				// Open file
+				$handle_r = fopen( $filename, "r" );
+				
+				$cnt = 0;
+				$max = 0;
 
-			// Loop through each line of the file in turn
-			while ($rowData = fgetcsv($handle_r, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
+				$is_first = true;
 
-				if($is_first){
-			        // タイトル行は飛ばす
-			        $is_first = false;
-			        $cnt++;
-			        continue;
-			    }
+				// Loop through each line of the file in turn
+				while ($rowData = fgetcsv($handle_r, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
 
-			    // idカラムの値を取得
-				$num = intval($rowData[0]);
+					if($is_first){
+				        // タイトル行は飛ばす
+				        $is_first = false;
+				        $cnt++;
+				        continue;
+				    }
 
-				// 追加時のid値生成
-			    if ($num > $max) {
-					$max = $num;
+				    // idカラムの値を取得
+					$num = intval($rowData[0]);
+
+					// 追加時のid値生成
+				    if ($num > $max) {
+						$max = $num;
+					}
+
+					// 変更対象となるid値の場合
+					if ($num == $selected_id) {
+						unset($file[$cnt]);
+						file_put_contents($filename, $file);
+					}
+
+					$cnt++;
 				}
 
-				// 変更対象となるid値の場合
-				if ($num == $selected_id) {
-					unset($file[$cnt]);
-					file_put_contents($filename, $file);
-				}
+				$max++;
 
-				$cnt++;
+				// Open file
+				$handle = fopen( $filename, 'a+' );
+
+
+				// 現在時刻
+				$now = date(self::DATETIME_FORMAT);
+
+				// // 日付と時刻を結合
+				// $combine_reserve_time = $this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
+				
+				// if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
+				// 	throw new \Exception("Combine date time failed.");
+				// }
+				
+				// // サーバのタイムゾーン日時へ変換
+				// $convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::DATETIME_FORMAT);
+
+				// if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
+				// 	throw new \Exception("Convert time zone failed.");
+				// }
+
+				// id, ブランチ, 公開予定日時, 状態, 設定日時
+				$array = array(
+					$max,
+					$this->options->_POST->branch_select_value,
+					$this->commit_hash,
+					$combine_reserve_time,
+					$convert_reserve_time,
+					$this->options->_POST->comment,
+					0,
+					$now
+				);
+
+				fputcsv( $handle, $array, self::CSV_DELIMITER, self::CSV_ENCLOSURE);
+				fclose( $handle);
 			}
 
-			$max++;
-
-			// Open file
-			$handle = fopen( $filename, 'a+' );
+			// Close file
+			fclose($handle_r);
 
 
-			// 現在時刻
-			$now = date(self::DATETIME_FORMAT);
+		} catch (\Exception $e) {
 
-			// // 日付と時刻を結合
-			// $combine_reserve_time = $this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
-			
-			// if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
-			// 	throw new \Exception("Combine date time failed.");
-			// }
-			
-			// // サーバのタイムゾーン日時へ変換
-			// $convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::DATETIME_FORMAT);
+			// set_time_limit(30);
 
-			// if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
-			// 	throw new \Exception("Convert time zone failed.");
-			// }
+			$result['status'] = false;
+			$result['message'] = $e->getMessage();
 
-			// id, ブランチ, 公開予定日時, 状態, 設定日時
-			$array = array(
-				$max,
-				$this->options->_POST->branch_select_value,
-				$this->commit_hash,
-				$combine_reserve_time,
-				$convert_reserve_time,
-				$this->options->_POST->comment,
-				0,
-				$now
-			);
-
-			fputcsv( $handle, $array, self::CSV_DELIMITER, self::CSV_ENCLOSURE);
-			fclose( $handle);
+			return json_encode($result);
 		}
 
-		// Close file
-		fclose($handle_r);
+		// set_time_limit(30);
+
+		$result['status'] = true;
+
+		$this->debug_echo('■ insert_list_csv_data end');
+
+		return json_encode($result);
 	}
 
 	/**
