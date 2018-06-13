@@ -1492,50 +1492,56 @@ class main
 
 		$filename = self::CSV_LIST_FILENAME;
 
-		if (!file_exists($filename)) {
-			$this->debug_echo($filename . '公開予約一覧ファイルが存在しない');
+		try {
 
-		} else {
+			if (!file_exists($filename)) {
+				$this->debug_echo($filename . '公開予約一覧ファイルが存在しない');
 
-			// Open file
-			$handle = fopen( $filename, "r" );
+			} else {
 
-			$title_array = array();
+				// Open file
+				$handle = fopen( $filename, "r" );
 
-			$is_first = true;
+				$title_array = array();
 
-			// CSVリストをループ
-			while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
+				$is_first = true;
 
-				if($is_first){
-			        // タイトル行
-			        foreach ($rowData as $k => $v) {
-			        	$title_array[] = $v;
-			        }
-			        $is_first = false;
-			        continue;
-			    }
-			    
-				$set_flg = true;
+				// CSVリストをループ
+				while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
 
-			    // ステータスの指定があった場合
-			    // TODO:要素番号を定数化
-			    if (isset($status) && ($rowData[5] != $status)) {
-					$set_flg = false;
-			    }
+					if($is_first){
+				        // タイトル行
+				        foreach ($rowData as $k => $v) {
+				        	$title_array[] = $v;
+				        }
+				        $is_first = false;
+				        continue;
+				    }
+				    
+					$set_flg = true;
 
-			    if ($set_flg) {
-			    	// タイトルと値の2次元配列作成
-			    	$ret_array[] = array_combine ($title_array, $rowData);
-			    }
+				    // ステータスの指定があった場合
+				    // TODO:要素番号を定数化
+				    if (isset($status) && ($rowData[5] != $status)) {
+						$set_flg = false;
+				    }
+
+				    if ($set_flg) {
+				    	// タイトルと値の2次元配列作成
+				    	$ret_array[] = array_combine ($title_array, $rowData);
+				    }
+				}
+
+				// Close file
+				fclose($handle);
+
 			}
 
-			// Close file
-			fclose($handle);
+		} catch (\Exception $e) {
 
+			echo "例外キャッチ：", $e->getMessage(), "\n";
+			return $ret_array;
 		}
-		
-		chdir($current_dir);
 		
 		$this->debug_echo('■ get_csv_data_list end');
 
@@ -2169,6 +2175,8 @@ class main
 	 */
 	private function file_delete($combine_reserve_time) {
 		
+		$this->debug_echo('■ file_delete start');
+
 		$current_dir = realpath('.');
 
 		$output = "";
@@ -2222,6 +2230,9 @@ class main
 		$result['status'] = true;
 
 		chdir($current_dir);
+
+		$this->debug_echo('■ file_delete end');
+
 		return json_encode($result);
 
 	}
