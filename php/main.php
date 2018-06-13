@@ -2396,14 +2396,25 @@ class main
 		// サーバのタイムゾーン取得
 		$timezone = date_default_timezone_get();
 
+		$this->debug_echo('　□ 1');
+
 		$t = new DateTime($input_datetime, new DateTimeZone('Asia/Tokyo'));
+
+		$this->debug_echo('　□ 2');
 
 		// タイムゾーン変更
 		$t->setTimeZone(new DateTimeZone($timezone));
 	
+		$this->debug_echo('　□ 3');
+		
 		$ret = $t->format($format);
 		
+		$this->debug_echo('　□ 4');
+		
 		$this->debug_echo($t->format($format));
+
+		$this->debug_echo('　□ 5');
+		
 		$this->debug_echo('■ convert_timezone_datetime end');
 
 	    return $ret;
@@ -2415,7 +2426,9 @@ class main
 	 */
 	function debug_echo($text) {
 	
-		echo strval($text) , PHP_EOL;
+		echo strval($text);
+		echo "<br>";
+
 		return;
 	}
 
