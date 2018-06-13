@@ -132,18 +132,22 @@ class main
 					if ( chdir( $master_path ) ) {
 
 						// git セットアップ
-						exec('git init', $output);
+						$command = 'git init';
+						$this->execute($command, false);
 
 						// git urlのセット
 						$url = $this->options->git->protocol . "://" . urlencode($this->options->git->username) . ":" . urlencode($this->options->git->password) . "@" . $this->options->git->url;
 
-						exec('git remote add origin ' . $url, $output);
+						$command = 'git remote add origin ' . $url;
+						$this->execute($command, false);
 
 						// git fetch
-						exec( 'git fetch origin', $output);
+						$command = 'git fetch origin';
+						$this->execute($command, false);
 
 						// git pull
-						exec( 'git pull origin master', $output);
+						$command = 'git pull origin master';
+						$this->execute($command, false);
 
 					} else {
 						// ディレクトリが存在しない場合
@@ -195,12 +199,14 @@ class main
 			if ( chdir( $this->options->git->repository )) {
 
 				// fetch
-				exec( 'git fetch', $output );
+				$command = 'git fetch';
+				$this->execute($command, false);
 
 				// ブランチの一覧取得
-				exec( 'git branch -r', $output );
+				$command = 'git branch -r';
+				$ret = $this->execute($command, false);
 
-				foreach ($output as $key => $value) {
+				foreach ($ret['output'] as $key => $value) {
 					if( strpos($value, '/HEAD') !== false ){
 						continue;
 					}
@@ -1919,32 +1925,32 @@ class main
 				if ( chdir($dirname) ) {
 
 					// git init
-					exec('git init', $output);
+					$command = 'git init';
+					$this->execute($command, false);
 
 					// git urlのセット
 					$url = $this->options->git->protocol . "://" . urlencode($this->options->git->username) . ":" . urlencode($this->options->git->password) . "@" . $this->options->git->url;
 					
 					// initしたリポジトリに名前を付ける
 					$command = 'git remote add origin ' . $url;
-					$this->execute($command, true);
+					$this->execute($command, false);
 
 					// git fetch（リモートリポジトリの指定ブランチの情報をローカルブランチに取得）
 					$command = 'git fetch origin' . ' ' . $branch_name;
-					$this->execute($command, true);
+					$this->execute($command, false);
 
 					// git pull（）pullはリモート取得ブランチを任意のローカルブランチにマージするコマンド
 					$command = 'git pull origin' . ' ' . $branch_name;
-					$this->execute($command, true);
+					$this->execute($command, false);
 			
 					// // 現在のブランチ取得
 					// exec( 'git branch', $output);
 
 					// コミットハッシュ値の取得
 					$command = 'git rev-parse --short HEAD';
-					$ret = $this->execute($command, true);
-		var_dump('　★ ' . $ret);
+					$ret = $this->execute($command, false);
+
 					foreach ( $ret['output'] as $element ) {
-		$this->debug_echo('　★ ' . $element);
 
 						$this->commit_hash = $element;
 					}
@@ -2049,7 +2055,8 @@ class main
 				if ( chdir( $dirname ) ) {
 
 					// 現在のブランチ取得
-					exec( 'git branch', $output);
+					$command = 'git branch';
+					$this->execute($command, false);
 
 					$now_branch;
 					$already_branch_checkout = false;
@@ -2074,25 +2081,29 @@ class main
 					}
 
 					// git fetch
-					exec( 'git fetch origin', $output );
+					$command = 'git fetch origin';
+					$this->execute($command, false);
 
 					// 現在のブランチと選択されたブランチが異なる場合は、ブランチを切り替える
 					if ( $now_branch !== $branch_name ) {
 
 						if ($already_branch_checkout) {
 							// 選択された(切り替える)ブランチが既にチェックアウト済みの場合
-							// echo 'チェックアウト済み';
-							exec( 'git checkout ' . $branch_name, $output);
+							$command = 'git checkout ' . $branch_name;
+							$this->execute($command, false);
+
 
 						} else {
 							// 選択された(切り替える)ブランチがまだチェックアウトされてない場合
-							// echo 'チェックアウトまだ';
-							exec( 'git checkout -b ' . $branch_name . ' ' . $branch_name_org, $output);
+							$command = 'git checkout -b ' . $branch_name . ' ' . $branch_name_org;
+							$this->execute($command, false);
+
 						}
 					}
 
 					// コミットハッシュ値の取得
-					exec( 'git rev-parse --short HEAD', $hash);
+					$command = 'git rev-parse --short HEAD';
+					$ret = $this->execute($command, false);
 
 					foreach ( $hash as $value ) {
 						$this->commit_hash = $value;
@@ -2162,7 +2173,7 @@ class main
 					
 					// 削除
 					$command = 'rm -rf '. $dirname;
-					$ret = $this->execute($command, true);
+					$ret = $this->execute($command, false);
 
 					if ( $ret['return'] !== 0 ) {
 						$this->debug_echo('削除失敗');
