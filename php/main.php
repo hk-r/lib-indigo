@@ -1942,7 +1942,7 @@ class main
 					// コミットハッシュ値の取得
 					$command = 'git rev-parse --short HEAD';
 					$ret = $this->execute($command, true);
-
+		var_dump('　★ ' . $ret);
 					foreach ( $ret['output'] as $element ) {
 		$this->debug_echo('　★ ' . $element);
 
