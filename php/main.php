@@ -1273,8 +1273,22 @@ class main
 		// 新規ダイアログの確定ボタンが押下された場合
 		} elseif (isset($this->options->_POST->add_confirm)) {
 
+			// 日付と時刻を結合
+			$combine_reserve_time = $this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
+	
+			if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
+				throw new \Exception("Combine date time failed.");
+			}
+
+			// サーバのタイムゾーン日時へ変換
+			$convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::TIME_FORMAT_CONV);
+			
+			if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
+				throw new \Exception("Convert time zone failed.");
+			}
+
 			// Gitファイルの取得
-			$add_ret = $this->file_copy();
+			$add_ret = $this->file_copy($convert_reserve_time);
 	
 			$add_ret = json_decode($add_ret);
 
@@ -1291,7 +1305,7 @@ class main
 			} else {
 
 				// CSV入力情報の追加
-				$this->insert_list_csv_data();
+				$this->insert_list_csv_data($combine_reserve_time, $convert_reserve_time);
 
 			}
 
@@ -1316,12 +1330,43 @@ class main
 		// 変更ダイアログの確定ボタンが押下された場合
 		} elseif (isset($this->options->_POST->update_confirm)) {
 			
-			// Gitファイルの取得
-			$this->file_update();
+			// 日付と時刻を結合
+			$combine_reserve_time = $this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
+	
+			if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
+				throw new \Exception("Combine date time failed.");
+			}
 
-			// CSV入力情報の変更
-			$this->do_update_btn();
-		
+			// サーバのタイムゾーン日時へ変換
+			$convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::TIME_FORMAT_CONV);
+			
+			if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
+				throw new \Exception("Convert time zone failed.");
+			}
+
+			// Gitファイルの取得
+			$update_ret = $this->file_update($convert_reserve_time);
+	
+			$update_ret = json_decode($update_ret);
+
+			if ( !$update_ret->status ) {
+				// デプロイ失敗
+
+				// エラーメッセージ
+				$dialog_disp = '
+				<script type="text/javascript">
+					console.error("' . $update_ret->message . '");
+					alert("update faild");
+				</script>';
+
+			} else {
+
+				// CSV入力情報の変更
+				$this->update_list_csv_data($combine_reserve_time, $convert_reserve_time);
+
+			}
+
+
 		// 変更確認ダイアログの戻るボタンが押下された場合
 		} elseif (isset($this->options->_POST->update_back)) {
 		
@@ -1534,7 +1579,7 @@ class main
 	 *
 	 * @return なし
 	 */
-	private function insert_list_csv_data()
+	private function insert_list_csv_data($combine_reserve_time, $convert_reserve_time)
 	{
 
 		$this->debug_echo('■ insert_list_csv_data start');
@@ -1592,19 +1637,19 @@ class main
 				// 現在時刻
 				$now = date(self::TIME_FORMAT_CONV);
 
-				// 日付と時刻を結合
-				$combine_reserve_time = $this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
+				// // 日付と時刻を結合
+				// $combine_reserve_time = $this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
 		
-				if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
-					throw new \Exception("Combine date time failed.");
-				}
+				// if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
+				// 	throw new \Exception("Combine date time failed.");
+				// }
 
-				// サーバのタイムゾーン日時へ変換
-				$convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::TIME_FORMAT_CONV);
+				// // サーバのタイムゾーン日時へ変換
+				// $convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::TIME_FORMAT_CONV);
 				
-				if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
-					throw new \Exception("Convert time zone failed.");
-				}
+				// if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
+				// 	throw new \Exception("Convert time zone failed.");
+				// }
 
 				// id, ブランチ名, コミット, 公開予定日時, コメント, 状態, 設定日時
 				$array = array(
@@ -1655,7 +1700,7 @@ class main
 	 *
 	 * @return なし
 	 */
-	private function do_update_btn() {
+	private function update_list_csv_data($combine_reserve_time, $convert_reserve_time) {
 
 		// $filename = realpath('.') . $this->list_filename;
 		$filename = self::CSV_LIST_FILENAME;
@@ -1713,24 +1758,19 @@ class main
 			// 現在時刻
 			$now = date(self::TIME_FORMAT_CONV);
 
-			// 日付と時刻を結合
-			$combine_reserve_time = $this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
+			// // 日付と時刻を結合
+			// $combine_reserve_time = $this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
 			
-			if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
-				throw new \Exception("Combine date time failed.");
-			}
+			// if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
+			// 	throw new \Exception("Combine date time failed.");
+			// }
 			
-			// サーバのタイムゾーン日時へ変換
-			$convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::TIME_FORMAT_CONV);
+			// // サーバのタイムゾーン日時へ変換
+			// $convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::TIME_FORMAT_CONV);
 
-			if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
-				throw new \Exception("Convert time zone failed.");
-			}
-
-			if ( is_null($convert_reserve_time) || !isset($convert_reserve_time)) {
-				// スロー処理！
-				// throw new PHPExcel_Writer_Exception("Could not open file $pFilename for writing.");
-			}
+			// if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
+			// 	throw new \Exception("Convert time zone failed.");
+			// }
 
 			// id, ブランチ, 公開予定日時, 状態, 設定日時
 			$array = array(
@@ -1800,7 +1840,7 @@ class main
 	 *
 	 * @return なし
 	 */
-	private function file_copy() {
+	private function file_copy($convert_reserve_time) {
 
 		$this->debug_echo('■ file_copy start');
 
@@ -1811,8 +1851,7 @@ class main
 						'message' => '');
 	
 		// ディレクトリ名
-		$dirname = date(self::TIME_FORMAT_SAVE, 
-			strtotime($this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time)));
+		$dirname = date(self::TIME_FORMAT_SAVE, strtotime($convert_reserve_time));
 
 		// 選択したブランチ
 		$branch_name = trim(str_replace("origin/", "", $this->options->_POST->branch_select_value));
@@ -1907,7 +1946,7 @@ class main
 	 *
 	 * @return なし
 	 */
-	private function file_update()
+	private function file_update($convert_reserve_time)
 	{
 		$current_dir = realpath('.');
 
@@ -1915,12 +1954,14 @@ class main
 		$result = array('status' => true,
 						'message' => '');
 
+		// 変更前の公開予定日時をフォーマット変換
 		$before_dir_name = date(self::TIME_FORMAT_SAVE, strtotime($this->combine_date_time($this->options->_POST->change_before_reserve_date, $this->options->_POST->change_before_reserve_time)));
 
+		// 変更前のcopyディレクトリパスを取得
 		$before_path = self::PATH_COPY . $before_dir_name;
 
-
-		$dir_name = date(self::TIME_FORMAT_SAVE, strtotime($this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time)));
+		// 今回作成するディレクトリ名
+		$dir_name = date(self::TIME_FORMAT_SAVE, $convert_reserve_time);
 
 		// 選択したブランチ
 		$branch_name_org = $this->options->_POST->branch_select_value;
