@@ -1925,23 +1925,26 @@ class main
 					$url = $this->options->git->protocol . "://" . urlencode($this->options->git->username) . ":" . urlencode($this->options->git->password) . "@" . $this->options->git->url;
 					
 					// initしたリポジトリに名前を付ける
-					exec( 'git remote add origin ' . $url, $output);
+					$command = 'git remote add origin ' . $url;
+					$this->execute($command, true);
 
 					// git fetch（リモートリポジトリの指定ブランチの情報をローカルブランチに取得）
-					exec( 'git fetch origin' . ' ' . $branch_name, $output);
+					$command = 'git fetch origin' . ' ' . $branch_name;
+					$this->execute($command, true);
 
 					// git pull（）pullはリモート取得ブランチを任意のローカルブランチにマージするコマンド
-					// exec( 'git pull origin master', $output);
-					exec( 'git pull origin' . ' ' . $branch_name, $output);
-					
-					// 現在のブランチ取得
-					exec( 'git branch', $output);
+					$command = 'git pull origin' . ' ' . $branch_name;
+					$this->execute($command, true);
+			
+					// // 現在のブランチ取得
+					// exec( 'git branch', $output);
 
 					// コミットハッシュ値の取得
-					exec( 'git rev-parse --short HEAD', $hash);
+					$command = 'git rev-parse --short HEAD';
+					$ret = $this->execute($command, true);
 
-					foreach ( $hash as $value ) {
-						$this->commit_hash = $value;
+					foreach ( $output as $element ) {
+						$this->commit_hash = $element;
 					}
 
 				} else {
@@ -2136,6 +2139,7 @@ class main
 	 * @return なし
 	 */
 	private function file_delete($combine_reserve_time) {
+		
 		$current_dir = realpath('.');
 
 		$output = "";
@@ -2151,6 +2155,7 @@ class main
 			// ディレクトリ移動
 			if ( chdir( self::PATH_COPY ) ) {
 
+				// ディレクトリが存在しない場合は無視する
 				if( file_exists( $dirname )){
 					
 					// 削除
