@@ -2396,26 +2396,17 @@ class main
 		// サーバのタイムゾーン取得
 		$timezone = date_default_timezone_get();
 
-		$this->debug_echo('　□ 1：' . $input_datetime);
-
-		// $t = new DateTime($input_datetime, new DateTimeZone(self::TIME_ZONE));
-		$t = new \DateTime("2018-06-14 00:00:00", new \DateTimeZone(self::TIME_ZONE));
+		$t = new \DateTime($input_datetime, new \DateTimeZone(self::TIME_ZONE));
 
 		$this->debug_echo('　□ 2');
 
 		// タイムゾーン変更
-		$t->setTimeZone(new DateTimeZone($timezone));
+		$t->setTimeZone(new \DateTimeZone($timezone));
 	
-		$this->debug_echo('　□ 3');
-		
 		$ret = $t->format($format);
 		
-		$this->debug_echo('　□ 4');
-		
 		$this->debug_echo($t->format($format));
-
-		$this->debug_echo('　□ 5');
-		
+	
 		$this->debug_echo('■ convert_timezone_datetime end');
 
 	    return $ret;
