@@ -1559,43 +1559,51 @@ class main
 
 		$ret_array = array();
 
-		if (!file_exists($filename) && !empty($selected_id)) {
-			$this->debug_echo('公開予約一覧ファイルが存在しない');
+		try {
 
-		} else {
+			if (!file_exists($filename) && !empty($selected_id)) {
+				$this->debug_echo('公開予約一覧ファイルが存在しない');
 
-			$file = file($filename);
+			} else {
 
-			// Open file
-			$handle = fopen( $filename, "r" );
-			
-			$title_array = array();
+				$file = file($filename);
 
-			$is_first = true;
+				// Open file
+				$handle = fopen( $filename, "r" );
+				
+				$title_array = array();
 
-			// Loop through each line of the file in turn
-			while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
+				$is_first = true;
 
-				if($is_first){
-			        // タイトル行
-			        foreach ($rowData as $k => $v) {
-			        	$title_array[] = $v;
-			        }
-			        $is_first = false;
-			        continue;
-			    }
+				// Loop through each line of the file in turn
+				while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
 
-				$num = intval($rowData[0]);
+					if($is_first){
+				        // タイトル行
+				        foreach ($rowData as $k => $v) {
+				        	$title_array[] = $v;
+				        }
+				        $is_first = false;
+				        continue;
+				    }
 
-				if ($num == $selected_id) {
-				    // タイトルと値の2次元配列作成
-				    $ret_array = array_combine ($title_array, $rowData) ;
+					$num = intval($rowData[0]);
+
+					if ($num == $selected_id) {
+					    // タイトルと値の2次元配列作成
+					    $ret_array = array_combine ($title_array, $rowData) ;
+					}
 				}
+
+
+				// Close file
+				fclose($handle);
 			}
 
+		} catch (\Exception $e) {
 
-			// Close file
-			fclose($handle);
+			echo "例外キャッチ：", $e->getMessage(), "\n";
+			return $ret_array;
 		}
 
 		$this->debug_echo('■ get_selected_data end');
@@ -1608,9 +1616,12 @@ class main
 	 *
 	 * @return なし
 	 */
-	private function insert_list_csv_data($combine_reserve_time, $convert_reserve_time)
-	{
+	private function insert_list_csv_data($combine_reserve_time, $convert_reserve_time){
 
+		$output = "";
+		$result = array('status' => true,
+						'message' => '');
+	
 		$this->debug_echo('■ insert_list_csv_data start');
 
 		try {
@@ -1727,6 +1738,10 @@ class main
 	 */
 	private function update_list_csv_data($combine_reserve_time, $convert_reserve_time) {
 
+		$output = "";
+		$result = array('status' => true,
+						'message' => '');
+	
 		// $filename = realpath('.') . $this->list_filename;
 		$filename = self::CSV_LIST_FILENAME;
 
@@ -2105,8 +2120,9 @@ class main
 					$command = 'git rev-parse --short HEAD';
 					$ret = $this->execute($command, false);
 
-					foreach ( $hash as $value ) {
-						$this->commit_hash = $value;
+					foreach ( $ret['output'] as $element ) {
+
+						$this->commit_hash = $element;
 					}
 
 				} else {
@@ -2169,7 +2185,7 @@ class main
 			if ( chdir( self::PATH_COPY ) ) {
 
 				// ディレクトリが存在しない場合は無視する
-				if( file_exists( $dirname )){
+				if( file_exists( $dirname )) {
 					
 					// 削除
 					$command = 'rm -rf '. $dirname;
@@ -2179,6 +2195,8 @@ class main
 						$this->debug_echo('削除失敗');
 						throw new \Exception('Delete directory failed.');
 					}
+				} else {
+					$this->debug_echo('削除対象が存在しない');
 				}
 		
 			} else {
