@@ -1358,9 +1358,6 @@ class main
 		// 変更ダイアログの確定ボタンが押下された場合
 		} elseif (isset($this->options->_POST->update_confirm)) {
 			
-			// 日付と時刻を結合
-			$combine_reserve_time = $this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
-	
 			if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
 				throw new \Exception("Combine date time failed.");
 			}
@@ -1382,10 +1379,6 @@ class main
 
 			} else {
 
-
-				// サーバのタイムゾーン日時へ変換
-				$convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::DATETIME_FORMAT);
-				
 				if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
 					throw new \Exception("Convert time zone failed.");
 				}
@@ -1975,8 +1968,10 @@ class main
 	 *
 	 * @return なし
 	 */
-	private function file_update($combine_reserve_time)
-	{
+	private function file_update($combine_reserve_time) {
+		
+		$this->debug_echo('■ file_update start');
+
 		$current_dir = realpath('.');
 
 		$output = "";
@@ -2065,8 +2060,13 @@ class main
 					if ( file_exists( $before_dir_name ) && !file_exists( $dir_name ) ){
 						
 						rename( $before_dir_name, $dir_name );
+
 					} else {
-						// print $before_dir_name. ',' . $dir_name;
+						print $before_dir_name. ',' . $dir_name;
+
+						$this->debug_echo('　□ $before_dir_name' . $before_dir_name);
+						$this->debug_echo('　□ $dir_name' . $dir_name);
+										
 						// print 'ディレクトリ名が変更できませんでした。';
 						throw new \Exception('Copy directory name could not be changed.');
 					}
@@ -2095,6 +2095,9 @@ class main
 		$result['status'] = true;
 
 		chdir($current_dir);
+
+		$this->debug_echo('■ file_update end');
+
 		return json_encode($result);
 
 	}
