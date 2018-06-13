@@ -1941,9 +1941,11 @@ class main
 
 					// コミットハッシュ値の取得
 					$command = 'git rev-parse --short HEAD';
-					$ret = $this->execute($command, false);
+					$ret = $this->execute($command, true);
 
 					foreach ( $ret['output'] as $element ) {
+		$this->debug_echo('　★ ' . $element);
+
 						$this->commit_hash = $element;
 					}
 
