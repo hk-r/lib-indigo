@@ -18,7 +18,8 @@ class main
 	const DATE_FORMAT_YMD = "Y-m-d";
 	// 時間フォーマット（H:i）
 	const TIME_FORMAT_HI = "H:i";
-
+	// 時間フォーマット（H:i:s）
+	const TIME_FORMAT_HIS = "H:i:s";
 
 	// 日時フォーマット_表示用（Y-m-d H:i）
 	const DATETIME_FORMAT_DISPLAY = "Y-m-d H:i";
@@ -386,7 +387,7 @@ class main
 
 		if (isset($date) && isset($time)) {
 
-			$ret = $date . ' ' . date('H:i:s',  strtotime($time));
+			$ret = $date . ' ' . date(self::TIME_FORMAT_HIS,  strtotime($time));
 		}
 
 		return $ret;
@@ -1027,7 +1028,7 @@ class main
 
 		// 公開予定日時の未来日時チェック
 		$now = date(self::DATETIME_FORMAT);
-		$datetime = $this->options->_POST->reserve_date . ' ' . date('H:i:s',  strtotime($this->options->_POST->reserve_time));
+		$datetime = $this->options->_POST->reserve_date . ' ' . date(self::TIME_FORMAT_HIS,  strtotime($this->options->_POST->reserve_time));
 
 		if (strtotime($now) > strtotime($datetime)) {
 			$ret .= '<p class="error_message">「公開予定日時」は未来日時を設定してください。</p>';
@@ -2002,7 +2003,7 @@ class main
 		// $before_path = self::PATH_COPY . $before_dir_name;
 
 		// 今回作成するディレクトリ名
-		$dirname = date(self::DATETIME_FORMAT_SAVE, $combine_reserve_time);
+		$dirname = date(self::DATETIME_FORMAT_SAVE, strtotime($combine_reserve_time);
 
 		// 選択したブランチ
 		$branch_name_org = $this->options->_POST->branch_select_value;
@@ -2143,7 +2144,7 @@ class main
 
 		$selected_ret = $this->get_selected_data();
 
-		$dirname = date(self::DATETIME_FORMAT_SAVE, $combine_reserve_time);
+		$dirname = date(self::DATETIME_FORMAT_SAVE, strtotime($combine_reserve_time));
 
 		try {
 
