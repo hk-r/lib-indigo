@@ -1897,7 +1897,7 @@ class main
 					throw new \Exception('Creation of copy publish directory failed.');
 				}
 
-				// コピーディレクトリへ移動
+				// 公開予定ディレクトリへ移動
 				if ( chdir($dirname) ) {
 
 					// git init
@@ -1994,84 +1994,104 @@ class main
 
 		try {
 
-			// デプロイ先のディレクトリがない場合は終了
-			if ( !file_exists($before_path) ) {
 
-				$this->debug_echo($before_path . '：ディレクトリが存在しません。');
-				throw new \Exception('Creation of preview server directory failed.');
-			}
+			// コピーディレクトリへ移動
+			if ( chdir(self::PATH_COPY) ) {
 
-			// ディレクトリ移動
-			if ( chdir( $before_path ) ) {
+				// 公開予定のディレクトリがない場合は終了
+				if ( !file_exists($before_path) ) {
 
-				// 現在のブランチ取得
-				exec( 'git branch', $output);
-
-				$now_branch;
-				$already_branch_checkout = false;
-				foreach ( $output as $value ) {
-
-					// 「*」の付いてるブランチを現在のブランチと判定
-					if ( strpos($value, '*') !== false ) {
-
-						$value = trim(str_replace("* ", "", $value));
-						$now_branch = $value;
-
-					} else {
-
-						$value = trim($value);
-
-					}
-
-					// 選択された(切り替える)ブランチがブランチの一覧に含まれているか判定
-					if ( $value == $branch_name ) {
-						$already_branch_checkout = true;
-					}
+					$this->debug_echo( '　□ $before_path：' . $before_path);
+					throw new \Exception('Publish directory not found.');
 				}
 
-				// git fetch
-				exec( 'git fetch origin', $output );
+				// 公開予定ディレクトリへ移動
+				if ( chdir( $before_path ) ) {
 
-				// 現在のブランチと選択されたブランチが異なる場合は、ブランチを切り替える
-				if ( $now_branch !== $branch_name ) {
+					// 現在のブランチ取得
+					exec( 'git branch', $output);
 
-					if ($already_branch_checkout) {
-						// 選択された(切り替える)ブランチが既にチェックアウト済みの場合
-						// echo 'チェックアウト済み';
-						exec( 'git checkout ' . $branch_name, $output);
+					$now_branch;
+					$already_branch_checkout = false;
+					foreach ( $output as $value ) {
 
-					} else {
-						// 選択された(切り替える)ブランチがまだチェックアウトされてない場合
-						// echo 'チェックアウトまだ';
-						exec( 'git checkout -b ' . $branch_name . ' ' . $branch_name_org, $output);
+						// 「*」の付いてるブランチを現在のブランチと判定
+						if ( strpos($value, '*') !== false ) {
+
+							$value = trim(str_replace("* ", "", $value));
+							$now_branch = $value;
+
+						} else {
+
+							$value = trim($value);
+
+						}
+
+						// 選択された(切り替える)ブランチがブランチの一覧に含まれているか判定
+						if ( $value == $branch_name ) {
+							$already_branch_checkout = true;
+						}
 					}
-				}
 
-				// コミットハッシュ値の取得
-				exec( 'git rev-parse --short HEAD', $hash);
+					// git fetch
+					exec( 'git fetch origin', $output );
 
-				foreach ( $hash as $value ) {
-					$this->commit_hash = $value;
-				}
-				
-				// ディレクトリ名が変更になる場合はリネームする
-				if ($before_dir_name != $dir_name) {
+					// 現在のブランチと選択されたブランチが異なる場合は、ブランチを切り替える
+					if ( $now_branch !== $branch_name ) {
 
-					if ( file_exists( $before_dir_name ) && !file_exists( $dir_name ) ){
-						
-						rename( $before_dir_name, $dir_name );
+						if ($already_branch_checkout) {
+							// 選択された(切り替える)ブランチが既にチェックアウト済みの場合
+							// echo 'チェックアウト済み';
+							exec( 'git checkout ' . $branch_name, $output);
 
-					} else {
-						print $before_dir_name. ',' . $dir_name;
-
-						$this->debug_echo('　□ $before_dir_name' . $before_dir_name);
-						$this->debug_echo('　□ $dir_name' . $dir_name);
-										
-						// print 'ディレクトリ名が変更できませんでした。';
-						throw new \Exception('Copy directory name could not be changed.');
+						} else {
+							// 選択された(切り替える)ブランチがまだチェックアウトされてない場合
+							// echo 'チェックアウトまだ';
+							exec( 'git checkout -b ' . $branch_name . ' ' . $branch_name_org, $output);
+						}
 					}
+
+					// コミットハッシュ値の取得
+					exec( 'git rev-parse --short HEAD', $hash);
+
+					foreach ( $hash as $value ) {
+						$this->commit_hash = $value;
+					}
+
+				} else {
+					// コピー用のディレクトリが存在しない場合
+
+					// エラー処理
+					throw new \Exception('Copy publish directory not found.');
 				}
-				
+
+				// コピーディレクトリへ移動
+				if ( chdir(self::PATH_COPY) ) {
+
+					// ディレクトリ名が変更になる場合はリネームする
+					if ($before_dir_name != $dir_name) {
+
+						if ( file_exists( $before_dir_name ) && !file_exists( $dir_name ) ){
+							
+							rename( $before_dir_name, $dir_name );
+
+						} else {
+
+							$this->debug_echo('　□ $before_dir_name：' . $before_dir_name);
+							$this->debug_echo('　□ $dir_name：' . $dir_name);
+
+							throw new \Exception('Copy directory name could not be changed.');
+						}
+					}
+
+				} else {
+					// コピー用のディレクトリが存在しない場合
+
+					// エラー処理
+					throw new \Exception('Copy directory not found.');
+				}	
+
+			
 			} else {
 				// コピー用のディレクトリが存在しない場合
 
