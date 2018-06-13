@@ -1233,6 +1233,12 @@ class main
 			</script>';
 		}
 
+		// 画面入力された日付と時刻を結合
+		$combine_reserve_time = $this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
+
+		// サーバのタイムゾーン日時へ変換
+		$convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::DATETIME_FORMAT);
+				
 		// 新規ボタンが押下された場合
 		if (isset($this->options->_POST->add)) {
 		
@@ -1248,10 +1254,31 @@ class main
 		// 削除ボタンが押下された場合
 		} elseif (isset($this->options->_POST->delete)) {
 		
+			if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
+				throw new \Exception("Combine date time failed.");
+			}
+
 			// Gitファイルの削除
-			$this->file_delete();
+			$delete_ret = $this->file_delete($combine_reserve_time);
 	
-			$this->do_delete_btn();
+			$delete_ret = json_decode($delete_ret);
+
+			if ( !$delete_ret->status ) {
+				// 削除失敗
+
+				// エラーメッセージ
+				$dialog_disp = '
+				<script type="text/javascript">
+					console.error("' . $delete_ret->message . '");
+					alert("add faild");
+				</script>';
+
+			} else {
+
+				// CSV入力情報の追加
+				$this->delete_list_csv_data();
+
+			}
 
 		// 即時公開ボタンが押下された場合
 		} elseif (isset($this->options->_POST->release)) {
@@ -1280,9 +1307,6 @@ class main
 		// 新規ダイアログの確定ボタンが押下された場合
 		} elseif (isset($this->options->_POST->add_confirm)) {
 
-			// 日付と時刻を結合
-			$combine_reserve_time = $this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
-	
 			if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
 				throw new \Exception("Combine date time failed.");
 			}
@@ -1304,9 +1328,6 @@ class main
 
 			} else {
 
-				// サーバのタイムゾーン日時へ変換
-				$convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::DATETIME_FORMAT);
-				
 				if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
 					throw new \Exception("Convert time zone failed.");
 				}
@@ -1805,7 +1826,7 @@ class main
 	 *
 	 * @return なし
 	 */
-	private function do_delete_btn() {
+	private function delete_list_csv_data() {
 
 		// $filename = realpath('.') . $this->list_filename;
 		$filename = self::CSV_LIST_FILENAME;
@@ -2079,12 +2100,11 @@ class main
 	}
 
 	/**
-	 * Gitファイルの削除（※ゆくゆくはLINUXコマンドでディレクトリごと削除する）
+	 * Gitファイルの削除
 	 *
 	 * @return なし
 	 */
-	private function file_delete()
-	{
+	private function file_delete($combine_reserve_time) {
 		$current_dir = realpath('.');
 
 		$output = "";
@@ -2093,20 +2113,23 @@ class main
 
 		$selected_ret = $this->get_selected_data();
 
-		$dir_name = date(self::DATETIME_FORMAT_SAVE, strtotime($selected_ret['reserve_datetime']));
+		$dirname = date(self::DATETIME_FORMAT_SAVE, $combine_reserve_time);
 
 		try {
 
 			// ディレクトリ移動
 			if ( chdir( self::PATH_COPY ) ) {
 
-				if( file_exists( $dir_name )){
+				if( file_exists( $dirname )){
 					
-					rename( $dir_name,  'BK_' . $dir_name );
+					// 削除
+					$command = 'rm -rf '. $dirname;
+					$ret = $this->execute($command, true);
 
-				}else{
-					
-					throw new \Exception('Copy directory name could not be changed.');
+					if ( $ret['return'] !== 0 ) {
+						$this->debug_echo('削除失敗');
+						throw new \Exception('Delete directory failed.');
+					}
 				}
 		
 			} else {
