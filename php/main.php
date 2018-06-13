@@ -1611,8 +1611,8 @@ class main
 					$max,
 					$this->options->_POST->branch_select_value,
 					$this->commit_hash,
-					$this->$combine_reserve_time,
-					$this->$convert_reserve_time,
+					$combine_reserve_time,
+					$convert_reserve_time,
 					$this->options->_POST->comment,
 					0,
 					$now
@@ -1737,8 +1737,8 @@ class main
 				$max,
 				$this->options->_POST->branch_select_value,
 				$this->commit_hash,
-				$this->$combine_reserve_time,
-				$this->$convert_reserve_time,
+				$combine_reserve_time,
+				$convert_reserve_time,
 				$this->options->_POST->comment,
 				0,
 				$now
