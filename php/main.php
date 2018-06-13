@@ -11,10 +11,12 @@ class main
 
 	// サーバのタイムゾーン
 	const TIME_ZONE = 'Asia/Tokyo';
-	// 時間フォーマット_表示用（Y-m-d H:i:s）
-	const TIME_FORMAT_DISPLAY = "Y-m-d H:i:s";
-	// 時間フォーマット_登録用（YmdHis）
-	const TIME_FORMAT_SET = "YmdHis";
+	// 時間フォーマット_表示用（Y-m-d H:i）
+	const TIME_FORMAT_DISPLAY = "Y-m-d H:i";
+	// 時間フォーマット_変換用（Y-m-d H:i:s）
+	const TIME_FORMAT_CONV = "Y-m-d H:i:s";
+	// 時間フォーマット_保存用（YmdHis）
+	const TIME_FORMAT_SAVE = "YmdHis";
 
 	// CSV区切り文字
 	const CSV_DELIMITER		= ',';
@@ -1017,7 +1019,7 @@ class main
 		}
 
 		// 公開予定日時の未来日時チェック
-		$now = date(self::TIME_FORMAT_DISPLAY);
+		$now = date(self::TIME_FORMAT_CONV);
 		$datetime = $this->options->_POST->reserve_date . ' ' . date('H:i:s',  strtotime($this->options->_POST->reserve_time));
 
 		if (strtotime($now) > strtotime($datetime)) {
@@ -1098,6 +1100,7 @@ class main
 			. '<tr>'
 			. '<th scope="row"></th>'
 			. '<th scope="row">公開予定日時</th>'
+			. '<th scope="row">（サーバ上日時）</th>'
 			. '<th scope="row">コミット</th>'
 			. '<th scope="row">ブランチ</th>'
 			. '<th scope="row">コメント</th>'
@@ -1112,7 +1115,8 @@ class main
 			
 			$ret .= '<tr>'
 				. '<td class="p-center"><input type="radio" name="target" value="' . $array['id'] . '"/></td>'
-				. '<td class="p-center">' . date('Y-m-d H:i',  strtotime($array['reserve_datetime'])) . '</td>'
+				. '<td class="p-center">' . date(self::TIME_FORMAT_DISPLAY,  strtotime($array['input_reserve_datetime'])) . '</td>'
+				. '<td class="p-center">' . date(self::TIME_FORMAT_DISPLAY,  strtotime($array['reserve_datetime'])) . '</td>'
 				. '<td class="p-center">' . $array['commit'] . '</td>'
 				. '<td class="p-center">' . $array['branch_name'] . '</td>'
 				. '<td>' . $array['comment'] . '</td>'
@@ -1159,6 +1163,7 @@ class main
 				. '<th scope="row"></th>'
 				. '<th scope="row">状態</th>'
 				. '<th scope="row">公開予定日時</th>'
+				. '<th scope="row">（サーバ上）</th>'
 				. '<th scope="row">コミット</th>'
 				. '<th scope="row">ブランチ</th>'
 				. '<th scope="row">コメント</th>'
@@ -1172,7 +1177,8 @@ class main
 			$ret .= '<tr>'
 				. '<td class="p-center"><input type="radio" name="target" value="' . $array['id'] . '"/></td>'
 				. '<td class="p-center">' . $this->convert_status( $array['status'] ). '</td>'
-				. '<td class="p-center">' . date('Y-m-d H:i',  strtotime($array['reserve_datetime'])) . '</td>'
+				. '<td class="p-center">' . date(self::TIME_FORMAT_DISPLAY,  strtotime($array['input_reserve_datetime'])) . '</td>'
+				. '<td class="p-center">' . date(self::TIME_FORMAT_DISPLAY,  strtotime($array['reserve_datetime'])) . '</td>'
 				. '<td class="p-center">' . $array['commit'] . '</td>'
 				. '<td class="p-center">' . $array['branch_name'] . '</td>'
 				. '<td>' . $array['comment'] . '</td>'
@@ -1369,7 +1375,7 @@ class main
 			$is_first = true;
 
 			// CSVリストをループ
-			while ($rowData = fgetcsv($handle, 0, $this->_delimiter, $this->_enclosure)) {
+			while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
 
 				if($is_first){
 			        // タイトル行
@@ -1425,7 +1431,7 @@ class main
 			$is_first = true;
 
 			// CSVリストをループ
-			while ($rowData = fgetcsv($handle, 0, $this->_delimiter, $this->_enclosure)) {
+			while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
 
 				if($is_first){
 			        // タイトル行
@@ -1494,7 +1500,7 @@ class main
 			$is_first = true;
 
 			// Loop through each line of the file in turn
-			while ($rowData = fgetcsv($handle, 0, $this->_delimiter, $this->_enclosure)) {
+			while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
 
 				if($is_first){
 			        // タイトル行
@@ -1556,7 +1562,7 @@ class main
 				$max = 0;
 
 				// Loop through each line of the file in turn
-				while ($rowData = fgetcsv($handle_r, 0, $this->_delimiter, $this->_enclosure)) {
+				while ($rowData = fgetcsv($handle_r, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
 
 					if($is_first){
 				        // タイトル行
@@ -1584,13 +1590,13 @@ class main
 				}
 
 				// 現在時刻
-				$now = date(self::TIME_FORMAT_DISPLAY);
+				$now = date(self::TIME_FORMAT_CONV);
 
 				// 日付と時刻を結合
 				$combine_reserve_time = combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
 
 				// サーバのタイムゾーン日時へ変換
-				$convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::TIME_FORMAT_DISPLAY);
+				$convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::TIME_FORMAT_CONV);
 
 
 				if ( is_null($convert_reserve_time) || !isset($convert_reserve_time)) {
@@ -1610,7 +1616,7 @@ class main
 					$now
 				);
 
-				fputcsv( $handle, $array, $this->_delimiter, $this->_enclosure);
+				fputcsv( $handle, $array, self::CSV_DELIMITER, self::CSV_ENCLOSURE);
 
 				fclose( $handle);
 			}
@@ -1643,49 +1649,6 @@ class main
 	}
 
 	/**
-	 * 削除処理（CSVから行削除）
-	 *
-	 * @return なし
-	 */
-	private function do_delete_btn() {
-
-		// $filename = realpath('.') . $this->list_filename;
-		$filename = self::CSV_LIST_FILENAME;
-
-		$selected_id =  $this->options->_POST->selected_id;
-
-		if (!file_exists($filename) && empty($selected_id)) {
-			$this->debug_echo('ファイルが存在しない、または、選択IDが不正です。');
-
-		} else {
-
-			$file = file($filename);
-
-			// Open file
-			$handle = fopen( $filename, "r" );
-			
-			$cnt = 0;
-
-			// Loop through each line of the file in turn
-			while ($rowData = fgetcsv($handle, 0, $this->_delimiter, $this->_enclosure)) {
-
-				$num = intval($rowData[0]);
-
-				if ($num == $selected_id) {
-					unset($file[$cnt]);
-					file_put_contents($filename, $file);
-					break;
-				}
-
-				$cnt++;
-			}
-		}
-
-		// Close file
-		fclose($handle);
-	}
-
-	/**
 	 * 変更処理（CSVへ行削除＆行追加）
 	 *
 	 * @return なし
@@ -1713,7 +1676,7 @@ class main
 			$is_first = true;
 
 			// Loop through each line of the file in turn
-			while ($rowData = fgetcsv($handle_r, 0, $this->_delimiter, $this->_enclosure)) {
+			while ($rowData = fgetcsv($handle_r, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
 
 				if($is_first){
 			        // タイトル行は飛ばす
@@ -1746,13 +1709,13 @@ class main
 
 
 			// 現在時刻
-			$now = date(self::TIME_FORMAT_DISPLAY);
+			$now = date(self::TIME_FORMAT_CONV);
 
 			// 日付と時刻を結合
 			$combine_reserve_time = combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
 
 			// サーバのタイムゾーン日時へ変換
-			$convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::TIME_FORMAT_DISPLAY);
+			$convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::TIME_FORMAT_CONV);
 
 
 			if ( is_null($convert_reserve_time) || !isset($convert_reserve_time)) {
@@ -1772,12 +1735,55 @@ class main
 				$now
 			);
 
-			fputcsv( $handle, $array, $this->_delimiter, $this->_enclosure);
+			fputcsv( $handle, $array, self::CSV_DELIMITER, self::CSV_ENCLOSURE);
 			fclose( $handle);
 		}
 
 		// Close file
 		fclose($handle_r);
+	}
+
+	/**
+	 * 削除処理（CSVから行削除）
+	 *
+	 * @return なし
+	 */
+	private function do_delete_btn() {
+
+		// $filename = realpath('.') . $this->list_filename;
+		$filename = self::CSV_LIST_FILENAME;
+
+		$selected_id =  $this->options->_POST->selected_id;
+
+		if (!file_exists($filename) && empty($selected_id)) {
+			$this->debug_echo('ファイルが存在しない、または、選択IDが不正です。');
+
+		} else {
+
+			$file = file($filename);
+
+			// Open file
+			$handle = fopen( $filename, "r" );
+			
+			$cnt = 0;
+
+			// Loop through each line of the file in turn
+			while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
+
+				$num = intval($rowData[0]);
+
+				if ($num == $selected_id) {
+					unset($file[$cnt]);
+					file_put_contents($filename, $file);
+					break;
+				}
+
+				$cnt++;
+			}
+		}
+
+		// Close file
+		fclose($handle);
 	}
 
 	/**
@@ -1796,7 +1802,7 @@ class main
 						'message' => '');
 	
 		// ディレクトリ名
-		$dirname = date(self::TIME_FORMAT_SET, 
+		$dirname = date(self::TIME_FORMAT_SAVE, 
 			strtotime($this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time)));
 
 		// 選択したブランチ
@@ -1900,12 +1906,12 @@ class main
 		$result = array('status' => true,
 						'message' => '');
 
-		$before_dir_name = date(self::TIME_FORMAT_SET, strtotime($this->combine_date_time($this->options->_POST->change_before_reserve_date, $this->options->_POST->change_before_reserve_time)));
+		$before_dir_name = date(self::TIME_FORMAT_SAVE, strtotime($this->combine_date_time($this->options->_POST->change_before_reserve_date, $this->options->_POST->change_before_reserve_time)));
 
 		$before_path = self::PATH_COPY . $before_dir_name;
 
 
-		$dir_name = date(self::TIME_FORMAT_SET, strtotime($this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time)));
+		$dir_name = date(self::TIME_FORMAT_SAVE, strtotime($this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time)));
 
 		// 選択したブランチ
 		$branch_name_org = $this->options->_POST->branch_select_value;
@@ -2029,7 +2035,7 @@ class main
 
 		$selected_ret = $this->get_selected_data();
 
-		$dir_name = date(self::TIME_FORMAT_SET, strtotime($selected_ret['reserve_datetime']));
+		$dir_name = date(self::TIME_FORMAT_SAVE, strtotime($selected_ret['reserve_datetime']));
 
 		try {
 
@@ -2085,7 +2091,7 @@ class main
 
 			// *** 公開予定から本番環境へ置き換えるものを1件抽出する。（抽出されたものが実行中の場合はスキップする　※処理終了）
 			// 現在時刻
-			$now = date(self::TIME_FORMAT_DISPLAY);
+			$now = date(self::TIME_FORMAT_CONV);
 			
 			// 公開予約の一覧を取得
 			$data_list = $this->get_csv_data_list_cron(0, $now);
@@ -2208,7 +2214,7 @@ class main
 			$is_first = true;
 
 			// CSVリストをループ
-			while ($rowData = fgetcsv($handle, 0, $this->_delimiter, $this->_enclosure)) {
+			while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
 
 				if($is_first){
 			        // タイトル行
