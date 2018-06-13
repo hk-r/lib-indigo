@@ -1261,12 +1261,8 @@ class main
 		// 削除ボタンが押下された場合
 		} elseif (isset($this->options->_POST->delete)) {
 		
-			if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
-				throw new \Exception("Combine date time failed.");
-			}
-
 			// Gitファイルの削除
-			$delete_ret = $this->file_delete($combine_reserve_time);
+			$delete_ret = $this->file_delete();
 	
 			$delete_ret = json_decode($delete_ret);
 
@@ -2173,7 +2169,7 @@ class main
 	 *
 	 * @return なし
 	 */
-	private function file_delete($combine_reserve_time) {
+	private function file_delete() {
 		
 		$this->debug_echo('■ file_delete start');
 
@@ -2185,7 +2181,7 @@ class main
 
 		$selected_ret = $this->get_selected_data();
 
-		$dirname = date(self::DATETIME_FORMAT_SAVE, strtotime($combine_reserve_time));
+		$dirname = date(self::DATETIME_FORMAT_SAVE, strtotime($selected_ret['reserve_datetime']));
 
 		try {
 
