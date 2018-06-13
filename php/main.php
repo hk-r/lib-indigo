@@ -11,12 +11,19 @@ class main
 
 	// サーバのタイムゾーン
 	const TIME_ZONE = 'Asia/Tokyo';
-	// 時間フォーマット_表示用（Y-m-d H:i）
-	const TIME_FORMAT_DISPLAY = "Y-m-d H:i";
-	// 時間フォーマット_変換用（Y-m-d H:i:s）
-	const TIME_FORMAT_CONV = "Y-m-d H:i:s";
-	// 時間フォーマット_保存用（YmdHis）
-	const TIME_FORMAT_SAVE = "YmdHis";
+
+	// 日時フォーマット（Y-m-d H:i:s）
+	const DATETIME_FORMAT = "Y-m-d H:i:s";
+	// 時間フォーマット（Y-m-d）
+	const DATE_FORMAT_YMD = "Y-m-d";
+	// 時間フォーマット（H:i）
+	const TIME_FORMAT_HI = "H:i";
+
+
+	// 日時フォーマット_表示用（Y-m-d H:i）
+	const DATETIME_FORMAT_DISPLAY = "Y-m-d H:i";
+	// 日時フォーマット_保存用（YmdHis）
+	const DATETIME_FORMAT_SAVE = "YmdHis";
 
 	// CSV区切り文字
 	const CSV_DELIMITER		= ',';
@@ -497,8 +504,8 @@ class main
 			$selected_ret = $this->get_selected_data();
 			
 			$branch_select_value = $selected_ret['branch_name'];
-			$reserve_date = date('Y-m-d',  strtotime($selected_ret['reserve_datetime']));
-			$reserve_time = date('H:i',  strtotime($selected_ret['reserve_datetime']));
+			$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($selected_ret['input_reserve_datetime']));
+			$reserve_time = date(self::TIME_FORMAT_HI,  strtotime($selected_ret['input_reserve_datetime']));
 			$comment = $selected_ret['comment'];
 
 		} else {
@@ -677,8 +684,8 @@ class main
 			$selected_ret = $this->get_selected_data();
 			
 			$branch_select_value = $selected_ret['branch_name'];
-			$reserve_date = date('Y-m-d',  strtotime($selected_ret['reserve_datetime']));
-			$reserve_time = date('H:i',  strtotime($selected_ret['reserve_datetime']));
+			$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($selected_ret['input_reserve_datetime']));
+			$reserve_time = date(self::TIME_FORMAT_HI,  strtotime($selected_ret['input_reserve_datetime']));
 			$comment = $selected_ret['comment'];
 	
 		} else {
@@ -1019,7 +1026,7 @@ class main
 		}
 
 		// 公開予定日時の未来日時チェック
-		$now = date(self::TIME_FORMAT_CONV);
+		$now = date(self::DATETIME_FORMAT);
 		$datetime = $this->options->_POST->reserve_date . ' ' . date('H:i:s',  strtotime($this->options->_POST->reserve_time));
 
 		if (strtotime($now) > strtotime($datetime)) {
@@ -1115,8 +1122,8 @@ class main
 			
 			$ret .= '<tr>'
 				. '<td class="p-center"><input type="radio" name="target" value="' . $array['id'] . '"/></td>'
-				. '<td class="p-center">' . date(self::TIME_FORMAT_DISPLAY,  strtotime($array['input_reserve_datetime'])) . '</td>'
-				. '<td class="p-center">' . date(self::TIME_FORMAT_DISPLAY,  strtotime($array['reserve_datetime'])) . '</td>'
+				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array['input_reserve_datetime'])) . '</td>'
+				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array['reserve_datetime'])) . '</td>'
 				. '<td class="p-center">' . $array['commit'] . '</td>'
 				. '<td class="p-center">' . $array['branch_name'] . '</td>'
 				. '<td>' . $array['comment'] . '</td>'
@@ -1177,8 +1184,8 @@ class main
 			$ret .= '<tr>'
 				. '<td class="p-center"><input type="radio" name="target" value="' . $array['id'] . '"/></td>'
 				. '<td class="p-center">' . $this->convert_status( $array['status'] ). '</td>'
-				. '<td class="p-center">' . date(self::TIME_FORMAT_DISPLAY,  strtotime($array['input_reserve_datetime'])) . '</td>'
-				. '<td class="p-center">' . date(self::TIME_FORMAT_DISPLAY,  strtotime($array['reserve_datetime'])) . '</td>'
+				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array['input_reserve_datetime'])) . '</td>'
+				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array['reserve_datetime'])) . '</td>'
 				. '<td class="p-center">' . $array['commit'] . '</td>'
 				. '<td class="p-center">' . $array['branch_name'] . '</td>'
 				. '<td>' . $array['comment'] . '</td>'
@@ -1281,7 +1288,7 @@ class main
 			}
 
 			// サーバのタイムゾーン日時へ変換
-			$convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::TIME_FORMAT_CONV);
+			$convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::DATETIME_FORMAT);
 			
 			if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
 				throw new \Exception("Convert time zone failed.");
@@ -1338,7 +1345,7 @@ class main
 			}
 
 			// サーバのタイムゾーン日時へ変換
-			$convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::TIME_FORMAT_CONV);
+			$convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::DATETIME_FORMAT);
 			
 			if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
 				throw new \Exception("Convert time zone failed.");
@@ -1635,7 +1642,7 @@ class main
 				}
 
 				// 現在時刻
-				$now = date(self::TIME_FORMAT_CONV);
+				$now = date(self::DATETIME_FORMAT);
 
 				// // 日付と時刻を結合
 				// $combine_reserve_time = $this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
@@ -1645,7 +1652,7 @@ class main
 				// }
 
 				// // サーバのタイムゾーン日時へ変換
-				// $convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::TIME_FORMAT_CONV);
+				// $convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::DATETIME_FORMAT);
 				
 				// if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
 				// 	throw new \Exception("Convert time zone failed.");
@@ -1756,7 +1763,7 @@ class main
 
 
 			// 現在時刻
-			$now = date(self::TIME_FORMAT_CONV);
+			$now = date(self::DATETIME_FORMAT);
 
 			// // 日付と時刻を結合
 			// $combine_reserve_time = $this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
@@ -1766,7 +1773,7 @@ class main
 			// }
 			
 			// // サーバのタイムゾーン日時へ変換
-			// $convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::TIME_FORMAT_CONV);
+			// $convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::DATETIME_FORMAT);
 
 			// if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
 			// 	throw new \Exception("Convert time zone failed.");
@@ -1851,7 +1858,7 @@ class main
 						'message' => '');
 	
 		// ディレクトリ名
-		$dirname = date(self::TIME_FORMAT_SAVE, strtotime($convert_reserve_time));
+		$dirname = date(self::DATETIME_FORMAT_SAVE, strtotime($convert_reserve_time));
 
 		// 選択したブランチ
 		$branch_name = trim(str_replace("origin/", "", $this->options->_POST->branch_select_value));
@@ -1955,13 +1962,13 @@ class main
 						'message' => '');
 
 		// 変更前の公開予定日時をフォーマット変換
-		$before_dir_name = date(self::TIME_FORMAT_SAVE, strtotime($this->combine_date_time($this->options->_POST->change_before_reserve_date, $this->options->_POST->change_before_reserve_time)));
+		$before_dir_name = date(self::DATETIME_FORMAT_SAVE, strtotime($this->combine_date_time($this->options->_POST->change_before_reserve_date, $this->options->_POST->change_before_reserve_time)));
 
 		// 変更前のcopyディレクトリパスを取得
 		$before_path = self::PATH_COPY . $before_dir_name;
 
 		// 今回作成するディレクトリ名
-		$dir_name = date(self::TIME_FORMAT_SAVE, $convert_reserve_time);
+		$dir_name = date(self::DATETIME_FORMAT_SAVE, $convert_reserve_time);
 
 		// 選択したブランチ
 		$branch_name_org = $this->options->_POST->branch_select_value;
@@ -2085,7 +2092,7 @@ class main
 
 		$selected_ret = $this->get_selected_data();
 
-		$dir_name = date(self::TIME_FORMAT_SAVE, strtotime($selected_ret['reserve_datetime']));
+		$dir_name = date(self::DATETIME_FORMAT_SAVE, strtotime($selected_ret['reserve_datetime']));
 
 		try {
 
@@ -2141,14 +2148,14 @@ class main
 
 			// *** 公開予定から本番環境へ置き換えるものを1件抽出する。（抽出されたものが実行中の場合はスキップする　※処理終了）
 			// 現在時刻
-			$now = date(self::TIME_FORMAT_CONV);
+			$now = date(self::DATETIME_FORMAT);
 			
 			// 公開予約の一覧を取得
 			$data_list = $this->get_csv_data_list_cron(0, $now);
 
 			if (!empty($data_list)) {
 
-				// 取得した一覧から最新の1件を取得
+				// 取得した一覧から最新の1件を取得（ymdhis形式で公開予定日時を取得）
 				$datetime_str = $this->get_datetime_str($data_list, 'reserve_datetime', SORT_DESC);
 			}
 
@@ -2325,7 +2332,7 @@ class main
 			// 公開予定日時の昇順へソート	
 			array_multisort($sort_array, $sort_kind, $array_list);
 			// 先頭行の公開予約日時
-			$ret = date('YmdHis', strtotime($array_list[0][$sort_name]));
+			$ret = date(self::DATETIME_FORMAT_SAVE, strtotime($array_list[0][$sort_name]));
 		}
 
 		return $ret;
@@ -2438,8 +2445,6 @@ class main
 
 		$t = new \DateTime($input_datetime, new \DateTimeZone(self::TIME_ZONE));
 
-		$this->debug_echo('　□ 2');
-
 		// タイムゾーン変更
 		$t->setTimeZone(new \DateTimeZone($timezone));
 	
@@ -2453,7 +2458,7 @@ class main
 	}
 
 	/**
-	 * ※デバッグ用
+	 * ※デバッグ用（ある程度実装が進んだら削除する）
 	 *	 
 	 */
 	function debug_echo($text) {
