@@ -1998,15 +1998,32 @@ class main
 			// コピーディレクトリへ移動
 			if ( chdir(self::PATH_COPY) ) {
 
-				// 公開予定のディレクトリがない場合は終了
+				
 				if ( !file_exists($before_dirname) ) {
 
 					$this->debug_echo( '　□ $before_dirname' . $before_dirname);
 					throw new \Exception('Publish directory not found.');
 				}
 
+				// ディレクトリ名が変更になる場合はリネームする
+				if ($before_dirname != $dirname) {
+
+					if ( file_exists( $before_dirname ) && !file_exists( $dirname ) ){
+						
+						rename( $before_dirname, $dirname );
+
+					} else {
+					// 名前変更前のディレクトリがない場合、または名前変更後のディレクトリが存在する場合は処理終了
+
+						$this->debug_echo('　□ $before_dirname' . $before_dirname);
+						$this->debug_echo('　□ $dirname' . $dirname);
+
+						throw new \Exception('Copy directory name could not be changed.');
+					}
+				}
+
 				// 公開予定ディレクトリへ移動
-				if ( chdir( $before_dirname ) ) {
+				if ( chdir( $dirname ) ) {
 
 					// 現在のブランチ取得
 					exec( 'git branch', $output);
@@ -2064,33 +2081,6 @@ class main
 					// エラー処理
 					throw new \Exception('Copy publish directory not found.');
 				}
-
-				// コピーディレクトリへ移動
-				if ( chdir(self::PATH_COPY) ) {
-
-					// ディレクトリ名が変更になる場合はリネームする
-					if ($before_dirname != $dirname) {
-
-						if ( file_exists( $before_dirname ) && !file_exists( $dirname ) ){
-							
-							rename( $before_dirname, $dirname );
-
-						} else {
-
-							$this->debug_echo('　□ $before_dirname' . $before_dirname);
-							$this->debug_echo('　□ $dirname' . $dirname);
-
-							throw new \Exception('Copy directory name could not be changed.');
-						}
-					}
-
-				} else {
-					// コピー用のディレクトリが存在しない場合
-
-					// エラー処理
-					throw new \Exception('Copy directory not found.');
-				}	
-
 			
 			} else {
 				// コピー用のディレクトリが存在しない場合
