@@ -1287,15 +1287,8 @@ class main
 				throw new \Exception("Combine date time failed.");
 			}
 
-			// サーバのタイムゾーン日時へ変換
-			$convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::DATETIME_FORMAT);
-			
-			if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
-				throw new \Exception("Convert time zone failed.");
-			}
-
 			// Gitファイルの取得
-			$add_ret = $this->file_copy($convert_reserve_time);
+			$add_ret = $this->file_copy($combine_reserve_time);
 	
 			$add_ret = json_decode($add_ret);
 
@@ -1310,6 +1303,13 @@ class main
 				</script>';
 
 			} else {
+
+				// サーバのタイムゾーン日時へ変換
+				$convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::DATETIME_FORMAT);
+				
+				if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
+					throw new \Exception("Convert time zone failed.");
+				}
 
 				// CSV入力情報の追加
 				$this->insert_list_csv_data($combine_reserve_time, $convert_reserve_time);
@@ -1344,15 +1344,8 @@ class main
 				throw new \Exception("Combine date time failed.");
 			}
 
-			// サーバのタイムゾーン日時へ変換
-			$convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::DATETIME_FORMAT);
-			
-			if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
-				throw new \Exception("Convert time zone failed.");
-			}
-
-			// Gitファイルの取得
-			$update_ret = $this->file_update($convert_reserve_time);
+			// Gitファイルをcopyディレクトリへコピー（ディレクトリ名は入力された日付）
+			$update_ret = $this->file_update($combine_reserve_time);
 	
 			$update_ret = json_decode($update_ret);
 
@@ -1367,6 +1360,14 @@ class main
 				</script>';
 
 			} else {
+
+
+				// サーバのタイムゾーン日時へ変換
+				$convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::DATETIME_FORMAT);
+				
+				if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
+					throw new \Exception("Convert time zone failed.");
+				}
 
 				// CSV入力情報の変更
 				$this->update_list_csv_data($combine_reserve_time, $convert_reserve_time);
@@ -1847,7 +1848,7 @@ class main
 	 *
 	 * @return なし
 	 */
-	private function file_copy($convert_reserve_time) {
+	private function file_copy($combine_reserve_time) {
 
 		$this->debug_echo('■ file_copy start');
 
@@ -1858,7 +1859,7 @@ class main
 						'message' => '');
 	
 		// ディレクトリ名
-		$dirname = date(self::DATETIME_FORMAT_SAVE, strtotime($convert_reserve_time));
+		$dirname = date(self::DATETIME_FORMAT_SAVE, strtotime($combine_reserve_time));
 
 		// 選択したブランチ
 		$branch_name = trim(str_replace("origin/", "", $this->options->_POST->branch_select_value));
@@ -1953,7 +1954,7 @@ class main
 	 *
 	 * @return なし
 	 */
-	private function file_update($convert_reserve_time)
+	private function file_update($combine_reserve_time)
 	{
 		$current_dir = realpath('.');
 
@@ -1968,7 +1969,7 @@ class main
 		$before_path = self::PATH_COPY . $before_dir_name;
 
 		// 今回作成するディレクトリ名
-		$dir_name = date(self::DATETIME_FORMAT_SAVE, $convert_reserve_time);
+		$dir_name = date(self::DATETIME_FORMAT_SAVE, $combine_reserve_time);
 
 		// 選択したブランチ
 		$branch_name_org = $this->options->_POST->branch_select_value;
