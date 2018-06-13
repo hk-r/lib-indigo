@@ -1979,13 +1979,13 @@ class main
 						'message' => '');
 
 		// 変更前の公開予定日時をフォーマット変換
-		$before_dir_name = date(self::DATETIME_FORMAT_SAVE, strtotime($this->combine_date_time($this->options->_POST->change_before_reserve_date, $this->options->_POST->change_before_reserve_time)));
+		$before_dirname = date(self::DATETIME_FORMAT_SAVE, strtotime($this->combine_date_time($this->options->_POST->change_before_reserve_date, $this->options->_POST->change_before_reserve_time)));
 
-		// 変更前のcopyディレクトリパスを取得
-		$before_path = self::PATH_COPY . $before_dir_name;
+		// // 変更前のcopyディレクトリパスを取得
+		// $before_path = self::PATH_COPY . $before_dir_name;
 
 		// 今回作成するディレクトリ名
-		$dir_name = date(self::DATETIME_FORMAT_SAVE, $combine_reserve_time);
+		$dirname = date(self::DATETIME_FORMAT_SAVE, $combine_reserve_time);
 
 		// 選択したブランチ
 		$branch_name_org = $this->options->_POST->branch_select_value;
@@ -1999,14 +1999,14 @@ class main
 			if ( chdir(self::PATH_COPY) ) {
 
 				// 公開予定のディレクトリがない場合は終了
-				if ( !file_exists($before_path) ) {
+				if ( !file_exists($before_dirname) ) {
 
-					$this->debug_echo( '　□ $before_path：' . $before_path);
+					$this->debug_echo( '　□ $before_dirname' . $before_dirname);
 					throw new \Exception('Publish directory not found.');
 				}
 
 				// 公開予定ディレクトリへ移動
-				if ( chdir( $before_path ) ) {
+				if ( chdir( $before_dirname ) ) {
 
 					// 現在のブランチ取得
 					exec( 'git branch', $output);
@@ -2069,16 +2069,16 @@ class main
 				if ( chdir(self::PATH_COPY) ) {
 
 					// ディレクトリ名が変更になる場合はリネームする
-					if ($before_dir_name != $dir_name) {
+					if ($before_dirname != $dirname) {
 
-						if ( file_exists( $before_dir_name ) && !file_exists( $dir_name ) ){
+						if ( file_exists( $before_dirname ) && !file_exists( $dirname ) ){
 							
-							rename( $before_dir_name, $dir_name );
+							rename( $before_dirname, $dirname );
 
 						} else {
 
-							$this->debug_echo('　□ $before_dir_name：' . $before_dir_name);
-							$this->debug_echo('　□ $dir_name：' . $dir_name);
+							$this->debug_echo('　□ $before_dirname' . $before_dirname);
+							$this->debug_echo('　□ $dirname' . $dirname);
 
 							throw new \Exception('Copy directory name could not be changed.');
 						}
