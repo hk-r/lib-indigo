@@ -1231,6 +1231,16 @@ class main
 		$init_ret = $this->init();
 		$init_ret = json_decode($init_ret);
 
+		// git init
+		$command = 'TZ=Asia/Hongkong date "+%Y%m%d%H%M%S"';
+		$ret = $this->execute($command, false);
+
+
+		foreach ( $ret['output'] as $element ) {
+
+			echo '日本時間:' . $element;
+		}
+
 		// 初期表示画面から遷移されたか
 		$init_trans_flg = false;
 
