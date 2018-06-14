@@ -32,7 +32,7 @@ class main
 	const CSV_ENCLOSURE		= '"';
 
 	// 公開予約管理CSVファイル
-	const CSV_LIST_FILENAME = './../indigo_dir/csv/list.csv';
+	const CSV_LIST_FILENAME = '/csv/list.csv';
 	// // 警告エラー時のお知らせCSVファイル
 	// const CSV_LIST_FILENAME = './../indigo_dir/csv/alert.csv';
 
@@ -40,21 +40,26 @@ class main
 	 * 画像パス定義
 	 */
 	// 右矢印
-	const IMG_ARROW_RIGHT = './../indigo_dir/images/arrow_right.png';
+	const IMG_ARROW_RIGHT = '/images/arrow_right.png';
 	// エラーアイコン
-	const IMG_ERROR_ICON = './../indigo_dir/images/error_icon.png';
+	const IMG_ERROR_ICON = '/images/error_icon.png';
 
 
 	/**
 	 * 公開用の操作ディレクトリパス定義
 	 */
 	// backupディレクトリパス
-	const PATH_BACKUP = './../indigo_dir/backup/';
+	const PATH_BACKUP = '/backup/';
 	// copyディレクトリパス
-	const PATH_COPY = './../indigo_dir/copy/';
+	const PATH_COPY = '/copy/';
 	// logディレクトリパス
-	const PATH_LOG = './../indigo_dir/log/';
+	const PATH_LOG = '/log/';
 
+
+	// 生成ディレクトリパス（後々パラメタ化する）
+	const PATH_CREATE_DIR = './../indigo_dir/';
+	// 本番パス（後々パラメタ化する）
+	const PATH_PROJECT_DIR = './../../indigo-test-project/';
 
 	/**
 	 * 公開予定管理CSVの列番号定義
@@ -876,7 +881,7 @@ class main
 	 */
 	private function create_change_check_dialog_html() {
 		
-		$img_filename = realpath('.') . self::IMG_ARROW_RIGHT;
+		$img_filename = self::PATH_CREATE_DIR . self::IMG_ARROW_RIGHT;
 
 		$ret = '<div class="dialog" id="modal_dialog">'
 			. '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
@@ -1486,7 +1491,7 @@ class main
 
 		$ret_array = array();
 
-		$filename = self::CSV_LIST_FILENAME;
+		$filename = self::PATH_CREATE_DIR . self::CSV_LIST_FILENAME;
 
 		try {
 
@@ -1555,7 +1560,7 @@ class main
 		$this->debug_echo('■ get_selected_data start');
 
 		// $filename = realpath('.') . $this->list_filename;
-		$filename = self::CSV_LIST_FILENAME;
+		$filename = self::PATH_CREATE_DIR . self::CSV_LIST_FILENAME;
 
 		$selected_id =  $this->options->_POST->selected_id;
 
@@ -1629,7 +1634,7 @@ class main
 		try {
 
 			// $filename = realpath('.') . $this->list_filename;
-			$filename = self::CSV_LIST_FILENAME;
+			$filename = self::PATH_CREATE_DIR . self::CSV_LIST_FILENAME;
 
 			if (!file_exists($filename)) {
 				$this->debug_echo('公開予約一覧ファイルが存在しない');
@@ -1745,7 +1750,7 @@ class main
 						'message' => '');
 	
 		// $filename = realpath('.') . $this->list_filename;
-		$filename = self::CSV_LIST_FILENAME;
+		$filename = self::PATH_CREATE_DIR . self::CSV_LIST_FILENAME;
 
 		$selected_id =  $this->options->_POST->selected_id;
 
@@ -1863,7 +1868,7 @@ class main
 	private function delete_list_csv_data() {
 
 		// $filename = realpath('.') . $this->list_filename;
-		$filename = self::CSV_LIST_FILENAME;
+		$filename = self::PATH_CREATE_DIR . self::CSV_LIST_FILENAME;
 
 		$selected_id =  $this->options->_POST->selected_id;
 
@@ -1922,17 +1927,17 @@ class main
 		try {
 
 			// コピーディレクトリが存在しない場合は作成
-			if ( !$this->is_exists_mkdir(self::PATH_COPY) ) {
+			if ( !$this->is_exists_mkdir(self::PATH_CREATE_DIR . self::PATH_COPY) ) {
 
 					// エラー処理
 					throw new \Exception('Creation of copy directory failed.');
 			}
 
 			// コピーディレクトリへ移動
-			if ( chdir(self::PATH_COPY) ) {
+			if ( chdir(self::PATH_CREATE_DIR . self::PATH_COPY) ) {
 
 				// コピーディレクトリをデリートインサート
-				if ( !$this->is_exists_remkdir(self::PATH_COPY, $dirname) ) {
+				if ( !$this->is_exists_remkdir(self::PATH_CREATE_DIR . self::PATH_COPY, $dirname) ) {
 
 					// エラー処理
 					throw new \Exception('Creation of copy publish directory failed.');
@@ -2042,7 +2047,7 @@ class main
 
 
 			// コピーディレクトリへ移動
-			if ( chdir(self::PATH_COPY) ) {
+			if ( chdir(self::PATH_CREATE_DIR . self::PATH_COPY) ) {
 
 				
 				if ( !file_exists($before_dirname) ) {
@@ -2186,7 +2191,7 @@ class main
 		try {
 
 			// ディレクトリ移動
-			if ( chdir( self::PATH_COPY ) ) {
+			if ( chdir( self::PATH_CREATE_DIR . self::PATH_COPY ) ) {
 
 				// ディレクトリが存在しない場合は無視する
 				if( file_exists( $dirname )) {
@@ -2261,22 +2266,22 @@ class main
 
 			// #本番環境ディレクトリのパス取得（１）
 			// 本番環境の絶対パスを取得
-			$honban_real_path = realpath('.') . $this->honban_path;
+			$honban_real_path = self::PATH_CREATE_DIR . $this->honban_path;
 			// echo '<br>' . '本番環境絶対パス：';
 			// echo $honban_real_path;
 
 			// backupディレクトリの絶対パスを取得
-			$bk_real_path = realpath('.') . self::PATH_BACKUP;
+			$bk_real_path = self::PATH_CREATE_DIR . self::PATH_BACKUP;
 			// echo '<br>' . 'バックアップフォルダの絶対パス：';
 			// echo $bk_real_path;
 
 			// copyディレクトリの絶対パスを取得
-			$copy_real_path = realpath('.') . self::PATH_COPY;
+			$copy_real_path = self::PATH_CREATE_DIR . self::PATH_COPY;
 			// echo '<br>' . 'コピーフォルダの絶対パス：';
 			// echo $copy_real_path;
 
 			// logディレクトリの絶対パスを取得
-			$log_real_path = realpath('.') . self::PATH_LOG;
+			$log_real_path = self::PATH_CREATE_DIR . self::PATH_LOG;
 			// echo '<br>' . 'ログフォルダの絶対パス：';
 			// echo $log_real_path;
 
@@ -2353,7 +2358,7 @@ class main
 		$ret_array = array();
 
 		// $filename = realpath('.') . $this->list_filename;
-		$filename = self::CSV_LIST_FILENAME;
+		$filename = self::PATH_CREATE_DIR . self::CSV_LIST_FILENAME;
 
 		if (!file_exists($filename)) {
 		
@@ -2548,6 +2553,8 @@ class main
 	
 		$ret = $t->format($format);
 		
+		$this->debug_echo('タイムゾーン：' . $timezone);
+
 		$this->debug_echo($t->format($format));
 	
 		$this->debug_echo('■ convert_timezone_datetime end');
