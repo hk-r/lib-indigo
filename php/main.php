@@ -1224,6 +1224,8 @@ class main
 	 */
 	public function run() {
 	
+		$this->debug_echo("絶対パス：", realpath('.'));
+
 		// ダイアログの表示
 		$dialog_disp = '';
 
@@ -1946,7 +1948,7 @@ class main
 			// コピーディレクトリへ移動
 			if ( chdir(self::PATH_CREATE_DIR . self::PATH_COPY) ) {
 
-				// コピーディレクトリをデリートインサート
+				// 公開予定ディレクトリをデリートインサート
 				if ( !$this->is_exists_remkdir(self::PATH_CREATE_DIR . self::PATH_COPY, $dirname) ) {
 
 					// エラー処理
@@ -2253,6 +2255,13 @@ class main
 	 */
 	private function manual_release() {
 
+		$current_dir = realpath('.');
+
+		$output = "";
+		$result = array('status' => true,
+						'message' => '');
+
+		$project_real_path = '';
 
 		try {
 
@@ -2260,95 +2269,91 @@ class main
 			// $this->file_control->process();
 
 			// *** 公開予定から本番環境へ置き換えるものを1件抽出する。（抽出されたものが実行中の場合はスキップする　※処理終了）
-			// 現在時刻
-			$now = date(self::DATETIME_FORMAT);
-			
+
+			// 現在時刻取得
+			$now = '';
+
+			$command = 'TZ=Asia/Tokyo date "+%Y%m%d%H%M%S"';
+			$ret = $this->execute($command, false);
+
+			foreach ( $ret['output'] as $element ) {
+
+				echo '日本時間:' . $element;
+				$now = $element;
+			}
+
 			// 公開予約の一覧を取得
 			$data_list = $this->get_csv_data_list_cron(0, $now);
+
+			$dirname = '';
 
 			if (!empty($data_list)) {
 
 				// 取得した一覧から最新の1件を取得（ymdhis形式で公開予定日時を取得）
-				$datetime_str = $this->get_datetime_str($data_list, 'reserve_datetime', SORT_DESC);
+				$dirname = $this->get_datetime_str($data_list, 'reserve_datetime', SORT_DESC);
 			}
 
-			// *** 本番環境よりバックアップ取得
-
-			// #本番環境ディレクトリのパス取得（１）
-			// 本番環境の絶対パスを取得
-			$honban_real_path = self::PATH_CREATE_DIR . $this->honban_path;
-			// echo '<br>' . '本番環境絶対パス：';
-			// echo $honban_real_path;
-
-			// backupディレクトリの絶対パスを取得
-			$bk_real_path = self::PATH_CREATE_DIR . self::PATH_BACKUP;
-			// echo '<br>' . 'バックアップフォルダの絶対パス：';
-			// echo $bk_real_path;
-
-			// copyディレクトリの絶対パスを取得
-			$copy_real_path = self::PATH_CREATE_DIR . self::PATH_COPY;
-			// echo '<br>' . 'コピーフォルダの絶対パス：';
-			// echo $copy_real_path;
-
-			// logディレクトリの絶対パスを取得
-			$log_real_path = self::PATH_CREATE_DIR . self::PATH_LOG;
-			// echo '<br>' . 'ログフォルダの絶対パス：';
-			// echo $log_real_path;
+			if ( !isnull($dirname) && isset($dirname)) {
 
 
-			// ディレクトリ作成
-			if (!mkdir("/var/www/html/sample-lib-indigo/indigo_dir/backup", 0777, true)) {
-				// ディレクトリが作成できない場合
+				// 本番環境のディレクトリへ移動
+				if ( chdir(self::PATH_PROJECT_DIR ) ) {
 
-				$this->debug_echo('error');
+					$project_real_path = realpath('.');
+					chdir($current_dir);
 
-				// エラー処理
-				throw new \Exception('Creation of backup directory failed.');
+					$this->debug_echo('　★本番環境の絶対パス：' . $project_real_path);
+
+				} else {
+
+					// エラー処理
+					throw new \Exception('Project directory change directory failed.');
+				}
+
+				// *** 本番環境よりバックアップ取得
+
+				// backupディレクトリのパスを取得
+				$bk_real_path = self::PATH_PROJECT_DIR;
+				// copyディレクトリの絶対パスを取得
+				$copy_real_path = self::PATH_CREATE_DIR . self::PATH_COPY;
+				// logディレクトリの絶対パスを取得
+				$log_real_path = self::PATH_CREATE_DIR . self::PATH_LOG;
+
+
+				// バックアップディレクトリが存在しない場合は作成
+				if ( !$this->is_exists_mkdir(self::PATH_CREATE_DIR . self::PATH_BACKUP) ) {
+
+						// エラー処理
+						throw new \Exception('Creation of backup directory failed.');
+				}
+
+				// バックアップディレクトリへ移動
+				if ( chdir(self::PATH_CREATE_DIR . self::PATH_BACKUP) ) {
+
+					// 公開予定ディレクトリをデリートインサート
+					if ( !$this->is_exists_remkdir(self::PATH_CREATE_DIR . self::PATH_BACKUP, $dirname) ) {
+
+						// エラー処理
+						throw new \Exception('Creation of copy publish directory failed.');
+					}
+
+					// 公開予定ディレクトリへ移動
+					if ( chdir($dirname) ) {
+
+						// 本番環境からファイルをコピー
+						$command = 'cp -pR ' . $project_real_path . '/* ' . './' ;
+						$this->execute($command, false);
+
+					} else {
+						// コピー用のディレクトリが存在しない場合
+
+						// エラー処理
+						throw new \Exception('Copy publish directory not found.');
+					}
+				}	
+			} else {
+
 			}
-
-
-			// // #backupディレクトリに公開予定日時を名前としたフォルダを作成（２）
-			// if (!file_exists($bk_real_path . $datetime_str)) {
-
-			// 	// ディレクトリ作成
-			// 	if (!mkdir($bk_real_path . $datetime_str, 0777, true)) {
-			// 		// ディレクトリが作成できない場合
-
-			// 		// エラー処理
-			// 		throw new \Exception('Creation of backup directory failed.');
-			// 	}
-			// }
-
-			// #（１）の中身を（２）へコピー
-			$command = 'cp -r '. $honban_real_path . '* ' . $bk_real_path . $datetime_str . ' 2>&1';
-			exec($command, $output, $status);
-			error_log('['.date(DATE_ATOM).'] '.$command."\n".'return code : '.$status."\n", 3, '../logs/ansible-view.log');
-			
-			foreach($output as $row){
-	    		error_log($row."\n", 3, '/var/log/test/test.log');
-			}
-			
-			var_dump($output);
-			
-			// **成功したら
-			//   （１）の中身を削除
-			//       *成功したら
-			//        TODO:実行処理追加！
-			 		if (chdir($honban_real_path)) {
-			       		exec('rm -rf ./* ./.*', $output);
-			 		}
-
-			//      次の処理へ！
-
-			//       *失敗したら
-			// 			・失敗ログを残し、処理終了
-			 		if (chdir($honban_real_path)) {
-			       		exec('rm -rf ./* ./.*', $output);
-			 		}
-
-
-			// （３）の中身を（１）へコピー
-			 exec('cp -r '. $copy_real_path . $datetime_str . '* ' . $honban_real_path . $datetime_str, $output);
 
 		} catch (\Exception $e) {
 
@@ -2395,19 +2400,8 @@ class main
 			        continue;
 			    }
 			    
-				$set_flg = true;
-
-			    // 指定ステータスと一致しない場合
-			    if (isset($status) && ($rowData[self::CSV_COLUMN_STATUS] != $status)) {
-					$set_flg = false;
-			    }
-
 			    // 指定日時より未来日時の場合
 			    if (isset($now) && ($rowData[self::CSV_COLUMN_SERVER_DATETIME] > $now)) {
-			    	$set_flg = false;
-			    }
-
-			    if ($set_flg) {
 			    	// タイトルと値の2次元配列作成
 			    	$ret_array[] = array_combine ($title_array, $rowData);
 			    }
