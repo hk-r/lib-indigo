@@ -1233,15 +1233,15 @@ class main
 		$init_ret = $this->init();
 		$init_ret = json_decode($init_ret);
 
-		// git init
-		$command = 'TZ=Hongkong date "+%Y%m%d%H%M%S"';
-		$ret = $this->execute($command, false);
+		// // git init
+		// $command = 'TZ=Hongkong date "+%Y%m%d%H%M%S"';
+		// $ret = $this->execute($command, false);
 
 
-		foreach ( $ret['output'] as $element ) {
+		// foreach ( $ret['output'] as $element ) {
 
-			echo '日本時間:' . $element;
-		}
+		// 	echo '日本時間:' . $element;
+		// }
 
 		// 初期表示画面から遷移されたか
 		$init_trans_flg = false;
@@ -2255,6 +2255,8 @@ class main
 	 */
 	private function manual_release() {
 
+		$this->debug_echo('■ manual_release start');
+
 		$current_dir = realpath('.');
 
 		$output = "";
@@ -2278,7 +2280,6 @@ class main
 
 			foreach ( $ret['output'] as $element ) {
 
-				echo '日本時間:' . $element;
 				$now = $element;
 			}
 
@@ -2293,8 +2294,7 @@ class main
 				$dirname = $this->get_datetime_str($data_list, 'reserve_datetime', SORT_DESC);
 			}
 
-			if ( !isnull($dirname) && isset($dirname)) {
-
+			if ( $dirname ) {
 
 				// 本番環境のディレクトリへ移動
 				if ( chdir(self::PATH_PROJECT_DIR ) ) {
@@ -2302,7 +2302,7 @@ class main
 					$project_real_path = realpath('.');
 					chdir($current_dir);
 
-					$this->debug_echo('　★本番環境の絶対パス：' . $project_real_path);
+					$this->debug_echo('　▲本番環境の絶対パス：' . $project_real_path);
 
 				} else {
 
@@ -2345,20 +2345,40 @@ class main
 						$this->execute($command, false);
 
 					} else {
+
 						// コピー用のディレクトリが存在しない場合
 
 						// エラー処理
 						throw new \Exception('Copy publish directory not found.');
 					}
-				}	
+				}
+
 			} else {
 
+					$this->debug_echo("対象なし");
 			}
-
+		
 		} catch (\Exception $e) {
 
-			$this->debug_echo("例外キャッチ：", $e->getMessage());
+			// set_time_limit(30);
+
+			$result['status'] = false;
+			$result['message'] = $e->getMessage();
+
+			chdir($current_dir);
+			return json_encode($result);
 		}
+
+		// set_time_limit(30);
+
+		$result['status'] = true;
+
+		chdir($current_dir);
+
+		$this->debug_echo('■ manual_release end');
+
+		return json_encode($result);
+
 	}
 
 	
@@ -2557,7 +2577,7 @@ class main
 	
 		$ret = $t->format($format);
 		
-		$this->debug_echo('タイムゾーン：' . $timezone);
+		// $this->debug_echo('タイムゾーン：' . $timezone);
 
 		$this->debug_echo($t->format($format));
 	
