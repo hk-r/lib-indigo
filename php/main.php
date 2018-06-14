@@ -1246,7 +1246,8 @@ class main
 		//timezone設定
 		date_default_timezone_set('Asia/Tokyo');
 
-		echo "GMT：" . gmdate(DATE_ISO8601, time());
+		echo "GMT：" . gmdate(DATE_ISO8601, time()). "\n";
+		echo "date：" . date(DATE_ISO8601, time()). "\n";
 
 		// 初期表示画面から遷移されたか
 		$init_trans_flg = false;
