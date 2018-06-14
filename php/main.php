@@ -1224,7 +1224,7 @@ class main
 	 */
 	public function run() {
 	
-		$this->debug_echo("絶対パス：", realpath('.'));
+		$this->debug_echo("絶対パス：" . realpath('.'));
 
 		// ダイアログの表示
 		$dialog_disp = '';
