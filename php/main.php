@@ -1243,7 +1243,10 @@ class main
 		// 	echo '日本時間:' . $element;
 		// }
 
-		echo "GMT：" . new \gmdate();
+		//timezone設定
+		date_default_timezone_set('Asia/Tokyo');
+
+		echo "GMT：" . new \gmdate(DATE_ISO8601);
 
 		// 初期表示画面から遷移されたか
 		$init_trans_flg = false;
