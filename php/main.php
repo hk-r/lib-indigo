@@ -1232,7 +1232,7 @@ class main
 		$init_ret = json_decode($init_ret);
 
 		// git init
-		$command = 'TZ=Asia/Hongkong date "+%Y%m%d%H%M%S"';
+		$command = 'TZ=Hongkong date "+%Y%m%d%H%M%S"';
 		$ret = $this->execute($command, false);
 
 
