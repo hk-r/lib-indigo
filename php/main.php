@@ -1249,7 +1249,7 @@ class main
 		echo "GMT：" . gmdate(DATE_ISO8601, time()). "\n";
 		echo "date：" . date(DATE_ISO8601, time()). "\n";
 		echo "date：" . date(DATE_ISO8601, gmdate(DATE_ISO8601, time())). "\n";
-
+		echo "date：" . date("e", date(DATE_ISO8601, time())). "\n";
 		// 初期表示画面から遷移されたか
 		$init_trans_flg = false;
 
