@@ -1243,6 +1243,8 @@ class main
 		// 	echo '日本時間:' . $element;
 		// }
 
+		echo "GMT：" . new \gmdate();
+
 		// 初期表示画面から遷移されたか
 		$init_trans_flg = false;
 
