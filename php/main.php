@@ -1548,19 +1548,15 @@ class main
 
 				$title_array = array();
 
-				// $is_first = true;
+				$is_first = true;
 
 				// CSVリストをループ
 				while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
 
-					// if($is_first){
-				 //        // タイトル行
-				 //        foreach ($rowData as $k => $v) {
-				 //        	$title_array[] = $v;
-				 //        }
-				 //        $is_first = false;
-				 //        continue;
-				 //    }
+					if($is_first){
+				        $is_first = false;
+				        continue;
+				    }
 				    
 					// $set_flg = true;
 
@@ -1624,19 +1620,15 @@ class main
 				
 				$title_array = array();
 
-				// $is_first = true;
+				$is_first = true;
 
 				// Loop through each line of the file in turn
 				while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
 
-					// if($is_first){
-				 //        // タイトル行
-				 //        foreach ($rowData as $k => $v) {
-				 //        	$title_array[] = $v;
-				 //        }
-				 //        $is_first = false;
-				 //        continue;
-				 //    }
+					if($is_first){
+				        $is_first = false;
+				        continue;
+				    }
 
 					$num = intval($rowData[WATING_CSV_COLUMN_ID]);
 
