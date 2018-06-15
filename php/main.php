@@ -1624,7 +1624,7 @@ class main
 				
 				$title_array = array();
 
-				$is_first = true;
+				// $is_first = true;
 
 				// Loop through each line of the file in turn
 				while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
@@ -1657,6 +1657,8 @@ class main
 			echo "例外キャッチ：", $e->getMessage(), "\n";
 			return $ret_array;
 		}
+
+		var_dump($ret_array);
 
 		$this->debug_echo('■ get_selected_data end');
 
