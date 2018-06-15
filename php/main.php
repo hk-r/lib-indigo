@@ -1630,7 +1630,7 @@ class main
 				        continue;
 				    }
 
-					$num = intval($rowData[WATING_CSV_COLUMN_ID]);
+					$num = intval($rowData[self::WATING_CSV_COLUMN_ID]);
 
 					$this->debug_echo('　★num：' . $num);
 					$this->debug_echo('　★select_id：' . $selected_id);
