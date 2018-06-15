@@ -69,6 +69,8 @@ class main
 	const WATING_CSV_COLUMN_BRANCH = 2;		// ブランチ名
 	const WATING_CSV_COLUMN_COMMIT = 3;		// コミットハッシュ値（短縮）
 	const WATING_CSV_COLUMN_COMMENT = 4;	// コメント
+	const WATING_CSV_COLUMN_REGIST = 5;		// 登録日時
+	const WATING_CSV_COLUMN_UPDATE = 6;		// 更新日時
 
 	/**
 	 * 公開実施管理CSVの列番号定義
@@ -1382,7 +1384,7 @@ class main
 				}
 
 				// CSV入力情報の追加
-				$this->insert_list_csv_data($combine_reserve_time, $convert_reserve_time);
+				$this->insert_list_csv_data($convert_reserve_time);
 
 			}
 
@@ -1433,7 +1435,7 @@ class main
 				}
 
 				// CSV入力情報の変更
-				$this->update_list_csv_data($combine_reserve_time, $convert_reserve_time);
+				$this->update_list_csv_data($convert_reserve_time);
 
 			}
 
@@ -1665,7 +1667,7 @@ class main
 	 *
 	 * @return なし
 	 */
-	private function insert_list_csv_data($combine_reserve_time, $convert_reserve_time){
+	private function insert_list_csv_data($convert_reserve_time){
 
 		$output = "";
 		$result = array('status' => true,
@@ -1741,16 +1743,24 @@ class main
 				// }
 
 				// id, ブランチ名, コミット, 公開予定日時, コメント, 状態, 設定日時
-				$array = array(
-					$max,
-					$this->options->_POST->branch_select_value,
-					$this->commit_hash,
-					$combine_reserve_time,
-					$convert_reserve_time,
-					$this->options->_POST->comment,
-					0,
-					$now
-				);
+				// $array = array(
+				// 	$max,
+				// 	$this->options->_POST->branch_select_value,
+				// 	$this->commit_hash,
+				// 	$combine_reserve_time,
+				// 	$convert_reserve_time,
+				// 	$this->options->_POST->comment,
+				// 	0,
+				// 	$now
+				// );
+
+				$array[WATING_CSV_COLUMN_ID] = $max;
+				$array[WATING_CSV_COLUMN_RESERVE] = $convert_reserve_time;
+				$array[WATING_CSV_COLUMN_BRANCH] = $this->options->_POST->branch_select_value;
+				$array[WATING_CSV_COLUMN_COMMIT] = $this->commit_hash;
+				$array[WATING_CSV_COLUMN_COMMENT] = $this->options->_POST->comment;
+				$array[WATING_CSV_COLUMN_REGIST] = $now;
+				$array[WATING_CSV_COLUMN_UPDATE] = $now;
 
 				fputcsv( $handle, $array, self::CSV_DELIMITER, self::CSV_ENCLOSURE);
 
@@ -1785,7 +1795,7 @@ class main
 	 *
 	 * @return なし
 	 */
-	private function update_list_csv_data($combine_reserve_time, $convert_reserve_time) {
+	private function update_list_csv_data($convert_reserve_time) {
 
 		$output = "";
 		$result = array('status' => true,
@@ -1864,16 +1874,16 @@ class main
 				// }
 
 				// id, ブランチ, 公開予定日時, 状態, 設定日時
-				$array = array(
-					$max,
-					$this->options->_POST->branch_select_value,
-					$this->commit_hash,
-					$combine_reserve_time,
-					$convert_reserve_time,
-					$this->options->_POST->comment,
-					0,
-					$now
-				);
+				// $array = array(
+				// 	$max,
+				// 	$this->options->_POST->branch_select_value,
+				// 	$this->commit_hash,
+				// 	$combine_reserve_time,
+				// 	$convert_reserve_time,
+				// 	$this->options->_POST->comment,
+				// 	0,
+				// 	$now
+				// );
 
 				fputcsv( $handle, $array, self::CSV_DELIMITER, self::CSV_ENCLOSURE);
 				fclose( $handle);
