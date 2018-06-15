@@ -69,8 +69,7 @@ class main
 	const WATING_CSV_COLUMN_BRANCH = 2;		// ブランチ名
 	const WATING_CSV_COLUMN_COMMIT = 3;		// コミットハッシュ値（短縮）
 	const WATING_CSV_COLUMN_COMMENT = 4;	// コメント
-	const WATING_CSV_COLUMN_REGIST = 5;		// 登録日時
-	const WATING_CSV_COLUMN_UPDATE = 6;		// 更新日時
+	const WATING_CSV_COLUMN_SETTING = 5;	// 設定日時
 
 	/**
 	 * 公開実施管理CSVの列番号定義
@@ -80,15 +79,16 @@ class main
 	const RELEASED_CSV_COLUMN_BRANCH = 2;		// ブランチ名
 	const RELEASED_CSV_COLUMN_COMMIT = 3;		// コミットハッシュ値（短縮）
 	const RELEASED_CSV_COLUMN_COMMENT = 4;		// コメント
+	const RELEASED_CSV_COLUMN_SETTING = 5;		// 設定日時
 
-	const RELEASED_CSV_COLUMN_START = 7;		// 公開処理開始日時
-	const RELEASED_CSV_COLUMN_END = 8;			// 公開処理終了日時
-	const RELEASED_CSV_COLUMN_RELEASED = 9;		// 公開完了日時
-	const RELEASED_CSV_COLUMN_RESTORE = 10;		// 復元完了日時
+	const RELEASED_CSV_COLUMN_START = 6;		// 公開処理開始日時
+	const RELEASED_CSV_COLUMN_END = 7;			// 公開処理終了日時
+	const RELEASED_CSV_COLUMN_RELEASED = 8;		// 公開完了日時
+	const RELEASED_CSV_COLUMN_RESTORE = 9;		// 復元完了日時
 
-	const RELEASED_CSV_COLUMN_DIFF_FLG1 = 11;	// 差分フラグ1（本番環境と前回分の差分）
-	const RELEASED_CSV_COLUMN_DIFF_FLG2 = 12;	// 差分フラグ2（本番環境と今回分の差分）
-	const RELEASED_CSV_COLUMN_DIFF_FLG3 = 13;	// 差分フラグ3（前回分と今回分の差分）
+	const RELEASED_CSV_COLUMN_DIFF_FLG1 = 10;	// 差分フラグ1（本番環境と前回分の差分）
+	const RELEASED_CSV_COLUMN_DIFF_FLG2 = 11;	// 差分フラグ2（本番環境と今回分の差分）
+	const RELEASED_CSV_COLUMN_DIFF_FLG3 = 12;	// 差分フラグ3（前回分と今回分の差分）
 
 	/**
 	 * コミットハッシュ値
@@ -1728,39 +1728,12 @@ class main
 				// 現在時刻
 				$now = date(self::DATETIME_FORMAT);
 
-				// // 日付と時刻を結合
-				// $combine_reserve_time = $this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
-		
-				// if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
-				// 	throw new \Exception("Combine date time failed.");
-				// }
-
-				// // サーバのタイムゾーン日時へ変換
-				// $convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::DATETIME_FORMAT);
-				
-				// if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
-				// 	throw new \Exception("Convert time zone failed.");
-				// }
-
-				// id, ブランチ名, コミット, 公開予定日時, コメント, 状態, 設定日時
-				// $array = array(
-				// 	$max,
-				// 	$this->options->_POST->branch_select_value,
-				// 	$this->commit_hash,
-				// 	$combine_reserve_time,
-				// 	$convert_reserve_time,
-				// 	$this->options->_POST->comment,
-				// 	0,
-				// 	$now
-				// );
-
-				$array[WATING_CSV_COLUMN_ID] = $max;
-				$array[WATING_CSV_COLUMN_RESERVE] = $convert_reserve_time;
-				$array[WATING_CSV_COLUMN_BRANCH] = $this->options->_POST->branch_select_value;
-				$array[WATING_CSV_COLUMN_COMMIT] = $this->commit_hash;
-				$array[WATING_CSV_COLUMN_COMMENT] = $this->options->_POST->comment;
-				$array[WATING_CSV_COLUMN_REGIST] = $now;
-				$array[WATING_CSV_COLUMN_UPDATE] = $now;
+				$array[self::WATING_CSV_COLUMN_ID] = $max;
+				$array[self::WATING_CSV_COLUMN_RESERVE] = $convert_reserve_time;
+				$array[self::WATING_CSV_COLUMN_BRANCH] = $this->options->_POST->branch_select_value;
+				$array[self::WATING_CSV_COLUMN_COMMIT] = $this->commit_hash;
+				$array[self::WATING_CSV_COLUMN_COMMENT] = $this->options->_POST->comment;
+				$array[self::WATING_CSV_COLUMN_SETTING] = $now;
 
 				fputcsv( $handle, $array, self::CSV_DELIMITER, self::CSV_ENCLOSURE);
 
@@ -1841,7 +1814,7 @@ class main
 						$max = $num;
 					}
 
-					// 変更対象となるid値の場合
+					// 変更対象となるid値の場合削除する
 					if ($num == $selected_id) {
 						unset($file[$cnt]);
 						file_put_contents($filename, $file);
@@ -1859,31 +1832,12 @@ class main
 				// 現在時刻
 				$now = date(self::DATETIME_FORMAT);
 
-				// // 日付と時刻を結合
-				// $combine_reserve_time = $this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
-				
-				// if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
-				// 	throw new \Exception("Combine date time failed.");
-				// }
-				
-				// // サーバのタイムゾーン日時へ変換
-				// $convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::DATETIME_FORMAT);
-
-				// if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
-				// 	throw new \Exception("Convert time zone failed.");
-				// }
-
-				// id, ブランチ, 公開予定日時, 状態, 設定日時
-				// $array = array(
-				// 	$max,
-				// 	$this->options->_POST->branch_select_value,
-				// 	$this->commit_hash,
-				// 	$combine_reserve_time,
-				// 	$convert_reserve_time,
-				// 	$this->options->_POST->comment,
-				// 	0,
-				// 	$now
-				// );
+				$array[self::WATING_CSV_COLUMN_ID] = $max;
+				$array[self::WATING_CSV_COLUMN_RESERVE] = $convert_reserve_time;
+				$array[self::WATING_CSV_COLUMN_BRANCH] = $this->options->_POST->branch_select_value;
+				$array[self::WATING_CSV_COLUMN_COMMIT] = $this->commit_hash;
+				$array[self::WATING_CSV_COLUMN_COMMENT] = $this->options->_POST->comment;
+				$array[self::WATING_CSV_COLUMN_SETTING] = $now;
 
 				fputcsv( $handle, $array, self::CSV_DELIMITER, self::CSV_ENCLOSURE);
 				fclose( $handle);
