@@ -31,10 +31,10 @@ class main
 	// CSV囲み文字
 	const CSV_ENCLOSURE		= '"';
 
-	// 公開予約管理CSVファイル
-	const CSV_LIST_FILENAME = '/csv/list.csv';
-	// // 警告エラー時のお知らせCSVファイル
-	// const CSV_LIST_FILENAME = './../indigo_dir/csv/alert.csv';
+	// 公開待ち管理CSVファイル
+	const CSV_WATING_LIST_FILENAME = '/csv/waiting_list.csv';
+	// 公開実施管理CSVファイル
+	const CSV_RELEASED_LIST_FILENAME = '/csv/released_list.csv';
 
 	/**
 	 * 画像パス定義
@@ -64,21 +64,34 @@ class main
 	/**
 	 * 公開予定管理CSVの列番号定義
 	 */
-	// 「公開予約日時」のカラム数
-	const CSV_COLUMN_DATETIME = 3;
-	// 「サーバ用_公開予約日時」のカラム数
-	const CSV_COLUMN_SERVER_DATETIME = 4;
-	// 「ステータス」列のカラム数
-	const CSV_COLUMN_STATUS = 6;
+	const WATING_CSV_COLUMN_ID = 0;			// ID
+	const WATING_CSV_COLUMN_RESERVE = 1;	// 公開予定日時
+	const WATING_CSV_COLUMN_BRANCH = 2;		// ブランチ名
+	const WATING_CSV_COLUMN_COMMIT = 3;		// コミットハッシュ値（短縮）
+	const WATING_CSV_COLUMN_COMMENT = 4;	// コメント
+
+	/**
+	 * 公開実施管理CSVの列番号定義
+	 */
+	const RELEASED_CSV_COLUMN_ID = 0;			// ID
+	const RELEASED_CSV_COLUMN_RESERVE = 1;		// 公開予定日時
+	const RELEASED_CSV_COLUMN_BRANCH = 2;		// ブランチ名
+	const RELEASED_CSV_COLUMN_COMMIT = 3;		// コミットハッシュ値（短縮）
+	const RELEASED_CSV_COLUMN_COMMENT = 4;		// コメント
+
+	const RELEASED_CSV_COLUMN_START = 7;		// 公開処理開始日時
+	const RELEASED_CSV_COLUMN_END = 8;			// 公開処理終了日時
+	const RELEASED_CSV_COLUMN_RELEASED = 9;		// 公開完了日時
+	const RELEASED_CSV_COLUMN_RESTORE = 10;		// 復元完了日時
+
+	const RELEASED_CSV_COLUMN_DIFF_FLG1 = 11;	// 差分フラグ1（本番環境と前回分の差分）
+	const RELEASED_CSV_COLUMN_DIFF_FLG2 = 12;	// 差分フラグ2（本番環境と今回分の差分）
+	const RELEASED_CSV_COLUMN_DIFF_FLG3 = 13;	// 差分フラグ3（前回分と今回分の差分）
+
 	/**
 	 * コミットハッシュ値
 	 */
 	private $commit_hash = '';
-
-	/**
-	 * サーバのタイムゾーン
-	 */
-	private $server_timezone = '';
 
 	/**
 	 * 本番環境ディレクトリパス（仮）
@@ -347,7 +360,7 @@ class main
 
 		foreach ($data_list as $array) {
 			
-			if (($array['id'] != $selected_id) && ($array['branch_name'] == $selected_branch)) {
+			if (($array[self::WATING_CSV_COLUMN_ID] != $selected_id) && ($array[self::WATING_CSV_COLUMN_BRANCH] == $selected_branch)) {
 				$ret = false;
 				break;
 			}
@@ -372,7 +385,7 @@ class main
 		$ret = true;
 
 		foreach ($data_list as $array) {
-			if (($array['id'] != $selected_id) && ($array['reserve_datetime'] == $input_reserve)) {
+			if (($array[self::WATING_CSV_COLUMN_ID] != $selected_id) && ($array[self::WATING_CSV_COLUMN_RESERVE] == $input_reserve)) {
 				$ret = false;
 				break;
 			}
@@ -515,10 +528,10 @@ class main
 			// 選択されたIDに紐づく情報を取得
 			$selected_ret = $this->get_selected_data();
 			
-			$branch_select_value = $selected_ret['branch_name'];
-			$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($selected_ret['reserve_datetime']));
-			$reserve_time = date(self::TIME_FORMAT_HI,  strtotime($selected_ret['reserve_datetime']));
-			$comment = $selected_ret['comment'];
+			$branch_select_value = $selected_ret[self::WATING_CSV_COLUMN_BRANCH];
+			$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($selected_ret[self::WATING_CSV_COLUMN_RESERVE]));
+			$reserve_time = date(self::TIME_FORMAT_HI,  strtotime($selected_ret[self::WATING_CSV_COLUMN_RESERVE]));
+			$comment = $selected_ret[self::WATING_CSV_COLUMN_COMMENT];
 
 		} else {
 
@@ -695,10 +708,10 @@ class main
 			// 選択されたIDに紐づく情報を取得
 			$selected_ret = $this->get_selected_data();
 			
-			$branch_select_value = $selected_ret['branch_name'];
-			$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($selected_ret['reserve_datetime']));
-			$reserve_time = date(self::TIME_FORMAT_HI,  strtotime($selected_ret['reserve_datetime']));
-			$comment = $selected_ret['comment'];
+			$branch_select_value = $selected_ret[self::WATING_CSV_COLUMN_BRANCH];
+			$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($selected_ret[self::WATING_CSV_COLUMN_RESERVE]));
+			$reserve_time = date(self::TIME_FORMAT_HI,  strtotime($selected_ret[self::WATING_CSV_COLUMN_RESERVE]));
+			$comment = $selected_ret[self::WATING_CSV_COLUMN_COMMENT];
 	
 		} else {
 
@@ -1070,7 +1083,7 @@ class main
 		// CSVより公開予約の一覧を取得する（ステータスが公開前のみ）
 		$data_list = $this->get_csv_data_list(0);
 		// 取得したリストをソートする
-		$data_list = $this->sort_list($data_list, 'reserve_datetime', SORT_ASC);
+		$data_list = $this->sort_list($data_list, self::WATING_CSV_COLUMN_RESERVE, SORT_ASC);
 
 		// // お知らせリストの取得
 		// $alert_list = $this->get_csv_alert_list();
@@ -1086,7 +1099,7 @@ class main
 		// 		$ret .= '<p class="alert_content" style="vertical-align: middle;">'
 		// 			. '<span style="padding-right: 5px;"><img src="'. $this->img_error_icon . '"/></span>'
 		// 			. '<a onClick="document.formA.submit();return false;" >'
-		// 			. $data['reserve_datetime'] . '　' . $data['content']
+		// 			. $data[WATING_CSV_COLUMN_RESERVE] . '　' . $data['content']
 		// 			. '</a></p>';
 		// 	}
 
@@ -1119,7 +1132,6 @@ class main
 			. '<tr>'
 			. '<th scope="row"></th>'
 			. '<th scope="row">公開予定日時</th>'
-			. '<th scope="row">（サーバ上日時）</th>'
 			. '<th scope="row">コミット</th>'
 			. '<th scope="row">ブランチ</th>'
 			. '<th scope="row">コメント</th>'
@@ -1134,11 +1146,10 @@ class main
 			
 			$ret .= '<tr>'
 				. '<td class="p-center"><input type="radio" name="target" value="' . $array['id'] . '"/></td>'
-				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array['reserve_datetime'])) . '</td>'
-				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array['server_reserve_datetime'])) . '</td>'
-				. '<td class="p-center">' . $array['commit'] . '</td>'
-				. '<td class="p-center">' . $array['branch_name'] . '</td>'
-				. '<td>' . $array['comment'] . '</td>'
+				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array[self::WATING_CSV_COLUMN_RESERVE])) . '</td>'
+				. '<td class="p-center">' . $array[self::WATING_CSV_COLUMN_COMMIT] . '</td>'
+				. '<td class="p-center">' . $array[self::WATING_CSV_COLUMN_BRANCH] . '</td>'
+				. '<td>' . $array[self::WATING_CSV_COLUMN_COMMENT] . '</td>'
 				// . '<td>' . $array['id'] . '</td>'
 				// . '<td>' . $this->convert_status($array['status']) . '</td>'
 				. '</tr>';
@@ -1164,7 +1175,7 @@ class main
 		// CSVより公開予約の一覧を取得する（全ステータス）
 		$data_list = $this->get_csv_data_list(null);
 		// 取得したリストをソートする
-		$data_list = $this->sort_list($data_list, 'reserve_datetime', SORT_ASC);
+		$data_list = $this->sort_list($data_list, self::WATING_CSV_COLUMN_RESERVE, SORT_ASC);
 
 		$ret .= '<div style="overflow:hidden">'
 			. '<form method="post">'
@@ -1180,9 +1191,7 @@ class main
 				. '<thead>'
 				. '<tr>'
 				. '<th scope="row"></th>'
-				. '<th scope="row">状態</th>'
 				. '<th scope="row">公開予定日時</th>'
-				. '<th scope="row">（サーバ上）</th>'
 				. '<th scope="row">コミット</th>'
 				. '<th scope="row">ブランチ</th>'
 				. '<th scope="row">コメント</th>'
@@ -1194,13 +1203,11 @@ class main
 		foreach ($data_list as $array) {
 			
 			$ret .= '<tr>'
-				. '<td class="p-center"><input type="radio" name="target" value="' . $array['id'] . '"/></td>'
-				. '<td class="p-center">' . $this->convert_status( $array['status'] ). '</td>'
-				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array['reserve_datetime'])) . '</td>'
-				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array['server_reserve_datetime'])) . '</td>'
-				. '<td class="p-center">' . $array['commit'] . '</td>'
-				. '<td class="p-center">' . $array['branch_name'] . '</td>'
-				. '<td>' . $array['comment'] . '</td>'
+				. '<td class="p-center"><input type="radio" name="target" value="' . $array[self::WATING_CSV_COLUMN_ID] . '"/></td>'
+				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array[self::WATING_CSV_COLUMN_RESERVE])) . '</td>'
+				. '<td class="p-center">' . $array[self::WATING_CSV_COLUMN_COMMIT] . '</td>'
+				. '<td class="p-center">' . $array[self::WATING_CSV_COLUMN_BRANCH] . '</td>'
+				. '<td>' . $array[self::WATING_CSV_COLUMN_COMMENT] . '</td>'
 				. '</tr>';
 		}
 
@@ -1237,7 +1244,6 @@ class main
 		// $command = 'TZ=Hongkong date "+%Y%m%d%H%M%S"';
 		// $ret = $this->execute($command, false);
 
-
 		// foreach ( $ret['output'] as $element ) {
 
 		// 	echo '日本時間:' . $element;
@@ -1249,7 +1255,7 @@ class main
 		echo "--------------------------------</br>";
 
 		echo "GMT　　　　　：" . gmdate(DATE_ATOM, time()). "</br>";
-		echo "date　　　　　：" . date(DATE_ATOM, time()). "</br>";
+		echo "date　　　　　：" . date(DATE_ATOM, time()). "</br></br>";
 		
 		$t = new \DateTime(gmdate(DATE_ATOM, time()));
 		$t->setTimeZone(new \DateTimeZone('Asia/Tokyo'));
@@ -1260,7 +1266,7 @@ class main
 		$t = new \DateTime($t->format(DATE_ATOM));
 		$t->setTimeZone(new \DateTimeZone('GMT'));
 
-		echo "日本時間からgmtへ：" . $t->format(DATE_ATOM). "</br>";
+		echo "日本時間からgmtへ：" . $t->format(DATE_ATOM). "</br></br>";
 
 		// タイムゾーンが取得できる！！！！
 		echo "タイムゾーン取得 ：" . date("e", date(DATE_ATOM, time())). "</br>";
@@ -1526,7 +1532,7 @@ class main
 
 		$ret_array = array();
 
-		$filename = self::PATH_CREATE_DIR . self::CSV_LIST_FILENAME;
+		$filename = self::PATH_CREATE_DIR . self::CSV_WATING_LIST_FILENAME;
 
 		try {
 
@@ -1540,32 +1546,33 @@ class main
 
 				$title_array = array();
 
-				$is_first = true;
+				// $is_first = true;
 
 				// CSVリストをループ
 				while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
 
-					if($is_first){
-				        // タイトル行
-				        foreach ($rowData as $k => $v) {
-				        	$title_array[] = $v;
-				        }
-				        $is_first = false;
-				        continue;
-				    }
+					// if($is_first){
+				 //        // タイトル行
+				 //        foreach ($rowData as $k => $v) {
+				 //        	$title_array[] = $v;
+				 //        }
+				 //        $is_first = false;
+				 //        continue;
+				 //    }
 				    
-					$set_flg = true;
+					// $set_flg = true;
 
-				    // ステータスの指定があった場合
-				    // TODO:要素番号を定数化
-				    if (isset($status) && ($rowData[5] != $status)) {
-						$set_flg = false;
-				    }
+				  //   // ステータスの指定があった場合
+				  //   // TODO:要素番号を定数化
+				  //   if (isset($status) && ($rowData[5] != $status)) {
+						// $set_flg = false;
+				  //   }
 
-				    if ($set_flg) {
+				    // if ($set_flg) {
 				    	// タイトルと値の2次元配列作成
-				    	$ret_array[] = array_combine ($title_array, $rowData);
-				    }
+				    	// $ret_array[] = array_combine ($title_array, $rowData);
+					$ret_array[] = $rowData;
+				    // }
 				}
 
 				// Close file
@@ -1595,7 +1602,7 @@ class main
 		$this->debug_echo('■ get_selected_data start');
 
 		// $filename = realpath('.') . $this->list_filename;
-		$filename = self::PATH_CREATE_DIR . self::CSV_LIST_FILENAME;
+		$filename = self::PATH_CREATE_DIR . self::CSV_WATING_LIST_FILENAME;
 
 		$selected_id =  $this->options->_POST->selected_id;
 
@@ -1669,7 +1676,7 @@ class main
 		try {
 
 			// $filename = realpath('.') . $this->list_filename;
-			$filename = self::PATH_CREATE_DIR . self::CSV_LIST_FILENAME;
+			$filename = self::PATH_CREATE_DIR . self::CSV_WATING_LIST_FILENAME;
 
 			if (!file_exists($filename)) {
 				$this->debug_echo('公開予約一覧ファイルが存在しない');
@@ -1785,7 +1792,7 @@ class main
 						'message' => '');
 	
 		// $filename = realpath('.') . $this->list_filename;
-		$filename = self::PATH_CREATE_DIR . self::CSV_LIST_FILENAME;
+		$filename = self::PATH_CREATE_DIR . self::CSV_WATING_LIST_FILENAME;
 
 		$selected_id =  $this->options->_POST->selected_id;
 
@@ -1903,7 +1910,7 @@ class main
 	private function delete_list_csv_data() {
 
 		// $filename = realpath('.') . $this->list_filename;
-		$filename = self::PATH_CREATE_DIR . self::CSV_LIST_FILENAME;
+		$filename = self::PATH_CREATE_DIR . self::CSV_WATING_LIST_FILENAME;
 
 		$selected_id =  $this->options->_POST->selected_id;
 
@@ -2221,7 +2228,7 @@ class main
 
 		$selected_ret = $this->get_selected_data();
 
-		$dirname = date(self::DATETIME_FORMAT_SAVE, strtotime($selected_ret['reserve_datetime']));
+		$dirname = date(self::DATETIME_FORMAT_SAVE, strtotime($selected_ret[WATING_CSV_COLUMN_RESERVE]));
 
 		try {
 
@@ -2314,7 +2321,7 @@ class main
 			if (!empty($data_list)) {
 
 				// 取得した一覧から最新の1件を取得（ymdhis形式で公開予定日時を取得）
-				$dirname = $this->get_datetime_str($data_list, 'reserve_datetime', SORT_DESC);
+				$dirname = $this->get_datetime_str($data_list, WATING_CSV_COLUMN_RESERVE, SORT_DESC);
 			}
 
 			if ( $dirname ) {
@@ -2401,7 +2408,6 @@ class main
 		$this->debug_echo('■ manual_release end');
 
 		return json_encode($result);
-
 	}
 
 	
@@ -2416,7 +2422,7 @@ class main
 		$ret_array = array();
 
 		// $filename = realpath('.') . $this->list_filename;
-		$filename = self::PATH_CREATE_DIR . self::CSV_LIST_FILENAME;
+		$filename = self::PATH_CREATE_DIR . self::CSV_WATING_LIST_FILENAME;
 
 		if (!file_exists($filename)) {
 		
