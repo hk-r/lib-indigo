@@ -75,7 +75,7 @@ $(function($){
 				alert('選択されていません');
 				return false;
 			}
-			alert('res:' + res);
+			
 			$("#form_table").submit(function(){
 				$('<input />').attr('type', 'hidden')
 				 .attr('name', 'selected_id')

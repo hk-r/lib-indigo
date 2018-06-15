@@ -1147,7 +1147,7 @@ class main
 		foreach ($data_list as $array) {
 			
 			$ret .= '<tr>'
-				. '<td class="p-center"><input type="radio" name="target" value="' . $array['id'] . '"/></td>'
+				. '<td class="p-center"><input type="radio" name="target" value="' . $array[self::WATING_CSV_COLUMN_ID] . '"/></td>'
 				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array[self::WATING_CSV_COLUMN_RESERVE])) . '</td>'
 				. '<td class="p-center">' . $array[self::WATING_CSV_COLUMN_COMMIT] . '</td>'
 				. '<td class="p-center">' . $array[self::WATING_CSV_COLUMN_BRANCH] . '</td>'
@@ -1632,8 +1632,6 @@ class main
 
 					$num = intval($rowData[WATING_CSV_COLUMN_ID]);
 
-					$this->debug_echo('　★num：' . $num);
-					$this->debug_echo('　★select_id：' . $selected_id);
 					if ($num == $selected_id) {
 					    // // タイトルと値の2次元配列作成
 					    // $ret_array = array_combine ($title_array, $rowData) ;
