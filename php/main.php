@@ -1246,16 +1246,16 @@ class main
 		//timezone設定
 		date_default_timezone_set('Asia/Tokyo');
 
-		echo "GMT：" . gmdate('Y-m-d\TH:i:sO', time()). "</br>";
-		echo "date：" . date('Y-m-d\TH:i:sO', time()). "</br>";
+		echo "GMT　　　　　：" . gmdate(DATE_ATOM, time()). "</br>";
+		echo "date　　　　 ：" . date(DATE_ATOM, time()). "</br>";
 		
-		$t = new \DateTime(gmdate('Y-m-d\TH:i:sO', time()));
+		$t = new \DateTime(gmdate(DATE_ATOM, time()));
 		$t->setTimeZone(new \DateTimeZone('Asia/Tokyo'));
 
-		echo "gmtからtokyoへ：" . $t->format('Y-m-d\TH:i:sO'). "</br>";
+		echo "gmtからtokyoへ：" . $t->format(DATE_ATOM). "</br>";
 
 		// タイムゾーンが取得できる！！！！
-		echo "date：" . date("e", date('Y-m-d\TH:i:sO', time())). "</br>";
+		echo "タイムゾーン取得 ：" . date("e", date(DATE_ATOM, time())). "</br>";
 		
 		// 初期表示画面から遷移されたか
 		$init_trans_flg = false;
