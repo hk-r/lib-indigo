@@ -1629,20 +1629,21 @@ class main
 				// Loop through each line of the file in turn
 				while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
 
-					if($is_first){
-				        // タイトル行
-				        foreach ($rowData as $k => $v) {
-				        	$title_array[] = $v;
-				        }
-				        $is_first = false;
-				        continue;
-				    }
+					// if($is_first){
+				 //        // タイトル行
+				 //        foreach ($rowData as $k => $v) {
+				 //        	$title_array[] = $v;
+				 //        }
+				 //        $is_first = false;
+				 //        continue;
+				 //    }
 
-					$num = intval($rowData[0]);
+					$num = intval($rowData[WATING_CSV_COLUMN_ID]);
 
 					if ($num == $selected_id) {
-					    // タイトルと値の2次元配列作成
-					    $ret_array = array_combine ($title_array, $rowData) ;
+					    // // タイトルと値の2次元配列作成
+					    // $ret_array = array_combine ($title_array, $rowData) ;
+					    $ret_array[] = $rowData;
 					}
 				}
 
