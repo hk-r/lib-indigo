@@ -1246,10 +1246,13 @@ class main
 		//timezone設定
 		date_default_timezone_set('Asia/Tokyo');
 
-		echo "GMT：" . gmdate(DATE_ISO8601, time()). "\n";
-		echo "date：" . date(DATE_ISO8601, time()). "\n";
-		echo "date：" . date(DATE_ISO8601, gmdate(DATE_ISO8601, time())). "\n";
-		echo "date：" . date("e", date(DATE_ISO8601, time())). "\n";
+		echo "GMT：" . gmdate('Y-m-d\TH:i:sO', time()). "\n";
+		echo "date：" . date('Y-m-d\TH:i:sO', time()). "\n";
+		echo "date：" . date('Y-m-d\TH:i:sO', gmdate('Y-m-d\TH:i:sO', time())). "\n";
+
+		// タイムゾーンが取得できる！！！！
+		echo "date：" . date("e", date('Y-m-d\TH:i:sO', time())). "\n";
+		
 		// 初期表示画面から遷移されたか
 		$init_trans_flg = false;
 
