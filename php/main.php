@@ -1248,7 +1248,11 @@ class main
 
 		echo "GMT：" . gmdate('Y-m-d\TH:i:sO', time()). "\n";
 		echo "date：" . date('Y-m-d\TH:i:sO', time()). "\n";
-		echo "date：" . date('Y-m-d\TH:i:sO', gmdate('Y-m-d\TH:i:sO', time())). "\n";
+		
+		$t = new \DateTime(gmdate('Y-m-d\TH:i:sO', time()));
+		$t->setTimeZone(new DateTimeZone('Asia/Tokyo'));
+
+		echo "gmtからtokyoへ：" . $t->format('Y-m-d H:i:s'). "\n";
 
 		// タイムゾーンが取得できる！！！！
 		echo "date：" . date("e", date('Y-m-d\TH:i:sO', time())). "\n";
