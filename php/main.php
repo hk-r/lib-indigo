@@ -1996,6 +1996,8 @@ class main
 			// 削除したデータ
 			$cut_data = $ret['del_data'];
 
+			$this->debug_echo('　□cut_data：' . var_dump($cut_data));
+
 			if (!file_exists($filename))  {
 
 				// エラー処理
@@ -2060,6 +2062,7 @@ class main
 
 			// Close file
 			fclose($handle_r);
+			fclose($handle);
 
 		} catch (\Exception $e) {
 
