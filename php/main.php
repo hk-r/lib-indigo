@@ -2584,9 +2584,12 @@ class main
 		}
 
 		// デプロイ先のディレクトリを作成
-		if ( file_exists($dirname) || !mkdir($dirname, 0777) ) {
-			$this->debug_echo('　□ 再作成失敗、$dirname：' . $dirname);
-			return false;
+		if ( !file_exists($dirname) {
+			if ( !mkdir($dirname, 0777) ) {
+				$this->debug_echo('　□ 再作成失敗、$dirname：' . $dirname);
+				return false;
+		} else {
+			return false:
 		}
 	
 		$this->debug_echo('■ is_exists_remkdir end');
