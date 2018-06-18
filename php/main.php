@@ -2002,7 +2002,7 @@ class main
 			if ( chdir(self::PATH_CREATE_DIR . self::PATH_COPY) ) {
 
 				// 公開予定ディレクトリをデリートインサート
-				if ( !$this->is_exists_remkdir(dirname) ) {
+				if ( !$this->is_exists_remkdir($dirname) ) {
 
 					// エラー処理
 					throw new \Exception('Creation of copy publish directory failed.');
@@ -2578,14 +2578,14 @@ class main
 			$ret = $this->execute($command, true);
 
 			if ( $ret['return'] !== 0 ) {
-				$this->debug_echo('削除失敗');
+				// $this->debug_echo('削除失敗');
 				return false;
 			}
 		}
 
 		// デプロイ先のディレクトリを作成
 		if ( file_exists($dirname) || !mkdir($dirname, 0777) ) {
-			$this->debug_echo('　□ 再作成失敗、$dirname：' . $dirname);
+			// $this->debug_echo('　□ 再作成失敗、$dirname：' . $dirname);
 			return false;
 		}
 	
