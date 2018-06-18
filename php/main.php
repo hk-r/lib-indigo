@@ -1904,7 +1904,9 @@ class main
 
 		$result = array('status' => true,
 						'message' => '',
-						'del_data' => '');
+						'del_data' => array());
+
+		$cut_data
 
 		$filename = self::PATH_CREATE_DIR . self::CSV_WATING_LIST_FILENAME;
 
@@ -1993,7 +1995,7 @@ class main
 
 			$ret = $this->delete_list_csv_data();
 
-			$cut_data = array_shift($ret['del_data']);
+			$cut_data = $ret['del_data'];
 			
 			$this->debug_echo('　□cut_data：' . var_dump($cut_data));
 			
@@ -2547,79 +2549,6 @@ class main
 	 		// ▼優先度低
 	 		// 今回分と前回分のソースに差分が存在した場合
 	 		// 　「差分確認フラグ3」を設定
-
-
-
-
-
-
-
-
-			// // 現在時刻取得
-			
-			// if ( $dirname ) {
-
-			// 	// 本番環境のディレクトリへ移動
-			// 	if ( chdir(self::PATH_PROJECT_DIR ) ) {
-
-			// 		$project_real_path = realpath('.');
-			// 		chdir($current_dir);
-
-			// 		$this->debug_echo('　▲本番環境の絶対パス：' . $project_real_path);
-
-			// 	} else {
-
-			// 		// エラー処理
-			// 		throw new \Exception('Project directory change directory failed.');
-			// 	}
-
-			// 	// *** 本番環境よりバックアップ取得
-
-			// 	// backupディレクトリのパスを取得
-			// 	$bk_real_path = self::PATH_PROJECT_DIR;
-			// 	// copyディレクトリの絶対パスを取得
-			// 	$copy_real_path = self::PATH_CREATE_DIR . self::PATH_COPY;
-			// 	// logディレクトリの絶対パスを取得
-			// 	$log_real_path = self::PATH_CREATE_DIR . self::PATH_LOG;
-
-
-			// 	// バックアップディレクトリが存在しない場合は作成
-			// 	if ( !$this->is_exists_mkdir(self::PATH_CREATE_DIR . self::PATH_BACKUP) ) {
-
-			// 			// エラー処理
-			// 			throw new \Exception('Creation of backup directory failed.');
-			// 	}
-
-			// 	// バックアップディレクトリへ移動
-			// 	if ( chdir(self::PATH_CREATE_DIR . self::PATH_BACKUP) ) {
-
-			// 		// 公開予定ディレクトリをデリートインサート
-			// 		if ( !$this->is_exists_remkdir(self::PATH_CREATE_DIR . self::PATH_BACKUP, $dirname) ) {
-
-			// 			// エラー処理
-			// 			throw new \Exception('Creation of copy publish directory failed.');
-			// 		}
-
-			// 		// 公開予定ディレクトリへ移動
-			// 		if ( chdir($dirname) ) {
-
-			// 			// 本番環境からファイルをコピー
-			// 			$command = 'cp -pR ' . $project_real_path . '/* ' . './' ;
-			// 			$this->execute($command, false);
-
-			// 		} else {
-
-			// 			// コピー用のディレクトリが存在しない場合
-
-			// 			// エラー処理
-			// 			throw new \Exception('Copy publish directory not found.');
-			// 		}
-			// 	}
-
-			// } else {
-
-			// 		$this->debug_echo("対象なし");
-			// }
 		
 		} catch (\Exception $e) {
 
