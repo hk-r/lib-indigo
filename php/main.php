@@ -1975,12 +1975,6 @@ class main
 		set_time_limit(30);
 
 		$result['status'] = true;
-
-		foreach ( (array)$result['del_data'] as $element ) {
-
-			$this->debug_echo('　□del_data' , $element);
-		}
-
 		
 		$this->debug_echo('■ delete_list_csv_data end');
 
@@ -2535,7 +2529,41 @@ class main
 			/**
 	 		* 本番ソースを「backup」ディレクトリへコピー
 			*/
+			// バックアップディレクトリが存在しない場合は作成
+			if ( !$this->is_exists_mkdir(self::PATH_CREATE_DIR . self::PATH_BACKUP) ) {
 
+					// エラー処理
+					throw new \Exception('Creation of backup directory failed.');
+			}
+
+			// コピーディレクトリへ移動
+			if ( chdir(self::PATH_CREATE_DIR . self::PATH_BACKUP) ) {
+
+				// 公開予定ディレクトリをデリートインサート
+				if ( !$this->is_exists_remkdir($dirname) ) {
+
+					// エラー処理
+					throw new \Exception('Creation of backup publish directory failed.');
+				}
+
+				// 公開予定ディレクトリへ移動
+				if ( chdir($dirname) ) {
+
+					// 本番ソースからバックアップディレクトリへコピー
+
+					$honban_realpath = $current_dir . "/" . self::PATH_PROJECT_DIR;
+
+					$command = 'rsync -avz ' . $honban_realpath . ' ./';
+					$this->execute($command, true);
+
+					foreach ( $ret['output'] as $element ) {
+
+						$this->debug_echo('　▼本番バックアップの処理結果' . $element);
+					}
+
+				}
+
+	 		}
 
 			/**
 	 		* 公開予定ソースを「wating」ディレクトリから「running」ディレクトリへ移動
