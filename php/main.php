@@ -226,7 +226,7 @@ class main
 				$command = 'git branch -r';
 				$ret = $this->execute($command, false);
 
-				foreach ($ret['output'] as $key => $value) {
+				foreach ((array)$ret['output'] as $key => $value) {
 					if( strpos($value, '/HEAD') !== false ){
 						continue;
 					}
@@ -298,22 +298,22 @@ class main
 	}
 
 	/**
-	 * 公開予約一覧用の配列を「公開予定日時の昇順」へソートし返却する
+	 * 配列を指定カラムでソートして返却する
 	 *	 
-	 * @param $array_list = ソート対象の配列
-	 * @param $sort_name  = ソートするキー名称
-	 * @param $sort_kind  = ソートの種類
+	 * @param $array_list  = ソート対象の配列
+	 * @param $sort_column = ソートするカラム
+	 * @param $sort_kind   = ソートの種類（昇順、降順）
 	 *	 
 	 * @return ソート後の配列
 	 */
-	private function sort_list($array_list, $sort_name, $sort_kind) {
+	private function sort_list($array_list, $sort_column, $sort_kind) {
 
 		if (!empty($array_list)) {
 
 			$sort_array = array();
 
-			foreach($array_list as $key => $value) {
-				$sort_array[$key] = $value[$sort_name];
+			foreach((array)$array_list as $key => $value) {
+				$sort_array[$key] = $value[$sort_column];
 			}
 
 			// 公開予定日時の昇順へソート	
@@ -603,10 +603,10 @@ class main
 		
 		$this->debug_echo('■ create_dialog_html start');
 
-		$this->debug_echo('　□ branch_list' . $branch_list);
-		$this->debug_echo('　□ branch_select_value' . $branch_select_value);
-		$this->debug_echo('　□ reserve_date' . $reserve_date);
-		$this->debug_echo('　□ reserve_time' . $reserve_time);
+		// $this->debug_echo('　□ branch_list' . $branch_list);
+		// $this->debug_echo('　□ branch_select_value' . $branch_select_value);
+		// $this->debug_echo('　□ reserve_date' . $reserve_date);
+		// $this->debug_echo('　□ reserve_time' . $reserve_time);
 
 		$ret = "";
 
@@ -1059,8 +1059,8 @@ class main
 			$selected_id = $this->options->_POST->selected_id;
 		}
 
-		// CSVより公開予約の一覧を取得する（ステータスが公開前のみ）
-		$data_list = $this->get_csv_data_list(0);
+		// CSVより公開予約の一覧を取得する
+		$data_list = $this->get_csv_data_list(null);
 
 		// 最大件数チェック
 		if ($add_flg) {
@@ -1114,8 +1114,8 @@ class main
 
 		$ret = "";
 
-		// CSVより公開予約の一覧を取得する（ステータスが公開前のみ）
-		$data_list = $this->get_csv_data_list(0);
+		// CSVより公開予約の一覧を取得する
+		$data_list = $this->get_csv_data_list(null);
 		// 取得したリストをソートする
 		$data_list = $this->sort_list($data_list, self::WATING_CSV_COLUMN_RESERVE, SORT_ASC);
 
@@ -1210,7 +1210,8 @@ class main
 
 		$ret = "";
 
-		// CSVより公開予約の一覧を取得する（全ステータス）
+		// CSVより公開予約の一覧を取得する
+		// （公開済みを見るように変更！！）
 		$data_list = $this->get_csv_data_list(null);
 		// 取得したリストをソートする
 		$data_list = $this->sort_list($data_list, self::WATING_CSV_COLUMN_RESERVE, SORT_ASC);
@@ -1555,15 +1556,13 @@ class main
 	/**
 	 * CSVからデータリストを取得する
 	 *
-	 * @param $status = 取得対象のステータス
+	 * @param $now = 現在時刻
 	 * @return データリスト
 	 */
-	private function get_csv_data_list($status)
+	private function get_csv_data_list($now)
 	{
 
 		$this->debug_echo('■ get_csv_data_list start');
-
-		$current_dir = realpath('.');
 
 		$ret_array = array();
 
@@ -1572,14 +1571,14 @@ class main
 		try {
 
 			if (!file_exists($filename)) {
-				$this->debug_echo($filename . '公開予約一覧ファイルが存在しない');
+				
+				// エラー処理
+				throw new \Exception('waiting_list.csv not found.');
 
 			} else {
 
 				// Open file
 				$handle = fopen( $filename, "r" );
-
-				$title_array = array();
 
 				$is_first = true;
 
@@ -1590,25 +1589,17 @@ class main
 				        $is_first = false;
 				        continue;
 				    }
-				    
-					// $set_flg = true;
 
-				  //   // ステータスの指定があった場合
-				  //   // TODO:要素番号を定数化
-				  //   if (isset($status) && ($rowData[5] != $status)) {
-						// $set_flg = false;
-				  //   }
+				    // 指定日時が設定されており、かつ、指定日時より未来日時の場合
+				    if (isset($now) && ($rowData[self::CSV_COLUMN_SERVER_DATETIME] > $now)) {
+				    	continue;
+				    }
 
-				    // if ($set_flg) {
-				    	// タイトルと値の2次元配列作成
-				    	// $ret_array[] = array_combine ($title_array, $rowData);
 					$ret_array[] = $rowData;
-				    // }
 				}
 
 				// Close file
 				fclose($handle);
-
 			}
 
 		} catch (\Exception $e) {
@@ -1903,40 +1894,78 @@ class main
 	 */
 	private function delete_list_csv_data() {
 
-		// $filename = realpath('.') . $this->list_filename;
+		$this->debug_echo('■ delete_list_csv_data start');
+
+		$result = array('status' => true,
+						'message' => '');
+
 		$filename = self::PATH_CREATE_DIR . self::CSV_WATING_LIST_FILENAME;
 
 		$selected_id =  $this->options->_POST->selected_id;
 
-		if (!file_exists($filename) && empty($selected_id)) {
-			$this->debug_echo('ファイルが存在しない、または、選択IDが不正です。');
+		try {
 
-		} else {
 
-			$file = file($filename);
+			if (!file_exists($filename))  {
 
-			// Open file
-			$handle = fopen( $filename, "r" );
+				// エラー処理
+				throw new \Exception('file not found. ');
 			
-			$cnt = 0;
+			} elseif (!$selected_id) {
 
-			// Loop through each line of the file in turn
-			while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
+				// エラー処理
+				throw new \Exception('Select id is undefined. ');
 
-				$num = intval($rowData[0]);
+			} else {
 
-				if ($num == $selected_id) {
-					unset($file[$cnt]);
-					file_put_contents($filename, $file);
-					break;
+				$file = file($filename);
+
+				// Open file
+				$handle = fopen( $filename, "r" );
+				
+				$cnt = 0;
+
+				// Loop through each line of the file in turn
+				while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
+
+					$num = intval($rowData[self::WATING_CSV_COLUMN_ID]);
+
+					if ($num == $selected_id) {
+
+						$this->debug_echo('　□ 削除データ：');
+						var_dump($file[$cnt]);
+
+						unset($file[$cnt]);
+						file_put_contents($filename, $file);
+
+						break;
+					}
+
+					$cnt++;
 				}
-
-				$cnt++;
 			}
+
+			// Close file
+			fclose($handle);
+
+
+		} catch (\Exception $e) {
+
+			set_time_limit(30);
+
+			$result['status'] = false;
+			$result['message'] = $e->getMessage();
+
+			return json_encode($result);
 		}
 
-		// Close file
-		fclose($handle);
+		set_time_limit(30);
+
+		$result['status'] = true;
+		
+		$this->debug_echo('■ delete_list_csv_data end');
+
+		return json_encode($result);
 	}
 
 	/**
@@ -2222,7 +2251,7 @@ class main
 
 		$selected_ret = $this->get_selected_data();
 
-		$dirname = date(self::DATETIME_FORMAT_SAVE, strtotime($selected_ret[WATING_CSV_COLUMN_RESERVE]));
+		$dirname = date(self::DATETIME_FORMAT_SAVE, strtotime($selected_ret[self::WATING_CSV_COLUMN_RESERVE]));
 
 		try {
 
@@ -2291,33 +2320,104 @@ class main
 
 		try {
 
-			// TODO:後で別クラスへ分割;
-			// $this->file_control->process();
+	 		// ▼優先度低
+			/**
+	 		* 公開タスクロックの確認
+			*/
+	 		// 公開タスクロックを確認し、ロックが掛かっている場合は処理終了
+	 		// ロックがかかっていない場合は、処理を進める
 
-			// *** 公開予定から本番環境へ置き換えるものを1件抽出する。（抽出されたものが実行中の場合はスキップする　※処理終了）
+	 		// ※ 画面から、どの公開処理が実施中か確認できるようにしたい
+	 		//    処理が異常終了した場合にロックが解除されないままとなってしまう
 
-			// 現在時刻取得
-			$now = '';
 
+			/**
+	 		* 公開予定一覧CSVの切り取り
+			*/
+			// 公開対象が存在するか
+
+	 		// 現在日時を取得
 			$command = 'TZ=Asia/Tokyo date "+%Y%m%d%H%M%S"';
 			$ret = $this->execute($command, false);
 
+			$now = '';
 			foreach ( $ret['output'] as $element ) {
-
 				$now = $element;
 			}
 
 			// 公開予約の一覧を取得
-			$data_list = $this->get_csv_data_list_cron(0, $now);
+			$data_list = $this->get_csv_data_list($now);
 
-			$dirname = '';
+			$ret_datetime = '';
 
-			if (!empty($data_list)) {
 
-				// 取得した一覧から最新の1件を取得（ymdhis形式で公開予定日時を取得）
-				$dirname = $this->get_datetime_str($data_list, WATING_CSV_COLUMN_RESERVE, SORT_DESC);
+			foreach ( $data_list as $data ) {
+				// 公開対象の公開予定日時（文字列）
+				$dirname = $this->get_datetime_str($data_list, self::WATING_CSV_COLUMN_RESERVE, SORT_DESC);
 			}
 
+			// 存在する場合
+			// 　公開予定一覧CSVにファイルロックが掛かっていない場合
+			// 　ファイルロックを掛ける
+			// 　実施済み一覧CSVにファイルロックが掛かっていない場合
+			// 　ファイルロックを掛ける
+	 		// 公開対象の行を、実施済みへ切り取り移動する
+
+
+	 		
+	 		// ファイルロックを解除する
+
+
+			/**
+	 		* 本番ソースを「backup」ディレクトリへコピー
+			*/
+
+
+			/**
+	 		* 公開予定ソースを「wating」ディレクトリから「running」ディレクトリへ移動
+			*/
+
+
+			/**
+	 		* 「running」ディレクトリへ移動した公開予定ソースを本番環境へ同期
+			*/
+	 		// rsync -avz /media/hdd1/data-1/ /media/hdd2/data-2/
+
+			/**
+	 		* 同期が正常終了したら、公開済みソースを「running」ディレクトリから「released」ディレクトリへ移動
+			*/
+
+
+			/**
+	 		* 処理結果をCSVへ書き込む
+			*/
+			// 実施済み一覧CSVにファイルロックが掛かっていない場合
+			// 　ロックを掛ける
+	 		// 「実施開始日時」を設定
+	 		// 「実施終了日時」を設定
+	 		
+			// 公開が成功した場合
+	 		// 　「公開完了日時」を設定
+
+	 		// 公開が失敗し、復元が完了した場合
+	 		// 　「復元完了日時」を設定
+
+	 		// ▼優先度低
+	 		// 本番環境と前回分のソースに差分が存在した場合
+	 		// 　「差分確認フラグ1」を設定
+
+	 		// ▼優先度低
+	 		// 本番環境と今回分のソースに差分が存在した場合
+	 		// 　「差分確認フラグ2」を設定
+
+	 		// ▼優先度低
+	 		// 今回分と前回分のソースに差分が存在した場合
+	 		// 　「差分確認フラグ3」を設定
+
+
+
+			// 現在時刻取得
+			
 			if ( $dirname ) {
 
 				// 本番環境のディレクトリへ移動
@@ -2404,88 +2504,32 @@ class main
 		return json_encode($result);
 	}
 
-	
-	/**
-	 * CSVから公開前のリストを取得する
-	 *
-	 * @param $status = 取得対象のステータス
-	 * @return データリスト
-	 */
-	private function get_csv_data_list_cron($status, $now) {
-
-		$ret_array = array();
-
-		// $filename = realpath('.') . $this->list_filename;
-		$filename = self::PATH_CREATE_DIR . self::CSV_WATING_LIST_FILENAME;
-
-		if (!file_exists($filename)) {
-		
-			$this->debug_echo('ファイルが存在しない');
-		
-		} else {
-
-			// Open file
-			$handle = fopen($filename, "r");
-
-			$title_array = array();
-
-			$is_first = true;
-
-			// CSVリストをループ
-			while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
-
-				if($is_first){
-			        // タイトル行
-			        foreach ($rowData as $k => $v) {
-			        	$title_array[] = $v;
-			        }
-			        $is_first = false;
-			        continue;
-			    }
-			    
-			    // 指定日時より未来日時の場合
-			    if (isset($now) && ($rowData[self::CSV_COLUMN_SERVER_DATETIME] > $now)) {
-			    	// タイトルと値の2次元配列作成
-			    	$ret_array[] = array_combine ($title_array, $rowData);
-			    }
-			}
-
-			// Close file
-			fclose($handle);
-
-		}
-					
-		return $ret_array;
-	}
 
 	/**
-	 * 公開予約一覧用の配列を「公開予定日時の昇順」へソートし返却する
+	 * 公開対象の公開予定日時をフォーマット指定して返却する
 	 *	 
-	 * @param $array_list = ソート対象の配列
-	 * @param $sort_name  = ソートするキー名称
-	 * @param $sort_kind  = ソートの種類
+	 * @param $array_list  = ソート対象の配列
+	 * @param $sort_column = ソートするカラム
+	 * @param $sort_kind   = ソートの種類（昇順、降順）
 	 *	 
-	 * @return ソート後の配列
+	 * @return 公開予定日時
 	 */
-	private function get_datetime_str($array_list, $sort_name, $sort_kind) {
+	private function get_datetime_str($array_list, $sort_column, $sort_kind) {
 
-		$ret = '';
+		$ret_str = '';
+		$lead_array = array();
 
 		if (!empty($array_list)) {
 
-			$sort_array = array();
+			$this->sort_list($array_list, $sort_name, $sort_kind);
 
-			foreach($array_list as $key => $value) {
-				$sort_array[$key] = $value[$sort_name];
-			}
-
-			// 公開予定日時の昇順へソート	
-			array_multisort($sort_array, $sort_kind, $array_list);
+			$lead_array = array_shift($array_list);
+			
 			// 先頭行の公開予約日時
-			$ret = date(self::DATETIME_FORMAT_SAVE, strtotime($array_list[0][$sort_name]));
+			$ret_str = date(self::DATETIME_FORMAT_SAVE, strtotime($lead_array[$sort_name]));
 		}
 
-		return $ret;
+		return $ret_str;
 	}
 
 
