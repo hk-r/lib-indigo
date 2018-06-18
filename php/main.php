@@ -2002,6 +2002,8 @@ class main
 			// 選択されたIDに紐づく情報を取得
 			$selected_ret = $this->get_selected_data();
 
+		$this->debug_echo('　□1：');
+
 			if (!$selected_ret)  {
 
 				// エラー処理
@@ -2043,7 +2045,7 @@ class main
 						$max = $num;
 					}
 				}
-
+		$this->debug_echo('　□max：');
 				$max++;
 
 				// Open file
@@ -2054,11 +2056,12 @@ class main
 					// スロー処理！
 					// throw new PHPExcel_Writer_Exception("Could not open file $pFilename for writing.");
 				}
-
+		$this->debug_echo('　□rselect_ret：');
+		var_dump($select_ret);
 				// 現在時刻
 				$now = date(self::DATETIME_FORMAT);
 
-				$array[self::RELEASED_CSV_COLUMN_ID] = $selected_ret[self::WATING_CSV_COLUMN_ID];
+				$array[self::RELEASED_CSV_COLUMN_ID] = $max;
 				$array[self::RELEASED_CSV_COLUMN_RESERVE] = $selected_ret[self::WATING_CSV_COLUMN_RESERVE];
 				$array[self::RELEASED_CSV_COLUMN_BRANCH] = $selected_ret[self::WATING_CSV_COLUMN_BRANCH];
 				$array[self::RELEASED_CSV_COLUMN_COMMIT] = $selected_ret[self::WATING_CSV_COLUMN_COMMIT];
