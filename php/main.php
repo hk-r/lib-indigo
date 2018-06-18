@@ -600,6 +600,11 @@ class main
 		
 		$this->debug_echo('■ create_dialog_html start');
 
+		$this->debug_echo('　□ reserve_time：' . $branch_list);
+		$this->debug_echo('　□ reserve_time：' . $branch_select_value);
+		$this->debug_echo('　□ reserve_time：' . $reserve_date);
+		$this->debug_echo('　□ reserve_time：' . $reserve_time);
+
 		$ret = "";
 
 		$ret .= '<div class="dialog" id="modal_dialog">'
