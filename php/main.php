@@ -696,6 +696,10 @@ class main
 	 */
 	private function create_change_before_hidden_html($init_trans_flg) {
 		
+		$this->debug_echo('■ create_change_before_hidden_html start');
+
+		$this->debug_echo('　★ $init_trans_flg：' . $init_trans_flg);
+
 		$selected_id = '';
 		$branch_select_value = '';
 		$reserve_date = '';
@@ -729,6 +733,8 @@ class main
   			  . '<input type="hidden" name="change_before_reserve_date" value="'. $reserve_date . '"/>'
   			  . '<input type="hidden" name="change_before_reserve_time" value="'. $reserve_time . '"/>'
   			  . '<input type="hidden" name="change_before_comment" value="'. $comment . '"/>';
+
+		$this->debug_echo('■ create_change_before_hidden_html end');
 
 		return $ret;
 	}
@@ -827,6 +833,8 @@ class main
 	private function create_check_dialog_html($branch_select_value,
 		$reserve_date, $reserve_time, $comment) {
 		
+		$this->debug_echo('■ create_check_dialog_html start');
+
 		$ret = "";
 
 		$ret .= '<div class="dialog" id="modal_dialog">'
@@ -884,6 +892,8 @@ class main
 			 . '</div>'
 			 . '</div></div></div>';
 
+		$this->debug_echo('■ create_check_dialog_html end');
+
 		return $ret;
 	}
 
@@ -896,6 +906,8 @@ class main
 	 */
 	private function create_change_check_dialog_html() {
 		
+		$this->debug_echo('■ create_change_check_dialog_html start');
+
 		$img_filename = self::PATH_CREATE_DIR . self::IMG_ARROW_RIGHT;
 
 		$ret = '<div class="dialog" id="modal_dialog">'
@@ -990,6 +1002,8 @@ class main
 			. '</div>'
 			. '</div></div>';
 
+		$this->debug_echo('■ create_change_check_dialog_html end');
+
 		return $ret;
 	}
 
@@ -1002,6 +1016,8 @@ class main
 	 */
 	private function do_check_validation($add_flg) {
 				
+		$this->debug_echo('■ do_check_validation start');
+
 		$ret = "";
 
 		$branch_select_value = "";
@@ -1070,6 +1086,8 @@ class main
 			$ret .= '<p class="error_message">入力された日時はすでに公開予定が作成されています。</p>';
 		}
 
+		$this->debug_echo('■ do_check_validation end');
+
 		return $ret;
 	}
 
@@ -1080,6 +1098,8 @@ class main
 	 */
 	private function create_top_contents() {
 		
+		$this->debug_echo('■ create_top_contents start');
+
 		$ret = "";
 
 		// CSVより公開予約の一覧を取得する（ステータスが公開前のみ）
@@ -1161,7 +1181,9 @@ class main
 			. '</div>'
 			. '</form>'
 			. '</div>';
-		
+
+		echo('■ create_top_contents end');
+
 		return $ret;
 	}
 
@@ -1172,6 +1194,8 @@ class main
 	 */
 	private function create_history_contents() {
 		
+		echo('■ create_history_contents start');
+
 		$ret = "";
 
 		// CSVより公開予約の一覧を取得する（全ステータス）
@@ -1225,6 +1249,8 @@ class main
 			. '</form>'
 			. '</div>';
 		
+		echo('■ create_history_contents end');
+
 		return $ret;
 	}
 
@@ -1233,6 +1259,8 @@ class main
 	 */
 	public function run() {
 	
+		echo('■ run start');
+
 		$this->debug_echo("絶対パス：" . realpath('.'));
 
 		// ダイアログの表示
@@ -1242,37 +1270,30 @@ class main
 		$init_ret = $this->init();
 		$init_ret = json_decode($init_ret);
 
-		// // git init
-		// $command = 'TZ=Hongkong date "+%Y%m%d%H%M%S"';
-		// $ret = $this->execute($command, false);
+		//timezoneテスト ここから
+		// date_default_timezone_set('Asia/Tokyo');
 
-		// foreach ( $ret['output'] as $element ) {
+		// echo "--------------------------------</br>";
 
-		// 	echo '日本時間:' . $element;
-		// }
-
-		//timezone設定
-		date_default_timezone_set('Asia/Tokyo');
-
-		echo "--------------------------------</br>";
-
-		echo "GMT　　　　　：" . gmdate(DATE_ATOM, time()). "</br>";
-		echo "date　　　　　：" . date(DATE_ATOM, time()). "</br></br>";
+		// echo "GMT　　　　　：" . gmdate(DATE_ATOM, time()). "</br>";
+		// echo "date　　　　　：" . date(DATE_ATOM, time()). "</br></br>";
 		
-		$t = new \DateTime(gmdate(DATE_ATOM, time()));
-		$t->setTimeZone(new \DateTimeZone('Asia/Tokyo'));
+		// $t = new \DateTime(gmdate(DATE_ATOM, time()));
+		// $t->setTimeZone(new \DateTimeZone('Asia/Tokyo'));
 
-		echo "gmtから日本時間へ：" . $t->format(DATE_ATOM). "</br>";
+		// echo "gmtから日本時間へ：" . $t->format(DATE_ATOM). "</br>";
 
 
-		$t = new \DateTime($t->format(DATE_ATOM));
-		$t->setTimeZone(new \DateTimeZone('GMT'));
+		// $t = new \DateTime($t->format(DATE_ATOM));
+		// $t->setTimeZone(new \DateTimeZone('GMT'));
 
-		echo "日本時間からgmtへ：" . $t->format(DATE_ATOM). "</br></br>";
+		// echo "日本時間からgmtへ：" . $t->format(DATE_ATOM). "</br></br>";
 
-		// タイムゾーンが取得できる！！！！
-		echo "タイムゾーン取得 ：" . date("e", date(DATE_ATOM, time())). "</br>";
-				echo "--------------------------------</br>";
+		// // タイムゾーンが取得できる！！！！
+		// echo "タイムゾーン取得 ：" . date("e", date(DATE_ATOM, time())). "</br>";
+		// 		echo "--------------------------------</br>";
+		//timezoneテスト ここまで
+		
 
 		// 初期表示画面から遷移されたか
 		$init_trans_flg = false;
