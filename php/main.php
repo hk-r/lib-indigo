@@ -1969,8 +1969,13 @@ class main
 		set_time_limit(30);
 
 		$result['status'] = true;
+
+		foreach ( (array)$result['del_data'] as $element ) {
+
+			$this->debug_echo('　□del_data' , $element);
+		}
+
 		
-		$this->debug_echo('　□del_data' , $result['del_data']);
 		$this->debug_echo('■ delete_list_csv_data end');
 
 		return json_encode($result);
