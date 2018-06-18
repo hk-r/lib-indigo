@@ -530,12 +530,15 @@ class main
 			// // 選択されたID
 			// $selected_id =  $this->options->_POST->selected_id;
 			// 選択されたIDに紐づく情報を取得
-			$selected_ret = $this->get_selected_data();
+			$selected_data_list = $this->get_selected_data();
 			
-			$branch_select_value = $selected_ret[self::WATING_CSV_COLUMN_BRANCH];
-			$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($selected_ret[self::WATING_CSV_COLUMN_RESERVE]));
-			$reserve_time = date(self::TIME_FORMAT_HI,  strtotime($selected_ret[self::WATING_CSV_COLUMN_RESERVE]));
-			$comment = $selected_ret[self::WATING_CSV_COLUMN_COMMENT];
+			foreach ( $selected_data_list as $data ) {
+
+				$branch_select_value = $data[self::WATING_CSV_COLUMN_BRANCH];
+				$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($data[self::WATING_CSV_COLUMN_RESERVE]));
+				$reserve_time = date(self::TIME_FORMAT_HI,  strtotime($data[self::WATING_CSV_COLUMN_RESERVE]));
+				$comment = $data[self::WATING_CSV_COLUMN_COMMENT];
+			}
 
 		} else {
 
@@ -556,7 +559,7 @@ class main
 
 		// ブランチリストを取得
 		$get_branch_ret = json_decode($this->get_branch_list());
-		$branch_list = array();
+		// $branch_list = array();
 		$branch_list = $get_branch_ret->branch_list;
 
 		// ダイアログHTMLの作成
@@ -600,10 +603,10 @@ class main
 		
 		$this->debug_echo('■ create_dialog_html start');
 
-		$this->debug_echo('　□ reserve_time：' . $branch_list);
-		$this->debug_echo('　□ reserve_time：' . $branch_select_value);
-		$this->debug_echo('　□ reserve_time：' . $reserve_date);
-		$this->debug_echo('　□ reserve_time：' . $reserve_time);
+		$this->debug_echo('　□ branch_list' . $branch_list);
+		$this->debug_echo('　□ branch_select_value' . $branch_select_value);
+		$this->debug_echo('　□ reserve_date' . $reserve_date);
+		$this->debug_echo('　□ reserve_time' . $reserve_time);
 
 		$ret = "";
 
