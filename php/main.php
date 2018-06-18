@@ -2003,7 +2003,8 @@ class main
 			$selected_ret = $this->get_selected_data();
 
 		$this->debug_echo('　□1：');
-
+		$this->debug_echo('　□select_ret：');
+		var_dump($selected_ret);
 			if (!$selected_ret)  {
 
 				// エラー処理
@@ -2057,7 +2058,7 @@ class main
 					// throw new PHPExcel_Writer_Exception("Could not open file $pFilename for writing.");
 				}
 		$this->debug_echo('　□rselect_ret：');
-		var_dump($select_ret);
+		var_dump($selected_ret);
 				// 現在時刻
 				$now = date(self::DATETIME_FORMAT);
 
