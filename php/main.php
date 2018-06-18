@@ -1499,58 +1499,58 @@ class main
 		return $disp . $disp_lock . $dialog_disp;
 	}
 
-	/**
-	 * CSVからお知らせリストを取得する
-	 *
-	 * @return お知らせリスト
-	 */
-	private function get_csv_alert_list()
-	{
+	// /**
+	//  * CSVからお知らせリストを取得する
+	//  *
+	//  * @return お知らせリスト
+	//  */
+	// private function get_csv_alert_list()
+	// {
 
-		$this->debug_echo('■ get_csv_alert_list start');
+	// 	$this->debug_echo('■ get_csv_alert_list start');
 
-		$ret_array = array();
+	// 	$ret_array = array();
 
-		// $filename = realpath('.') . $this->alert_filename;
-		$filename = $this->alert_filename;
+	// 	// $filename = realpath('.') . $this->alert_filename;
+	// 	$filename = $this->alert_filename;
 
-		if (!file_exists($filename)) {
-			$this->debug_echo('お知らせ一覧ファイルが存在しない');
+	// 	if (!file_exists($filename)) {
+	// 		$this->debug_echo('お知らせ一覧ファイルが存在しない');
 
-		} else {
+	// 	} else {
 
-			// Open file
-			$handle = fopen( $filename, "r" );
+	// 		// Open file
+	// 		$handle = fopen( $filename, "r" );
 
-			$title_array = array();
+	// 		$title_array = array();
 
-			$is_first = true;
+	// 		$is_first = true;
 
-			// CSVリストをループ
-			while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
+	// 		// CSVリストをループ
+	// 		while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
 
-				if($is_first){
-			        // タイトル行
-			        foreach ($rowData as $k => $v) {
-			        	$title_array[] = $v;
-			        }
-			        $is_first = false;
-			        continue;
-			    }
+	// 			if($is_first){
+	// 		        // タイトル行
+	// 		        foreach ($rowData as $k => $v) {
+	// 		        	$title_array[] = $v;
+	// 		        }
+	// 		        $is_first = false;
+	// 		        continue;
+	// 		    }
 			    
-			    // タイトルと値の2次元配列作成
-			    $ret_array[] = array_combine ($title_array, $rowData) ;
-			}
+	// 		    // タイトルと値の2次元配列作成
+	// 		    $ret_array[] = array_combine ($title_array, $rowData) ;
+	// 		}
 
-			// Close file
-			fclose($handle);
+	// 		// Close file
+	// 		fclose($handle);
 
-		}
+	// 	}
 
-		$this->debug_echo('■ get_csv_alert_list end');
+	// 	$this->debug_echo('■ get_csv_alert_list end');
 
-		return $ret_array;
-	}
+	// 	return $ret_array;
+	// }
 
 
 	/**
@@ -1633,7 +1633,7 @@ class main
 
 		$selected_id =  $this->options->_POST->selected_id;
 
-		$this->debug_echo('　□$selected_id：' . $selected_id);
+		$this->debug_echo('　□selected_id：' . $selected_id);
 
 		$ret_array = array();
 
@@ -1668,7 +1668,7 @@ class main
 					if ($num == $selected_id) {
 					    // // タイトルと値の2次元配列作成
 					    // $ret_array = array_combine ($title_array, $rowData) ;
-					    $ret_array = $rowData;
+					    $ret_array[] = $rowData;
 					    break;
 					}
 				}
