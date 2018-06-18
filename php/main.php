@@ -1662,6 +1662,7 @@ class main
 					    // // タイトルと値の2次元配列作成
 					    // $ret_array = array_combine ($title_array, $rowData) ;
 					    $ret_array[] = $rowData;
+					    break;
 					}
 				}
 
@@ -1675,8 +1676,6 @@ class main
 			echo "例外キャッチ：", $e->getMessage(), "\n";
 			return $ret_array;
 		}
-
-		var_dump($ret_array);
 
 		$this->debug_echo('■ get_selected_data end');
 
@@ -1791,6 +1790,8 @@ class main
 	 */
 	private function update_list_csv_data($convert_reserve_time) {
 
+		$this->debug_echo('■ update_list_csv_data start');
+
 		$output = "";
 		$result = array('status' => true,
 						'message' => '');
@@ -1882,7 +1883,7 @@ class main
 
 		$result['status'] = true;
 
-		$this->debug_echo('■ insert_list_csv_data end');
+		$this->debug_echo('■ update_list_csv_data end');
 
 		return json_encode($result);
 	}
@@ -1897,7 +1898,8 @@ class main
 		$this->debug_echo('■ delete_list_csv_data start');
 
 		$result = array('status' => true,
-						'message' => '');
+						'message' => '',
+						'del_data' => '');
 
 		$filename = self::PATH_CREATE_DIR . self::CSV_WATING_LIST_FILENAME;
 
@@ -1932,8 +1934,7 @@ class main
 
 					if ($num == $selected_id) {
 
-						$this->debug_echo('　□ 削除データ：');
-						var_dump($file[$cnt]);
+						$result['del_data'] = $file[$cnt];
 
 						unset($file[$cnt]);
 						file_put_contents($filename, $file);
@@ -1943,6 +1944,7 @@ class main
 
 					$cnt++;
 				}
+
 			}
 
 			// Close file
@@ -1967,6 +1969,112 @@ class main
 
 		return json_encode($result);
 	}
+
+
+	/**
+	 * CSVの切り取り移動処理（公開予定一覧CSVから実施済み一覧CSVへ）
+	 *
+	 * @return なし
+	 */
+	private function move_csv_data() {
+
+		$this->debug_echo('■ move_csv_data start');
+
+		$filename = self::PATH_CREATE_DIR . self::CSV_RELEASED_LIST_FILENAME;
+
+		// $selected_id =  $this->options->_POST->selected_id;
+
+		try {
+
+			$ret = $this->delete_list_csv_data();
+
+			// 削除したデータ
+			$cut_data = $ret['del_data'];
+
+			if (!file_exists($filename))  {
+
+				// エラー処理
+				throw new \Exception('file not found. ');
+			
+			} else {
+
+				// Open file
+				$handle_r = fopen( $filename, "r" );
+
+				if ($handle_r === false) {
+					// スロー処理！
+					// throw new PHPExcel_Writer_Exception("Could not open file $pFilename for writing.");
+				}
+
+				$is_first = true;
+
+				$max = 0;
+
+				// Loop through each line of the file in turn
+				while ($rowData = fgetcsv($handle_r, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
+
+					if($is_first){
+				        // タイトル行
+
+				        $is_first = false;
+				        continue;
+				    }
+
+				    $num = intval($rowData[0]);
+
+				    if ($num > $max) {
+						$max = $num;
+					}
+				}
+
+				$max++;
+
+				// Open file
+				$handle = fopen( $filename, 'a+' );
+
+
+				if ($handle === false) {
+					// スロー処理！
+					// throw new PHPExcel_Writer_Exception("Could not open file $pFilename for writing.");
+				}
+
+				// 現在時刻
+				$now = date(self::DATETIME_FORMAT);
+
+				$array[self::RELEASED_CSV_COLUMN_ID] = $cut_data[self::RELEASED_CSV_COLUMN_ID];
+				$array[self::RELEASED_CSV_COLUMN_RESERVE] = $cut_data[self::RELEASED_CSV_COLUMN_RESERVE];
+				$array[self::RELEASED_CSV_COLUMN_BRANCH] = $cut_data[self::RELEASED_CSV_COLUMN_BRANCH];
+				$array[self::RELEASED_CSV_COLUMN_COMMIT] = $cut_data[self::RELEASED_CSV_COLUMN_COMMIT];
+				$array[self::RELEASED_CSV_COLUMN_COMMENT] = $cut_data[self::RELEASED_CSV_COLUMN_COMMENT];
+				$array[self::RELEASED_CSV_COLUMN_SETTING] = $now;
+
+				fputcsv( $handle, $array, self::CSV_DELIMITER, self::CSV_ENCLOSURE);
+
+				fclose( $handle);
+			}
+
+			// Close file
+			fclose($handle_r);
+
+		} catch (\Exception $e) {
+
+			set_time_limit(30);
+
+			$result['status'] = false;
+			$result['message'] = $e->getMessage();
+
+			return json_encode($result);
+		}
+
+		set_time_limit(30);
+
+		$result['status'] = true;
+
+		$this->debug_echo('■ move_csv_data end');
+
+		return json_encode($result);
+	}
+
 
 	/**
 	 * 新規追加時のGitファイルのコピー
@@ -2362,7 +2470,19 @@ class main
 			// 　実施済み一覧CSVにファイルロックが掛かっていない場合
 			// 　ファイルロックを掛ける
 	 		// 公開対象の行を、実施済みへ切り取り移動する
+			$ret = $this->move_csv_data();
+			$ret = json_decode($ret);
 
+			if ( !$ret->status ) {
+				// 削除失敗
+
+				// エラーメッセージ
+				$dialog_disp = '
+				<script type="text/javascript">
+					console.error("' . $ret->message . '");
+					alert("add faild");
+				</script>';
+			} 
 
 
 	 		// ファイルロックを解除する
@@ -2416,71 +2536,76 @@ class main
 
 
 
-			// 現在時刻取得
+
+
+
+
+
+			// // 現在時刻取得
 			
-			if ( $dirname ) {
+			// if ( $dirname ) {
 
-				// 本番環境のディレクトリへ移動
-				if ( chdir(self::PATH_PROJECT_DIR ) ) {
+			// 	// 本番環境のディレクトリへ移動
+			// 	if ( chdir(self::PATH_PROJECT_DIR ) ) {
 
-					$project_real_path = realpath('.');
-					chdir($current_dir);
+			// 		$project_real_path = realpath('.');
+			// 		chdir($current_dir);
 
-					$this->debug_echo('　▲本番環境の絶対パス：' . $project_real_path);
+			// 		$this->debug_echo('　▲本番環境の絶対パス：' . $project_real_path);
 
-				} else {
+			// 	} else {
 
-					// エラー処理
-					throw new \Exception('Project directory change directory failed.');
-				}
+			// 		// エラー処理
+			// 		throw new \Exception('Project directory change directory failed.');
+			// 	}
 
-				// *** 本番環境よりバックアップ取得
+			// 	// *** 本番環境よりバックアップ取得
 
-				// backupディレクトリのパスを取得
-				$bk_real_path = self::PATH_PROJECT_DIR;
-				// copyディレクトリの絶対パスを取得
-				$copy_real_path = self::PATH_CREATE_DIR . self::PATH_COPY;
-				// logディレクトリの絶対パスを取得
-				$log_real_path = self::PATH_CREATE_DIR . self::PATH_LOG;
+			// 	// backupディレクトリのパスを取得
+			// 	$bk_real_path = self::PATH_PROJECT_DIR;
+			// 	// copyディレクトリの絶対パスを取得
+			// 	$copy_real_path = self::PATH_CREATE_DIR . self::PATH_COPY;
+			// 	// logディレクトリの絶対パスを取得
+			// 	$log_real_path = self::PATH_CREATE_DIR . self::PATH_LOG;
 
 
-				// バックアップディレクトリが存在しない場合は作成
-				if ( !$this->is_exists_mkdir(self::PATH_CREATE_DIR . self::PATH_BACKUP) ) {
+			// 	// バックアップディレクトリが存在しない場合は作成
+			// 	if ( !$this->is_exists_mkdir(self::PATH_CREATE_DIR . self::PATH_BACKUP) ) {
 
-						// エラー処理
-						throw new \Exception('Creation of backup directory failed.');
-				}
+			// 			// エラー処理
+			// 			throw new \Exception('Creation of backup directory failed.');
+			// 	}
 
-				// バックアップディレクトリへ移動
-				if ( chdir(self::PATH_CREATE_DIR . self::PATH_BACKUP) ) {
+			// 	// バックアップディレクトリへ移動
+			// 	if ( chdir(self::PATH_CREATE_DIR . self::PATH_BACKUP) ) {
 
-					// 公開予定ディレクトリをデリートインサート
-					if ( !$this->is_exists_remkdir(self::PATH_CREATE_DIR . self::PATH_BACKUP, $dirname) ) {
+			// 		// 公開予定ディレクトリをデリートインサート
+			// 		if ( !$this->is_exists_remkdir(self::PATH_CREATE_DIR . self::PATH_BACKUP, $dirname) ) {
 
-						// エラー処理
-						throw new \Exception('Creation of copy publish directory failed.');
-					}
+			// 			// エラー処理
+			// 			throw new \Exception('Creation of copy publish directory failed.');
+			// 		}
 
-					// 公開予定ディレクトリへ移動
-					if ( chdir($dirname) ) {
+			// 		// 公開予定ディレクトリへ移動
+			// 		if ( chdir($dirname) ) {
 
-						// 本番環境からファイルをコピー
-						$command = 'cp -pR ' . $project_real_path . '/* ' . './' ;
-						$this->execute($command, false);
+			// 			// 本番環境からファイルをコピー
+			// 			$command = 'cp -pR ' . $project_real_path . '/* ' . './' ;
+			// 			$this->execute($command, false);
 
-					} else {
+			// 		} else {
 
-						// コピー用のディレクトリが存在しない場合
+			// 			// コピー用のディレクトリが存在しない場合
 
-						// エラー処理
-						throw new \Exception('Copy publish directory not found.');
-					}
-				}
+			// 			// エラー処理
+			// 			throw new \Exception('Copy publish directory not found.');
+			// 		}
+			// 	}
 
-			} else {
+			// } else {
 
-					$this->debug_echo("対象なし");
-			}
+			// 		$this->debug_echo("対象なし");
+			// }
 		
 		} catch (\Exception $e) {
 
@@ -2578,7 +2703,7 @@ class main
 			$ret = $this->execute($command, true);
 
 			if ( $ret['return'] !== 0 ) {
-				$this->debug_echo('削除失敗');
+				$this->debug_echo('[既存ディレクトリ削除失敗]');
 				return false;
 			}
 		}
@@ -2586,10 +2711,11 @@ class main
 		// デプロイ先のディレクトリを作成
 		if ( !file_exists($dirname)) {
 			if ( !mkdir($dirname, 0777) ) {
-				$this->debug_echo('　□ 再作成失敗、$dirname：' . $dirname);
+				$this->debug_echo('　□ [再作成失敗]$dirname：' . $dirname);
 				return false;
 			}
 		} else {
+			$this->debug_echo('　□ [既存ディレクトリが残っている]$dirname：' . $dirname);
 			return false;
 		}
 	
@@ -2607,7 +2733,7 @@ class main
 	 */
 	function execute($command, $captureStderr) {
 	
-		$this->debug_echo('■ execute start');
+		// $this->debug_echo('■ execute start');
 
 	    $output = array();
 	    $return = 0;
@@ -2619,9 +2745,7 @@ class main
 
 	    exec($command, $output, $return);
 
-	    // $output = implode("\n", $output);
-	
-		$this->debug_echo('■ execute end');
+		// $this->debug_echo('■ execute end');
 
 	    return array('output' => $output, 'return' => $return);
 	}
