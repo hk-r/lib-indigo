@@ -1559,8 +1559,7 @@ class main
 	 * @param $now = 現在時刻
 	 * @return データリスト
 	 */
-	private function get_csv_data_list($now)
-	{
+	private function get_csv_data_list($now) {
 
 		$this->debug_echo('■ get_csv_data_list start');
 
@@ -1590,9 +1589,15 @@ class main
 				        continue;
 				    }
 
-				    // 指定日時が設定されており、かつ、指定日時より未来日時の場合
-				    if (isset($now) && ($rowData[self::CSV_COLUMN_SERVER_DATETIME] > $now)) {
-				    	continue;
+				    if ($now) {
+				    // 指定日時が設定されている
+
+						$datetime = date(self::TIME_FORMAT_HIS,  strtotime($rowData[self::WATING_CSV_COLUMN_RESERVE]));
+
+					    // 指定日時より未来日時の場合
+				    	if ($datetime && ($datetime > $now)) {
+				    		continue;
+				    	}
 				    }
 
 					$ret_array[] = $rowData;
