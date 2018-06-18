@@ -1993,12 +1993,22 @@ class main
 
 			$ret = $this->delete_list_csv_data();
 
+			$this->debug_echo('　□cut_data：' . var_dump($ret));
+			
+			$cut_data = array();
 			// 削除したデータ
 			$cut_data = $ret['del_data'];
 
 			$this->debug_echo('　□cut_data：' . var_dump($cut_data));
+			
+			if (!$cut_data)  {
 
-			if (!file_exists($filename))  {
+				// エラー処理
+				throw new \Exception('Csv data move failed. ');
+			
+			}
+
+			if ( !file_exists($filename))  {
 
 				// エラー処理
 				throw new \Exception('file not found. ');
