@@ -1633,6 +1633,8 @@ class main
 
 		$selected_id =  $this->options->_POST->selected_id;
 
+		$this->debug_echo('　□$selected_id：' . $selected_id);
+
 		$ret_array = array();
 
 		try {
@@ -1666,7 +1668,7 @@ class main
 					if ($num == $selected_id) {
 					    // // タイトルと値の2次元配列作成
 					    // $ret_array = array_combine ($title_array, $rowData) ;
-					    $ret_array[] = $rowData;
+					    $ret_array = $rowData;
 					    break;
 					}
 				}
