@@ -2588,6 +2588,7 @@ class main
 			if ( !mkdir($dirname, 0777) ) {
 				$this->debug_echo('　□ 再作成失敗、$dirname：' . $dirname);
 				return false;
+			}
 		} else {
 			return false:
 		}
