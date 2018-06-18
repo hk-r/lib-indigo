@@ -1857,7 +1857,11 @@ class main
 				// Open file
 				$handle = fopen( $filename, 'a+' );
 
-
+				if ($handle === false) {
+					// スロー処理！
+					// throw new PHPExcel_Writer_Exception("Could not open file $pFilename for writing.");
+				}
+				
 				// 現在時刻
 				$now = date(self::DATETIME_FORMAT);
 
@@ -2001,16 +2005,21 @@ class main
 
 			// 実施済み一覧CSVへ書きこみ
 
+			$insert_data = array();
 			// 選択されたIDに紐づく情報を取得
 			$selected_ret = $this->get_selected_data();
 
 		$this->debug_echo('　□1：');
 		$this->debug_echo('　□select_ret：');
 		var_dump($selected_ret);
+
 			if (!$selected_ret)  {
 
 				// エラー処理
 				throw new \Exception('Csv data move failed. ');
+			} else {
+
+				$insert_array = array_shift($selected_ret);
 			}
 
 			if ( !file_exists($filename))  {
@@ -2059,16 +2068,16 @@ class main
 					// スロー処理！
 					// throw new PHPExcel_Writer_Exception("Could not open file $pFilename for writing.");
 				}
-		$this->debug_echo('　□rselect_ret：');
-		var_dump($selected_ret);
+		$this->debug_echo('　□insert_array：');
+		var_dump($insert_array);
 				// 現在時刻
 				$now = date(self::DATETIME_FORMAT);
 
 				$array[self::RELEASED_CSV_COLUMN_ID] = $max;
-				$array[self::RELEASED_CSV_COLUMN_RESERVE] = $selected_ret[self::WATING_CSV_COLUMN_RESERVE];
-				$array[self::RELEASED_CSV_COLUMN_BRANCH] = $selected_ret[self::WATING_CSV_COLUMN_BRANCH];
-				$array[self::RELEASED_CSV_COLUMN_COMMIT] = $selected_ret[self::WATING_CSV_COLUMN_COMMIT];
-				$array[self::RELEASED_CSV_COLUMN_COMMENT] = $selected_ret[self::WATING_CSV_COLUMN_COMMENT];
+				$array[self::RELEASED_CSV_COLUMN_RESERVE] = $insert_array[self::WATING_CSV_COLUMN_RESERVE];
+				$array[self::RELEASED_CSV_COLUMN_BRANCH] = $insert_array[self::WATING_CSV_COLUMN_BRANCH];
+				$array[self::RELEASED_CSV_COLUMN_COMMIT] = $insert_array[self::WATING_CSV_COLUMN_COMMIT];
+				$array[self::RELEASED_CSV_COLUMN_COMMENT] = $insert_array[self::WATING_CSV_COLUMN_COMMENT];
 				$array[self::RELEASED_CSV_COLUMN_SETTING] = $now;
 
 				fputcsv( $handle, $array, self::CSV_DELIMITER, self::CSV_ENCLOSURE);
