@@ -2002,7 +2002,7 @@ class main
 			if ( chdir(self::PATH_CREATE_DIR . self::PATH_COPY) ) {
 
 				// 公開予定ディレクトリをデリートインサート
-				if ( !$this->is_exists_remkdir(self::PATH_CREATE_DIR . self::PATH_COPY, $dirname) ) {
+				if ( !$this->is_exists_remkdir(dirname) ) {
 
 					// エラー処理
 					throw new \Exception('Creation of copy publish directory failed.');
@@ -2364,7 +2364,7 @@ class main
 	 		// 公開対象の行を、実施済みへ切り取り移動する
 
 
-	 		
+
 	 		// ファイルロックを解除する
 
 
@@ -2561,13 +2561,13 @@ class main
 	}
 
 	/**
-	 * ディレクトリの存在チェックをし、存在しなかった場合は削除し、再作成作成する
+	 * ディレクトリの再作成
 	 *	 
 	 * @param $path = 作成ディレクトリ名
 	 *	 
 	 * @return ソート後の配列
 	 */
-	private function is_exists_remkdir($dirpath, $dirname) {
+	private function is_exists_remkdir($dirname) {
 		
 		$this->debug_echo('■ is_exists_remkdir start');
 
@@ -2585,7 +2585,7 @@ class main
 
 		// デプロイ先のディレクトリを作成
 		if ( file_exists($dirname) || !mkdir($dirname, 0777) ) {
-
+			$this->debug_echo('再作成失敗');
 			return false;
 		}
 	
