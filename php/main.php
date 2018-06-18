@@ -1993,12 +1993,8 @@ class main
 
 			$ret = $this->delete_list_csv_data();
 
-			$this->debug_echo('　□cut_data：' . var_dump($ret));
+			$cut_data = array_shift($ret['del_data']);
 			
-			$cut_data = array();
-			// 削除したデータ
-			$cut_data = $ret['del_data'];
-
 			$this->debug_echo('　□cut_data：' . var_dump($cut_data));
 			
 			if (!$cut_data)  {
