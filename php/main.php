@@ -1916,12 +1916,12 @@ class main
 			if (!file_exists($filename))  {
 
 				// エラー処理
-				throw new \Exception('file not found. ');
+				throw new \Exception('file not found.');
 			
 			} elseif (!$selected_id) {
 
 				// エラー処理
-				throw new \Exception('Select id is undefined. ');
+				throw new \Exception('Select id is undefined.');
 
 			} else {
 
@@ -1997,17 +1997,15 @@ class main
 
 		try {
 
-			$ret = $this->delete_list_csv_data();
+			// 実施済み一覧CSVへ書きこみ
 
-			$cut_data = $ret['del_data'];
-			
-			$this->debug_echo('　□cut_data：' . var_dump($cut_data));
-			
-			if (!$cut_data)  {
+			// 選択されたIDに紐づく情報を取得
+			$selected_ret = $this->get_selected_data();
+
+			if (!$selected_ret)  {
 
 				// エラー処理
 				throw new \Exception('Csv data move failed. ');
-			
 			}
 
 			if ( !file_exists($filename))  {
@@ -2039,7 +2037,7 @@ class main
 				        continue;
 				    }
 
-				    $num = intval($rowData[0]);
+				    $num = intval($rowData[self::RELEASED_CSV_COLUMN_ID]);
 
 				    if ($num > $max) {
 						$max = $num;
@@ -2060,11 +2058,11 @@ class main
 				// 現在時刻
 				$now = date(self::DATETIME_FORMAT);
 
-				$array[self::RELEASED_CSV_COLUMN_ID] = $cut_data[self::RELEASED_CSV_COLUMN_ID];
-				$array[self::RELEASED_CSV_COLUMN_RESERVE] = $cut_data[self::RELEASED_CSV_COLUMN_RESERVE];
-				$array[self::RELEASED_CSV_COLUMN_BRANCH] = $cut_data[self::RELEASED_CSV_COLUMN_BRANCH];
-				$array[self::RELEASED_CSV_COLUMN_COMMIT] = $cut_data[self::RELEASED_CSV_COLUMN_COMMIT];
-				$array[self::RELEASED_CSV_COLUMN_COMMENT] = $cut_data[self::RELEASED_CSV_COLUMN_COMMENT];
+				$array[self::RELEASED_CSV_COLUMN_ID] = $selected_ret[self::WATING_CSV_COLUMN_ID];
+				$array[self::RELEASED_CSV_COLUMN_RESERVE] = $selected_ret[self::WATING_CSV_COLUMN_RESERVE];
+				$array[self::RELEASED_CSV_COLUMN_BRANCH] = $selected_ret[self::WATING_CSV_COLUMN_BRANCH];
+				$array[self::RELEASED_CSV_COLUMN_COMMIT] = $selected_ret[self::WATING_CSV_COLUMN_COMMIT];
+				$array[self::RELEASED_CSV_COLUMN_COMMENT] = $selected_ret[self::WATING_CSV_COLUMN_COMMENT];
 				$array[self::RELEASED_CSV_COLUMN_SETTING] = $now;
 
 				fputcsv( $handle, $array, self::CSV_DELIMITER, self::CSV_ENCLOSURE);
@@ -2075,6 +2073,17 @@ class main
 			// Close file
 			fclose($handle_r);
 			fclose($handle);
+
+			// 公開予定一覧CSVから削除
+			$ret = $this->delete_list_csv_data();
+
+			$ret = json_decode($ret);
+
+			if ( !$ret->status ) {
+				// デプロイ失敗
+
+				throw new \Exception("Waiting csv delete failed.");
+			}
 
 		} catch (\Exception $e) {
 
