@@ -1906,8 +1906,6 @@ class main
 						'message' => '',
 						'del_data' => array());
 
-		$cut_data
-
 		$filename = self::PATH_CREATE_DIR . self::CSV_WATING_LIST_FILENAME;
 
 		$selected_id =  $this->options->_POST->selected_id;
