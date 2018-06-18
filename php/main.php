@@ -513,7 +513,9 @@ class main
 	 */
 	private function disp_update_dialog($init_trans_flg, $error_message) {
 		
-		// $ret = "";
+		$this->debug_echo('■ disp_update_dialog start');
+
+		$ret = "";
 
 		$branch_select_value = "";
 		$reserve_date = "";
@@ -559,6 +561,8 @@ class main
 
 		// ダイアログHTMLの作成
 		$ret = $this->create_dialog_html(false, $init_trans_flg, $error_message, $branch_list, $branch_select_value, $reserve_date, $reserve_time, $comment);
+
+		$this->debug_echo('■ disp_update_dialog end');
 
 		return $ret;
 	}
@@ -1293,7 +1297,7 @@ class main
 		// echo "タイムゾーン取得 ：" . date("e", date(DATE_ATOM, time())). "</br>";
 		// 		echo "--------------------------------</br>";
 		//timezoneテスト ここまで
-		
+
 
 		// 初期表示画面から遷移されたか
 		$init_trans_flg = false;
