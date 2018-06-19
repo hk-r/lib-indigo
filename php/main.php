@@ -2563,6 +2563,7 @@ class main
 
 			$ret_datetime = '';
 
+			$dirname = '';
 
 			foreach ( (array)$data_list as $data ) {
 				// 公開対象の公開予定日時（文字列）
