@@ -1277,7 +1277,6 @@ class main
 		$this->debug_echo('■ run start');
 
 		$this->debug_echo('　□カレントパス：' . realpath('.'));
-		$this->debug_echo('　□現在日時' . );
 
 		// ダイアログの表示
 		$dialog_disp = '';
