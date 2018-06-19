@@ -2103,7 +2103,7 @@ class main
 				// Open file
 				$handle = fopen( $filename, "r" );
 				
-				$title_array = array();
+				// $title_array = array();
 
 				$is_first = true;
 
@@ -2176,7 +2176,7 @@ class main
 
 			$insert_array = '';
 
-			if (!$selected_ret && !file_exists($filename))  {
+			if ($selected_ret && !file_exists($filename))  {
 
 				$insert_array = array_shift($selected_ret);
 
