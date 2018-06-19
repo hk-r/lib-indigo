@@ -2123,7 +2123,7 @@ class main
 					if ($num == $selected_id) {
 					    // // タイトルと値の2次元配列作成
 					    // $ret_array = array_combine ($title_array, $rowData) ;
-					    $ret_array[] = $rowData;
+					    $ret_array = $rowData;
 					    break;
 					}
 				}
@@ -2354,17 +2354,14 @@ class main
 			// 選択されたIDに紐づく情報を取得
 			$selected_ret = $this->get_released_selected_data();
 
-		$this->debug_echo('　□1：');
-		$this->debug_echo('　□select_ret：');
-		var_dump($selected_ret);
+			$this->debug_echo('　□1：');
+			$this->debug_echo('　□select_ret：');
+			var_dump($selected_ret);
 
 			if (!$selected_ret)  {
 
 				// エラー処理
 				throw new \Exception('Csv data move failed. ');
-			} else {
-
-				$insert_array = array_shift($selected_ret);
 			}
 
 			if ( !file_exists($filename))  {
@@ -2410,8 +2407,10 @@ class main
 					// スロー処理！
 					// throw new PHPExcel_Writer_Exception("Could not open file $pFilename for writing.");
 				}
-		$this->debug_echo('　□insert_array：');
-		var_dump($insert_array);
+				
+				$this->debug_echo('　□insert_array：');
+				var_dump($insert_array);
+
 				// 現在時刻
 				$now = date(self::DATETIME_FORMAT);
 
