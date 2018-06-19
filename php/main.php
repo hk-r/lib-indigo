@@ -731,10 +731,13 @@ class main
 		if ($init_trans_flg) {
 
 			// 選択されたID
-			$selected_id =  $this->options->_POST->selected_id;
+			$selected_id = $this->options->_POST->selected_id;
 			// 選択されたIDに紐づく情報を取得
 			$selected_ret = $this->get_selected_data();
 			
+			$this->debug_echo('　□selected_ret ：');
+			$this->debug_echo($selected_ret);
+
 			$branch_select_value = $selected_ret[self::WATING_CSV_COLUMN_BRANCH];
 			$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($selected_ret[self::WATING_CSV_COLUMN_RESERVE]));
 			$reserve_time = date(self::TIME_FORMAT_HI,  strtotime($selected_ret[self::WATING_CSV_COLUMN_RESERVE]));
@@ -754,6 +757,9 @@ class main
   			  . '<input type="hidden" name="change_before_reserve_date" value="'. $reserve_date . '"/>'
   			  . '<input type="hidden" name="change_before_reserve_time" value="'. $reserve_time . '"/>'
   			  . '<input type="hidden" name="change_before_comment" value="'. $comment . '"/>';
+
+		$this->debug_echo('　□ret ：');
+		$this->debug_echo($ret_str);
 
 		$this->debug_echo('■ create_change_before_hidden_html end');
 
@@ -2691,7 +2697,7 @@ class main
 				if ( !file_exists($before_dirname) ) {
 
 					$this->debug_echo( '　□ $before_dirname' . $before_dirname);
-					throw new \Exception('Publish directory not found.');
+					throw new \Exception('Before publish directory not found.');
 				}
 
 				// ディレクトリ名が変更になる場合はリネームする
