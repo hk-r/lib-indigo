@@ -654,7 +654,7 @@ class main
 			  // . '<td>' . 'dummy' . '</td>'
 			  // . '</tr>'
 			  . '<tr>'
-			  . '<td class="dialog_thead">公開予定日時（日本時間）</td>'
+			  . '<td class="dialog_thead">公開予定日時</td>'
 			  . '<td scope="row"><span style="margin-right:10px;"><input type="text" id="datepicker" name="reserve_date" value="'. $reserve_date . '" autocomplete="off" /></span>'
 			  . '<input type="time" id="reserve_time" name="reserve_time" value="'. $reserve_time . '" /></td>'
 			  . '</tr>'
@@ -1325,8 +1325,8 @@ class main
 		// 画面入力された日付と時刻を結合
 		$combine_reserve_time = $this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
 
-		// サーバのタイムゾーン日時へ変換
-		$convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::DATETIME_FORMAT);
+		// // サーバのタイムゾーン日時へ変換
+		// $convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::DATETIME_FORMAT);
 				
 		// 新規ボタンが押下された場合
 		if (isset($this->options->_POST->add)) {
@@ -1413,12 +1413,12 @@ class main
 
 			} else {
 
-				if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
+				if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
 					throw new \Exception("Convert time zone failed.");
 				}
 
 				// CSV入力情報の追加
-				$this->insert_list_csv_data($convert_reserve_time);
+				$this->insert_list_csv_data($combine_reserve_time);
 
 			}
 
