@@ -1282,6 +1282,7 @@ class main
 		$this->debug_echo('■ run start');
 
 		$this->debug_echo('　□カレントパス：' . realpath('.'));
+		$this->debug_echo('　□__DIR__：' . __DIR__);
 
 		// ダイアログの表示
 		$dialog_disp = '';
@@ -2695,6 +2696,22 @@ class main
 					foreach ( (array)$ret['output'] as $element ) {
 						$this->debug_echo($element);
 					}
+
+
+					// waitingの空ディレクトリを削除する
+					$command = 'find ' .  self::PATH_CREATE_DIR . self::PATH_WAITING . $dirname . '/ -type d -empty -delete' ;
+
+					$this->debug_echo('　□$command：');
+					$this->debug_echo($command);
+
+					$ret = $this->execute($command, true);
+
+					$this->debug_echo('　▼Waitingディレクトリの削除');
+
+					foreach ( (array)$ret['output'] as $element ) {
+						$this->debug_echo($element);
+					}
+					
 				}
 
 				/**
@@ -2918,6 +2935,63 @@ class main
 
 	    return $ret;
 	}
+
+	// /**
+	//  * 空のディレクトリを削除する。（サブディレクトリも含める）
+	//  *
+	//  *
+	//  * @param string $path 対象ディレクトリのパス
+	//  * @return bool 成功時に `true`、失敗時に `false` を返します。
+	//  */
+	// public function rmdir( $path ){
+
+	// 	// $path = $this->localize_path($path);
+
+	// 	// if( !$this->is_writable( $path ) ){
+	// 	// 	return false;
+	// 	// }
+	// 	// $path = @realpath( $path );
+
+	// 	if( !$path || !isdir($path) ) {
+	// 		return false;
+		
+	// 	}
+
+ //        if( !($dh = opendir($dir)) ) {
+ //        	return false;
+ //        }
+
+ //        while( ($file = readdir($dh)) !== false) {
+
+ //                if( strpos($file,".") === 0 ) continue;
+ //                if( is_dir($dir."/".$file) &&
+ //                        remove_empty_dir_recursive($dir."/".$file) ) continue;
+ //                closedir($dh);
+ //                return false;
+ //        }
+ //        closedir($dh);
+ //        rmdir($dir);
+
+
+	// 	if( is_dir( $path ) ) {
+	// 		// ディレクトリの処理
+	// 		$filelist = $this->ls($path);
+	// 		foreach( $filelist as $basename ){
+	// 			if( $this->is_file( $path.DIRECTORY_SEPARATOR.$basename ) ){
+	// 				$this->rm( $path.DIRECTORY_SEPARATOR.$basename );
+	// 			}else if( !$this->rmdir_r( $path.DIRECTORY_SEPARATOR.$basename ) ){
+	// 				return false;
+	// 			}
+	// 		}
+
+	// 		return $this->rmdir( $path );
+		
+	// 	} else {
+	// 		return false;
+	// 	}
+
+	// 	return false;
+	// }
 
 	/**
 	 * ※デバッグ用（ある程度実装が進んだら削除する）
