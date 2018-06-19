@@ -54,8 +54,10 @@ class main
 	const PATH_BACKUP = '/backup/';
 	// waitingディレクトリパス
 	const PATH_WAITING = '/waiting/';
-	// runnnintディレクトリパス
+	// runnningディレクトリパス
 	const PATH_RUNNING = '/running/';
+	// releasedディレクトリパス
+	const PATH_RELEASED = '/released/';
 	// logディレクトリパス
 	const PATH_LOG = '/log/';
 
@@ -95,7 +97,7 @@ class main
 	const RELEASED_CSV_COLUMN_DIFF_FLG3 = 12;	// 差分フラグ3（前回分と今回分の差分）
 
 	// const HONBAN_REALPATH = '/var/www/html/indigo-test-project/';
-	const HONBAN_REALPATH = '/var/www/html/test/';
+	const HONBAN_REALPATH = '/var/www/html/test';
 	
 	/**
 	 * コミットハッシュ値
@@ -1237,6 +1239,8 @@ class main
 				. '<thead>'
 				. '<tr>'
 				. '<th scope="row"></th>'
+				. '<th scope="row">公開完了日時</th>'
+				. '<th scope="row">復元完了日時</th>'
 				. '<th scope="row">公開予定日時</th>'
 				. '<th scope="row">コミット</th>'
 				. '<th scope="row">ブランチ</th>'
@@ -1250,6 +1254,8 @@ class main
 			
 			$ret .= '<tr>'
 				. '<td class="p-center"><input type="radio" name="target" value="' . $array[self::RELEASED_CSV_COLUMN_ID] . '"/></td>'
+				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array[self::RELEASED_CSV_COLUMN_RELEASED])) . '</td>'
+				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array[self::RELEASED_CSV_COLUMN_RESTORE])) . '</td>'
 				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array[self::RELEASED_CSV_COLUMN_RESERVE])) . '</td>'
 				. '<td class="p-center">' . $array[self::RELEASED_CSV_COLUMN_COMMIT] . '</td>'
 				. '<td class="p-center">' . $array[self::RELEASED_CSV_COLUMN_BRANCH] . '</td>'
@@ -1986,8 +1992,7 @@ class main
 		$this->debug_echo('■ delete_list_csv_data start');
 
 		$result = array('status' => true,
-						'message' => '',
-						'del_data' => array());
+						'message' => '');
 
 		$filename = self::PATH_CREATE_DIR . self::CSV_WATING_LIST_FILENAME;
 
@@ -2022,8 +2027,6 @@ class main
 
 					if ($num == $selected_id) {
 
-						$result['del_data'] = $file[$cnt];
-
 						unset($file[$cnt]);
 						file_put_contents($filename, $file);
 
@@ -2056,6 +2059,81 @@ class main
 		$this->debug_echo('■ delete_list_csv_data end');
 
 		return json_encode($result);
+	}
+
+	/**
+	 * 実施済み一覧CSVから選択された行の情報を取得する
+	 *
+	 * @return 選択行の情報
+	 */
+	private function get_released_selected_data() {
+
+		$this->debug_echo('■ get_released_selected_data start');
+
+		// $filename = realpath('.') . $this->list_filename;
+		$filename = self::PATH_CREATE_DIR . self::CSV_RELEASED_LIST_FILENAME;
+
+		$selected_id =  $this->options->_POST->selected_id;
+
+		$this->debug_echo('　□selected_id：' . $selected_id);
+
+		$ret_array = array();
+
+		try {
+
+			if (!file_exists($filename) && !empty($selected_id)) {
+				$this->debug_echo('実施済み一覧ファイルが存在しない');
+
+			} else {
+
+				$file = file($filename);
+
+				// Open file
+				$handle = fopen( $filename, "r" );
+				
+				$title_array = array();
+
+				$is_first = true;
+
+				// Loop through each line of the file in turn
+				while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
+
+					if($is_first){
+				        $is_first = false;
+				        continue;
+				    }
+
+					$num = intval($rowData[self::RELEASED_CSV_COLUMN_ID]);
+
+					$this->debug_echo('　★num：' . $num);
+					$this->debug_echo('　★select_id：' . $selected_id);
+
+					if ($num == $selected_id) {
+					    // // タイトルと値の2次元配列作成
+					    // $ret_array = array_combine ($title_array, $rowData) ;
+					    $ret_array[] = $rowData;
+					    break;
+					}
+				}
+
+
+				// Close file
+				fclose($handle);
+			}
+
+		} catch (\Exception $e) {
+
+			echo "例外キャッチ：", $e->getMessage(), "\n";
+			return $ret_array;
+		}
+
+		$this->debug_echo('　□ ret_array');
+		var_dump($ret_array);
+		$this->debug_echo('　');
+
+		$this->debug_echo('■ get_released_selected_data end');
+
+		return $ret_array;
 	}
 
 
@@ -2114,10 +2192,8 @@ class main
 
 				// Loop through each line of the file in turn
 				while ($rowData = fgetcsv($handle_r, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
-
+ 					// タイトル行
 					if($is_first){
-				        // タイトル行
-
 				        $is_first = false;
 				        continue;
 				    }
@@ -2127,9 +2203,8 @@ class main
 				    if ($num > $max) {
 						$max = $num;
 					}
+					$max++;
 				}
-		$this->debug_echo('　□max：');
-				$max++;
 
 				// Open file
 				$handle = fopen( $filename, 'a+' );
@@ -2190,6 +2265,222 @@ class main
 		return json_encode($result);
 	}
 
+
+	/**
+	 * 実施済みCSVの変更処理（CSVへ行削除＆行追加）
+	 *
+	 * @return なし
+	 */
+	private function update_running_list_csv_data($start_datetime) {
+
+		$this->debug_echo('■ update_running_list_csv_data start');
+
+		$filename = self::PATH_CREATE_DIR . self::CSV_RELEASED_LIST_FILENAME;
+
+		// $selected_id =  $this->options->_POST->selected_id;
+
+		try {
+
+			// 実施済み一覧CSVへ書きこみ
+
+			$insert_data = array();
+			// 選択されたIDに紐づく情報を取得
+			$selected_ret = $this->get_released_selected_data();
+
+		$this->debug_echo('　□1：');
+		$this->debug_echo('　□select_ret：');
+		var_dump($selected_ret);
+
+			if (!$selected_ret)  {
+
+				// エラー処理
+				throw new \Exception('Csv data move failed. ');
+			} else {
+
+				$insert_array = array_shift($selected_ret);
+			}
+
+			if ( !file_exists($filename))  {
+
+				// エラー処理
+				throw new \Exception('file not found. ');
+			
+			} else {
+
+				// Open file
+				$handle_r = fopen( $filename, "r" );
+
+				if ($handle_r === false) {
+					// スロー処理！
+					// throw new PHPExcel_Writer_Exception("Could not open file $pFilename for writing.");
+				}
+
+				$is_first = true;
+
+				$max = 0;
+
+				// Loop through each line of the file in turn
+				while ($rowData = fgetcsv($handle_r, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
+ 					// タイトル行
+					if($is_first){
+				        $is_first = false;
+				        continue;
+				    }
+
+				    $num = intval($rowData[self::RELEASED_CSV_COLUMN_ID]);
+
+				    if ($num > $max) {
+						$max = $num;
+					}
+					$max++;
+				}
+
+				// Open file
+				$handle = fopen( $filename, 'a+' );
+
+
+				if ($handle === false) {
+					// スロー処理！
+					// throw new PHPExcel_Writer_Exception("Could not open file $pFilename for writing.");
+				}
+		$this->debug_echo('　□insert_array：');
+		var_dump($insert_array);
+				// 現在時刻
+				$now = date(self::DATETIME_FORMAT);
+
+				$array[self::RELEASED_CSV_COLUMN_ID] = $max;
+				$array[self::RELEASED_CSV_COLUMN_RESERVE] = $insert_array[self::RELEASED_CSV_COLUMN_RESERVE];
+				$array[self::RELEASED_CSV_COLUMN_BRANCH] = $insert_array[self::RELEASED_CSV_COLUMN_BRANCH];
+				$array[self::RELEASED_CSV_COLUMN_COMMIT] = $insert_array[self::RELEASED_CSV_COLUMN_COMMIT];
+				$array[self::RELEASED_CSV_COLUMN_COMMENT] = $insert_array[self::RELEASED_CSV_COLUMN_COMMENT];
+				$array[self::RELEASED_CSV_COLUMN_SETTING] = $insert_array[self::RELEASED_CSV_COLUMN_SETTING];
+
+				$array[self::RELEASED_CSV_COLUMN_START] = $start_datetime;
+				$array[self::RELEASED_CSV_COLUMN_END] = $now;
+				$array[self::RELEASED_CSV_COLUMN_RELEASED] = $now;
+				$array[self::RELEASED_CSV_COLUMN_RESTORE] = '';
+				$array[self::RELEASED_CSV_COLUMN_DIFF_FLG1] = 0;
+				$array[self::RELEASED_CSV_COLUMN_DIFF_FLG2] = 0;
+				$array[self::RELEASED_CSV_COLUMN_DIFF_FLG3] = 0;
+
+				fputcsv( $handle, $array, self::CSV_DELIMITER, self::CSV_ENCLOSURE);
+
+				fclose( $handle);
+			}
+
+			// Close file
+			fclose($handle_r);
+			fclose($handle);
+
+			// 公開予定一覧CSVから削除
+			$ret = $this->delete_released_list_csv_data();
+
+			$ret = json_decode($ret);
+
+			if ( !$ret->status ) {
+				// デプロイ失敗
+
+				throw new \Exception("Waiting csv delete failed.");
+			}
+
+		} catch (\Exception $e) {
+
+			set_time_limit(30);
+
+			$result['status'] = false;
+			$result['message'] = $e->getMessage();
+
+			return json_encode($result);
+		}
+
+		set_time_limit(30);
+
+		$result['status'] = true;
+
+		$this->debug_echo('■ move_csv_data end');
+
+		return json_encode($result);
+	}
+
+
+	/**
+	 * 実施済み一覧CSVの削除処理（CSVから行削除）
+	 *
+	 * @return なし
+	 */
+	private function delete_released_list_csv_data() {
+
+		$this->debug_echo('■ delete_list_csv_data start');
+
+		$result = array('status' => true,
+						'message' => '');
+
+		$filename = self::PATH_CREATE_DIR . self::CSV_RELEASED_LIST_FILENAME;
+
+		$selected_id =  $this->options->_POST->selected_id;
+
+		try {
+
+
+			if (!file_exists($filename))  {
+
+				// エラー処理
+				throw new \Exception('file not found.');
+			
+			} elseif (!$selected_id) {
+
+				// エラー処理
+				throw new \Exception('Select id is undefined.');
+
+			} else {
+
+				$file = file($filename);
+
+				// Open file
+				$handle = fopen( $filename, "r" );
+				
+				$cnt = 0;
+
+				// Loop through each line of the file in turn
+				while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
+
+					$num = intval($rowData[self::RELEASED_CSV_COLUMN_ID]);
+
+					if ($num == $selected_id) {
+
+						unset($file[$cnt]);
+						file_put_contents($filename, $file);
+
+						break;
+					}
+
+					$cnt++;
+				}
+
+			}
+
+			// Close file
+			fclose($handle);
+
+
+		} catch (\Exception $e) {
+
+			set_time_limit(30);
+
+			$result['status'] = false;
+			$result['message'] = $e->getMessage();
+
+			return json_encode($result);
+		}
+
+		set_time_limit(30);
+
+		$result['status'] = true;
+		
+		$this->debug_echo('■ delete_list_csv_data end');
+
+		return json_encode($result);
+	}
 
 	/**
 	 * 新規追加時のGitファイルのコピー
@@ -2541,6 +2832,8 @@ class main
 
 		$project_real_path = '';
 
+		$start_datetime = gmdate(DATE_ATOM, time());
+
 		try {
 
 	 		// ▼優先度低
@@ -2645,6 +2938,20 @@ class main
 
 						// エラー処理
 						throw new \Exception('Creation of running publish directory failed.');
+					}
+				}
+
+				// releasedディレクトリが存在しない場合は作成
+				if ( !$this->is_exists_mkdir(self::PATH_CREATE_DIR . self::PATH_RELEASED) ) {
+					// エラー処理
+					throw new \Exception('Creation of released directory failed.');
+				} else {
+					
+					// 公開予定ディレクトリをデリートインサート
+					if ( !$this->is_exists_remkdir(self::PATH_CREATE_DIR . self::PATH_RELEASED . $dirname) ) {
+
+						// エラー処理
+						throw new \Exception('Creation of released publish directory failed.');
 					}
 				}
 
@@ -2753,11 +3060,58 @@ class main
 				/**
 		 		* 同期が正常終了したら、公開済みソースを「running」ディレクトリから「released」ディレクトリへ移動
 				*/
+				// runningの公開予定ディレクトリの存在確認
+				if ( file_exists(self::PATH_CREATE_DIR . self::PATH_RELEASED . $dirname) ) {
+
+					// TODO:ログフォルダに出力する
+					$command = 'rsync -avzP --remove-source-files ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . ' ' . self::PATH_CREATE_DIR . self::PATH_RELEASED . $dirname . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
+
+					$this->debug_echo('　□$command：');
+					$this->debug_echo($command);
+
+					$ret = $this->execute($command, true);
+
+					$this->debug_echo('　▼REALEASEDへの移動の処理結果');
+
+					foreach ( (array)$ret['output'] as $element ) {
+						$this->debug_echo($element);
+					}
+
+
+					// waitingの空ディレクトリを削除する
+					$command = 'find ' .  self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . '/ -type d -empty -delete' ;
+
+					$this->debug_echo('　□$command：');
+					$this->debug_echo($command);
+
+					$ret = $this->execute($command, true);
+
+					$this->debug_echo('　▼Runningディレクトリの削除');
+
+					foreach ( (array)$ret['output'] as $element ) {
+						$this->debug_echo($element);
+					}
+
+					// waitingディレクトリの削除が成功していることを確認
+					if ( file_exists(self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname) ) {
+						// ディレクトリが削除できていない場合
+						// エラー処理
+						throw new \Exception('Delete of waiting publish directory failed.');
+					}
+				}
 
 
 				/**
 		 		* 処理結果をCSVへ書き込む
 				*/
+		 		$ret = $this->update_running_list_csv_data($start_datetime);
+
+				$this->debug_echo('　▼CSV更新');
+
+				foreach ( (array)$ret['output'] as $element ) {
+					$this->debug_echo($element);
+				}
+
 				// 実施済み一覧CSVにファイルロックが掛かっていない場合
 				// 　ロックを掛ける
 		 		// 「実施開始日時」を設定
