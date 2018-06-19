@@ -2,6 +2,11 @@
 
 namespace indigo;
 
+include 'ChromePhp.php';
+ChromePhp::log('Hello console!');
+ChromePhp::log($_SERVER);
+ChromePhp::warn('something went wrong!');
+
 class main
 {
 	public $options;
@@ -2497,125 +2502,133 @@ class main
 			$ret_datetime = '';
 
 
-			foreach ( $data_list as $data ) {
+			foreach ( (array)$data_list as $data ) {
 				// 公開対象の公開予定日時（文字列）
 				$dirname = $this->get_datetime_str($data_list, self::WATING_CSV_COLUMN_RESERVE, SORT_DESC);
 			}
 
 			// 存在する場合
-			// 　公開予定一覧CSVにファイルロックが掛かっていない場合
-			// 　ファイルロックを掛ける
-			// 　実施済み一覧CSVにファイルロックが掛かっていない場合
-			// 　ファイルロックを掛ける
-	 		// 公開対象の行を、実施済みへ切り取り移動する
-			$ret = $this->move_csv_data();
-			$ret = json_decode($ret);
+			if ($dirname) {
 
-			if ( !$ret->status ) {
-				// 削除失敗
+				// 　公開予定一覧CSVにファイルロックが掛かっていない場合
+				// 　ファイルロックを掛ける
+				// 　実施済み一覧CSVにファイルロックが掛かっていない場合
+				// 　ファイルロックを掛ける
+		 		// 公開対象の行を、実施済みへ切り取り移動する
+				$ret = $this->move_csv_data();
+				$ret = json_decode($ret);
 
-				// エラーメッセージ
-				$dialog_disp = '
-				<script type="text/javascript">
-					console.error("' . $ret->message . '");
-					alert("add faild");
-				</script>';
-			} 
+				if ( !$ret->status ) {
+					// 削除失敗
+
+					// エラーメッセージ
+					$dialog_disp = '
+					<script type="text/javascript">
+						console.error("' . $ret->message . '");
+						alert("add faild");
+					</script>';
+				} 
 
 
-	 		// ファイルロックを解除する
+		 		// ファイルロックを解除する
 
-			$this->debug_echo('　▼1');
-			/**
-	 		* 本番ソースを「backup」ディレクトリへコピー
-			*/
-			// バックアップディレクトリが存在しない場合は作成
-			if ( !$this->is_exists_mkdir(self::PATH_CREATE_DIR . self::PATH_BACKUP) ) {
+				$this->debug_echo('　▼1');
+				/**
+		 		* 本番ソースを「backup」ディレクトリへコピー
+				*/
+				// バックアップディレクトリが存在しない場合は作成
+				if ( !$this->is_exists_mkdir(self::PATH_CREATE_DIR . self::PATH_BACKUP) ) {
 
-					// エラー処理
-					throw new \Exception('Creation of backup directory failed.');
-			}
-			$this->debug_echo('　▼2');
-			// コピーディレクトリへ移動
-			if ( chdir(self::PATH_CREATE_DIR . self::PATH_BACKUP) ) {
-
-				// 公開予定ディレクトリをデリートインサート
-				if ( !$this->is_exists_remkdir($dirname) ) {
-
-					// エラー処理
-					throw new \Exception('Creation of backup publish directory failed.');
+						// エラー処理
+						throw new \Exception('Creation of backup directory failed.');
 				}
-			$this->debug_echo('　▼3');
-				// 公開予定ディレクトリへ移動
-				if ( chdir($dirname) ) {
+				$this->debug_echo('　▼2');
+				// コピーディレクトリへ移動
+				if ( chdir(self::PATH_CREATE_DIR . self::PATH_BACKUP) ) {
 
-					// 本番ソースからバックアップディレクトリへコピー
+					// 公開予定ディレクトリをデリートインサート
+					if ( !$this->is_exists_remkdir($dirname) ) {
 
-					// $honban_realpath = $current_dir . "/" . self::PATH_PROJECT_DIR;
-					$honban_realpath = '/var/www/html/indigo-test-project/';
-
-
-					$this->debug_echo('　□カレントディレクトリ：');
-					$this->debug_echo(realpath('.'));
-
-					$command = 'rsync -avzP ' . $honban_realpath . ' ./ --log-file=./rsync.log' ;
-
-					$this->debug_echo('　□$command：');
-					$this->debug_echo($command);
-			$this->debug_echo('　▼4');
-					$ret = $this->execute($command, true);
-			$this->debug_echo('　▼5');
-					$this->debug_echo('　▼本番バックアップの処理結果');
-
-					foreach ( (array)$ret['output'] as $element ) {
-						$this->debug_echo($element);
+						// エラー処理
+						throw new \Exception('Creation of backup publish directory failed.');
 					}
+				$this->debug_echo('　▼3');
+					// 公開予定ディレクトリへ移動
+					if ( chdir($dirname) ) {
 
-			$this->debug_echo('　▼7');
-				}
-			$this->debug_echo('　▼8');
-	 		}
-			$this->debug_echo('　▼9');
-			/**
-	 		* 公開予定ソースを「wating」ディレクトリから「running」ディレクトリへ移動
-			*/
+						// 本番ソースからバックアップディレクトリへコピー
 
-
-			/**
-	 		* 「running」ディレクトリへ移動した公開予定ソースを本番環境へ同期
-			*/
-	 		// rsync -avz /media/hdd1/data-1/ /media/hdd2/data-2/
-
-			/**
-	 		* 同期が正常終了したら、公開済みソースを「running」ディレクトリから「released」ディレクトリへ移動
-			*/
+						// $honban_realpath = $current_dir . "/" . self::PATH_PROJECT_DIR;
+						$honban_realpath = '/var/www/html/indigo-test-project/';
 
 
-			/**
-	 		* 処理結果をCSVへ書き込む
-			*/
-			// 実施済み一覧CSVにファイルロックが掛かっていない場合
-			// 　ロックを掛ける
-	 		// 「実施開始日時」を設定
-	 		// 「実施終了日時」を設定
-	 		
-			// 公開が成功した場合
-	 		// 　「公開完了日時」を設定
+						$this->debug_echo('　□カレントディレクトリ：');
+						$this->debug_echo(realpath('.'));
 
-	 		// 公開が失敗し、復元が完了した場合
-	 		// 　「復元完了日時」を設定
+						$command = 'rsync -avzP ' . $honban_realpath . ' ./ --log-file=./rsync.log' ;
 
-	 		// ▼優先度低
-	 		// 本番環境と前回分のソースに差分が存在した場合
-	 		// 　「差分確認フラグ1」を設定
+						$this->debug_echo('　□$command：');
+						$this->debug_echo($command);
+				$this->debug_echo('　▼4');
+						$ret = $this->execute($command, true);
+				$this->debug_echo('　▼5');
+						$this->debug_echo('　▼本番バックアップの処理結果');
 
-	 		// ▼優先度低
-	 		// 本番環境と今回分のソースに差分が存在した場合
-	 		// 　「差分確認フラグ2」を設定
+						foreach ( (array)$ret['output'] as $element ) {
+							$this->debug_echo($element);
+						}
 
-	 		// ▼優先度低
-	 		// 今回分と前回分のソースに差分が存在した場合
-	 		// 　「差分確認フラグ3」を設定
+				$this->debug_echo('　▼7');
+					}
+				$this->debug_echo('　▼8');
+		 		}
+				$this->debug_echo('　▼9');
+				/**
+		 		* 公開予定ソースを「wating」ディレクトリから「running」ディレクトリへ移動
+				*/
+
+
+				/**
+		 		* 「running」ディレクトリへ移動した公開予定ソースを本番環境へ同期
+				*/
+		 		// rsync -avz /media/hdd1/data-1/ /media/hdd2/data-2/
+
+				/**
+		 		* 同期が正常終了したら、公開済みソースを「running」ディレクトリから「released」ディレクトリへ移動
+				*/
+
+
+				/**
+		 		* 処理結果をCSVへ書き込む
+				*/
+				// 実施済み一覧CSVにファイルロックが掛かっていない場合
+				// 　ロックを掛ける
+		 		// 「実施開始日時」を設定
+		 		// 「実施終了日時」を設定
+		 		
+				// 公開が成功した場合
+		 		// 　「公開完了日時」を設定
+
+		 		// 公開が失敗し、復元が完了した場合
+		 		// 　「復元完了日時」を設定
+
+		 		// ▼優先度低
+		 		// 本番環境と前回分のソースに差分が存在した場合
+		 		// 　「差分確認フラグ1」を設定
+
+		 		// ▼優先度低
+		 		// 本番環境と今回分のソースに差分が存在した場合
+		 		// 　「差分確認フラグ2」を設定
+
+		 		// ▼優先度低
+		 		// 今回分と前回分のソースに差分が存在した場合
+		 		// 　「差分確認フラグ3」を設定
+
+			} else {
+
+				$this->debug_echo('　□ 公開対象が存在しない');
+
+			}
 		
 		} catch (\Exception $e) {
 
