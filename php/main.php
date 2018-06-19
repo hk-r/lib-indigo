@@ -2729,6 +2729,8 @@ class main
 	 */
 	private function get_datetime_str($array_list, $sort_column, $sort_kind) {
 
+		$this->debug_echo('■ get_datetime_str start');
+
 		$ret_str = '';
 		$lead_array = array();
 
@@ -2739,8 +2741,12 @@ class main
 			$lead_array = array_shift($array_list);
 			
 			// 先頭行の公開予約日時
-			$ret_str = date(self::DATETIME_FORMAT_SAVE, strtotime($lead_array[$sort_name]));
+			$ret_str = date(self::DATETIME_FORMAT_SAVE, strtotime($lead_array[self::WATING_CSV_COLUMN_RESERVE]));
 		}
+
+		$this->debug_echo('　□return ：' . $ret_str);
+
+		$this->debug_echo('■ get_datetime_str end');
 
 		return $ret_str;
 	}
