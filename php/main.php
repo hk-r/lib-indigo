@@ -2713,7 +2713,7 @@ class main
 					}
 
 					// waitingディレクトリの削除が成功していることを確認
-					if ( file_exists(self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname) ) {
+					if ( file_exists(self::PATH_CREATE_DIR . self::PATH_WAITING . $dirname) ) {
 						// ディレクトリが削除できていない場合
 						// エラー処理
 						throw new \Exception('Delete of waiting publish directory failed.');
@@ -2791,6 +2791,8 @@ class main
 
 			$result['status'] = false;
 			$result['message'] = $e->getMessage();
+
+			$this->debug_echo('■ manual_release error end');
 
 			chdir($current_dir);
 			return json_encode($result);
