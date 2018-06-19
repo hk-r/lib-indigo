@@ -738,11 +738,13 @@ class main
 			$this->debug_echo('　□selected_ret ：');
 			$this->debug_echo($selected_ret);
 
-			$branch_select_value = $selected_ret[self::WATING_CSV_COLUMN_BRANCH];
-			$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($selected_ret[self::WATING_CSV_COLUMN_RESERVE]));
-			$reserve_time = date(self::TIME_FORMAT_HI,  strtotime($selected_ret[self::WATING_CSV_COLUMN_RESERVE]));
-			$comment = $selected_ret[self::WATING_CSV_COLUMN_COMMENT];
-	
+			if ($selected_ret) {
+				$branch_select_value = $selected_ret[self::WATING_CSV_COLUMN_BRANCH];
+				$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($selected_ret[self::WATING_CSV_COLUMN_RESERVE]));
+				$reserve_time = date(self::TIME_FORMAT_HI,  strtotime($selected_ret[self::WATING_CSV_COLUMN_RESERVE]));
+				$comment = $selected_ret[self::WATING_CSV_COLUMN_COMMENT];
+			}
+			
 		} else {
 
 			$selected_id =  $this->options->_POST->selected_id;		
