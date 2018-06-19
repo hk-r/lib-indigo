@@ -539,13 +539,13 @@ class main
 			// // 選択されたID
 			// $selected_id =  $this->options->_POST->selected_id;
 			// 選択されたIDに紐づく情報を取得
-			$selected_data_list = $this->get_selected_data();
+			$selected_data = $this->get_selected_data();
 			
 			$this->debug_echo('　□ selected_data_list');
 			var_dump($selected_data_list);
 			$this->debug_echo('　');
 
-			foreach ( (array)$selected_data_list as $data ) {
+			if ($selected_data_list) {
 
 				$branch_select_value = $data[self::WATING_CSV_COLUMN_BRANCH];
 				$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($data[self::WATING_CSV_COLUMN_RESERVE]));
@@ -2170,27 +2170,23 @@ class main
 			// 選択されたIDに紐づく情報を取得
 			$selected_ret = $this->get_selected_data();
 
-		$this->debug_echo('　□1：');
-		$this->debug_echo('　□select_ret：');
-		var_dump($selected_ret);
+			$this->debug_echo('　□1：');
+			$this->debug_echo('　□select_ret：');
+			var_dump($selected_ret);
 
-			if (!$selected_ret)  {
+			$insert_array = '';
 
-				// エラー処理
-				throw new \Exception('Csv data move failed. ');
-			} else {
+			if (!$selected_ret && !file_exists($filename))  {
 
 				$insert_array = array_shift($selected_ret);
-			}
 
-			if ( !file_exists($filename))  {
+				// 実施済み一覧CSVへ追加処理
+				$this->insert_released_list_csv_data($insert_array);
+
+			} else {
 
 				// エラー処理
-				throw new \Exception('file not found. ');
-			
-			} else {
-				// 実施済み一覧CSVへ追加処理
-				$this->insert_released_list_csv_data();
+				throw new \Exception('csv insert failed. ');
 			}
 
 			// 公開予定一覧CSVから削除
@@ -2229,7 +2225,7 @@ class main
 	 *
 	 * @return なし
 	 */
-	private function insert_released_list_csv_data(){
+	private function insert_released_list_csv_data($insert_array) {
 
 		$this->debug_echo('■ insert_list_csv_data start');
 
@@ -2289,7 +2285,7 @@ class main
 
 				$this->debug_echo('　□insert_array：');
 				var_dump($insert_array);
-
+	
 				// 現在時刻
 				$now = date(self::DATETIME_FORMAT);
 
