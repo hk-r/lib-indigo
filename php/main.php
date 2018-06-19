@@ -1274,9 +1274,10 @@ class main
 	 */
 	public function run() {
 	
-		echo('■ run start');
+		$this->debug_echo('■ run start');
 
-		$this->debug_echo("絶対パス：" . realpath('.'));
+		$this->debug_echo('　□カレントパス：' . realpath('.'));
+		$this->debug_echo('　□現在日時' . );
 
 		// ダイアログの表示
 		$dialog_disp = '';
@@ -2549,28 +2550,24 @@ class main
 			*/
 			// 公開対象が存在するか
 
-	 		// 現在日時を取得
-			$command = 'TZ=Asia/Tokyo date "+%Y%m%d%H%M%S"';
-			$ret = $this->execute($command, false);
+	 	// 	// クーロン用
+	 	// 	$now = gmdate(self::DATETIME_FORMAT_SAVE);
+			// // 公開予約の一覧を取得
+			// $data_list = $this->get_csv_data_list($now);
 
-			$now = '';
-			foreach ( $ret['output'] as $element ) {
-				$now = $element;
-			}
 
-			// 公開予約の一覧を取得
-			$data_list = $this->get_csv_data_list($now);
-
-			$ret_datetime = '';
+			$selected_ret = $this->get_selected_data();
 
 			$dirname = '';
 
-			foreach ( (array)$data_list as $data ) {
+			foreach ( (array)$selected_ret as $data ) {
 				// 公開対象の公開予定日時（文字列）
-				$dirname = $this->get_datetime_str($data_list, self::WATING_CSV_COLUMN_RESERVE, SORT_DESC);
+				$dirname = $this->get_datetime_str($selected_ret, self::WATING_CSV_COLUMN_RESERVE, SORT_DESC);
 			}
 
 			$this->debug_echo('　□公開予定ディレクトリ：');
+			$this->debug_echo($dirname);
+			$this->debug_echo('　□現在日時：');
 			$this->debug_echo($dirname);
 
 			// 存在する場合
@@ -2631,6 +2628,7 @@ class main
 						$this->debug_echo('　□カレントディレクトリ：');
 						$this->debug_echo(realpath('.'));
 
+						// TODO:ログフォルダに出力する
 						$command = 'rsync -avzP ' . $honban_realpath . ' ./ --log-file=./rsync.log' ;
 
 						$this->debug_echo('　□$command：');
