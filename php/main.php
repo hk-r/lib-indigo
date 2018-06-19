@@ -52,8 +52,10 @@ class main
 	 */
 	// backupディレクトリパス
 	const PATH_BACKUP = '/backup/';
-	// copyディレクトリパス
-	const PATH_COPY = '/copy/';
+	// waitingディレクトリパス
+	const PATH_WAITING = '/waiting/';
+	// runnnintディレクトリパス
+	const PATH_RUNNING = '/running/';
 	// logディレクトリパス
 	const PATH_LOG = '/log/';
 
@@ -91,6 +93,9 @@ class main
 	const RELEASED_CSV_COLUMN_DIFF_FLG1 = 10;	// 差分フラグ1（本番環境と前回分の差分）
 	const RELEASED_CSV_COLUMN_DIFF_FLG2 = 11;	// 差分フラグ2（本番環境と今回分の差分）
 	const RELEASED_CSV_COLUMN_DIFF_FLG3 = 12;	// 差分フラグ3（前回分と今回分の差分）
+
+	const HONBAN_REALPATH = '/var/www/html/indigo-test-project/';
+
 
 	/**
 	 * コミットハッシュ値
@@ -1214,9 +1219,9 @@ class main
 
 		// CSVより公開予約の一覧を取得する
 		// （公開済みを見るように変更！！）
-		$data_list = $this->get_csv_data_list(null);
+		$data_list = $this->get_released_csv_data_list(null);
 		// 取得したリストをソートする
-		$data_list = $this->sort_list($data_list, self::WATING_CSV_COLUMN_RESERVE, SORT_ASC);
+		$data_list = $this->sort_list($data_list, self::RELEASED_CSV_COLUMN_RESERVE, SORT_ASC);
 
 		$ret .= '<div style="overflow:hidden">'
 			. '<form method="post">'
@@ -1244,11 +1249,11 @@ class main
 		foreach ($data_list as $array) {
 			
 			$ret .= '<tr>'
-				. '<td class="p-center"><input type="radio" name="target" value="' . $array[self::WATING_CSV_COLUMN_ID] . '"/></td>'
-				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array[self::WATING_CSV_COLUMN_RESERVE])) . '</td>'
-				. '<td class="p-center">' . $array[self::WATING_CSV_COLUMN_COMMIT] . '</td>'
-				. '<td class="p-center">' . $array[self::WATING_CSV_COLUMN_BRANCH] . '</td>'
-				. '<td>' . $array[self::WATING_CSV_COLUMN_COMMENT] . '</td>'
+				. '<td class="p-center"><input type="radio" name="target" value="' . $array[self::RELEASED_CSV_COLUMN_ID] . '"/></td>'
+				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array[self::RELEASED_CSV_COLUMN_RESERVE])) . '</td>'
+				. '<td class="p-center">' . $array[self::RELEASED_CSV_COLUMN_COMMIT] . '</td>'
+				. '<td class="p-center">' . $array[self::RELEASED_CSV_COLUMN_BRANCH] . '</td>'
+				. '<td>' . $array[self::RELEASED_CSV_COLUMN_COMMENT] . '</td>'
 				. '</tr>';
 		}
 
@@ -1449,7 +1454,7 @@ class main
 				throw new \Exception("Combine date time failed.");
 			}
 
-			// Gitファイルをcopyディレクトリへコピー（ディレクトリ名は入力された日付）
+			// GitファイルをWAITINGディレクトリへコピー（ディレクトリ名は入力された日付）
 			$update_ret = $this->file_update($combine_reserve_time);
 	
 			$update_ret = json_decode($update_ret);
@@ -1628,18 +1633,18 @@ class main
 	 */
 	private function get_released_csv_data_list($now) {
 
-		$this->debug_echo('■ get_csv_data_list start');
+		$this->debug_echo('■ get_released_csv_data_list start');
 
 		$ret_array = array();
 
-		$filename = self::PATH_CREATE_DIR . self::CSV_WATING_LIST_FILENAME;
+		$filename = self::PATH_CREATE_DIR . self::CSV_RELEASED_LIST_FILENAME;
 
 		try {
 
 			if (!file_exists($filename)) {
 				
 				// エラー処理
-				throw new \Exception('waiting_list.csv not found.');
+				throw new \Exception('released_list.csv not found.');
 
 			} else {
 
@@ -1656,16 +1661,16 @@ class main
 				        continue;
 				    }
 
-				    if ($now) {
-				    // 指定日時が設定されている
+				  //   if ($now) {
+				  //   // 指定日時が設定されている
 
-						$datetime = date(self::TIME_FORMAT_HIS,  strtotime($rowData[self::WATING_CSV_COLUMN_RESERVE]));
+						// $datetime = date(self::TIME_FORMAT_HIS,  strtotime($rowData[self::WATING_CSV_COLUMN_RESERVE]));
 
-					    // 指定日時より未来日時の場合
-				    	if ($datetime && ($datetime > $now)) {
-				    		continue;
-				    	}
-				    }
+					 //    // 指定日時より未来日時の場合
+				  //   	if ($datetime && ($datetime > $now)) {
+				  //   		continue;
+				  //   	}
+				  //   }
 
 					$ret_array[] = $rowData;
 				}
@@ -1680,7 +1685,7 @@ class main
 			return $ret_array;
 		}
 		
-		$this->debug_echo('■ get_csv_data_list end');
+		$this->debug_echo('■ get_released_csv_data_list end');
 
 		return $ret_array;
 	}
@@ -2204,21 +2209,21 @@ class main
 
 		try {
 
-			// コピーディレクトリが存在しない場合は作成
-			if ( !$this->is_exists_mkdir(self::PATH_CREATE_DIR . self::PATH_COPY) ) {
+			// WAITINGディレクトリが存在しない場合は作成
+			if ( !$this->is_exists_mkdir(self::PATH_CREATE_DIR . self::PATH_WAITING) ) {
 
 					// エラー処理
-					throw new \Exception('Creation of copy directory failed.');
+					throw new \Exception('Creation of Waiting directory failed.');
 			}
 
-			// コピーディレクトリへ移動
-			if ( chdir(self::PATH_CREATE_DIR . self::PATH_COPY) ) {
+			// WAITINGディレクトリへ移動
+			if ( chdir(self::PATH_CREATE_DIR . self::PATH_WAITING) ) {
 
 				// 公開予定ディレクトリをデリートインサート
 				if ( !$this->is_exists_remkdir($dirname) ) {
 
 					// エラー処理
-					throw new \Exception('Creation of copy publish directory failed.');
+					throw new \Exception('Creation of Waiting publish directory failed.');
 				}
 
 				// 公開予定ディレクトリへ移動
@@ -2256,17 +2261,17 @@ class main
 					}
 
 				} else {
-					// コピー用のディレクトリが存在しない場合
+					// WAITINGの公開予定ディレクトリが存在しない場合
 
 					// エラー処理
-					throw new \Exception('Copy publish directory not found.');
+					throw new \Exception('Waiting publish directory not found.');
 				}
 
 			} else {
-				// コピー用のディレクトリが存在しない場合
+				// WAITINGディレクトリが存在しない場合
 
 				// エラー処理
-				throw new \Exception('Copy directory not found.');
+				throw new \Exception('Waiting directory not found.');
 			}
 
 		} catch (\Exception $e) {
@@ -2310,8 +2315,8 @@ class main
 		// 変更前の公開予定日時をフォーマット変換
 		$before_dirname = date(self::DATETIME_FORMAT_SAVE, strtotime($this->combine_date_time($this->options->_POST->change_before_reserve_date, $this->options->_POST->change_before_reserve_time)));
 
-		// // 変更前のcopyディレクトリパスを取得
-		// $before_path = self::PATH_COPY . $before_dir_name;
+		// // 変更前のWAITINGディレクトリパスを取得
+		// $before_path = self::PATH_WAITING . $before_dir_name;
 
 		// 今回作成するディレクトリ名
 		$dirname = date(self::DATETIME_FORMAT_SAVE, strtotime($combine_reserve_time));
@@ -2324,8 +2329,8 @@ class main
 		try {
 
 
-			// コピーディレクトリへ移動
-			if ( chdir(self::PATH_CREATE_DIR . self::PATH_COPY) ) {
+			// WAITINGディレクトリへ移動
+			if ( chdir(self::PATH_CREATE_DIR . self::PATH_WAITING) ) {
 
 				
 				if ( !file_exists($before_dirname) ) {
@@ -2347,7 +2352,7 @@ class main
 						$this->debug_echo('　□ $before_dirname' . $before_dirname);
 						$this->debug_echo('　□ $dirname' . $dirname);
 
-						throw new \Exception('Copy directory name could not be changed.');
+						throw new \Exception('Waiting directory name could not be changed.');
 					}
 				}
 
@@ -2414,14 +2419,14 @@ class main
 					// コピー用のディレクトリが存在しない場合
 
 					// エラー処理
-					throw new \Exception('Copy publish directory not found.');
+					throw new \Exception('Waiting publish directory not found.');
 				}
 			
 			} else {
 				// コピー用のディレクトリが存在しない場合
 
 				// エラー処理
-				throw new \Exception('Copy directory not found.');
+				throw new \Exception('Waiting directory not found.');
 			}
 		
 		} catch (\Exception $e) {
@@ -2468,8 +2473,8 @@ class main
 
 		try {
 
-			// ディレクトリ移動
-			if ( chdir( self::PATH_CREATE_DIR . self::PATH_COPY ) ) {
+			// WAITINGディレクトリ移動
+			if ( chdir( self::PATH_CREATE_DIR . self::PATH_WAITING ) ) {
 
 				// ディレクトリが存在しない場合は無視する
 				if( file_exists( $dirname )) {
@@ -2490,7 +2495,7 @@ class main
 				// コピー用のディレクトリが存在しない場合
 
 				// エラー処理
-				throw new \Exception('Copy directory not found.');
+				throw new \Exception('Waiting directory not found.');
 			}
 		
 		} catch (\Exception $e) {
@@ -2605,51 +2610,88 @@ class main
 						throw new \Exception('Creation of backup directory failed.');
 				}
 				$this->debug_echo('　▼2');
-				// コピーディレクトリへ移動
-				if ( chdir(self::PATH_CREATE_DIR . self::PATH_BACKUP) ) {
+
+				// バックアップディレクトリの存在確認
+				if ( file_exists(self::PATH_CREATE_DIR . self::PATH_BACKUP) ) {
 
 					// 公開予定ディレクトリをデリートインサート
-					if ( !$this->is_exists_remkdir($dirname) ) {
+					if ( !$this->is_exists_remkdir(self::PATH_CREATE_DIR . self::PATH_BACKUP . $dirname) ) {
 
 						// エラー処理
 						throw new \Exception('Creation of backup publish directory failed.');
 					}
-				$this->debug_echo('　▼3');
-					// 公開予定ディレクトリへ移動
-					if ( chdir($dirname) ) {
+
+					$this->debug_echo('　▼3');
+
+					// 公開予定ディレクトリの存在確認
+					if ( file_exists(self::PATH_CREATE_DIR . self::PATH_BACKUP . $dirname) ) {
 
 						// 本番ソースからバックアップディレクトリへコピー
 
 						// $honban_realpath = $current_dir . "/" . self::PATH_PROJECT_DIR;
-						$honban_realpath = '/var/www/html/indigo-test-project/';
-
 
 						$this->debug_echo('　□カレントディレクトリ：');
 						$this->debug_echo(realpath('.'));
 
 						// TODO:ログフォルダに出力する
-						$command = 'rsync -avzP ' . $honban_realpath . ' ./ --log-file=./rsync.log' ;
+						$command = 'rsync -avzP ' . self::HONBAN_REALPATH . ' ' . self::PATH_CREATE_DIR . self::PATH_BACKUP . $dirname . '/' . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . 'rsync' . $dirname . '.log' ;
 
 						$this->debug_echo('　□$command：');
 						$this->debug_echo($command);
-				$this->debug_echo('　▼4');
+
 						$ret = $this->execute($command, true);
-				$this->debug_echo('　▼5');
+
 						$this->debug_echo('　▼本番バックアップの処理結果');
 
 						foreach ( (array)$ret['output'] as $element ) {
 							$this->debug_echo($element);
 						}
-
-				$this->debug_echo('　▼7');
 					}
-				$this->debug_echo('　▼8');
 		 		}
-				$this->debug_echo('　▼9');
+
+
 				/**
 		 		* 公開予定ソースを「wating」ディレクトリから「running」ディレクトリへ移動
 				*/
 
+				// runningディレクトリが存在しない場合は作成
+				if ( !$this->is_exists_mkdir(self::PATH_CREATE_DIR . self::PATH_RUNNING) ) {
+
+						// エラー処理
+						throw new \Exception('Creation of running directory failed.');
+				}
+				$this->debug_echo('　▼2');
+
+				// バックアップディレクトリの存在確認
+				if ( file_exists(self::PATH_CREATE_DIR . self::PATH_RUNNING) ) {
+
+					// 公開予定ディレクトリをデリートインサート
+					if ( !$this->is_exists_remkdir(self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname) ) {
+
+						// エラー処理
+						throw new \Exception('Creation of running publish directory failed.');
+					}
+
+					$this->debug_echo('　▼3');
+
+					// 公開予定ディレクトリの存在確認
+					if ( file_exists(self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname) ) {
+
+						// TODO:ログフォルダに出力する
+						$command = 'rsync -avzP --remove-source-files' . self::PATH_CREATE_DIR . self::PATH_WAITING . $dirname . ' ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . ' --log-file=./rsync.log' ;
+
+						$this->debug_echo('　□$command：');
+						$this->debug_echo($command);
+
+						$ret = $this->execute($command, true);
+
+						$this->debug_echo('　▼RUNNINGへの移動の処理結果');
+
+						foreach ( (array)$ret['output'] as $element ) {
+							$this->debug_echo($element);
+						}
+					}
+				}
 
 				/**
 		 		* 「running」ディレクトリへ移動した公開予定ソースを本番環境へ同期
