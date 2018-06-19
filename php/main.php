@@ -2545,7 +2545,7 @@ class main
 					// エラー処理
 					throw new \Exception('Creation of backup publish directory failed.');
 				}
-			$this->debug_echo('　▼.');
+			$this->debug_echo('　▼3');
 				// 公開予定ディレクトリへ移動
 				if ( chdir($dirname) ) {
 
@@ -2554,17 +2554,19 @@ class main
 					// $honban_realpath = $current_dir . "/" . self::PATH_PROJECT_DIR;
 					$honban_realpath = '/var/www/html/indigo-test-project/';
 
-					$command = 'rsync -avz ' . $honban_realpath . ' ./';
+					$command = 'rsync -avzP ' . $honban_realpath . ' ./ --log-file=./rsync.log' ;
 
 					$this->debug_echo('　□$command：');
 					$this->debug_echo($command);
 			$this->debug_echo('　▼4');
-					$this->execute($command, true);
+					$ret = $this->execute($command, true);
 			$this->debug_echo('　▼5');
-					foreach ( $ret['output'] as $element ) {
-			$this->debug_echo('　▼6');
-						$this->debug_echo('　▼本番バックアップの処理結果' . $element);
+					$this->debug_echo('　▼本番バックアップの処理結果');
+
+					foreach ( (array)$ret['output'] as $element ) {
+						$this->debug_echo($element);
 					}
+
 			$this->debug_echo('　▼7');
 				}
 			$this->debug_echo('　▼8');
@@ -2737,7 +2739,7 @@ class main
 	 */
 	function execute($command, $captureStderr) {
 	
-		// $this->debug_echo('■ execute start');
+		$this->debug_echo('■ execute start');
 
 	    $output = array();
 	    $return = 0;
@@ -2749,7 +2751,7 @@ class main
 
 	    exec($command, $output, $return);
 
-		// $this->debug_echo('■ execute end');
+		$this->debug_echo('■ execute end');
 
 	    return array('output' => $output, 'return' => $return);
 	}
