@@ -2569,6 +2569,9 @@ class main
 				$dirname = $this->get_datetime_str($data_list, self::WATING_CSV_COLUMN_RESERVE, SORT_DESC);
 			}
 
+			$this->debug_echo('　□公開予定ディレクトリ：');
+			$this->debug_echo($dirname);
+
 			// 存在する場合
 			if ($dirname) {
 
