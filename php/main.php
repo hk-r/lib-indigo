@@ -2525,7 +2525,7 @@ class main
 
 	 		// ファイルロックを解除する
 
-
+			$this->debug_echo('　▼1');
 			/**
 	 		* 本番ソースを「backup」ディレクトリへコピー
 			*/
@@ -2535,7 +2535,7 @@ class main
 					// エラー処理
 					throw new \Exception('Creation of backup directory failed.');
 			}
-
+			$this->debug_echo('　▼2');
 			// コピーディレクトリへ移動
 			if ( chdir(self::PATH_CREATE_DIR . self::PATH_BACKUP) ) {
 
@@ -2545,26 +2545,31 @@ class main
 					// エラー処理
 					throw new \Exception('Creation of backup publish directory failed.');
 				}
-
+			$this->debug_echo('　▼.');
 				// 公開予定ディレクトリへ移動
 				if ( chdir($dirname) ) {
 
 					// 本番ソースからバックアップディレクトリへコピー
 
-					$honban_realpath = $current_dir . "/" . self::PATH_PROJECT_DIR;
+					// $honban_realpath = $current_dir . "/" . self::PATH_PROJECT_DIR;
+					$honban_realpath = '/var/www/html/indigo-test-project/';
 
 					$command = 'rsync -avz ' . $honban_realpath . ' ./';
+
+					$this->debug_echo('　□$command：');
+					$this->debug_echo($command);
+			$this->debug_echo('　▼4');
 					$this->execute($command, true);
-
+			$this->debug_echo('　▼5');
 					foreach ( $ret['output'] as $element ) {
-
+			$this->debug_echo('　▼6');
 						$this->debug_echo('　▼本番バックアップの処理結果' . $element);
 					}
-
+			$this->debug_echo('　▼7');
 				}
-
+			$this->debug_echo('　▼8');
 	 		}
-
+			$this->debug_echo('　▼9');
 			/**
 	 		* 公開予定ソースを「wating」ディレクトリから「running」ディレクトリへ移動
 			*/
