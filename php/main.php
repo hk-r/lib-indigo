@@ -2,6 +2,8 @@
 
 namespace indigo;
 
+include 'ChromePhp.php';
+
 class main
 {
 	public $options;
