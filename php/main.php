@@ -2600,96 +2600,96 @@ class main
 		 		// ファイルロックを解除する
 
 				$this->debug_echo('　▼1');
-				/**
-		 		* 本番ソースを「backup」ディレクトリへコピー
-				*/
-				// バックアップディレクトリが存在しない場合は作成
-				if ( !$this->is_exists_mkdir(self::PATH_CREATE_DIR . self::PATH_BACKUP) ) {
+
+				// ログファイルディレクトリが存在しない場合は作成
+				if ( !$this->is_exists_mkdir(self::PATH_CREATE_DIR . self::PATH_LOG) ) {
+					// エラー処理
+					throw new \Exception('Creation of log directory failed.');
+				} else {
+					
+					// ログファイル内の公開予定ディレクトリが存在しない場合は削除（存在する場合は作成しない）
+					if ( !$this->is_exists_mkdir(self::PATH_CREATE_DIR . self::PATH_LOG . $dirname) ) {
 
 						// エラー処理
-						throw new \Exception('Creation of backup directory failed.');
+						throw new \Exception('Creation of log publish directory failed.');
+					}
 				}
-				$this->debug_echo('　▼2');
 
-				// バックアップディレクトリの存在確認
-				if ( file_exists(self::PATH_CREATE_DIR . self::PATH_BACKUP) ) {
-
+				// バックアップディレクトリが存在しない場合は作成
+				if ( !$this->is_exists_mkdir(self::PATH_CREATE_DIR . self::PATH_BACKUP) ) {
+					// エラー処理
+					throw new \Exception('Creation of backup directory failed.');
+				} else {
+					
 					// 公開予定ディレクトリをデリートインサート
 					if ( !$this->is_exists_remkdir(self::PATH_CREATE_DIR . self::PATH_BACKUP . $dirname) ) {
 
 						// エラー処理
 						throw new \Exception('Creation of backup publish directory failed.');
 					}
-
-					$this->debug_echo('　▼3');
-
-					// 公開予定ディレクトリの存在確認
-					if ( file_exists(self::PATH_CREATE_DIR . self::PATH_BACKUP . $dirname) ) {
-
-						// 本番ソースからバックアップディレクトリへコピー
-
-						// $honban_realpath = $current_dir . "/" . self::PATH_PROJECT_DIR;
-
-						$this->debug_echo('　□カレントディレクトリ：');
-						$this->debug_echo(realpath('.'));
-
-						// TODO:ログフォルダに出力する
-						$command = 'rsync -avzP ' . self::HONBAN_REALPATH . ' ' . self::PATH_CREATE_DIR . self::PATH_BACKUP . $dirname . '/' . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . 'rsync' . $dirname . '.log' ;
-
-						$this->debug_echo('　□$command：');
-						$this->debug_echo($command);
-
-						$ret = $this->execute($command, true);
-
-						$this->debug_echo('　▼本番バックアップの処理結果');
-
-						foreach ( (array)$ret['output'] as $element ) {
-							$this->debug_echo($element);
-						}
-					}
-		 		}
-
-
-				/**
-		 		* 公開予定ソースを「wating」ディレクトリから「running」ディレクトリへ移動
-				*/
+				}
 
 				// runningディレクトリが存在しない場合は作成
 				if ( !$this->is_exists_mkdir(self::PATH_CREATE_DIR . self::PATH_RUNNING) ) {
-
-						// エラー処理
-						throw new \Exception('Creation of running directory failed.');
-				}
-				$this->debug_echo('　▼2');
-
-				// バックアップディレクトリの存在確認
-				if ( file_exists(self::PATH_CREATE_DIR . self::PATH_RUNNING) ) {
-
+					// エラー処理
+					throw new \Exception('Creation of running directory failed.');
+				} else {
+					
 					// 公開予定ディレクトリをデリートインサート
 					if ( !$this->is_exists_remkdir(self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname) ) {
 
 						// エラー処理
 						throw new \Exception('Creation of running publish directory failed.');
 					}
+				}
 
-					$this->debug_echo('　▼3');
+				/**
+		 		* 本番ソースを「backup」ディレクトリへコピー
+				*/
+				// バックアップの公開予定ディレクトリの存在確認
+				if ( file_exists(self::PATH_CREATE_DIR . self::PATH_BACKUP . $dirname) ) {
 
-					// 公開予定ディレクトリの存在確認
-					if ( file_exists(self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname) ) {
+					// 本番ソースからバックアップディレクトリへコピー
 
-						// TODO:ログフォルダに出力する
-						$command = 'rsync -avzP --remove-source-files' . self::PATH_CREATE_DIR . self::PATH_WAITING . $dirname . ' ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . ' --log-file=./rsync.log' ;
+					// $honban_realpath = $current_dir . "/" . self::PATH_PROJECT_DIR;
 
-						$this->debug_echo('　□$command：');
-						$this->debug_echo($command);
+					$this->debug_echo('　□カレントディレクトリ：');
+					$this->debug_echo(realpath('.'));
 
-						$ret = $this->execute($command, true);
+					// TODO:ログフォルダに出力する
+					$command = 'rsync -avzP ' . self::HONBAN_REALPATH . ' ' . self::PATH_CREATE_DIR . self::PATH_BACKUP . $dirname . '/' . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . 'rsync' . $dirname . '.log' ;
 
-						$this->debug_echo('　▼RUNNINGへの移動の処理結果');
+					$this->debug_echo('　□$command：');
+					$this->debug_echo($command);
 
-						foreach ( (array)$ret['output'] as $element ) {
-							$this->debug_echo($element);
-						}
+					$ret = $this->execute($command, true);
+
+					$this->debug_echo('　▼本番バックアップの処理結果');
+
+					foreach ( (array)$ret['output'] as $element ) {
+						$this->debug_echo($element);
+					}
+				}
+
+
+				/**
+		 		* 公開予定ソースを「wating」ディレクトリから「running」ディレクトリへ移動
+				*/
+				// runningの公開予定ディレクトリの存在確認
+				if ( file_exists(self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname) ) {
+
+					// TODO:ログフォルダに出力する
+					$command = 'rsync -avzP --remove-source-files ' . self::HONBAN_REALPATH . ' ' . self::PATH_WAITING . self::PATH_RUNNING . $dirname . '/' . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . 'rsync' . $dirname . '.log' ;
+
+					$this->debug_echo('　□$command：');
+					$this->debug_echo($command);
+
+					$ret = $this->execute($command, true);
+
+					$this->debug_echo('　▼RUNNINGへの移動の処理結果');
+
+					foreach ( (array)$ret['output'] as $element ) {
+						$this->debug_echo($element);
 					}
 				}
 
