@@ -2554,6 +2554,10 @@ class main
 					// $honban_realpath = $current_dir . "/" . self::PATH_PROJECT_DIR;
 					$honban_realpath = '/var/www/html/indigo-test-project/';
 
+
+					$this->debug_echo('　□カレントディレクトリ：');
+					$this->debug_echo(realpath('.'));
+
 					$command = 'rsync -avzP ' . $honban_realpath . ' ./ --log-file=./rsync.log' ;
 
 					$this->debug_echo('　□$command：');
