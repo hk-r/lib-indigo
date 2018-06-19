@@ -1756,6 +1756,10 @@ class main
 			return $ret_array;
 		}
 
+		$this->debug_echo('　□ ret_array');
+		var_dump($ret_array);
+		$this->debug_echo('　');
+
 		$this->debug_echo('■ get_selected_data end');
 
 		return $ret_array;
