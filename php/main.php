@@ -547,10 +547,10 @@ class main
 
 			if ($selected_data) {
 
-				$branch_select_value = $data[self::WATING_CSV_COLUMN_BRANCH];
-				$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($data[self::WATING_CSV_COLUMN_RESERVE]));
-				$reserve_time = date(self::TIME_FORMAT_HI,  strtotime($data[self::WATING_CSV_COLUMN_RESERVE]));
-				$comment = $data[self::WATING_CSV_COLUMN_COMMENT];
+				$branch_select_value = $selected_data[self::WATING_CSV_COLUMN_BRANCH];
+				$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($selected_data[self::WATING_CSV_COLUMN_RESERVE]));
+				$reserve_time = date(self::TIME_FORMAT_HI,  strtotime($selected_data[self::WATING_CSV_COLUMN_RESERVE]));
+				$comment = $selected_data[self::WATING_CSV_COLUMN_COMMENT];
 			}
 
 		} else {
@@ -2951,6 +2951,7 @@ class main
 				// 　実施済み一覧CSVにファイルロックが掛かっていない場合
 				// 　ファイルロックを掛ける
 		 		// 公開対象の行を、実施済みへ切り取り移動する
+		 		$this->debug_echo('　▼CSVの切り取り作業開始');
 				$ret = $this->move_csv_data();
 
 				$ret = json_decode($ret);
@@ -2969,7 +2970,7 @@ class main
 
 		 		// ファイルロックを解除する
 
-				$this->debug_echo('　▼1');
+				$this->debug_echo('　');
 
 				// ログファイルディレクトリが存在しない場合は作成
 				if ( !$this->is_exists_mkdir(self::PATH_CREATE_DIR . self::PATH_LOG) ) {
@@ -3030,8 +3031,11 @@ class main
 				/**
 		 		* 本番ソースを「backup」ディレクトリへコピー
 				*/
+
 				// バックアップの公開予定ディレクトリの存在確認
 				if ( file_exists(self::PATH_CREATE_DIR . self::PATH_BACKUP . $dirname) ) {
+
+					$this->debug_echo('　▼バックアップ処理開始');
 
 					// 本番ソースからバックアップディレクトリへコピー
 
@@ -3053,6 +3057,9 @@ class main
 					foreach ( (array)$ret['output'] as $element ) {
 						$this->debug_echo($element);
 					}
+				} else {
+						// エラー処理
+						throw new \Exception('Backup directory not found.');
 				}
 
 
@@ -3097,6 +3104,9 @@ class main
 						// エラー処理
 						throw new \Exception('Delete of waiting publish directory failed.');
 					}
+				} else {
+						// エラー処理
+						throw new \Exception('Waiting directory not found.');
 				}
 
 				/**
@@ -3127,6 +3137,9 @@ class main
 					foreach ( (array)$ret['output'] as $element ) {
 						$this->debug_echo($element);
 					}
+				} else {
+						// エラー処理
+						throw new \Exception('Running directory not found.');
 				}
 
 				/**
@@ -3170,6 +3183,9 @@ class main
 						// エラー処理
 						throw new \Exception('Delete of waiting publish directory failed.');
 					}
+				} else {
+						// エラー処理
+						throw new \Exception('Running publish directory not found.');
 				}
 
 
