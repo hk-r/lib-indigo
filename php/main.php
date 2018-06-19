@@ -1759,7 +1759,7 @@ class main
 					if ($num == $selected_id) {
 					    // // タイトルと値の2次元配列作成
 					    // $ret_array = array_combine ($title_array, $rowData) ;
-					    $ret_array[] = $rowData;
+					    $ret_array = $rowData;
 					    break;
 					}
 				}
