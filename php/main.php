@@ -541,7 +541,11 @@ class main
 			// 選択されたIDに紐づく情報を取得
 			$selected_data_list = $this->get_selected_data();
 			
-			foreach ( $selected_data_list as $data ) {
+			$this->debug_echo('　□ selected_data_list');
+			var_dump($selected_data_list);
+			$this->debug_echo('　');
+
+			foreach ( (array)$selected_data_list as $data ) {
 
 				$branch_select_value = $data[self::WATING_CSV_COLUMN_BRANCH];
 				$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($data[self::WATING_CSV_COLUMN_RESERVE]));
