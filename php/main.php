@@ -94,9 +94,9 @@ class main
 	const RELEASED_CSV_COLUMN_DIFF_FLG2 = 11;	// 差分フラグ2（本番環境と今回分の差分）
 	const RELEASED_CSV_COLUMN_DIFF_FLG3 = 12;	// 差分フラグ3（前回分と今回分の差分）
 
-	const HONBAN_REALPATH = '/var/www/html/indigo-test-project/';
-
-
+	// const HONBAN_REALPATH = '/var/www/html/indigo-test-project/';
+	const HONBAN_REALPATH = '/var/www/html/test/';
+	
 	/**
 	 * コミットハッシュ値
 	 */
@@ -3041,3 +3041,4 @@ class main
 	}
 
 }
+
