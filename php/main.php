@@ -2407,7 +2407,7 @@ class main
 					// スロー処理！
 					// throw new PHPExcel_Writer_Exception("Could not open file $pFilename for writing.");
 				}
-				
+
 				$this->debug_echo('　□insert_array：');
 				var_dump($insert_array);
 
@@ -3124,7 +3124,15 @@ class main
 					// TODO:ログフォルダに出力する
 					// $command = 'rsync -avzP ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . '/' . ' ' . self::HONBAN_REALPATH . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
 
-					$command = 'rsync -avzP ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . '/' . ' ' . self::HONBAN_REALPATH . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
+					// ★-aではエラーとなる。最低限の同期とする！所有者やグループは変更しない！
+					// r ディレクトリを再帰的に調べる。
+					// -l シンボリックリンクをリンクとして扱う
+					// -p パーミッションも含める
+					// -t 更新時刻などの時刻情報も含める
+					// -o 所有者情報も含める
+					// -g ファイルのグループ情報も含める
+					// -D デバイスファイルはそのままデバイスとして扱う
+					$command = 'rsync -rtvzP ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . '/' . ' ' . self::HONBAN_REALPATH . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
 
 					$this->debug_echo('　□$command：');
 					$this->debug_echo($command);
