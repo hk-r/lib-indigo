@@ -2711,13 +2711,42 @@ class main
 					foreach ( (array)$ret['output'] as $element ) {
 						$this->debug_echo($element);
 					}
-					
+
+					// waitingディレクトリの削除が成功していることを確認
+					if ( file_exists(self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname) ) {
+						// ディレクトリが削除できていない場合
+						// エラー処理
+						throw new \Exception('Delete of waiting publish directory failed.');
+					}
 				}
 
 				/**
 		 		* 「running」ディレクトリへ移動した公開予定ソースを本番環境へ同期
 				*/
-		 		// rsync -avz /media/hdd1/data-1/ /media/hdd2/data-2/
+				// 本番ディレクトリの存在確認
+				if ( file_exists(self::HONBAN_REALPATH) ) {
+
+					// runningから本番ディレクトリへコピー
+
+					// $honban_realpath = $current_dir . "/" . self::PATH_PROJECT_DIR;
+
+					$this->debug_echo('　□カレントディレクトリ：');
+					$this->debug_echo(realpath('.'));
+
+					// TODO:ログフォルダに出力する
+					$command = 'rsync -avzP ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . '/' . ' ' . self::HONBAN_REALPATH . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
+
+					$this->debug_echo('　□$command：');
+					$this->debug_echo($command);
+
+					$ret = $this->execute($command, true);
+
+					$this->debug_echo('　▼本番反映の処理結果');
+
+					foreach ( (array)$ret['output'] as $element ) {
+						$this->debug_echo($element);
+					}
+				}
 
 				/**
 		 		* 同期が正常終了したら、公開済みソースを「running」ディレクトリから「released」ディレクトリへ移動
