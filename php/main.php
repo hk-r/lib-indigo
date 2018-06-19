@@ -2807,8 +2807,10 @@ class main
 	 */
 	function debug_echo($text) {
 	
-		echo strval($text);
-		echo "<br>";
+		ChromePhp::log($text);
+
+		// echo strval($text);
+		// echo "<br>";
 
 		return;
 	}
