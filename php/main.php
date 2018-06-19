@@ -2657,7 +2657,7 @@ class main
 					$this->debug_echo(realpath('.'));
 
 					// TODO:ログフォルダに出力する
-					$command = 'rsync -avzP ' . self::HONBAN_REALPATH . ' ' . self::PATH_CREATE_DIR . self::PATH_BACKUP . $dirname . '/' . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . 'rsync' . $dirname . '.log' ;
+					$command = 'rsync -avzP ' . self::HONBAN_REALPATH . ' ' . self::PATH_CREATE_DIR . self::PATH_BACKUP . $dirname . '/' . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . 'rsync_' . $dirname . '.log' ;
 
 					$this->debug_echo('　□$command：');
 					$this->debug_echo($command);
@@ -2679,7 +2679,7 @@ class main
 				if ( file_exists(self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname) ) {
 
 					// TODO:ログフォルダに出力する
-					$command = 'rsync -avzP --remove-source-files ' . self::HONBAN_REALPATH . ' ' . self::PATH_WAITING . self::PATH_RUNNING . $dirname . '/' . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . 'rsync' . $dirname . '.log' ;
+					$command = 'rsync -avzP --remove-source-files ' . self::PATH_WAITING . ' ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . '/' . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . 'rsync_' . $dirname . '.log' ;
 
 					$this->debug_echo('　□$command：');
 					$this->debug_echo($command);
