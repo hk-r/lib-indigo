@@ -2935,7 +2935,7 @@ class main
 
 			if ( $selected_ret ) {
 				// 公開対象の公開予定日時（文字列）
-				$dirname = $selected_ret[self::WATING_CSV_COLUMN_RESERVE];
+				$dirname = date(self::DATETIME_FORMAT_SAVE, strtotime($selected_ret[self::WATING_CSV_COLUMN_RESERVE]));
 			}
 
 			$this->debug_echo('　□公開予定ディレクトリ：');
@@ -3032,10 +3032,10 @@ class main
 		 		* 本番ソースを「backup」ディレクトリへコピー
 				*/
 
+				$this->debug_echo('　▼バックアップ処理開始');
+
 				// バックアップの公開予定ディレクトリの存在確認
 				if ( file_exists(self::PATH_CREATE_DIR . self::PATH_BACKUP . $dirname) ) {
-
-					$this->debug_echo('　▼バックアップ処理開始');
 
 					// 本番ソースからバックアップディレクトリへコピー
 
