@@ -2177,63 +2177,9 @@ class main
 				throw new \Exception('file not found. ');
 			
 			} else {
-
-				// Open file
-				$handle_r = fopen( $filename, "r" );
-
-				if ($handle_r === false) {
-					// スロー処理！
-					// throw new PHPExcel_Writer_Exception("Could not open file $pFilename for writing.");
-				}
-
-				$is_first = true;
-
-				$max = 0;
-
-				// Loop through each line of the file in turn
-				while ($rowData = fgetcsv($handle_r, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
- 					// タイトル行
-					if($is_first){
-				        $is_first = false;
-				        continue;
-				    }
-
-				    $num = intval($rowData[self::RELEASED_CSV_COLUMN_ID]);
-
-				    if ($num > $max) {
-						$max = $num;
-					}
-					$max++;
-				}
-
-				// Open file
-				$handle = fopen( $filename, 'a+' );
-
-
-				if ($handle === false) {
-					// スロー処理！
-					// throw new PHPExcel_Writer_Exception("Could not open file $pFilename for writing.");
-				}
-		$this->debug_echo('　□insert_array：');
-		var_dump($insert_array);
-				// 現在時刻
-				$now = date(self::DATETIME_FORMAT);
-
-				$array[self::RELEASED_CSV_COLUMN_ID] = $max;
-				$array[self::RELEASED_CSV_COLUMN_RESERVE] = $insert_array[self::WATING_CSV_COLUMN_RESERVE];
-				$array[self::RELEASED_CSV_COLUMN_BRANCH] = $insert_array[self::WATING_CSV_COLUMN_BRANCH];
-				$array[self::RELEASED_CSV_COLUMN_COMMIT] = $insert_array[self::WATING_CSV_COLUMN_COMMIT];
-				$array[self::RELEASED_CSV_COLUMN_COMMENT] = $insert_array[self::WATING_CSV_COLUMN_COMMENT];
-				$array[self::RELEASED_CSV_COLUMN_SETTING] = $now;
-
-				fputcsv( $handle, $array, self::CSV_DELIMITER, self::CSV_ENCLOSURE);
-
-				fclose( $handle);
+				// 実施済み一覧CSVへ追加処理
+				$this->insert_released_list_csv_data();
 			}
-
-			// Close file
-			fclose($handle_r);
-			fclose($handle);
 
 			// 公開予定一覧CSVから削除
 			$ret = $this->delete_list_csv_data();
@@ -2261,6 +2207,119 @@ class main
 		$result['status'] = true;
 
 		$this->debug_echo('■ move_csv_data end');
+
+		return json_encode($result);
+	}
+
+
+	/**
+	 * 実施済み一覧CSVへ登録処理（CSVへの行追加）
+	 *
+	 * @return なし
+	 */
+	private function insert_released_list_csv_data($convert_reserve_time){
+
+		$this->debug_echo('■ insert_list_csv_data start');
+
+		$output = "";
+		$result = array('status' => true,
+						'message' => '');
+	
+		try {
+
+			// $filename = realpath('.') . $this->list_filename;
+			$filename = self::PATH_CREATE_DIR . self::CSV_RELEASED_LIST_FILENAME;
+
+			if (!file_exists($filename)) {
+				$this->debug_echo('実施済み一覧ファイルが存在しない');
+
+			} else {
+
+				// Open file
+				$handle_r = fopen( $filename, "r" );
+
+				if ($handle_r === false) {
+					// スロー処理！
+					// throw new PHPExcel_Writer_Exception("Could not open file $pFilename for writing.");
+				}
+
+				$is_first = true;
+
+				$max = 0;
+
+				// Loop through each line of the file in turn
+				while ($rowData = fgetcsv($handle_r, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
+
+					if($is_first){
+				        // タイトル行
+
+				        $is_first = false;
+				        continue;
+				    }
+
+				    $num = intval($rowData[self::RELEASED_CSV_COLUMN_ID]);
+
+				    if ($num > $max) {
+						$max = $num;
+					}
+				}
+
+				$max++;
+
+				// Open file
+				$handle = fopen( $filename, 'a+' );
+
+
+				if ($handle === false) {
+					// スロー処理！
+					// throw new PHPExcel_Writer_Exception("Could not open file $pFilename for writing.");
+				}
+
+				$this->debug_echo('　□insert_array：');
+				var_dump($insert_array);
+
+				// 現在時刻
+				$now = date(self::DATETIME_FORMAT);
+
+				$array[self::RELEASED_CSV_COLUMN_ID] = $max;
+				$array[self::RELEASED_CSV_COLUMN_RESERVE] = $insert_array[self::WATING_CSV_COLUMN_RESERVE];
+				$array[self::RELEASED_CSV_COLUMN_BRANCH] = $insert_array[self::WATING_CSV_COLUMN_BRANCH];
+				$array[self::RELEASED_CSV_COLUMN_COMMIT] = $insert_array[self::WATING_CSV_COLUMN_COMMIT];
+				$array[self::RELEASED_CSV_COLUMN_COMMENT] = $insert_array[self::WATING_CSV_COLUMN_COMMENT];
+				$array[self::RELEASED_CSV_COLUMN_SETTING] = $now;
+
+				$array[self::RELEASED_CSV_COLUMN_START] = '';
+				$array[self::RELEASED_CSV_COLUMN_END] = '';
+				$array[self::RELEASED_CSV_COLUMN_RELEASED] = '';
+				$array[self::RELEASED_CSV_COLUMN_RESTORE] = '';
+				$array[self::RELEASED_CSV_COLUMN_DIFF_FLG1] = '';
+				$array[self::RELEASED_CSV_COLUMN_DIFF_FLG2] = '';
+				$array[self::RELEASED_CSV_COLUMN_DIFF_FLG3] = '';
+
+				fputcsv( $handle, $array, self::CSV_DELIMITER, self::CSV_ENCLOSURE);
+
+				fclose( $handle);
+			}
+
+
+			// Close file
+			fclose($handle_r);
+
+		} catch (\Exception $e) {
+
+			// set_time_limit(30);
+
+			$result['status'] = false;
+			$result['message'] = $e->getMessage();
+
+			return json_encode($result);
+		}
+
+		// set_time_limit(30);
+
+		$result['status'] = true;
+
+		$this->debug_echo('■ insert_list_csv_data end');
 
 		return json_encode($result);
 	}
@@ -3043,7 +3102,7 @@ class main
 					// TODO:ログフォルダに出力する
 					// $command = 'rsync -avzP ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . '/' . ' ' . self::HONBAN_REALPATH . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
 
-					$command = 'rsync -rltDvzP ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . '/' . ' ' . self::HONBAN_REALPATH . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
+					$command = 'rsync -avzP ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . '/' . ' ' . self::HONBAN_REALPATH . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
 
 					$this->debug_echo('　□$command：');
 					$this->debug_echo($command);
