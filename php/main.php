@@ -2679,7 +2679,7 @@ class main
 				if ( file_exists(self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname) ) {
 
 					// TODO:ログフォルダに出力する
-					$command = 'rsync -avzP --remove-source-files ' . self::PATH_CREATE_DIR . self::PATH_WAITING . ' ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . '/' . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
+					$command = 'rsync -avzP --remove-source-files ' . self::PATH_CREATE_DIR . self::PATH_WAITING . $dirname . ' ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
 
 					$this->debug_echo('　□$command：');
 					$this->debug_echo($command);
