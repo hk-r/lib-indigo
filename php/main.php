@@ -541,11 +541,11 @@ class main
 			// 選択されたIDに紐づく情報を取得
 			$selected_data = $this->get_selected_data();
 			
-			$this->debug_echo('　□ selected_data_list');
-			var_dump($selected_data_list);
+			$this->debug_echo('　□ selected_data');
+			var_dump($selected_data);
 			$this->debug_echo('　');
 
-			if ($selected_data_list) {
+			if ($selected_data) {
 
 				$branch_select_value = $data[self::WATING_CSV_COLUMN_BRANCH];
 				$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($data[self::WATING_CSV_COLUMN_RESERVE]));
@@ -2923,15 +2923,19 @@ class main
 	 	// 	$now = gmdate(self::DATETIME_FORMAT_SAVE);
 			// // 公開予約の一覧を取得
 			// $data_list = $this->get_csv_data_list($now);
+			// foreach ( (array)$selected_ret as $data ) {
+			// 	// 公開対象の公開予定日時（文字列）
+			// 	$dirname = $this->get_datetime_str($selected_ret, self::WATING_CSV_COLUMN_RESERVE, SORT_DESC);
+			// }
 
 
 			$selected_ret = $this->get_selected_data();
 
 			$dirname = '';
 
-			foreach ( (array)$selected_ret as $data ) {
+			if ( $selected_ret ) {
 				// 公開対象の公開予定日時（文字列）
-				$dirname = $this->get_datetime_str($selected_ret, self::WATING_CSV_COLUMN_RESERVE, SORT_DESC);
+				$dirname = $selected_ret[self::WATING_CSV_COLUMN_RESERVE];
 			}
 
 			$this->debug_echo('　□公開予定ディレクトリ：');
