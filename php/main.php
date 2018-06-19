@@ -1620,6 +1620,71 @@ class main
 		return $ret_array;
 	}
 
+	/**
+	 * 実施済みCSVからデータリストを取得する
+	 *
+	 * @param $now = 現在時刻
+	 * @return データリスト
+	 */
+	private function get_released_csv_data_list($now) {
+
+		$this->debug_echo('■ get_csv_data_list start');
+
+		$ret_array = array();
+
+		$filename = self::PATH_CREATE_DIR . self::CSV_WATING_LIST_FILENAME;
+
+		try {
+
+			if (!file_exists($filename)) {
+				
+				// エラー処理
+				throw new \Exception('waiting_list.csv not found.');
+
+			} else {
+
+				// Open file
+				$handle = fopen( $filename, "r" );
+
+				$is_first = true;
+
+				// CSVリストをループ
+				while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
+
+					if($is_first){
+				        $is_first = false;
+				        continue;
+				    }
+
+				    if ($now) {
+				    // 指定日時が設定されている
+
+						$datetime = date(self::TIME_FORMAT_HIS,  strtotime($rowData[self::WATING_CSV_COLUMN_RESERVE]));
+
+					    // 指定日時より未来日時の場合
+				    	if ($datetime && ($datetime > $now)) {
+				    		continue;
+				    	}
+				    }
+
+					$ret_array[] = $rowData;
+				}
+
+				// Close file
+				fclose($handle);
+			}
+
+		} catch (\Exception $e) {
+
+			echo "例外キャッチ：", $e->getMessage(), "\n";
+			return $ret_array;
+		}
+		
+		$this->debug_echo('■ get_csv_data_list end');
+
+		return $ret_array;
+	}
+
 
 	/**
 	 * CSVから選択された行の情報を取得する
@@ -2807,10 +2872,10 @@ class main
 	 */
 	function debug_echo($text) {
 	
-		ChromePhp::log($text);
+		// ChromePhp::log($text);
 
-		// echo strval($text);
-		// echo "<br>";
+		echo strval($text);
+		echo "<br>";
 
 		return;
 	}
