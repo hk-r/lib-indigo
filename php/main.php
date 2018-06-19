@@ -1262,7 +1262,7 @@ class main
 				. '<tbody>';
 
 		// データリスト
-		foreach ($data_list as $array) {
+		foreach ((array)$data_list as $array) {
 			
 			$ret .= '<tr>'
 				. '<td class="p-center"><input type="radio" name="target" value="' . $array[self::RELEASED_CSV_COLUMN_ID] . '"/></td>'
@@ -2229,7 +2229,7 @@ class main
 	 *
 	 * @return なし
 	 */
-	private function insert_released_list_csv_data($convert_reserve_time){
+	private function insert_released_list_csv_data(){
 
 		$this->debug_echo('■ insert_list_csv_data start');
 
@@ -2952,6 +2952,7 @@ class main
 				// 　ファイルロックを掛ける
 		 		// 公開対象の行を、実施済みへ切り取り移動する
 				$ret = $this->move_csv_data();
+
 				$ret = json_decode($ret);
 
 				if ( !$ret->status ) {
