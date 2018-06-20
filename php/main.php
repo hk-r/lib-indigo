@@ -2030,30 +2030,31 @@ class main
 			} else {
 
 				$file = file($filename);
-
+$this->debug_echo('　□1');
 				// Open file
 				$handle = fopen( $filename, "r" );
-				
+$this->debug_echo('　□2');				
 				$cnt = 0;
-
+$this->debug_echo('　□3');
 				// Loop through each line of the file in turn
 				while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
-
+$this->debug_echo('　□4');
 					$num = intval($rowData[self::WAITING_CSV_COLUMN_ID]);
-
+$this->debug_echo('　□5');
 					if ($num == $selected_id) {
-
+$this->debug_echo('　□6');
 						unset($file[$cnt]);
 						file_put_contents($filename, $file);
-
+$this->debug_echo('　□7');
 						break;
 					}
 
 					$cnt++;
 				}
-
+$this->debug_echo('　□8');
 				// Close file
 				fclose($handle);
+$this->debug_echo('　□9');
 			}
 
 		} catch (\Exception $e) {
