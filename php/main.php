@@ -2272,14 +2272,15 @@ class main
 	
 		$filename = self::PATH_CREATE_DIR . self::CSV_RELEASED_LIST_FILENAME;
 
-		$update_data = array();
-
 		try {
 
 			if (!file_exists($filename) && !$id) {
 				$this->debug_echo('ファイルが存在しない、または、選択IDが不正です。');
 
 			} else {
+
+
+				$update_data = $this->get_released_selected_data($id);
 
 				$file = file($filename);
 
@@ -2317,8 +2318,6 @@ class main
 
 					// 変更対象となるid値の場合削除する
 					if ($num == $id) {
-
-						$update_data = $file[$cnt];
 
 						$this->debug_echo('　□update_data');
 						$this->debug_echo(var_dump($update_data));
