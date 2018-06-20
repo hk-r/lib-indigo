@@ -2706,7 +2706,7 @@ class main
 
 				if ( file_exists( self::PATH_CREATE_DIR . self::PATH_WAITING . $before_dirname ) && !file_exists( self::PATH_CREATE_DIR . self::PATH_WAITING . $dirname ) ){
 					
-					rename( $before_dirname, $dirname );
+					rename( self::PATH_CREATE_DIR . self::PATH_WAITING . $before_dirname, self::PATH_CREATE_DIR . self::PATH_WAITING . $dirname );
 
 				} else {
 				// 名前変更前のディレクトリがない場合、または名前変更後のディレクトリが存在する場合は処理終了
@@ -2811,6 +2811,7 @@ class main
 		$this->debug_echo('■ file_delete start');
 
 		$current_dir = realpath('.');
+		$this->debug_echo('　□current_dir：' . $current_dir);
 
 		$output = "";
 		$result = array('status' => true,
@@ -2822,29 +2823,19 @@ class main
 
 		try {
 
-			// WAITINGディレクトリ移動
-			if ( chdir( self::PATH_CREATE_DIR . self::PATH_WAITING ) ) {
+			// WAITINGに公開予定ディレクトリが存在しない場合は無視する
+			if( file_exists( self::PATH_CREATE_DIR . self::PATH_WAITING . $dirname )) {
+				
+				// 削除
+				$command = 'rm -rf '. $dirname;
+				$ret = $this->execute($command, false);
 
-				// ディレクトリが存在しない場合は無視する
-				if( file_exists( $dirname )) {
-					
-					// 削除
-					$command = 'rm -rf '. $dirname;
-					$ret = $this->execute($command, false);
-
-					if ( $ret['return'] !== 0 ) {
-						$this->debug_echo('削除失敗');
-						throw new \Exception('Delete directory failed.');
-					}
-				} else {
-					$this->debug_echo('削除対象が存在しない');
+				if ( $ret['return'] !== 0 ) {
+					$this->debug_echo('削除失敗');
+					throw new \Exception('Delete directory failed.');
 				}
-		
 			} else {
-				// コピー用のディレクトリが存在しない場合
-
-				// エラー処理
-				throw new \Exception('Waiting directory not found.');
+				$this->debug_echo('削除対象が存在しない');
 			}
 		
 		} catch (\Exception $e) {
