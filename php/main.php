@@ -2012,8 +2012,7 @@ class main
 		$filename = self::PATH_CREATE_DIR . self::CSV_WAITING_LIST_FILENAME;
 
 		$selected_id =  $this->options->_POST->selected_id;
-		$this->debug_echo('　□selected_id：');
-		$this->debug_echo($selected_id);
+
 		try {
 
 
@@ -2030,31 +2029,30 @@ class main
 			} else {
 
 				$file = file($filename);
-$this->debug_echo('　□1');
+
 				// Open file
 				$handle = fopen( $filename, "r" );
-$this->debug_echo('　□2');				
+
 				$cnt = 0;
-$this->debug_echo('　□3');
+
 				// Loop through each line of the file in turn
 				while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
-$this->debug_echo('　□4');
+
 					$num = intval($rowData[self::WAITING_CSV_COLUMN_ID]);
-$this->debug_echo('　□5');
+
 					if ($num == $selected_id) {
-$this->debug_echo('　□6');
+
 						unset($file[$cnt]);
 						file_put_contents($filename, $file);
-$this->debug_echo('　□7');
+
 						break;
 					}
 
 					$cnt++;
 				}
-$this->debug_echo('　□8');
+
 				// Close file
 				fclose($handle);
-$this->debug_echo('　□9');
 			}
 
 		} catch (\Exception $e) {
@@ -2081,22 +2079,20 @@ $this->debug_echo('　□9');
 	 *
 	 * @return 選択行の情報
 	 */
-	private function get_released_selected_data() {
+	private function get_released_selected_data($id) {
 
 		$this->debug_echo('■ get_released_selected_data start');
 
 		// $filename = realpath('.') . $this->list_filename;
 		$filename = self::PATH_CREATE_DIR . self::CSV_RELEASED_LIST_FILENAME;
 
-		$selected_id =  $this->options->_POST->selected_id;
-
-		$this->debug_echo('　□selected_id：' . $selected_id);
+		$this->debug_echo('　□id：' . $id);
 
 		$ret_array = array();
 
 		try {
 
-			if (!file_exists($filename) && !empty($selected_id)) {
+			if (!file_exists($filename) && !$id) {
 				$this->debug_echo('実施済み一覧ファイルが存在しない');
 
 			} else {
@@ -2120,10 +2116,7 @@ $this->debug_echo('　□9');
 
 					$num = intval($rowData[self::RELEASED_CSV_COLUMN_ID]);
 
-					$this->debug_echo('　★num：' . $num);
-					$this->debug_echo('　★select_id：' . $selected_id);
-
-					if ($num == $selected_id) {
+					if ($num == $id) {
 					    // // タイトルと値の2次元配列作成
 					    // $ret_array = array_combine ($title_array, $rowData) ;
 					    $ret_array = $rowData;
@@ -2269,7 +2262,7 @@ $this->debug_echo('　□9');
 	 *
 	 * @return なし
 	 */
-	private function update_running_list_csv_data($start_datetime, $insert_id) {
+	private function update_running_list_csv_data($start_datetime, $id) {
 
 		$this->debug_echo('■ update_running_list_csv_data start');
 
@@ -2279,9 +2272,11 @@ $this->debug_echo('　□9');
 	
 		$filename = self::PATH_CREATE_DIR . self::CSV_RELEASED_LIST_FILENAME;
 
+		$update_data = array();
+
 		try {
 
-			if (!file_exists($filename) && !$insert_id) {
+			if (!file_exists($filename) && !$id) {
 				$this->debug_echo('ファイルが存在しない、または、選択IDが不正です。');
 
 			} else {
@@ -2297,7 +2292,7 @@ $this->debug_echo('　□9');
 				}
 
 				$cnt = 0;
-				$max = 0;
+				// $max = 0;
 
 				$is_first = true;
 
@@ -2315,13 +2310,15 @@ $this->debug_echo('　□9');
 				    // idカラムの値を取得
 					$num = intval($rowData[self::RELEASED_CSV_COLUMN_ID]);
 
-					// 追加時のid値生成
-				    if ($num > $max) {
-						$max = $num;
-					}
+					// // 追加時のid値生成
+				 //    if ($num > $max) {
+					// 	$max = $num;
+					// }
 
 					// 変更対象となるid値の場合削除する
-					if ($num == $selected_id) {
+					if ($num == $id) {
+
+						$update_data = $file[$cnt];
 						unset($file[$cnt]);
 						file_put_contents($filename, $file);
 					}
@@ -2329,7 +2326,7 @@ $this->debug_echo('　□9');
 					$cnt++;
 				}
 
-				$max++;
+				// $max++;
 
 				// Open file
 				$handle = fopen( $filename, 'a+' );
@@ -2342,12 +2339,12 @@ $this->debug_echo('　□9');
 				// 現在時刻
 				$now = date(DATE_ATOM);
 
-				$array[self::RELEASED_CSV_COLUMN_ID] = $max;
-				$array[self::RELEASED_CSV_COLUMN_RESERVE] = $insert_array[self::RELEASED_CSV_COLUMN_RESERVE];
-				$array[self::RELEASED_CSV_COLUMN_BRANCH] = $insert_array[self::RELEASED_CSV_COLUMN_BRANCH];
-				$array[self::RELEASED_CSV_COLUMN_COMMIT] = $insert_array[self::RELEASED_CSV_COLUMN_COMMIT];
-				$array[self::RELEASED_CSV_COLUMN_COMMENT] = $insert_array[self::RELEASED_CSV_COLUMN_COMMENT];
-				$array[self::RELEASED_CSV_COLUMN_SETTING] = $insert_array[self::RELEASED_CSV_COLUMN_SETTING];
+				$array[self::RELEASED_CSV_COLUMN_ID] = $update_data[self::RELEASED_CSV_COLUMN_ID];
+				$array[self::RELEASED_CSV_COLUMN_RESERVE] = $update_data[self::RELEASED_CSV_COLUMN_RESERVE];
+				$array[self::RELEASED_CSV_COLUMN_BRANCH] = $update_data[self::RELEASED_CSV_COLUMN_BRANCH];
+				$array[self::RELEASED_CSV_COLUMN_COMMIT] = $update_data[self::RELEASED_CSV_COLUMN_COMMIT];
+				$array[self::RELEASED_CSV_COLUMN_COMMENT] = $update_data[self::RELEASED_CSV_COLUMN_COMMENT];
+				$array[self::RELEASED_CSV_COLUMN_SETTING] = $update_data[self::RELEASED_CSV_COLUMN_SETTING];
 
 				$array[self::RELEASED_CSV_COLUMN_START] = $start_datetime;
 				$array[self::RELEASED_CSV_COLUMN_END] = $now;
@@ -2853,8 +2850,7 @@ $this->debug_echo('　□9');
 
 				if ( !$ret->status || !$ret->insert_id) {
 					// 削除失敗
-
-			 		$this->debug_echo('　※insert_released_list_csv_data失敗');				
+			
 					// // エラーメッセージ
 					// $dialog_disp = '
 					// <script type="text/javascript">
@@ -2869,17 +2865,16 @@ $this->debug_echo('　□9');
 				// 実施CSVへインサートしたID（最後のアップデートに使用する）
 				$insert_id = $ret->insert_id;
 
-				$this->debug_echo('　□$insert_id：');
-				$this->debug_echo($insert_id);
+				// $this->debug_echo('　□$insert_id：');
+				// $this->debug_echo($insert_id);
 
 				// 予定CSVへデリート処理
 				$ret = $this->delete_list_csv_data();
 				$ret = json_decode($ret);
-				
+
 				if ( !$ret->status ) {
 				// 削除失敗
-
-					$this->debug_echo('　※delete_list_csv_data失敗');				
+		
 					// // エラーメッセージ
 					// $dialog_disp = '
 					// <script type="text/javascript">
