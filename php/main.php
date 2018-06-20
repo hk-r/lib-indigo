@@ -2831,7 +2831,7 @@ class main
 			if( file_exists( self::PATH_CREATE_DIR . self::PATH_WAITING . $dirname )) {
 				
 				// 削除
-				$command = 'rm -rf '. $dirname;
+				$command = 'rm -rf '. self::PATH_CREATE_DIR . self::PATH_WAITING . $dirname;
 				$ret = $this->execute($command, false);
 
 				if ( $ret['return'] !== 0 ) {
@@ -3026,7 +3026,7 @@ class main
 					$this->debug_echo(realpath('.'));
 
 					// TODO:ログフォルダに出力する
-					$command = 'rsync -avzP ' . self::HONBAN_REALPATH . ' ' . self::PATH_CREATE_DIR . self::PATH_BACKUP . $dirname . '/' . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
+					$command = 'rsync -avzP ' . self::HONBAN_REALPATH  . '/' . ' ' . self::PATH_CREATE_DIR . self::PATH_BACKUP . $dirname . '/' . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
 
 					$this->debug_echo('　□$command：');
 					$this->debug_echo($command);
@@ -3051,7 +3051,7 @@ class main
 				if ( file_exists(self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname) ) {
 
 					// TODO:ログフォルダに出力する
-					$command = 'rsync -avzP --remove-source-files ' . self::PATH_CREATE_DIR . self::PATH_WAITING . $dirname . ' ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
+					$command = 'rsync -avzP --remove-source-files ' . self::PATH_CREATE_DIR . self::PATH_WAITING . $dirname . '/' . ' ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . '/' . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
 
 					$this->debug_echo('　□$command：');
 					$this->debug_echo($command);
@@ -3114,7 +3114,7 @@ class main
 					// -o 所有者情報も含める
 					// -g ファイルのグループ情報も含める
 					// -D デバイスファイルはそのままデバイスとして扱う
-					$command = 'rsync -rtvzP ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . ' ' . self::HONBAN_REALPATH . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
+					$command = 'rsync -rtvzP ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . '/' . ' ' . self::HONBAN_REALPATH . '/' . ' ' . '--log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
 
 					$this->debug_echo('　□$command：');
 					$this->debug_echo($command);
@@ -3138,7 +3138,7 @@ class main
 				if ( file_exists(self::PATH_CREATE_DIR . self::PATH_RELEASED . $dirname) ) {
 
 					// TODO:ログフォルダに出力する
-					$command = 'rsync -avzP --remove-source-files ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . ' ' . self::PATH_CREATE_DIR . self::PATH_RELEASED . $dirname . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
+					$command = 'rsync -avzP --remove-source-files ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . '/' . ' ' . self::PATH_CREATE_DIR . self::PATH_RELEASED . $dirname . '/' . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
 
 					$this->debug_echo('　□$command：');
 					$this->debug_echo($command);
@@ -3152,7 +3152,7 @@ class main
 					}
 
 
-					// waitingの空ディレクトリを削除する
+					// runningの空ディレクトリを削除する
 					$command = 'find ' .  self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . '/ -type d -empty -delete' ;
 
 					$this->debug_echo('　□$command：');
