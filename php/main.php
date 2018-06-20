@@ -2051,11 +2051,9 @@ class main
 					$cnt++;
 				}
 
+				// Close file
+				fclose($handle);
 			}
-
-			// Close file
-			fclose($handle);
-
 
 		} catch (\Exception $e) {
 
@@ -2130,7 +2128,6 @@ class main
 					    break;
 					}
 				}
-
 
 				// Close file
 				fclose($handle);
@@ -2879,7 +2876,7 @@ class main
 				if ( !$ret->status ) {
 				// 削除失敗
 
-					$this->debug_echo('delete_list_csv_data');				
+					$this->debug_echo('　※delete_list_csv_data失敗');				
 					// // エラーメッセージ
 					// $dialog_disp = '
 					// <script type="text/javascript">
