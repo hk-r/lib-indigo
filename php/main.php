@@ -34,7 +34,7 @@ class main
 	const CSV_ENCLOSURE		= '"';
 
 	// 公開待ち管理CSVファイル
-	const CSV_WATING_LIST_FILENAME = '/csv/waiting_list.csv';
+	const CSV_WAITING_LIST_FILENAME = '/csv/waiting_list.csv';
 	// 公開実施管理CSVファイル
 	const CSV_RELEASED_LIST_FILENAME = '/csv/released_list.csv';
 
@@ -70,12 +70,12 @@ class main
 	/**
 	 * 公開予定管理CSVの列番号定義
 	 */
-	const WATING_CSV_COLUMN_ID = 0;			// ID
-	const WATING_CSV_COLUMN_RESERVE = 1;	// 公開予定日時
-	const WATING_CSV_COLUMN_BRANCH = 2;		// ブランチ名
-	const WATING_CSV_COLUMN_COMMIT = 3;		// コミットハッシュ値（短縮）
-	const WATING_CSV_COLUMN_COMMENT = 4;	// コメント
-	const WATING_CSV_COLUMN_SETTING = 5;	// 設定日時
+	const WAITING_CSV_COLUMN_ID = 0;			// ID
+	const WAITING_CSV_COLUMN_RESERVE = 1;	// 公開予定日時
+	const WAITING_CSV_COLUMN_BRANCH = 2;		// ブランチ名
+	const WAITING_CSV_COLUMN_COMMIT = 3;		// コミットハッシュ値（短縮）
+	const WAITING_CSV_COLUMN_COMMENT = 4;	// コメント
+	const WAITING_CSV_COLUMN_SETTING = 5;	// 設定日時
 
 	/**
 	 * 公開実施管理CSVの列番号定義
@@ -371,7 +371,7 @@ class main
 
 		foreach ($data_list as $array) {
 			
-			if (($array[self::WATING_CSV_COLUMN_ID] != $selected_id) && ($array[self::WATING_CSV_COLUMN_BRANCH] == $selected_branch)) {
+			if (($array[self::WAITING_CSV_COLUMN_ID] != $selected_id) && ($array[self::WAITING_CSV_COLUMN_BRANCH] == $selected_branch)) {
 				$ret = false;
 				break;
 			}
@@ -396,7 +396,7 @@ class main
 		$ret = true;
 
 		foreach ($data_list as $array) {
-			if (($array[self::WATING_CSV_COLUMN_ID] != $selected_id) && ($array[self::WATING_CSV_COLUMN_RESERVE] == $input_reserve)) {
+			if (($array[self::WAITING_CSV_COLUMN_ID] != $selected_id) && ($array[self::WAITING_CSV_COLUMN_RESERVE] == $input_reserve)) {
 				$ret = false;
 				break;
 			}
@@ -547,10 +547,10 @@ class main
 
 			if ($selected_data) {
 
-				$branch_select_value = $selected_data[self::WATING_CSV_COLUMN_BRANCH];
-				$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($selected_data[self::WATING_CSV_COLUMN_RESERVE]));
-				$reserve_time = date(self::TIME_FORMAT_HI,  strtotime($selected_data[self::WATING_CSV_COLUMN_RESERVE]));
-				$comment = $selected_data[self::WATING_CSV_COLUMN_COMMENT];
+				$branch_select_value = $selected_data[self::WAITING_CSV_COLUMN_BRANCH];
+				$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($selected_data[self::WAITING_CSV_COLUMN_RESERVE]));
+				$reserve_time = date(self::TIME_FORMAT_HI,  strtotime($selected_data[self::WAITING_CSV_COLUMN_RESERVE]));
+				$comment = $selected_data[self::WAITING_CSV_COLUMN_COMMENT];
 			}
 
 		} else {
@@ -743,10 +743,10 @@ class main
 			$this->debug_echo($selected_ret);
 
 			if ($selected_ret) {
-				$branch_select_value = $selected_ret[self::WATING_CSV_COLUMN_BRANCH];
-				$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($selected_ret[self::WATING_CSV_COLUMN_RESERVE]));
-				$reserve_time = date(self::TIME_FORMAT_HI,  strtotime($selected_ret[self::WATING_CSV_COLUMN_RESERVE]));
-				$comment = $selected_ret[self::WATING_CSV_COLUMN_COMMENT];
+				$branch_select_value = $selected_ret[self::WAITING_CSV_COLUMN_BRANCH];
+				$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($selected_ret[self::WAITING_CSV_COLUMN_RESERVE]));
+				$reserve_time = date(self::TIME_FORMAT_HI,  strtotime($selected_ret[self::WAITING_CSV_COLUMN_RESERVE]));
+				$comment = $selected_ret[self::WAITING_CSV_COLUMN_COMMENT];
 			}
 			
 		} else {
@@ -1138,7 +1138,7 @@ class main
 		// CSVより公開予約の一覧を取得する
 		$data_list = $this->get_csv_data_list(null);
 		// 取得したリストをソートする
-		$data_list = $this->sort_list($data_list, self::WATING_CSV_COLUMN_RESERVE, SORT_ASC);
+		$data_list = $this->sort_list($data_list, self::WAITING_CSV_COLUMN_RESERVE, SORT_ASC);
 
 		// // お知らせリストの取得
 		// $alert_list = $this->get_csv_alert_list();
@@ -1154,7 +1154,7 @@ class main
 		// 		$ret .= '<p class="alert_content" style="vertical-align: middle;">'
 		// 			. '<span style="padding-right: 5px;"><img src="'. $this->img_error_icon . '"/></span>'
 		// 			. '<a onClick="document.formA.submit();return false;" >'
-		// 			. $data[WATING_CSV_COLUMN_RESERVE] . '　' . $data['content']
+		// 			. $data[WAITING_CSV_COLUMN_RESERVE] . '　' . $data['content']
 		// 			. '</a></p>';
 		// 	}
 
@@ -1200,11 +1200,11 @@ class main
 		foreach ($data_list as $array) {
 			
 			$ret .= '<tr>'
-				. '<td class="p-center"><input type="radio" name="target" value="' . $array[self::WATING_CSV_COLUMN_ID] . '"/></td>'
-				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array[self::WATING_CSV_COLUMN_RESERVE])) . '</td>'
-				. '<td class="p-center">' . $array[self::WATING_CSV_COLUMN_COMMIT] . '</td>'
-				. '<td class="p-center">' . $array[self::WATING_CSV_COLUMN_BRANCH] . '</td>'
-				. '<td>' . $array[self::WATING_CSV_COLUMN_COMMENT] . '</td>'
+				. '<td class="p-center"><input type="radio" name="target" value="' . $array[self::WAITING_CSV_COLUMN_ID] . '"/></td>'
+				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array[self::WAITING_CSV_COLUMN_RESERVE])) . '</td>'
+				. '<td class="p-center">' . $array[self::WAITING_CSV_COLUMN_COMMIT] . '</td>'
+				. '<td class="p-center">' . $array[self::WAITING_CSV_COLUMN_BRANCH] . '</td>'
+				. '<td>' . $array[self::WAITING_CSV_COLUMN_COMMENT] . '</td>'
 				// . '<td>' . $array['id'] . '</td>'
 				// . '<td>' . $this->convert_status($array['status']) . '</td>'
 				. '</tr>';
@@ -1594,7 +1594,7 @@ class main
 
 		$ret_array = array();
 
-		$filename = self::PATH_CREATE_DIR . self::CSV_WATING_LIST_FILENAME;
+		$filename = self::PATH_CREATE_DIR . self::CSV_WAITING_LIST_FILENAME;
 
 		try {
 
@@ -1621,7 +1621,7 @@ class main
 				    if ($now) {
 				    // 指定日時が設定されている
 
-						$datetime = date(self::TIME_FORMAT_HIS,  strtotime($rowData[self::WATING_CSV_COLUMN_RESERVE]));
+						$datetime = date(self::TIME_FORMAT_HIS,  strtotime($rowData[self::WAITING_CSV_COLUMN_RESERVE]));
 
 					    // 指定日時より未来日時の場合
 				    	if ($datetime && ($datetime > $now)) {
@@ -1686,7 +1686,7 @@ class main
 				  //   if ($now) {
 				  //   // 指定日時が設定されている
 
-						// $datetime = date(self::TIME_FORMAT_HIS,  strtotime($rowData[self::WATING_CSV_COLUMN_RESERVE]));
+						// $datetime = date(self::TIME_FORMAT_HIS,  strtotime($rowData[self::WAITING_CSV_COLUMN_RESERVE]));
 
 					 //    // 指定日時より未来日時の場合
 				  //   	if ($datetime && ($datetime > $now)) {
@@ -1723,7 +1723,7 @@ class main
 		$this->debug_echo('■ get_selected_data start');
 
 		// $filename = realpath('.') . $this->list_filename;
-		$filename = self::PATH_CREATE_DIR . self::CSV_WATING_LIST_FILENAME;
+		$filename = self::PATH_CREATE_DIR . self::CSV_WAITING_LIST_FILENAME;
 
 		$selected_id =  $this->options->_POST->selected_id;
 
@@ -1752,7 +1752,7 @@ class main
 				        continue;
 				    }
 
-					$num = intval($rowData[self::WATING_CSV_COLUMN_ID]);
+					$num = intval($rowData[self::WAITING_CSV_COLUMN_ID]);
 
 					$this->debug_echo('　★num：' . $num);
 					$this->debug_echo('　★select_id：' . $selected_id);
@@ -1797,7 +1797,7 @@ class main
 
 		try {
 
-			$filename = self::PATH_CREATE_DIR . self::CSV_WATING_LIST_FILENAME;
+			$filename = self::PATH_CREATE_DIR . self::CSV_WAITING_LIST_FILENAME;
 
 			if (!file_exists($filename)) {
 				$this->debug_echo('公開予約一覧ファイルが存在しない');
@@ -1846,12 +1846,12 @@ class main
 				// 現在時刻
 				$now = date(self::DATETIME_FORMAT);
 
-				$array[self::WATING_CSV_COLUMN_ID] = $max;
-				$array[self::WATING_CSV_COLUMN_RESERVE] = $combine_reserve_time;
-				$array[self::WATING_CSV_COLUMN_BRANCH] = $this->options->_POST->branch_select_value;
-				$array[self::WATING_CSV_COLUMN_COMMIT] = $this->commit_hash;
-				$array[self::WATING_CSV_COLUMN_COMMENT] = $this->options->_POST->comment;
-				$array[self::WATING_CSV_COLUMN_SETTING] = $now;
+				$array[self::WAITING_CSV_COLUMN_ID] = $max;
+				$array[self::WAITING_CSV_COLUMN_RESERVE] = $combine_reserve_time;
+				$array[self::WAITING_CSV_COLUMN_BRANCH] = $this->options->_POST->branch_select_value;
+				$array[self::WAITING_CSV_COLUMN_COMMIT] = $this->commit_hash;
+				$array[self::WAITING_CSV_COLUMN_COMMENT] = $this->options->_POST->comment;
+				$array[self::WAITING_CSV_COLUMN_SETTING] = $now;
 
 				fputcsv( $handle, $array, self::CSV_DELIMITER, self::CSV_ENCLOSURE);
 
@@ -1895,18 +1895,20 @@ class main
 						'message' => '');
 	
 		// $filename = realpath('.') . $this->list_filename;
-		$filename = self::PATH_CREATE_DIR . self::CSV_WATING_LIST_FILENAME;
+		$filename = self::PATH_CREATE_DIR . self::CSV_WAITING_LIST_FILENAME;
 
 		$selected_id =  $this->options->_POST->selected_id;
-$this->debug_echo('　□$selected_id');
-$this->debug_echo($selected_id);
+
+		$this->debug_echo('　□$selected_id');
+		$this->debug_echo($selected_id);
+
 		try {
 
 			if (!file_exists($filename) && !$selected_id) {
 				$this->debug_echo('ファイルが存在しない、または、選択IDが不正です。');
 
 			} else {
-$this->debug_echo('　□2');
+
 				$file = file($filename);
 
 				// Open file
@@ -1931,26 +1933,24 @@ $this->debug_echo('　□2');
 				        $cnt++;
 				        continue;
 				    }
-$this->debug_echo('　□$num1');
-$this->debug_echo($rowData[self::WAITING_CSV_COLUMN_ID]);
+
 				    // idカラムの値を取得
 					$num = intval($rowData[self::WAITING_CSV_COLUMN_ID]);
-$this->debug_echo('　□$num');
-$this->debug_echo($num);
+
 					// 追加時のid値生成
 				    if ($num > $max) {
 						$max = $num;
 					}
-$this->debug_echo('2-1');
+
 					// 変更対象となるid値の場合削除する
 					if ($num == $selected_id) {
 						unset($file[$cnt]);
 						file_put_contents($filename, $file);
 					}
-$this->debug_echo('2-2');
+
 					$cnt++;
 				}
-$this->debug_echo('　□3');
+
 				$max++;
 
 				// Open file
@@ -1964,12 +1964,12 @@ $this->debug_echo('　□3');
 				// 現在時刻
 				$now = date(self::DATETIME_FORMAT);
 
-				$array[self::WATING_CSV_COLUMN_ID] = $max;
-				$array[self::WATING_CSV_COLUMN_RESERVE] = $combine_reserve_time;
-				$array[self::WATING_CSV_COLUMN_BRANCH] = $this->options->_POST->branch_select_value;
-				$array[self::WATING_CSV_COLUMN_COMMIT] = $this->commit_hash;
-				$array[self::WATING_CSV_COLUMN_COMMENT] = $this->options->_POST->comment;
-				$array[self::WATING_CSV_COLUMN_SETTING] = $now;
+				$array[self::WAITING_CSV_COLUMN_ID] = $max;
+				$array[self::WAITING_CSV_COLUMN_RESERVE] = $combine_reserve_time;
+				$array[self::WAITING_CSV_COLUMN_BRANCH] = $this->options->_POST->branch_select_value;
+				$array[self::WAITING_CSV_COLUMN_COMMIT] = $this->commit_hash;
+				$array[self::WAITING_CSV_COLUMN_COMMENT] = $this->options->_POST->comment;
+				$array[self::WAITING_CSV_COLUMN_SETTING] = $now;
 
 				fputcsv( $handle, $array, self::CSV_DELIMITER, self::CSV_ENCLOSURE);
 				fclose( $handle);
@@ -1977,7 +1977,6 @@ $this->debug_echo('　□3');
 
 			// Close file
 			fclose($handle_r);
-$this->debug_echo('　□5');
 
 		} catch (\Exception $e) {
 
@@ -2010,7 +2009,7 @@ $this->debug_echo('　□5');
 		$result = array('status' => true,
 						'message' => '');
 
-		$filename = self::PATH_CREATE_DIR . self::CSV_WATING_LIST_FILENAME;
+		$filename = self::PATH_CREATE_DIR . self::CSV_WAITING_LIST_FILENAME;
 
 		$selected_id =  $this->options->_POST->selected_id;
 
@@ -2039,7 +2038,7 @@ $this->debug_echo('　□5');
 				// Loop through each line of the file in turn
 				while ($rowData = fgetcsv($handle, 0, self::CSV_DELIMITER, self::CSV_ENCLOSURE)) {
 
-					$num = intval($rowData[self::WATING_CSV_COLUMN_ID]);
+					$num = intval($rowData[self::WAITING_CSV_COLUMN_ID]);
 
 					if ($num == $selected_id) {
 
@@ -2221,11 +2220,11 @@ $this->debug_echo('　□5');
 				// $now = date(self::DATETIME_FORMAT);
 
 				$array[self::RELEASED_CSV_COLUMN_ID] = $max;
-				$array[self::RELEASED_CSV_COLUMN_RESERVE] = $selected_ret[self::WATING_CSV_COLUMN_RESERVE];
-				$array[self::RELEASED_CSV_COLUMN_BRANCH] = $selected_ret[self::WATING_CSV_COLUMN_BRANCH];
-				$array[self::RELEASED_CSV_COLUMN_COMMIT] = $selected_ret[self::WATING_CSV_COLUMN_COMMIT];
-				$array[self::RELEASED_CSV_COLUMN_COMMENT] = $selected_ret[self::WATING_CSV_COLUMN_COMMENT];
-				$array[self::RELEASED_CSV_COLUMN_SETTING] = $selected_ret[self::WATING_CSV_COLUMN_SETTING];
+				$array[self::RELEASED_CSV_COLUMN_RESERVE] = $selected_ret[self::WAITING_CSV_COLUMN_RESERVE];
+				$array[self::RELEASED_CSV_COLUMN_BRANCH] = $selected_ret[self::WAITING_CSV_COLUMN_BRANCH];
+				$array[self::RELEASED_CSV_COLUMN_COMMIT] = $selected_ret[self::WAITING_CSV_COLUMN_COMMIT];
+				$array[self::RELEASED_CSV_COLUMN_COMMENT] = $selected_ret[self::WAITING_CSV_COLUMN_COMMENT];
+				$array[self::RELEASED_CSV_COLUMN_SETTING] = $selected_ret[self::WAITING_CSV_COLUMN_SETTING];
 
 				$array[self::RELEASED_CSV_COLUMN_START] = '';
 				$array[self::RELEASED_CSV_COLUMN_END] = '';
@@ -2292,7 +2291,11 @@ $this->debug_echo('　□5');
 
 				// Open file
 				$handle_r = fopen( $filename, "r" );
-
+				
+				if ($handle_r === false) {
+					// スロー処理！
+					$this->debug_echo('ファイルオープンエラー');
+				}
 
 				$cnt = 0;
 				$max = 0;
@@ -2732,7 +2735,7 @@ $this->debug_echo('　□5');
 
 		$selected_ret = $this->get_selected_data();
 
-		$dirname = date(self::DATETIME_FORMAT_SAVE, strtotime($selected_ret[self::WATING_CSV_COLUMN_RESERVE]));
+		$dirname = date(self::DATETIME_FORMAT_SAVE, strtotime($selected_ret[self::WAITING_CSV_COLUMN_RESERVE]));
 
 		try {
 
@@ -2817,7 +2820,7 @@ $this->debug_echo('　□5');
 			// $data_list = $this->get_csv_data_list($now);
 			// foreach ( (array)$selected_ret as $data ) {
 			// 	// 公開対象の公開予定日時（文字列）
-			// 	$dirname = $this->get_datetime_str($selected_ret, self::WATING_CSV_COLUMN_RESERVE, SORT_DESC);
+			// 	$dirname = $this->get_datetime_str($selected_ret, self::WAITING_CSV_COLUMN_RESERVE, SORT_DESC);
 			// }
 
 	 		// 予定CSVより画面選択された行データを取得
@@ -2827,7 +2830,7 @@ $this->debug_echo('　□5');
 
 			if ( $selected_ret ) {
 				// 公開対象の公開予定日時（文字列）
-				$dirname = date(self::DATETIME_FORMAT_SAVE, strtotime($selected_ret[self::WATING_CSV_COLUMN_RESERVE]));
+				$dirname = date(self::DATETIME_FORMAT_SAVE, strtotime($selected_ret[self::WAITING_CSV_COLUMN_RESERVE]));
 			}
 
 			$this->debug_echo('　□公開予定ディレクトリ：');
@@ -2977,7 +2980,7 @@ $this->debug_echo('　□5');
 
 
 				/**
-		 		* 公開予定ソースを「wating」ディレクトリから「running」ディレクトリへ移動
+		 		* 公開予定ソースを「WAITING」ディレクトリから「running」ディレクトリへ移動
 				*/
 				// runningの公開予定ディレクトリの存在確認
 				if ( file_exists(self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname) ) {
@@ -3199,7 +3202,7 @@ $this->debug_echo('　□5');
 			$lead_array = array_shift($array_list);
 			
 			// 先頭行の公開予約日時
-			$ret_str = date(self::DATETIME_FORMAT_SAVE, strtotime($lead_array[self::WATING_CSV_COLUMN_RESERVE]));
+			$ret_str = date(self::DATETIME_FORMAT_SAVE, strtotime($lead_array[self::WAITING_CSV_COLUMN_RESERVE]));
 		}
 
 		$this->debug_echo('　□return ：' . $ret_str);
