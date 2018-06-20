@@ -1264,10 +1264,19 @@ class main
 		// データリスト
 		foreach ((array)$data_list as $array) {
 			
+			$released_datetime = '';
+			if ($array[self::RELEASED_CSV_COLUMN_RELEASED]) {
+				$released_datetime = date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array[self::RELEASED_CSV_COLUMN_RELEASED]));
+			}
+			$restore_datetime = '';
+			if ($array[self::RELEASED_CSV_COLUMN_RESTORE]) {
+				$restore_datetime = date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array[self::RELEASED_CSV_COLUMN_RESTORE]));
+			}
+
 			$ret .= '<tr>'
 				. '<td class="p-center"><input type="radio" name="target" value="' . $array[self::RELEASED_CSV_COLUMN_ID] . '"/></td>'
-				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array[self::RELEASED_CSV_COLUMN_RELEASED])) . '</td>'
-				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array[self::RELEASED_CSV_COLUMN_RESTORE])) . '</td>'
+				. '<td class="p-center">' . $released_datetime . '</td>'
+				. '<td class="p-center">' . $restore_datetime . '</td>'
 				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array[self::RELEASED_CSV_COLUMN_RESERVE])) . '</td>'
 				. '<td class="p-center">' . $array[self::RELEASED_CSV_COLUMN_COMMIT] . '</td>'
 				. '<td class="p-center">' . $array[self::RELEASED_CSV_COLUMN_BRANCH] . '</td>'
