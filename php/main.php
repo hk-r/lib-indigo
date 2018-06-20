@@ -1929,18 +1929,19 @@ $this->debug_echo('　□2');
 
 				    // idカラムの値を取得
 					$num = intval($rowData[self::WAITING_CSV_COLUMN_ID]);
-
+$this->debug_echo('　□$num');
+$this->debug_echo($num);
 					// 追加時のid値生成
 				    if ($num > $max) {
 						$max = $num;
 					}
-
+$this->debug_echo('2-1');
 					// 変更対象となるid値の場合削除する
 					if ($num == $selected_id) {
 						unset($file[$cnt]);
 						file_put_contents($filename, $file);
 					}
-
+$this->debug_echo('2-2');
 					$cnt++;
 				}
 $this->debug_echo('　□3');
