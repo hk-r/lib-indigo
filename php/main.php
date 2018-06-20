@@ -542,7 +542,7 @@ class main
 			$selected_data = $this->get_selected_data();
 			
 			$this->debug_echo('　□ selected_data');
-			$this->debug_echo(var_dump($selected_data));
+			$this->debug_var_dump($selected_data);
 			$this->debug_echo('　');
 
 			if ($selected_data) {
@@ -1215,7 +1215,7 @@ class main
 			. '</form>'
 			. '</div>';
 
-		echo('■ create_top_contents end');
+		$this->debug_echo('■ create_top_contents end');
 
 		return $ret;
 	}
@@ -1227,7 +1227,7 @@ class main
 	 */
 	private function create_history_contents() {
 		
-		echo('■ create_history_contents start');
+		$this->debug_echo('■ create_history_contents start');
 
 		$ret = "";
 
@@ -1302,7 +1302,7 @@ class main
 			. '</form>'
 			. '</div>';
 		
-		echo('■ create_history_contents end');
+		$this->debug_echo('■ create_history_contents end');
 
 		return $ret;
 	}
@@ -1789,7 +1789,7 @@ class main
 		}
 
 		$this->debug_echo('　□ ret_array');
-		$this->debug_echo(var_dump($ret_array));
+		$this->debug_var_dump($ret_array);
 		// $this->debug_echo('　');
 
 		$this->debug_echo('■ get_selected_data end');
@@ -2150,7 +2150,7 @@ class main
 		}
 
 		$this->debug_echo('　□ ret_array');
-		$this->debug_echo(var_dump($ret_array));
+		$this->debug_var_dump($ret_array);
 		$this->debug_echo('　');
 
 		$this->debug_echo('■ get_released_selected_data end');
@@ -2221,7 +2221,7 @@ class main
 				}
 
 				$this->debug_echo('selected_ret');
-				$this->debug_echo(var_dump($selected_ret));
+				$this->debug_var_dump($selected_ret);
 	
 				// // 現在時刻
 				// $now = date(self::DATETIME_FORMAT);
@@ -2335,7 +2335,7 @@ class main
 					if ($num == $id) {
 
 						$this->debug_echo('　□update_data');
-						$this->debug_echo(var_dump($update_data));
+						$this->debug_var_dump($update_data);
 			
 						unset($file[$cnt]);
 						file_put_contents($filename, $file);
@@ -3417,10 +3417,20 @@ class main
 	 */
 	function debug_echo($text) {
 	
-		// ChromePhp::log($text);
-
 		// echo strval($text);
 		// echo "<br>";
+
+		return;
+	}
+
+	/**
+	 * ※デバッグ用（ある程度実装が進んだら削除する）
+	 *	 
+	 */
+	function debug_var_dump($text) {
+	
+		var_dump($text);
+		echo "<br>";
 
 		return;
 	}
