@@ -1497,7 +1497,7 @@ class main
 				if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
 					throw new \Exception("Combine date time failed.");
 				}
-				
+
 				// CSV入力情報の変更
 				$this->update_list_csv_data($combine_reserve_time);
 
@@ -2694,105 +2694,88 @@ class main
 
 		try {
 
+			// WAITINGディレクトリの公開予定ディレクトリの存在チェック
+			if ( !file_exists(self::PATH_CREATE_DIR . self::PATH_WAITING . $before_dirname) ) {
 
-			// WAITINGディレクトリへ移動
-			if ( chdir(self::PATH_CREATE_DIR . self::PATH_WAITING) ) {
+				$this->debug_echo( '　□ $before_dirname' . $before_dirname);
+				throw new \Exception('Before publish directory not found.');
+			}
 
-				
-				if ( !file_exists($before_dirname) ) {
+			// ディレクトリ名が変更になる場合はリネームする
+			if ($before_dirname != $dirname) {
 
-					$this->debug_echo( '　□ $before_dirname' . $before_dirname);
-					throw new \Exception('Before publish directory not found.');
-				}
-
-				// ディレクトリ名が変更になる場合はリネームする
-				if ($before_dirname != $dirname) {
-
-					if ( file_exists( $before_dirname ) && !file_exists( $dirname ) ){
-						
-						rename( $before_dirname, $dirname );
-
-					} else {
-					// 名前変更前のディレクトリがない場合、または名前変更後のディレクトリが存在する場合は処理終了
-
-						$this->debug_echo('　□ $before_dirname' . $before_dirname);
-						$this->debug_echo('　□ $dirname' . $dirname);
-
-						throw new \Exception('Waiting directory name could not be changed.');
-					}
-				}
-
-				// 公開予定ディレクトリへ移動
-				if ( chdir( $dirname ) ) {
-
-					// 現在のブランチ取得
-					$command = 'git branch';
-					$this->execute($command, false);
-
-					$now_branch;
-					$already_branch_checkout = false;
-					foreach ( $output as $value ) {
-
-						// 「*」の付いてるブランチを現在のブランチと判定
-						if ( strpos($value, '*') !== false ) {
-
-							$value = trim(str_replace("* ", "", $value));
-							$now_branch = $value;
-
-						} else {
-
-							$value = trim($value);
-
-						}
-
-						// 選択された(切り替える)ブランチがブランチの一覧に含まれているか判定
-						if ( $value == $branch_name ) {
-							$already_branch_checkout = true;
-						}
-					}
-
-					// git fetch
-					$command = 'git fetch origin';
-					$this->execute($command, false);
-
-					// 現在のブランチと選択されたブランチが異なる場合は、ブランチを切り替える
-					if ( $now_branch !== $branch_name ) {
-
-						if ($already_branch_checkout) {
-							// 選択された(切り替える)ブランチが既にチェックアウト済みの場合
-							$command = 'git checkout ' . $branch_name;
-							$this->execute($command, false);
-
-
-						} else {
-							// 選択された(切り替える)ブランチがまだチェックアウトされてない場合
-							$command = 'git checkout -b ' . $branch_name . ' ' . $branch_name_org;
-							$this->execute($command, false);
-
-						}
-					}
-
-					// コミットハッシュ値の取得
-					$command = 'git rev-parse --short HEAD';
-					$ret = $this->execute($command, false);
-
-					foreach ( $ret['output'] as $element ) {
-
-						$this->commit_hash = $element;
-					}
+				if ( file_exists( $before_dirname ) && !file_exists( $dirname ) ){
+					
+					rename( $before_dirname, $dirname );
 
 				} else {
-					// コピー用のディレクトリが存在しない場合
+				// 名前変更前のディレクトリがない場合、または名前変更後のディレクトリが存在する場合は処理終了
 
-					// エラー処理
-					throw new \Exception('Waiting publish directory not found.');
+					$this->debug_echo('　□ $before_dirname' . $before_dirname);
+					$this->debug_echo('　□ $dirname' . $dirname);
+
+					throw new \Exception('Waiting directory name could not be changed.');
 				}
-			
-			} else {
-				// コピー用のディレクトリが存在しない場合
+			}
 
-				// エラー処理
-				throw new \Exception('Waiting directory not found.');
+			// 公開予定ディレクトリへ移動
+			if ( chdir( self::PATH_CREATE_DIR . self::PATH_WAITING . $before_dirname ) ) {
+
+				// 現在のブランチ取得
+				$command = 'git branch';
+				$this->execute($command, false);
+
+				$now_branch;
+				$already_branch_checkout = false;
+				foreach ( $output as $value ) {
+
+					// 「*」の付いてるブランチを現在のブランチと判定
+					if ( strpos($value, '*') !== false ) {
+
+						$value = trim(str_replace("* ", "", $value));
+						$now_branch = $value;
+
+					} else {
+
+						$value = trim($value);
+
+					}
+
+					// 選択された(切り替える)ブランチがブランチの一覧に含まれているか判定
+					if ( $value == $branch_name ) {
+						$already_branch_checkout = true;
+					}
+				}
+
+				// git fetch
+				$command = 'git fetch origin';
+				$this->execute($command, false);
+
+				// 現在のブランチと選択されたブランチが異なる場合は、ブランチを切り替える
+				if ( $now_branch !== $branch_name ) {
+
+					if ($already_branch_checkout) {
+						// 選択された(切り替える)ブランチが既にチェックアウト済みの場合
+						$command = 'git checkout ' . $branch_name;
+						$this->execute($command, false);
+
+
+					} else {
+						// 選択された(切り替える)ブランチがまだチェックアウトされてない場合
+						$command = 'git checkout -b ' . $branch_name . ' ' . $branch_name_org;
+						$this->execute($command, false);
+
+					}
+				}
+
+				// コミットハッシュ値の取得
+				$command = 'git rev-parse --short HEAD';
+				$ret = $this->execute($command, false);
+
+				foreach ( $ret['output'] as $element ) {
+
+					$this->commit_hash = $element;
+				}
 			}
 		
 		} catch (\Exception $e) {
