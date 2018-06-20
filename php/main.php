@@ -1490,12 +1490,16 @@ class main
 
 			} else {
 
-				if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
-					throw new \Exception("Convert time zone failed.");
-				}
+				// if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
+				// 	throw new \Exception("Convert time zone failed.");
+				// }
 
+				if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
+					throw new \Exception("Combine date time failed.");
+				}
+				
 				// CSV入力情報の変更
-				$this->update_list_csv_data($convert_reserve_time);
+				$this->update_list_csv_data($combine_reserve_time);
 
 			}
 
@@ -1789,7 +1793,7 @@ class main
 	 *
 	 * @return なし
 	 */
-	private function insert_list_csv_data($convert_reserve_time){
+	private function insert_list_csv_data($combine_reserve_time){
 
 		$output = "";
 		$result = array('status' => true,
@@ -1851,7 +1855,7 @@ class main
 				$now = date(self::DATETIME_FORMAT);
 
 				$array[self::WATING_CSV_COLUMN_ID] = $max;
-				$array[self::WATING_CSV_COLUMN_RESERVE] = $convert_reserve_time;
+				$array[self::WATING_CSV_COLUMN_RESERVE] = $combine_reserve_time;
 				$array[self::WATING_CSV_COLUMN_BRANCH] = $this->options->_POST->branch_select_value;
 				$array[self::WATING_CSV_COLUMN_COMMIT] = $this->commit_hash;
 				$array[self::WATING_CSV_COLUMN_COMMENT] = $this->options->_POST->comment;
@@ -1890,7 +1894,7 @@ class main
 	 *
 	 * @return なし
 	 */
-	private function update_list_csv_data($convert_reserve_time) {
+	private function update_list_csv_data($combine_reserve_time) {
 
 		$this->debug_echo('■ update_list_csv_data start');
 
@@ -1961,7 +1965,7 @@ class main
 				$now = date(self::DATETIME_FORMAT);
 
 				$array[self::WATING_CSV_COLUMN_ID] = $max;
-				$array[self::WATING_CSV_COLUMN_RESERVE] = $convert_reserve_time;
+				$array[self::WATING_CSV_COLUMN_RESERVE] = $combine_reserve_time;
 				$array[self::WATING_CSV_COLUMN_BRANCH] = $this->options->_POST->branch_select_value;
 				$array[self::WATING_CSV_COLUMN_COMMIT] = $this->commit_hash;
 				$array[self::WATING_CSV_COLUMN_COMMENT] = $this->options->_POST->comment;
