@@ -1912,6 +1912,11 @@ $this->debug_echo('　□2');
 				// Open file
 				$handle_r = fopen( $filename, "r" );
 				
+				if ($handle_r === false) {
+					// スロー処理！
+					$this->debug_echo('ファイルオープンエラー');
+				}
+
 				$cnt = 0;
 				$max = 0;
 
@@ -1926,7 +1931,8 @@ $this->debug_echo('　□2');
 				        $cnt++;
 				        continue;
 				    }
-
+$this->debug_echo('　□$num1');
+$this->debug_echo($rowData[self::WAITING_CSV_COLUMN_ID]);
 				    // idカラムの値を取得
 					$num = intval($rowData[self::WAITING_CSV_COLUMN_ID]);
 $this->debug_echo('　□$num');
