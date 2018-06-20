@@ -2855,12 +2855,13 @@ class main
 				if ( !$ret->status || !$ret->insert_id) {
 					// 削除失敗
 
-					// エラーメッセージ
-					$dialog_disp = '
-					<script type="text/javascript">
-						console.error("' . $ret->message . '");
-						alert("publish faild");
-					</script>';
+			 		$this->debug_echo('　※insert_released_list_csv_data失敗');				
+					// // エラーメッセージ
+					// $dialog_disp = '
+					// <script type="text/javascript">
+					// 	console.error("' . $ret->message . '");
+					// 	alert("publish faild");
+					// </script>';
 
 					throw new \Exception("Released csv insert failed.");
 
@@ -2869,18 +2870,22 @@ class main
 				// 実施CSVへインサートしたID（最後のアップデートに使用する）
 				$insert_id = $ret->insert_id;
 
+				$this->debug_echo('　□$insert_id：');
+				$this->debug_echo($insert_id);
+
 				// 予定CSVへデリート処理
 				$ret = $this->delete_list_csv_data();
 
 				if ( !$ret->status ) {
 				// 削除失敗
 
-					// エラーメッセージ
-					$dialog_disp = '
-					<script type="text/javascript">
-						console.error("' . $ret->message . '");
-						alert("publish faild");
-					</script>';
+					$this->debug_echo('delete_list_csv_data');				
+					// // エラーメッセージ
+					// $dialog_disp = '
+					// <script type="text/javascript">
+					// 	console.error("' . $ret->message . '");
+					// 	alert("publish faild");
+					// </script>';
 
 					throw new \Exception("Waiting csv delete failed.");
 				}
