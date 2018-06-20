@@ -2719,7 +2719,7 @@ class main
 			}
 
 			// 公開予定ディレクトリへ移動
-			if ( chdir( self::PATH_CREATE_DIR . self::PATH_WAITING . $before_dirname ) ) {
+			if ( chdir( self::PATH_CREATE_DIR . self::PATH_WAITING . $dirname ) ) {
 
 				// 現在のブランチ取得
 				$command = 'git branch';
@@ -2776,6 +2776,10 @@ class main
 
 					$this->commit_hash = $element;
 				}
+
+			} else {
+
+				throw new \Exception('Waiting publish directory not found.');
 			}
 		
 		} catch (\Exception $e) {
