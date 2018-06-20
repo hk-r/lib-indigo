@@ -2319,6 +2319,10 @@ class main
 					if ($num == $id) {
 
 						$update_data = $file[$cnt];
+
+						$this->debug_echo('　□update_data');
+						$this->debug_echo(var_dump($update_data));
+			
 						unset($file[$cnt]);
 						file_put_contents($filename, $file);
 					}
@@ -2375,7 +2379,7 @@ class main
 
 		$result['status'] = true;
 
-		$this->debug_echo('■ move_csv_data end');
+		$this->debug_echo('■ update_running_list_csv_data end');
 
 		return json_encode($result);
 	}
