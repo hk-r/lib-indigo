@@ -1898,14 +1898,15 @@ class main
 		$filename = self::PATH_CREATE_DIR . self::CSV_WATING_LIST_FILENAME;
 
 		$selected_id =  $this->options->_POST->selected_id;
-
+$this->debug_echo('　□$selected_id');
+$this->debug_echo($selected_id);
 		try {
 
 			if (!file_exists($filename) && !$selected_id) {
 				$this->debug_echo('ファイルが存在しない、または、選択IDが不正です。');
 
 			} else {
-
+$this->debug_echo('　□2');
 				$file = file($filename);
 
 				// Open file
@@ -1942,7 +1943,7 @@ class main
 
 					$cnt++;
 				}
-
+$this->debug_echo('　□3');
 				$max++;
 
 				// Open file
@@ -1952,7 +1953,7 @@ class main
 					// スロー処理！
 					// throw new PHPExcel_Writer_Exception("Could not open file $pFilename for writing.");
 				}
-				
+				$this->debug_echo('　□4');
 				// 現在時刻
 				$now = date(self::DATETIME_FORMAT);
 
@@ -1969,7 +1970,7 @@ class main
 
 			// Close file
 			fclose($handle_r);
-
+$this->debug_echo('　□5');
 
 		} catch (\Exception $e) {
 
