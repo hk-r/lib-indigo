@@ -1268,16 +1268,22 @@ class main
 			if ($array[self::RELEASED_CSV_COLUMN_RELEASED]) {
 				$released_datetime = date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array[self::RELEASED_CSV_COLUMN_RELEASED]));
 			}
+			
 			$restore_datetime = '';
 			if ($array[self::RELEASED_CSV_COLUMN_RESTORE]) {
 				$restore_datetime = date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array[self::RELEASED_CSV_COLUMN_RESTORE]));
+			}
+
+			$reserve_datetime = '';
+			if ($array[self::RELEASED_CSV_COLUMN_RESERVE]) {
+				$reserve_datetime = date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array[self::RELEASED_CSV_COLUMN_RESERVE]));
 			}
 
 			$ret .= '<tr>'
 				. '<td class="p-center"><input type="radio" name="target" value="' . $array[self::RELEASED_CSV_COLUMN_ID] . '"/></td>'
 				. '<td class="p-center">' . $released_datetime . '</td>'
 				. '<td class="p-center">' . $restore_datetime . '</td>'
-				. '<td class="p-center">' . date(self::DATETIME_FORMAT_DISPLAY,  strtotime($array[self::RELEASED_CSV_COLUMN_RESERVE])) . '</td>'
+				. '<td class="p-center">' . $reserve_datetime . '</td>'
 				. '<td class="p-center">' . $array[self::RELEASED_CSV_COLUMN_COMMIT] . '</td>'
 				. '<td class="p-center">' . $array[self::RELEASED_CSV_COLUMN_BRANCH] . '</td>'
 				. '<td>' . $array[self::RELEASED_CSV_COLUMN_COMMENT] . '</td>'
@@ -3413,8 +3419,8 @@ class main
 	
 		// ChromePhp::log($text);
 
-		echo strval($text);
-		echo "<br>";
+		// echo strval($text);
+		// echo "<br>";
 
 		return;
 	}
