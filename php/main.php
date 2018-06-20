@@ -2697,22 +2697,22 @@ class main
 			// WAITINGディレクトリの公開予定ディレクトリの存在チェック
 			if ( !file_exists(self::PATH_CREATE_DIR . self::PATH_WAITING . $before_dirname) ) {
 
-				$this->debug_echo( '　□ $before_dirname' . $before_dirname);
+				$this->debug_echo( '　□ $before_dirname：' . $before_dirname);
 				throw new \Exception('Before publish directory not found.');
 			}
 
 			// ディレクトリ名が変更になる場合はリネームする
 			if ($before_dirname != $dirname) {
 
-				if ( file_exists( $before_dirname ) && !file_exists( $dirname ) ){
+				if ( file_exists( self::PATH_CREATE_DIR . self::PATH_WAITING . $before_dirname ) && !file_exists( self::PATH_CREATE_DIR . self::PATH_WAITING . $dirname ) ){
 					
 					rename( $before_dirname, $dirname );
 
 				} else {
 				// 名前変更前のディレクトリがない場合、または名前変更後のディレクトリが存在する場合は処理終了
 
-					$this->debug_echo('　□ $before_dirname' . $before_dirname);
-					$this->debug_echo('　□ $dirname' . $dirname);
+					$this->debug_echo('　□ $before_dirname：' . $before_dirname);
+					$this->debug_echo('　□ $dirname：' . $dirname);
 
 					throw new \Exception('Waiting directory name could not be changed.');
 				}
