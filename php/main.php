@@ -2012,7 +2012,8 @@ class main
 		$filename = self::PATH_CREATE_DIR . self::CSV_WAITING_LIST_FILENAME;
 
 		$selected_id =  $this->options->_POST->selected_id;
-
+		$this->debug_echo('　□selected_id：');
+		$this->debug_echo($selected_id);
 		try {
 
 
