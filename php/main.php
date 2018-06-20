@@ -3132,7 +3132,7 @@ class main
 					// -o 所有者情報も含める
 					// -g ファイルのグループ情報も含める
 					// -D デバイスファイルはそのままデバイスとして扱う
-					$command = 'rsync -rtvzP ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . '/' . ' ' . self::HONBAN_REALPATH . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
+					$command = 'rsync -rtvzP ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . ' ' . self::HONBAN_REALPATH . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
 
 					$this->debug_echo('　□$command：');
 					$this->debug_echo($command);
