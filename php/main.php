@@ -2874,7 +2874,8 @@ $this->debug_echo('　□9');
 
 				// 予定CSVへデリート処理
 				$ret = $this->delete_list_csv_data();
-
+				$ret = json_decode($ret);
+				
 				if ( !$ret->status ) {
 				// 削除失敗
 
