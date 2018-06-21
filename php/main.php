@@ -1580,7 +1580,7 @@ class main
 			$dialog_disp = '
 			<script type="text/javascript">
 				console.error("' . $ret->message . '");
-				alert(' . $alert_message .');
+				alert("' . $alert_message .'");
 			</script>';
 		}
 
