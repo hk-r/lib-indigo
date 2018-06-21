@@ -2,8 +2,6 @@
 
 namespace indigo;
 
-include 'ChromePhp.php';
-
 class main
 {
 	public $options;
@@ -12,7 +10,9 @@ class main
 
 
 	// サーバのタイムゾーン
-	const TIME_ZONE = 'Asia/Tokyo';
+	const PARAM_TIME_ZONE = 'Asia/Tokyo';
+	// サーバのタイムゾーン
+	const GMT = 'GMT';
 
 	// 日時フォーマット（Y-m-d H:i:s）
 	const DATETIME_FORMAT = "Y-m-d H:i:s";
@@ -70,10 +70,10 @@ class main
 	/**
 	 * 公開予定管理CSVの列番号定義
 	 */
-	const WAITING_CSV_COLUMN_ID = 0;			// ID
+	const WAITING_CSV_COLUMN_ID = 0;		// ID
 	const WAITING_CSV_COLUMN_RESERVE = 1;	// 公開予定日時
-	const WAITING_CSV_COLUMN_BRANCH = 2;		// ブランチ名
-	const WAITING_CSV_COLUMN_COMMIT = 3;		// コミットハッシュ値（短縮）
+	const WAITING_CSV_COLUMN_BRANCH = 2;	// ブランチ名
+	const WAITING_CSV_COLUMN_COMMIT = 3;	// コミットハッシュ値（短縮）
 	const WAITING_CSV_COLUMN_COMMENT = 4;	// コメント
 	const WAITING_CSV_COLUMN_SETTING = 5;	// 設定日時
 
@@ -99,6 +99,10 @@ class main
 	// const HONBAN_REALPATH = '/var/www/html/indigo-test-project/';
 	const HONBAN_REALPATH = '/var/www/html/test';
 	
+	// const DEFINE_MAX_RECORD = 10;		// 公開予約できる最大件数
+	// const DEFINE_MAX_GENERATION = 10;	// 差分フラグ2（本番環境と今回分の差分）
+	// const DEFINE_MAX_RECORD = 12;		// 差分フラグ3（前回分と今回分の差分）
+
 	/**
 	 * コミットハッシュ値
 	 */
@@ -354,6 +358,77 @@ class main
 		return $ret;
 	}
 
+
+	/**
+	 * 公開予約の最大件数チェック
+	 *	 
+	 * @param $data_list       = データリスト
+	 *	 
+	 * @return 
+	 *  重複なし：true
+	 *  重複あり：false
+	 */
+	private function check_reserve_max_record($data_list) {
+
+		$ret = true;
+
+		// TODO:定数化
+		$max = 10;
+
+		if ($max <= count($data_list)) {
+			$ret = false;
+		}
+
+		return $ret;
+	}
+
+	/**
+	 * 日付の妥当性チェック
+	 *	 
+	 * @param $reserve_date  = 公開予定日時
+	 *	 
+	 * @return 
+	 *  重複なし：true
+	 *  重複あり：false
+	 */
+	private function check_date($reserve_date) {
+
+		$ret = true;
+
+		// 日付の妥当性チェック
+		list($Y, $m, $d) = explode('-', $reserve_date);
+
+		if (!checkdate(intval($m), intval($d), intval($Y))) {
+			$ret = false;
+		}	
+
+		return $ret;
+	}
+
+	/**
+	 * 日付未来チェック
+	 *	 
+	 * @param $datetime       = 公開予定日時の日付
+	 *	 
+	 * @return 
+	 *  重複なし：true
+	 *  重複あり：false
+	 */
+	private function check_future_date($datetime) {
+
+		$ret = true;
+
+		// GMTの現在日時
+		$now = gmdate(self::DATETIME_FORMAT);
+
+		if (strtotime($now) > strtotime($datetime)) {
+			$ret = false;
+		}	
+
+		return $ret;
+	}
+
+
 	/**
 	 * ブランチ重複チェック
 	 *	 
@@ -369,7 +444,7 @@ class main
 
 		$ret = true;
 
-		foreach ($data_list as $array) {
+		foreach ((array)$data_list as $array) {
 			
 			if (($array[self::WAITING_CSV_COLUMN_ID] != $selected_id) && ($array[self::WAITING_CSV_COLUMN_BRANCH] == $selected_branch)) {
 				$ret = false;
@@ -395,7 +470,7 @@ class main
 
 		$ret = true;
 
-		foreach ($data_list as $array) {
+		foreach ((array)$data_list as $array) {
 			if (($array[self::WAITING_CSV_COLUMN_ID] != $selected_id) && ($array[self::WAITING_CSV_COLUMN_RESERVE] == $input_reserve)) {
 				$ret = false;
 				break;
@@ -429,60 +504,44 @@ class main
 	}
 
 	/**
-	 * 初期表示画面の新規ボタン押下時
+	 * 新規ダイアログの表示
 	 *	 
-	 * @param $error_message = エラーメッセージ出力内容
-	 *
 	 * @return 新規ダイアログの出力内容
 	 */
-	private function disp_add_dialog($error_message) {
+	private function disp_add_dialog() {
 		
 		$this->debug_echo('■ disp_add_dialog start');
 
-		$ret = "";
+		$error_message = "";
 
 		$branch_select_value = "";
 		$reserve_date = "";
 		$reserve_time = "";
 		$comment = "";
 
-		// フォームパラメタが設定されている場合変数へ設定
-		if (isset($this->options->_POST->branch_select_value)) {
-			$branch_select_value = $this->options->_POST->branch_select_value;
-		}
-		if (isset($this->options->_POST->reserve_date)) {
-			$reserve_date = $this->options->_POST->reserve_date;
-		}
-		if (isset($this->options->_POST->reserve_time)) {
-			$reserve_time = $this->options->_POST->reserve_time;
-		}
-		if (isset($this->options->_POST->comment)) {
-			$comment = $this->options->_POST->comment;
-		}
-
 		// ブランチリストを取得
 		$get_branch_ret = json_decode($this->get_branch_list());
-		$branch_list = array();
 		$branch_list = $get_branch_ret->branch_list;
 
 		// ダイアログHTMLの作成
-		$ret = $this->create_dialog_html(true, false, $error_message, $branch_list, $branch_select_value, $reserve_date, $reserve_time, $comment);
+		$ret = $this->create_dialog_html(true, true, $error_message, $branch_list, $branch_select_value, $reserve_date, $reserve_time, $comment);
 
 		$this->debug_echo('■ disp_add_dialog end');
 
 		return $ret;
 	}
 
-	/**
-	 * 新規ダイアログ表示の確認ボタン押下時
-	 *	 
-	 * @return 新規確認ダイアログの出力内容
-	 */
-	private function do_add_check_btn() {
-		
-		$this->debug_echo('■ do_add_check_btn start');
 
-		$ret = "";
+	/**
+	 * 新規ダイアログの戻り表示
+	 *	 
+	 * @param $error_message = エラーメッセージ出力内容
+	 *
+	 * @return 新規ダイアログの出力内容
+	 */
+	private function disp_back_add_dialog($error_message) {
+		
+		$this->debug_echo('■ disp_back_add_dialog start');
 
 		$branch_select_value = "";
 		$reserve_date = "";
@@ -503,10 +562,59 @@ class main
 			$comment = $this->options->_POST->comment;
 		}
 
-		// 確認ダイアログHTMLの作成
-		$ret = $this->create_check_dialog_html($branch_select_value, $reserve_date, $reserve_time, $comment);
 
-		$this->debug_echo('■ do_add_check_btn end');
+		// // 画面入力された日付と時刻を結合し、指定タイムゾーンの時刻へ変換。その後、日付と時刻へ分割する。
+		// $combine_reserve_time = $this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
+		// $local_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::DATETIME_FORMAT, self::PARAM_TIME_ZONE);	
+		// $reserve_date = date(self::DATE_FORMAT_YMD, strtotime($local_reserve_time));
+		// $reserve_time = date(self::TIME_FORMAT_HI, strtotime($local_reserve_time));
+
+
+		// ブランチリストを取得
+		$get_branch_ret = json_decode($this->get_branch_list());
+		$branch_list = $get_branch_ret->branch_list;
+
+		// 入力ダイアログHTMLの作成
+		$ret = $this->create_dialog_html(true, false, $error_message, $branch_list, $branch_select_value, $reserve_date, $reserve_time, $comment);
+
+		$this->debug_echo('■ disp_back_add_dialog end');
+
+		return $ret;
+	}
+
+
+	/**
+	 * 新規確認ダイアログの表示
+	 *	 
+	 * @return 新規確認ダイアログの出力内容
+	 */
+	private function disp_add_check_dialog() {
+		
+		$this->debug_echo('■ disp_add_check_dialog start');
+
+		$branch_select_value = "";
+		$reserve_date = "";
+		$reserve_time = "";
+		$comment = "";
+
+		// フォームパラメタが設定されている場合変数へ設定
+		if (isset($this->options->_POST->branch_select_value)) {
+			$branch_select_value = $this->options->_POST->branch_select_value;
+		}
+		if (isset($this->options->_POST->reserve_date)) {
+			$reserve_date = $this->options->_POST->reserve_date;
+		}
+		if (isset($this->options->_POST->reserve_time)) {
+			$reserve_time = $this->options->_POST->reserve_time;
+		}
+		if (isset($this->options->_POST->comment)) {
+			$comment = $this->options->_POST->comment;
+		}
+
+		// 新規確認ダイアログHTMLの作成
+		$ret = $this->create_add_check_dialog_html($branch_select_value, $reserve_date, $reserve_time, $comment);
+
+		$this->debug_echo('■ disp_add_check_dialog end');
 
 		return $ret;
 	}
@@ -515,83 +623,104 @@ class main
 	/**
 	 * 変更ダイアログの表示
 	 *	 
-	 * @param $init_trans_flg = 初期表示画面遷移フラグ
-	 * @param $error_message  = エラーメッセージ出力内容
 	 *
 	 * @return 変更ダイアログの出力内容
 	 */
-	private function disp_update_dialog($init_trans_flg, $error_message) {
+	private function disp_update_dialog() {
 		
 		$this->debug_echo('■ disp_update_dialog start');
 
-		$ret = "";
+		$error_message = "";
 
 		$branch_select_value = "";
 		$reserve_date = "";
 		$reserve_time = "";
 		$comment = "";
 
-		// $selected_id =  "";
+		// // 選択されたID
+		// $selected_id =  $this->options->_POST->selected_id;
 
-		// 初期表示画面の変更ボタンから遷移してきた場合
-		if ($init_trans_flg) {
-			
-			// // 選択されたID
-			// $selected_id =  $this->options->_POST->selected_id;
-			// 選択されたIDに紐づく情報を取得
-			$selected_data = $this->get_selected_data();
-			
-			$this->debug_echo('　□ selected_data');
-			$this->debug_var_dump($selected_data);
-			$this->debug_echo('　');
+		// 画面選択された公開予約情報を取得
+		$selected_data = $this->get_selected_data();
+		
+		$this->debug_echo('　□ selected_data');
+		$this->debug_var_dump($selected_data);
+		$this->debug_echo('　');
 
-			if ($selected_data) {
+		if ($selected_data) {
 
-				$branch_select_value = $selected_data[self::WAITING_CSV_COLUMN_BRANCH];
-				$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($selected_data[self::WAITING_CSV_COLUMN_RESERVE]));
-				$reserve_time = date(self::TIME_FORMAT_HI,  strtotime($selected_data[self::WAITING_CSV_COLUMN_RESERVE]));
-				$comment = $selected_data[self::WAITING_CSV_COLUMN_COMMENT];
-			}
+			$branch_select_value = $selected_data[self::WAITING_CSV_COLUMN_BRANCH];
 
-		} else {
+			$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($selected_data[self::WAITING_CSV_COLUMN_RESERVE]));
+			$reserve_time = date(self::TIME_FORMAT_HI,  strtotime($selected_data[self::WAITING_CSV_COLUMN_RESERVE]));
 
-			// フォームパラメタが設定されている場合変数へ設定
-			if (isset($this->options->_POST->branch_select_value)) {
-				$branch_select_value = $this->options->_POST->branch_select_value;
-			}
-			if (isset($this->options->_POST->reserve_date)) {
-				$reserve_date = $this->options->_POST->reserve_date;
-			}
-			if (isset($this->options->_POST->reserve_time)) {
-				$reserve_time = $this->options->_POST->reserve_time;
-			}
-			if (isset($this->options->_POST->comment)) {
-				$comment = $this->options->_POST->comment;
-			}
+			$comment = $selected_data[self::WAITING_CSV_COLUMN_COMMENT];
 		}
 
 		// ブランチリストを取得
 		$get_branch_ret = json_decode($this->get_branch_list());
-		// $branch_list = array();
 		$branch_list = $get_branch_ret->branch_list;
 
 		// ダイアログHTMLの作成
-		$ret = $this->create_dialog_html(false, $init_trans_flg, $error_message, $branch_list, $branch_select_value, $reserve_date, $reserve_time, $comment);
+		$ret = $this->create_dialog_html(false, true, $error_message, $branch_list, $branch_select_value, $reserve_date, $reserve_time, $comment);
 
 		$this->debug_echo('■ disp_update_dialog end');
 
 		return $ret;
 	}
 
+
 	/**
-	 * 変更ダイアログの確認ボタン押下
+	 * 変更ダイアログの戻り表示
+	 *	 
+	 * @param $error_message  = エラーメッセージ出力内容
+	 *
+	 * @return 変更ダイアログの出力内容
+	 */
+	private function disp_back_update_dialog($error_message) {
+		
+		$this->debug_echo('■ disp_back_update_dialog start');
+
+		$branch_select_value = "";
+		$reserve_date = "";
+		$reserve_time = "";
+		$comment = "";
+
+		// フォームパラメタが設定されている場合変数へ設定
+		if (isset($this->options->_POST->branch_select_value)) {
+			$branch_select_value = $this->options->_POST->branch_select_value;
+		}
+		if (isset($this->options->_POST->reserve_date)) {
+			$reserve_date = $this->options->_POST->reserve_date;
+		}
+		if (isset($this->options->_POST->reserve_time)) {
+			$reserve_time = $this->options->_POST->reserve_time;
+		}
+		if (isset($this->options->_POST->comment)) {
+			$comment = $this->options->_POST->comment;
+		}
+	
+		// ブランチリストを取得
+		$get_branch_ret = json_decode($this->get_branch_list());
+		$branch_list = $get_branch_ret->branch_list;
+
+		// ダイアログHTMLの作成
+		$ret = $this->create_dialog_html(false, false, $error_message, $branch_list, $branch_select_value, $reserve_date, $reserve_time, $comment);
+
+		$this->debug_echo('■ disp_back_update_dialog end');
+
+		return $ret;
+	}
+
+	/**
+	 * 変更確認ダイアログの表示
 	 *	 
 	 * @return 変更確認ダイアログの出力内容
 	 */
-	private function do_update_check_btn() {
+	private function disp_update_check_dialog() {
 				
-		// 確認ダイアログHTMLの作成
-		$ret = $this->create_change_check_dialog_html();
+		// 変更確認ダイアログHTMLの作成
+		$ret = $this->create_update_check_dialog_html();
 
 		return $ret;
 	}
@@ -616,11 +745,6 @@ class main
 		
 		$this->debug_echo('■ create_dialog_html start');
 
-		// $this->debug_echo('　□ branch_list' . $branch_list);
-		// $this->debug_echo('　□ branch_select_value' . $branch_select_value);
-		// $this->debug_echo('　□ reserve_date' . $reserve_date);
-		// $this->debug_echo('　□ reserve_time' . $reserve_time);
-
 		$ret = "";
 
 		$ret .= '<div class="dialog" id="modal_dialog">'
@@ -644,11 +768,9 @@ class main
 			   
 		$ret .= '<form method="post">';
 
-		// 変更モードの場合
+		// 変更モードの場合、変更前の値をhidden項目に保持させる
 		if ( !$add_flg) {
-
 			$ret .= $this->create_change_before_hidden_html($init_trans_flg);
-
 		}
 
 		$ret .= '<table class="table table-striped">'
@@ -656,7 +778,7 @@ class main
 			  . '<td class="dialog_thead">ブランチ</td>'
 			  . '<td><select id="branch_list" class="form-control" name="branch_select_value">';
 
-				foreach ($branch_list as $branch) {
+				foreach ((array)$branch_list as $branch) {
 					$ret .= '<option value="' . htmlspecialchars($branch) . '" ' . $this->compare_to_selected_value($branch_select_value, $branch) . '>' . htmlspecialchars($branch) . '</option>';
 				}
 
@@ -703,7 +825,6 @@ class main
 		return $ret;
 	}
 
-
 	/**
 	 * 変更前hidden項目HTMLの作成
 	 *	 
@@ -723,7 +844,7 @@ class main
 		
 		$this->debug_echo('■ create_change_before_hidden_html start');
 
-		$this->debug_echo('　★ $init_trans_flg：' . $init_trans_flg);
+		$this->debug_echo('　□$init_trans_flg：' . $init_trans_flg);
 
 		$selected_id = '';
 		$branch_select_value = '';
@@ -731,7 +852,7 @@ class main
 		$reserve_time = '';
 		$comment = '';
 
-		// 初期画面より遷移
+		// 初期画面からの遷移の場合、CSVから変更の情報を取得する
 		if ($init_trans_flg) {
 
 			// 選択されたID
@@ -765,91 +886,13 @@ class main
   			  . '<input type="hidden" name="change_before_comment" value="'. $comment . '"/>';
 
 		$this->debug_echo('　□ret ：');
-		$this->debug_echo($ret_str);
+		$this->debug_echo($ret);
 
 		$this->debug_echo('■ create_change_before_hidden_html end');
 
 		return $ret;
 	}
 
-	// /**
-	//  * 新規・変更の出力確認ダイアログHTMLの作成
-	//  *	 
-	//  * @param $add_flg     = 新規フラグ
-	//  * @param $branch_select_value = ブランチ選択値
-	//  * @param $date        = 日付
-	//  * @param $time        = 日時
-	//  * @param $comment     = コメント
-	//  * @param $selected_id = 変更時の選択ID
-	//  *
-	//  * @return 
-	//  *  確認ダイアログ出力内容
-	//  */
-	// private function create_check_dialog_html($add_flg, $branch_select_value,
-	// 	$date, $time, $comment, $selected_id) {
-		
-	// 	$ret = "";
-
-	// 	$ret .= '<div class="dialog">'
-	// 		 . '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
-	// 		 . '<div style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; background: rgb(0, 0, 0); opacity: 0.5;"></div>'
-	// 		 . '<div style="position: absolute; left: 0px; top: 0px; padding-top: 4em; overflow: auto; width: 100%; height: 100%;">'
-	// 		 . '<div class="dialog_box">';
-			 
-	// 	if ( $add_flg ) {
-	// 		$ret .= '<h4>追加確認</h4>';
-	// 	} else {
-	// 	  	$ret .= '<h4>変更確認</h4>';
-	// 	}
-
-	// 	$ret .= '<form method="post">'
-	// 		 . '<input type="hidden" name="selected_id" value="' . $selected_id . '"/>'
-	// 		 . '<table class="table table-bordered table-striped">'
-	// 		 . '<tr>'
-	// 		 . '<td>' . 'ブランチ' . '</td>'
-	// 		 . '<td>' . $branch_select_value
-	// 		 . '<input type="hidden" name="branch_select_value" value="' . $branch_select_value . '"/>'
-	// 		 . '</td>'
-	// 		 . '</tr>'
-	// 		 . '<tr>'
-	// 		 . '<td>' . 'コミット' . '</td>'
-	// 		 . '<td>' . 'dummy' . '</td>'
-	// 		 . '</tr>'
-	// 		 . '<tr>'
-	// 		 . '<td scope="row">' . '公開予定日時' . '</td>'
-	// 		 . '<td>' . $date . ' ' . $time
-	// 		 . '<input type="hidden" name="date" value="' . $date . '"/>'
-	// 		 . '<input type="hidden" name="time" value="' . $time . '"/>'
-	// 		 . '</td>'
-	// 		 . '</tr>'
-	// 		 . '<tr>'
-	// 		 . '<td scope="row">' . 'コメント' . '</td>'
-	// 		 . '<td scope="row">' . htmlspecialchars($comment) . '</td>'
-	// 		 . '<input type="hidden" name="comment" value="' . htmlspecialchars($comment) . '"/>'
-	// 		 . '</tr>'
-	// 		 . '</tbody></table>'
-			
-	// 		. '<div class="unit">'
-	// 		. '<div class="text-center">';
-
-	// 	if ( $add_flg ) {
-	// 		$ret .= '<input type="submit" name="add_confirm_btn" class="btn btn-default" value="確定"/>'
-	// 			. '<input type="submit" name="add_back_btn" class="btn btn-default" value="戻る"/>';
-	// 	} else {
-	// 		$ret .= '<input type="submit" name="update_confirm_btn" class="btn btn-default" value="確定"/>'
-	// 			. '<input type="submit" name="update_back_btn" class="btn btn-default" value="戻る"/>';
-	// 	}
-
-	// 	$ret .= '</div>'
-	// 		. '</form>'
-	// 		. '</div>'
-
-	// 		 . '</div>'
-	// 		 . '</div>'
-	// 		 . '</div></div>';
-
-	// 	return $ret;
-	// }
 
 	/**
 	 * 新規の出力確認ダイアログHTMLの作成
@@ -860,13 +903,12 @@ class main
 	 * @param $reserve_time = 公開予定時間
 	 * @param $comment      = コメント
 	 *
-	 * @return 
-	 *  確認ダイアログ出力内容
+	 * @return 確認ダイアログ出力内容
 	 */
-	private function create_check_dialog_html($branch_select_value,
+	private function create_add_check_dialog_html($branch_select_value,
 		$reserve_date, $reserve_time, $comment) {
 		
-		$this->debug_echo('■ create_check_dialog_html start');
+		$this->debug_echo('■ create_add_check_dialog_html start');
 
 		$ret = "";
 
@@ -925,7 +967,7 @@ class main
 			 . '</div>'
 			 . '</div></div></div>';
 
-		$this->debug_echo('■ create_check_dialog_html end');
+		$this->debug_echo('■ create_add_check_dialog_html end');
 
 		return $ret;
 	}
@@ -937,9 +979,9 @@ class main
 	 * @return 
 	 *  確認ダイアログ出力内容
 	 */
-	private function create_change_check_dialog_html() {
+	private function create_update_check_dialog_html() {
 		
-		$this->debug_echo('■ create_change_check_dialog_html start');
+		$this->debug_echo('■ create_update_check_dialog_html start');
 
 		$img_filename = self::PATH_CREATE_DIR . self::IMG_ARROW_RIGHT;
 
@@ -1035,7 +1077,7 @@ class main
 			. '</div>'
 			. '</div></div>';
 
-		$this->debug_echo('■ create_change_check_dialog_html end');
+		$this->debug_echo('■ create_update_check_dialog_html end');
 
 		return $ret;
 	}
@@ -1082,30 +1124,25 @@ class main
 
 		// CSVより公開予約の一覧を取得する
 		$data_list = $this->get_csv_data_list(null);
+	
+		// 日時結合（画面表示日時）
+		$combine_datetime = combine_date_time($reserve_date, $reserve_time);
 
-		// 最大件数チェック
+
 		if ($add_flg) {
-
-			// TODO:定数化
-			$max = 10;
-
-			if ($max <= count($data_list)) {
+			// 公開予約の最大件数チェック
+			if (!$this->check_date($data_list)) {
 				$ret .= '<p class="error_message">公開予約は最大' . $max . '件までの登録になります。</p>';
 			}
 		}
 
 		// 日付の妥当性チェック
-		list($Y, $m, $d) = explode('-', $this->options->_POST->reserve_date);
-
-		if (!checkdate(intval($m), intval($d), intval($Y))) {
+		if (!$this->check_date($reserve_date)) {
 			$ret .= '<p class="error_message">「公開予定日時」の日付が有効ではありません。</p>';
 		}
 
-		// 公開予定日時の未来日時チェック
-		$now = date(self::DATETIME_FORMAT);
-		$datetime = $this->options->_POST->reserve_date . ' ' . date(self::TIME_FORMAT_HIS,  strtotime($this->options->_POST->reserve_time));
-
-		if (strtotime($now) > strtotime($datetime)) {
+		// 未来の日付であるかチェック
+		if (!$this->check_future_date($combine_datetime)) {
 			$ret .= '<p class="error_message">「公開予定日時」は未来日時を設定してください。</p>';
 		}
 
@@ -1115,7 +1152,7 @@ class main
 		}
 
 		// 公開予定日時の重複チェック
-		if (!$this->check_exist_reserve($data_list, $this->combine_date_time($reserve_date, $reserve_time), $selected_id)) {
+		if (!$this->check_exist_reserve($data_list, $combine_datetime, $selected_id)) {
 			$ret .= '<p class="error_message">入力された日時はすでに公開予定が作成されています。</p>';
 		}
 
@@ -1197,7 +1234,7 @@ class main
 			. '<tbody>';
 
 		// テーブルデータリスト
-		foreach ($data_list as $array) {
+		foreach ((array)$data_list as $array) {
 			
 			$ret .= '<tr>'
 				. '<td class="p-center"><input type="radio" name="target" value="' . $array[self::WAITING_CSV_COLUMN_ID] . '"/></td>'
@@ -1321,17 +1358,19 @@ class main
 		$dialog_disp = '';
 
 		// gitのmaster情報取得
-		$init_ret = $this->init();
-		$init_ret = json_decode($init_ret);
+		$init_ret = json_decode($this->init());
 
 		//timezoneテスト ここから
 		// date_default_timezone_set('Asia/Tokyo');
 
 		// echo "--------------------------------</br>";
+	
+		$this->debug_echo('　□GMT：');
+		$this->debug_echo(gmdate(DATE_ATOM, time()));
 
-		// echo "GMT　　　　　：" . gmdate(DATE_ATOM, time()). "</br>";
-		// echo "date　　　　　：" . date(DATE_ATOM, time()). "</br></br>";
-		
+		$this->debug_echo('　□date：');
+		$this->debug_echo(date(DATE_ATOM, time()));
+
 		// $t = new \DateTime(gmdate(DATE_ATOM, time()));
 		// $t->setTimeZone(new \DateTimeZone('Asia/Tokyo'));
 
@@ -1348,192 +1387,190 @@ class main
 		// 		echo "--------------------------------</br>";
 		//timezoneテスト ここまで
 
+		// 入力画面へ表示させるエラーメッセージ
+		$error_message = '';
 
 		// 初期表示画面から遷移されたか
 		$init_trans_flg = false;
+		// 追加処理か
+		$add_flg = flase;
 
-		if ( !$init_ret->status ) {
-			// 初期化失敗
+		if ( $ret->status ) {
+			// 初期化成功の場合
 
-			// エラーメッセージ
-			$init_error_msg = '
-			<script type="text/javascript">
-				console.error("' . $init_ret->message . '");
-				alert("initialize faild");
-			</script>';
-		}
+			// $combine_reserve_time = '';
+			// $convert_reserve_time = '';
 
-		// 画面入力された日付と時刻を結合
-		$combine_reserve_time = $this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
+			// // 画面入力された日付と時刻を結合
+			// $combine_reserve_time = $this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
 
-		// // サーバのタイムゾーン日時へ変換
-		// $convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::DATETIME_FORMAT);
+			// // サーバのタイムゾーン日時へ変換
+			// $convert_reserve_time = $this->convert_timezone_datetime($combine_reserve_time, self::DATETIME_FORMAT, self::PARAM_TIME_ZONE);
+					
+			// if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
+			// 	throw new \Exception("Combine date time failed.");
+			// }
+
+
+			/**
+		 	* 新規処理
+		 	*/
+			// 初期表示画面の「新規」ボタン押下
+			if (isset($this->options->_POST->add)) {
+
+				// 新規（入力）ダイアログ画面へ遷移
+				$dialog_disp = $this->disp_add_dialog();
+
+			// 新規ダイアログの「確認」ボタン押下
+			} elseif (isset($this->options->_POST->add_check)) {
+
+				$add_flg = true;
+
+				// 入力チェック処理
+				$error_message = $this->do_check_validation($add_flg);
+
+				if ($error_message != '') {
+					// 入力ダイアログのまま
+					$dialog_disp = $this->disp_back_add_dialog($error_message);
+				} else {
+					// 確認ダイアログへ遷移
+					$dialog_disp = $this->disp_add_check_dialog();
+				}
 				
-		// 新規ボタンが押下された場合
-		if (isset($this->options->_POST->add)) {
-		
-			$dialog_disp = $this->disp_add_dialog(null);
+			// 新規ダイアログの「確定」ボタン
+			} elseif (isset($this->options->_POST->add_confirm)) {
 
-		// 変更ボタンが押下された場合
-		} elseif (isset($this->options->_POST->update)) {
-		
-			$init_trans_flg = true;
+				// Gitファイルの取得
+				$ret = json_decode($this->file_copy($combine_reserve_time));
 
-			$dialog_disp = $this->disp_update_dialog($init_trans_flg, null);
+				if ( !$ret->status ) {
+					// 処理失敗
+					break;
 
-		// 削除ボタンが押下された場合
-		} elseif (isset($this->options->_POST->delete)) {
-		
-			// Gitファイルの削除
-			$delete_ret = $this->file_delete();
-	
-			$delete_ret = json_decode($delete_ret);
+				} else {
+					// 処理成功
 
-			if ( !$delete_ret->status ) {
-				// 削除失敗
+					if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
+						throw new \Exception("Convert time zone failed.");
+					}
 
-				// エラーメッセージ
-				$dialog_disp = '
-				<script type="text/javascript">
-					console.error("' . $delete_ret->message . '");
-					alert("add faild");
-				</script>';
+					// CSV入力情報の追加
+					$this->insert_list_csv_data($combine_reserve_time);
 
-			} else {
-
-				// CSV入力情報の追加
-				$this->delete_list_csv_data();
-
-			}
-
-		// 即時公開ボタンが押下された場合
-		} elseif (isset($this->options->_POST->release)) {
-		
-			// 即時公開処理
-			$this->manual_release();
-
-		// // 履歴ボタンが押下された場合
-		// } elseif (isset($this->options->_POST->history)) {
-		
-		// 新規作成ダイアログの「確認」ボタンが押下された場合
-		} elseif (isset($this->options->_POST->add_check)) {
-
-			// 入力チェック
-			$error_message = $this->do_check_validation(true);
-
-			if ($error_message != '') {
-				// 入力チェックエラーがあった場合はそのままの画面
-				$dialog_disp = $this->disp_add_dialog($error_message);
-			} else {
-				// 入力チェックエラーがなかった場合は確認ダイアログへ遷移
-				$dialog_disp = $this->do_add_check_btn();
-			}
-			
-		// 新規ダイアログの確定ボタンが押下された場合
-		} elseif (isset($this->options->_POST->add_confirm)) {
-
-			if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
-				throw new \Exception("Combine date time failed.");
-			}
-
-			// Gitファイルの取得
-			$add_ret = $this->file_copy($combine_reserve_time);
-	
-			$add_ret = json_decode($add_ret);
-
-			if ( !$add_ret->status ) {
-				// デプロイ失敗
-
-				// エラーメッセージ
-				$dialog_disp = '
-				<script type="text/javascript">
-					console.error("' . $add_ret->message . '");
-					alert("add faild");
-				</script>';
-
-			} else {
-
-				if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
-					throw new \Exception("Convert time zone failed.");
 				}
 
-				// CSV入力情報の追加
-				$this->insert_list_csv_data($combine_reserve_time);
+			// 新規確認ダイアログの「戻る」ボタン押下
+			} elseif (isset($this->options->_POST->add_back)) {
+			
+				$dialog_disp = $this->disp_back_add_dialog(null);
 
-			}
 
-		// 新規確認ダイアログの戻るボタンが押下された場合
-		} elseif (isset($this->options->_POST->add_back)) {
-		
-			$dialog_disp = $this->disp_add_dialog(null);
+			/**
+		 	* 変更処理
+		 	*/
+			// 初期表示画面の「変更」ボタン押下
+			} elseif (isset($this->options->_POST->update)) {
+			
+				$init_trans_flg = true;
 
-		// 変更ダイアログの確認ボタンが押下された場合
-		} elseif (isset($this->options->_POST->update_check)) {
-		
-			$error_message = $this->do_check_validation(false);
-
-			if ($error_message != '') {
-				// 入力チェックエラーがあった場合はそのままの画面
+				// 「変更入力ダイアログ」画面へ遷移（エラーメッセージ＝空）
 				$dialog_disp = $this->disp_update_dialog($init_trans_flg, $error_message);
-			} else {
-				// 入力チェックエラーがなかった場合は確認ダイアログへ遷移
-				$dialog_disp = $this->do_update_check_btn();
-			}	
 
-		// 変更ダイアログの確定ボタンが押下された場合
-		} elseif (isset($this->options->_POST->update_confirm)) {
+			// 変更ダイアログの確認ボタンが押下された場合
+			} elseif (isset($this->options->_POST->update_check)) {
 			
-			if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
-				throw new \Exception("Combine date time failed.");
-			}
+				$error_message = $this->do_check_validation(false);
 
-			// GitファイルをWAITINGディレクトリへコピー（ディレクトリ名は入力された日付）
-			$update_ret = $this->file_update($combine_reserve_time);
-	
-			$update_ret = json_decode($update_ret);
+				if ($error_message != '') {
 
-			if ( !$update_ret->status ) {
-				// デプロイ失敗
+					// 入力チェックエラーがあった場合はそのままの画面
+					$dialog_disp = $this->disp_update_dialog($init_trans_flg, $error_message);
 
-				// エラーメッセージ
-				$dialog_disp = '
-				<script type="text/javascript">
-					console.error("' . $update_ret->message . '");
-					alert("update faild");
-				</script>';
+				} else {
 
-			} else {
+					// 入力チェックエラーがなかった場合は確認ダイアログへ遷移
+					$dialog_disp = $this->disp_update_check_dialog();
+				}	
 
-				// if ( is_null($convert_reserve_time) || !isset($convert_reserve_time) ) {
-				// 	throw new \Exception("Convert time zone failed.");
-				// }
+			// 変更ダイアログの確定ボタンが押下された場合
+			} elseif (isset($this->options->_POST->update_confirm)) {
+				
+				// GitファイルをWAITINGディレクトリへコピー（ディレクトリ名は入力された日付）
+				$ret = json_decode($this->file_update($combine_reserve_time));
+		
+				if ( !$ret->status ) {
+					// 処理失敗
+					break;
 
-				if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
-					throw new \Exception("Combine date time failed.");
+				} else {
+					// 処理成功
+
+					// CSV入力情報の変更
+					$this->update_list_csv_data($combine_reserve_time);
+
 				}
 
-				// CSV入力情報の変更
-				$this->update_list_csv_data($combine_reserve_time);
+
+			// 変更確認ダイアログの「戻る」ボタン押下
+			} elseif (isset($this->options->_POST->update_back)) {
+			
+				$dialog_disp = $this->disp_update_dialog($init_trans_flg, null);
+
+
+			/**
+		 	* 削除処理
+		 	*/
+			// 初期表示画面の「削除」ボタン押下
+			} elseif (isset($this->options->_POST->delete)) {
+			
+				// Gitファイルの削除
+				$ret = json_decode($this->file_delete());
+
+					if ( !$ret->status ) {
+					// 処理失敗
+					break;
+
+				} else {
+
+					// CSV情報の削除
+					$this->delete_list_csv_data();
+
+				}
+
+			/**
+		 	* 即時公開処理
+		 	*/
+			// 初期表示画面の「即時公開」ボタン押下
+			} elseif (isset($this->options->_POST->release)) {
+			
+				// 即時公開処理
+				$this->manual_release();
 
 			}
-
-
-		// 変更確認ダイアログの戻るボタンが押下された場合
-		} elseif (isset($this->options->_POST->update_back)) {
-		
-			$dialog_disp = $this->disp_update_dialog($init_trans_flg, null);
-
 		}
 
 		// // 画面表示
 		$disp = '';  
 
+		// 初期表示画面の「履歴」ボタン押下
 		if (isset($this->options->_POST->history)) {
 			// 履歴表示画面の表示
 			$disp = $this->create_history_contents();
 		} else {
 			// 初期表示画面の表示
 			$disp = $this->create_top_contents();
+		}
+
+
+		if ( !$ret->status ) {
+			// 処理失敗の場合
+
+			// エラーメッセージ表示
+			$dialog_disp = '
+			<script type="text/javascript">
+				console.error("' . $ret->message . '");
+				alert("add faild");
+			</script>';
 		}
 
 		// 画面ロック用
@@ -2547,7 +2584,7 @@ class main
 					$command = 'git rev-parse --short HEAD';
 					$ret = $this->execute($command, false);
 
-					foreach ( $ret['output'] as $element ) {
+					foreach ( (array)$ret['output'] as $element ) {
 
 						$this->commit_hash = $element;
 					}
@@ -2649,11 +2686,11 @@ class main
 
 				// 現在のブランチ取得
 				$command = 'git branch';
-				$this->execute($command, false);
+				$ret = $this->execute($command, false);
 
 				$now_branch;
 				$already_branch_checkout = false;
-				foreach ( $output as $value ) {
+				foreach ( (array)$ret['output'] as $value ) {
 
 					// 「*」の付いてるブランチを現在のブランチと判定
 					if ( strpos($value, '*') !== false ) {
@@ -2698,7 +2735,7 @@ class main
 				$command = 'git rev-parse --short HEAD';
 				$ret = $this->execute($command, false);
 
-				foreach ( $ret['output'] as $element ) {
+				foreach ( (array)$ret['output'] as $element ) {
 
 					$this->commit_hash = $element;
 				}
@@ -2863,8 +2900,7 @@ class main
 		 		$this->debug_echo('　▼CSVの切り取り作業開始');
 				
 		 		// 実施済みCSVへインサート処理
-				$ret = $this->insert_released_list_csv_data($selected_ret);
-				$ret = json_decode($ret);
+				$ret = json_decode($this->insert_released_list_csv_data($selected_ret));
 
 				if ( !$ret->status || !$ret->insert_id) {
 					// 削除失敗
@@ -2887,8 +2923,7 @@ class main
 				// $this->debug_echo($insert_id);
 
 				// 予定CSVへデリート処理
-				$ret = $this->delete_list_csv_data();
-				$ret = json_decode($ret);
+				$ret = json_decode($this->delete_list_csv_data());
 
 				if ( !$ret->status ) {
 				// 削除失敗
@@ -3331,14 +3366,14 @@ class main
 	 *	 
 	 * @return ソート後の配列
 	 */
-	function convert_timezone_datetime($reserve_datetime, $format) {
+	function convert_timezone_datetime($reserve_datetime, $format, $time_zone) {
 	
 		$this->debug_echo('■ convert_timezone_datetime start');
 
 		// サーバのタイムゾーン取得
 		$timezone = date_default_timezone_get();
 
-		$t = new \DateTime($reserve_datetime, new \DateTimeZone(self::TIME_ZONE));
+		$t = new \DateTime($reserve_datetime, new \DateTimeZone($time_zone));
 
 		// タイムゾーン変更
 		$t->setTimeZone(new \DateTimeZone($timezone));
@@ -3347,6 +3382,9 @@ class main
 		
 		// $this->debug_echo('タイムゾーン：' . $timezone);
 
+		$this->debug_echo('　□変換前の時刻：');
+		$this->debug_echo($reserve_datetime);
+		$this->debug_echo('　□変換後の時刻：');
 		$this->debug_echo($t->format($format));
 	
 		$this->debug_echo('■ convert_timezone_datetime end');
@@ -3354,77 +3392,20 @@ class main
 	    return $ret;
 	}
 
-	// /**
-	//  * 空のディレクトリを削除する。（サブディレクトリも含める）
-	//  *
-	//  *
-	//  * @param string $path 対象ディレクトリのパス
-	//  * @return bool 成功時に `true`、失敗時に `false` を返します。
-	//  */
-	// public function rmdir( $path ){
-
-	// 	// $path = $this->localize_path($path);
-
-	// 	// if( !$this->is_writable( $path ) ){
-	// 	// 	return false;
-	// 	// }
-	// 	// $path = @realpath( $path );
-
-	// 	if( !$path || !isdir($path) ) {
-	// 		return false;
-		
-	// 	}
-
- //        if( !($dh = opendir($dir)) ) {
- //        	return false;
- //        }
-
- //        while( ($file = readdir($dh)) !== false) {
-
- //                if( strpos($file,".") === 0 ) continue;
- //                if( is_dir($dir."/".$file) &&
- //                        remove_empty_dir_recursive($dir."/".$file) ) continue;
- //                closedir($dh);
- //                return false;
- //        }
- //        closedir($dh);
- //        rmdir($dir);
-
-
-	// 	if( is_dir( $path ) ) {
-	// 		// ディレクトリの処理
-	// 		$filelist = $this->ls($path);
-	// 		foreach( $filelist as $basename ){
-	// 			if( $this->is_file( $path.DIRECTORY_SEPARATOR.$basename ) ){
-	// 				$this->rm( $path.DIRECTORY_SEPARATOR.$basename );
-	// 			}else if( !$this->rmdir_r( $path.DIRECTORY_SEPARATOR.$basename ) ){
-	// 				return false;
-	// 			}
-	// 		}
-
-	// 		return $this->rmdir( $path );
-		
-	// 	} else {
-	// 		return false;
-	// 	}
-
-	// 	return false;
-	// }
-
 	/**
-	 * ※デバッグ用（ある程度実装が進んだら削除する）
+	 * ※デバッグ関数（エラー調査用）
 	 *	 
 	 */
 	function debug_echo($text) {
 	
-		// echo strval($text);
-		// echo "<br>";
+		echo strval($text);
+		echo "<br>";
 
 		return;
 	}
 
 	/**
-	 * ※デバッグ用（ある程度実装が進んだら削除する）
+	 * ※デバッグ関数（エラー調査用）
 	 *	 
 	 */
 	function debug_var_dump($text) {
