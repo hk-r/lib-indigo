@@ -1354,6 +1354,8 @@ class main
 		$this->debug_echo('　□カレントパス：' . realpath('.'));
 		$this->debug_echo('　□__DIR__：' . __DIR__);
 
+		$alert_message = '';
+
 		// ダイアログの表示
 		$dialog_disp = '';
 
@@ -1395,7 +1397,12 @@ class main
 		// 追加処理か
 		$add_flg = flase;
 
-		if ( $ret->status ) {
+		if ( !$ret->status ) {
+
+			$alert_message = 'initialized faild';
+
+		} else {
+		
 			// 初期化成功の場合
 
 			// $combine_reserve_time = '';
@@ -1445,6 +1452,7 @@ class main
 
 				if ( !$ret->status ) {
 					// 処理失敗
+					$alert_message = 'add faild';
 					break;
 
 				} else {
@@ -1500,6 +1508,7 @@ class main
 		
 				if ( !$ret->status ) {
 					// 処理失敗
+					$alert_message = 'update faild';
 					break;
 
 				} else {
@@ -1527,8 +1536,10 @@ class main
 				$ret = json_decode($this->file_delete());
 
 					if ( !$ret->status ) {
-					// 処理失敗
-					break;
+						
+						$alert_message = 'delete faild';
+						// 処理失敗
+						break;
 
 				} else {
 
@@ -1569,7 +1580,7 @@ class main
 			$dialog_disp = '
 			<script type="text/javascript">
 				console.error("' . $ret->message . '");
-				alert("add faild");
+				alert(' . $alert_message .';
 			</script>';
 		}
 
