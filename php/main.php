@@ -120,6 +120,7 @@ class main
 	public function __construct($options) {
 		$this->options = json_decode(json_encode($options));
 		$this->file_control = new file_control($this);
+
 	}
 
 	/**
@@ -1126,12 +1127,12 @@ class main
 		$data_list = $this->get_csv_data_list(null);
 	
 		// 日時結合（画面表示日時）
-		$combine_datetime = combine_date_time($reserve_date, $reserve_time);
+		$combine_datetime = $this->combine_date_time($reserve_date, $reserve_time);
 
 
 		if ($add_flg) {
 			// 公開予約の最大件数チェック
-			if (!$this->check_date($data_list)) {
+			if (!$this->check_reserve_max_record($data_list)) {
 				$ret .= '<p class="error_message">公開予約は最大' . $max . '件までの登録になります。</p>';
 			}
 		}
@@ -1359,11 +1360,16 @@ class main
 		// ダイアログの表示
 		$dialog_disp = '';
 
-		// gitのmaster情報取得
-		$init_ret = json_decode($this->init());
-
 		// 処理実行結果格納
 		$ret = '';
+
+		// 入力画面へ表示させるエラーメッセージ
+		$error_message = '';
+
+		// 初期表示画面から遷移されたか
+		$init_trans_flg = false;
+		// 追加処理か
+		$add_flg = flase;
 
 		//timezoneテスト ここから
 		// date_default_timezone_set('Asia/Tokyo');
@@ -1375,6 +1381,13 @@ class main
 
 		$this->debug_echo('　□date：');
 		$this->debug_echo(date(DATE_ATOM, time()));
+
+
+		$t = new \DateTime(gmdate(DATE_ATOM, time()));
+		$t->setTimeZone(new \DateTimeZone('Asia/Tokyo'));
+		$this->debug_echo('　□日本時間：');
+		$this->debug_echo($t->format(DATE_ATOM));
+
 
 		// $t = new \DateTime(gmdate(DATE_ATOM, time()));
 		// $t->setTimeZone(new \DateTimeZone('Asia/Tokyo'));
@@ -1392,13 +1405,9 @@ class main
 		// 		echo "--------------------------------</br>";
 		//timezoneテスト ここまで
 
-		// 入力画面へ表示させるエラーメッセージ
-		$error_message = '';
 
-		// 初期表示画面から遷移されたか
-		$init_trans_flg = false;
-		// 追加処理か
-		$add_flg = flase;
+		// gitのmaster情報取得
+		$ret = json_decode($this->init());
 
 		if ( !$ret->status ) {
 
