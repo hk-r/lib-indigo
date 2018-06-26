@@ -1362,6 +1362,9 @@ class main
 		// gitのmaster情報取得
 		$init_ret = json_decode($this->init());
 
+		// 処理実行結果格納
+		$ret = '';
+
 		//timezoneテスト ここから
 		// date_default_timezone_set('Asia/Tokyo');
 

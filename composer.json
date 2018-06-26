@@ -23,7 +23,8 @@
     "autoload": {
         "files": [
             "php/main.php",
-            "php/file_control.php"
+            "php/file_control.php",
+            "php/pdo.php"
         ]
     },
     "extra": {
