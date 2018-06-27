@@ -188,6 +188,8 @@ class main
 
 			$stmt = $this->dbh->prepare($insert_sql);
 
+		$this->debug_echo('　□PDO2.5');
+
 var_dump($stmt->errorCode());
 var_dump($stmt->errorInfo());
 
