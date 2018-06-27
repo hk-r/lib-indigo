@@ -164,7 +164,8 @@ class main
 
 				// PDOインスタンスを生成
 				$this->dbh = new \PDO(
-					'sqlite:' . $db_path . $db_name,
+					'sqlite:' . $db_name,
+					// 'sqlite:' . $db_path . $db_name,
 					$db_user,		// ユーザID
 					$db_password,	// パスワード
 					array(		// オプションがあればこちらへ追記
