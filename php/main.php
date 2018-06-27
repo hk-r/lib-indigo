@@ -8,6 +8,7 @@ class main
 
 	private $file_control;
 
+	private $pdo;
 
 	// サーバのタイムゾーン
 	const PARAM_TIME_ZONE = 'Asia/Tokyo';
@@ -118,8 +119,10 @@ class main
 	 * @param $options = オプション
 	 */
 	public function __construct($options) {
+
 		$this->options = json_decode(json_encode($options));
 		$this->file_control = new file_control($this);
+		$this->pdo = new pdo($this);
 
 	}
 
