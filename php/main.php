@@ -171,6 +171,23 @@ class main
 				)
 			);
 
+
+			// CREATE TABLE処理開始
+			$this->debug_echo('　□CREATE TABLE START');
+
+			// SQL作成
+			$create_sql = 'CREATE TABLE IF NOT EXISTS list (
+				id INTEGER PRIMARY KEY,
+				reserve_dt TEXT,
+				commit_hash TEXT,
+				branch_name TEXT
+			)';
+
+			// SQL実行
+			$res = $this->dbh->query($create_sql);
+
+
+
 			// INSERT処理開始
 			$this->debug_echo('　□INSERT START');
 
