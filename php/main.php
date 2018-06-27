@@ -175,12 +175,10 @@ class main
 			$this->debug_echo('　□INSERT START');
 
 			$insert_sql = "INSERT INTO list (
-				-- id,
 				reserve_dt,
 				commit_hash,
 				branch_name
 			)VALUES(
-				-- :id,
 				:reserve_dt,
 				:commit_hash,
 				:branch_name
@@ -191,7 +189,6 @@ class main
 			$stmt = $this->dbh->prepare($insert_sql);
 
 			$params = array(
-				// ':id' => '',
 				':reserve_dt' => '2018-05-31T10:00:00+00:00',
 				':commit_hash' => 'feie8e',
 				':branch_name' => 'released/2018-05-31'
@@ -205,7 +202,6 @@ class main
 		$this->debug_echo('　□PDO4');
 
 			$params = array(
-				// ':id' => '',
 				':reserve_dt' => '2018-06-01T10:00:00+00:00',
 				':commit_hash' => 'h83ohi',
 				':branch_name' => 'released/2018-06-01'
