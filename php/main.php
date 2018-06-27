@@ -122,7 +122,185 @@ class main
 
 		$this->options = json_decode(json_encode($options));
 		$this->file_control = new file_control($this);
-		$this->pdo = new pdo($this);
+		// $this->pdo = new pdo($this);
+
+				$this->debug_echo('■ __construct start');
+
+		// $this->px = $px;
+		// $this->conf = $this->px->conf();
+
+		$this->dbh = false;//初期化
+
+		if( class_exists('\\PDO') ) {
+			
+			$this->debug_echo('　□PDO1');
+
+			try {
+
+				// 接続種類
+				$db = 'sqlite:';
+
+				// データベースパス
+				$db_path = './sqlite/';
+
+				// データベース名
+				$db_name = 'test.db';
+
+				// データベースのユーザ名
+				$db_user = null;
+				// データベースのパスワード
+				$db_password = null;
+
+				// TODO:MySQLの場合
+				// mysql:host=ホスト名;dbname=データベース名;charset=文字エンコード
+				// $dsn = 'mysql:host=mysql000.db.sakura.ne.jp;dbname=example_php;charset=utf8';		
+
+				// PDOインスタンスを生成
+				$this->dbh = new \PDO(
+					'sqlite:' . $db_path . $db_name,
+					$db_user,		// ユーザID
+					$db_password,	// パスワード
+					array(		// オプションがあればこちらへ追記
+						// \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+						\PDO::ATTR_PERSISTENT => false, // ←これをtrueにすると、"持続的な接続" になる
+					)
+				);
+
+				// INSERT処理開始
+				$this->debug_echo('　□INSERT START');
+
+				$insert_sql = "INSERT INTO list (
+					-- id,
+					reserve_dt,
+					commit_hash,
+					branch_name
+				)VALUES(
+					-- :id,
+					:reserve_dt,
+					:commit_hash,
+					:branch_name
+				)";
+
+				$this->debug_echo('　□INSERT　SQL：' . $insert_sql);
+
+				$stmt = $this->dbh->prepare($insert_sql);
+
+				$params = array(
+					// ':id' => '',
+					':reserve_dt' => '2018-05-31T10:00:00+00:00',
+					':commit_hash' => 'feie8e',
+					':branch_name' => 'released/2018-05-31'
+				);
+
+				// 処理実行
+				$stmt->execute($params);
+
+
+				$params = array(
+					// ':id' => '',
+					':reserve_dt' => '2018-06-01T10:00:00+00:00',
+					':commit_hash' => 'h83ohi',
+					':branch_name' => 'released/2018-06-01'
+				);
+
+				// 処理実行
+				$stmt->execute($params);
+
+				// デバッグ用
+				$this->debug_var_dump('　□INSERTエラー：' . $stmt->errorInfo());
+				$count = $stmt->rowCount();
+				$this->debug_echo('　□INSERT件数：' . $count);
+
+				$this->debug_echo('　□INSERT END');
+
+
+
+				// UPDATE処理開始
+				$this->debug_echo('　□UPDATE START');
+
+				$update_sql = "UPDATE list SET branch_name = :branch_name WHERE id = :id";
+
+				$this->debug_echo('　□UPDATE　SQL：' . $update_sql);
+
+				$stmt = $this->dbh->prepare($update_sql);
+
+				$params = array(
+					':branch_name' => 'released/2018-06-09',
+					':id' => '2'
+				);
+
+				$stmt->execute($params);
+
+				$this->debug_var_dump('　□UPDATEエラー：' . $stmt->errorInfo());
+				$count = $stmt->rowCount();
+				$this->debug_echo('　□UPDATE件数：' . $count);
+
+				$this->debug_echo('　□UPDATE END');
+
+
+
+				// DELETE処理開始
+				$this->debug_echo('　□DELETE START');
+
+				$delete_sql = "DELETE FROM list WHERE id = :id";
+
+				$this->debug_echo('　□DELETE　SQL：' . $delete_sql);
+
+				$stmt = $this->dbh->prepare($delete_sql);
+
+				$params = array(
+					':id' => '1'
+				);
+
+				$stmt->execute($params);
+
+				$this->debug_var_dump('　□DELETEエラー：' . $stmt->errorInfo());
+				$count = $stmt->rowCount();
+				$this->debug_echo('　□DELETE件数：' . $count);
+
+				$this->debug_echo('　□DELETE END');
+
+
+
+				// SELECT処理開始
+				$this->debug_echo('　□SELECT START');
+
+				$select_sql = "SELECT * FROM list ORDER BY branch_name";
+
+
+				$this->debug_echo('　□SELECT　SQL：' . $select_sql);
+
+				$stmt = $this->dbh->query($select_sql);
+
+				$this->debug_var_dump($stmt->errorInfo());
+				$count = $stmt->rowCount();
+				$this->debug_echo('　□SELECT：' . $count);
+
+				// foreach文で配列の中身を一行ずつ出力
+				foreach ($stmt as $row) {
+				 
+					// データベースのフィールド名で出力
+					$this->debug_echo($row['id'].'：'.$row['branch_name']);
+					
+				}
+
+				$this->debug_echo('　□SELECT END');
+
+
+				// データベースとの接続を閉じる
+				$dbh = null;
+
+			} catch (Exception $e) {
+				
+				echo 'データベースにアクセスできません！' . $e->getMessage();
+				// 強制終了
+				exit;
+			}
+			
+		}
+
+		$this->debug_echo('■ __construct end');
+
 
 	}
 
