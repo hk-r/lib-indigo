@@ -155,6 +155,8 @@ class main
 				// mysql:host=ホスト名;dbname=データベース名;charset=文字エンコード
 				// $dsn = 'mysql:host=mysql000.db.sakura.ne.jp;dbname=example_php;charset=utf8';		
 
+			$this->debug_echo('　□PDO2');
+
 				// PDOインスタンスを生成
 				$this->dbh = new \PDO(
 					'sqlite:' . $db_path . $db_name,
