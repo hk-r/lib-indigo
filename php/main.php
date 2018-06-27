@@ -207,10 +207,6 @@ class main
 
 		$this->debug_echo('　□PDO2.5');
 
-var_dump($dbh->errorInfo());
-
-		$this->debug_echo('　□PDO2.6');
-
 			$params = array(
 				':reserve_dt' => '2018-05-31T10:00:00+00:00',
 				':commit_hash' => 'feie8e',
