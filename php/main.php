@@ -1371,10 +1371,10 @@ class main
 		$this->debug_echo('　□date：');
 		$this->debug_echo(date(DATE_ATOM, time()));
 
-		// $t = new \DateTime(gmdate(DATE_ATOM, time()));
-		// $t->setTimeZone(new \DateTimeZone('Asia/Tokyo'));
+		$t = new \DateTime(gmdate(DATE_ATOM, time()));
+		$t->setTimeZone(new \DateTimeZone('Asia/Tokyo'));
 
-		// echo "gmtから日本時間へ：" . $t->format(DATE_ATOM). "</br>";
+		echo "gmtから日本時間へ：" . $t->format(DATE_ATOM). "</br>";
 
 
 		// $t = new \DateTime($t->format(DATE_ATOM));
