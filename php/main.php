@@ -188,6 +188,9 @@ class main
 
 			$stmt = $this->dbh->prepare($insert_sql);
 
+var_dump($stmt->errorCode());
+var_dump($stmt->errorInfo());
+
 			$params = array(
 				':reserve_dt' => '2018-05-31T10:00:00+00:00',
 				':commit_hash' => 'feie8e',
