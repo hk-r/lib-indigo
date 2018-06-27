@@ -190,8 +190,9 @@ class main
 
 		$this->debug_echo('　□PDO2.5');
 
-var_dump($stmt->errorCode());
-var_dump($stmt->errorInfo());
+var_dump($dbh->errorInfo());
+
+		$this->debug_echo('　□PDO2.6');
 
 			$params = array(
 				':reserve_dt' => '2018-05-31T10:00:00+00:00',
