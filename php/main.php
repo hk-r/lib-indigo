@@ -115,6 +115,11 @@ class main
 	private $honban_path = './../honban/';
 
 	/**
+	 * PDOインスタンス
+	 */
+	private $dbh;
+
+	/**
 	 * コンストラクタ
 	 * @param $options = オプション
 	 */
