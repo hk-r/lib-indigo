@@ -197,9 +197,12 @@ class main
 				':branch_name' => 'released/2018-05-31'
 			);
 
+		$this->debug_echo('　□PDO3');
+
 			// 処理実行
 			$stmt->execute($params);
 
+		$this->debug_echo('　□PDO4');
 
 			$params = array(
 				// ':id' => '',
@@ -208,6 +211,9 @@ class main
 				':branch_name' => 'released/2018-06-01'
 			);
 
+		$this->debug_echo('　□PDO5');
+
+	
 			// 処理実行
 			$stmt->execute($params);
 
