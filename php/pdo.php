@@ -5,43 +5,6 @@ namespace indigo;
 class pdo
 {
 
-	// try {
-	// 	// DBへ接続
-	// 	$dbh = new PDO("sqlite:./sqlite/test.db");
-
-	// 	// SQL作成
-	// 	$sql = 'CREATE TABLE IF NOT EXISTS products (
-	// 		    id          INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	// 		    name        TEXT    NOT NULL,
-	// 		    description TEXT    NULL,
-	// 		    price       INTEGER NOT NULL,
-	// 		    discount    INTEGER NOT NULL DEFAULT 0,
-	// 		    reg_date    TEXT    NOT NULL
-	// 	)';
-
-	// 	// SQL実行
-	// 	$res = $dbh->query($sql);
-
-
-	// 	// SQL作成
-	// 	$sql = 'INSERT INTO products (
-	// 		    id          INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	// 		    name        TEXT    NOT NULL,
-	// 		    description TEXT    NULL,
-	// 		    price       INTEGER NOT NULL,
-	// 		    discount    INTEGER NOT NULL DEFAULT 0,
-	// 		    reg_date    TEXT    NOT NULL
-	// 	)';
-
-	// } catch(PDOException $e) {
-
-	// 	echo $e->getMessage();
-	// 	die();
-	// }
-
-	// // 接続を閉じる
-	// $dbh = null;
-
 	/**
 	 * PDOインスタンス
 	 */
@@ -54,428 +17,294 @@ class pdo
 	 */
 	public function __construct ($main){
 
+		// テーブル作成（存在している場合は処理しない）
+		$this->create_table();
+
+		// // UPDATE文作成
+		// $update_sql = "UPDATE list SET branch_name = :branch_name WHERE id = :id";
+		// // パラメータ作成
+		// $params = array(
+		// 	':branch_name' => 'released/2018-06-09',
+		// 	':id' => '2'
+		// );
+		// // UPDATE実行
+		// $stmt = $this->select($update_sql, $params);
 
 
-				$this->debug_echo('■ __construct start');
 
-		// $this->px = $px;
-		// $this->conf = $this->px->conf();
+		// // DELETE文作成
+		// $delete_sql = "DELETE FROM list WHERE id = :id";
+		// // パラメータ作成
+		// $params = array(
+		// 	':id' => '1'
+		// );
+		// // DELETE実行
+		// $stmt = $this->select($delete_sql, $params);
 
-		$this->dbh = false;//初期化
+		// // デバック用（直前の操作件数取得）
+		// // $count = $stmt->rowCount();
 
-		$this->debug_echo('　□PDO1');
+		// // SELECT文作成
+		// $select_sql = "SELECT * FROM list ORDER BY branch_name";
+		// // SELECT実行
+		// $select_ret = $this->select($select_sql);
+
+		// // $this->debug_echo('　□SELECTデータ：');
+		// // $this->debug_var_dump($select_ret);
+
+	}
+
+
+	/**
+	 * データベースへ接続する
+	 *	 
+	 */
+	public function connect() {
+	
+		// $this->debug_echo('■ connect start');
+
+		$this->dbh = false; // 初期化
+
+		/**
+		 * mysqlの場合（一旦コメント。後々パラメタで接続種類を判別し、切り替えられるようにする。）
+		 */
+		// $db_name = 'db_name';		// データベース名
+		// $db_host = '.localhost';		// ホスト名
+
+		// $dsn = "mysql:dbname=" . $db_name . ";host=" . $db_host. ";charset=utf8";
+
+		// $db_user = self::USER;
+		// $db_pass = self::PASS;
+
+		// $option = array(
+		// 			PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES '.SELF::UTF
+		// 		);
+
+	
+		/**
+		 * sqliteの場合 
+		 */
+		$db_name = 'test.db';	// データベース名
+		$db_path = './sqlite/';	// データベースパス
+
+		$dsn = "sqlite:" . $db_path . $db_name;
+
+		$db_user = null;
+		$db_pass = null;
+	
+		$option = array(
+					\PDO::ATTR_PERSISTENT => false, // ←これをtrueにすると、"持続的な接続" になる
+				);
+
+		$pdo = null;
 
 		try {
 
-			// 接続種類
-			$db = 'sqlite:';
-
-			// データベースパス
-			$db_path = './sqlite/';
-
-			// データベース名
-			$db_name = 'test.db';
-
-			// データベースのユーザ名
-			$db_user = null;
-			// データベースのパスワード
-			$db_password = null;
-
-			// TODO:MySQLの場合
-			// mysql:host=ホスト名;dbname=データベース名;charset=文字エンコード
-			// $dsn = 'mysql:host=mysql000.db.sakura.ne.jp;dbname=example_php;charset=utf8';		
-
-		$this->debug_echo('　□PDO2');
-
-			// PDOインスタンスを生成
-			$this->dbh = new \PDO(
-				'sqlite:' . $db_path . $db_name,
-				$db_user,		// ユーザID
-				$db_password,	// パスワード
-				array(		// オプションがあればこちらへ追記
-					// \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-					\PDO::ATTR_PERSISTENT => false, // ←これをtrueにすると、"持続的な接続" になる
-				)
-			);
-
-
-			// CREATE TABLE処理開始
-			$this->debug_echo('　□CREATE TABLE START');
-
-			// SQL作成
-			$create_sql = 'CREATE TABLE IF NOT EXISTS list (
-				id INTEGER PRIMARY KEY,
-				reserve_dt TEXT,
-				commit_hash TEXT,
-				branch_name TEXT
-			)';
-
-			// SQL実行
-			$res = $this->dbh->query($create_sql);
-
-
-
-			// INSERT処理開始
-			$this->debug_echo('　□INSERT START');
-
-			$insert_sql = "INSERT INTO list (
-				reserve_dt,
-				commit_hash,
-				branch_name
-			)VALUES(
-				:reserve_dt,
-				:commit_hash,
-				:branch_name
-			)";
-
-			$this->debug_echo('　□INSERT　SQL：' . $insert_sql);
-
-			$stmt = $this->dbh->prepare($insert_sql);
-
-		$this->debug_echo('　□PDO2.5');
-
-			$params = array(
-				':reserve_dt' => '2018-05-31T10:00:00+00:00',
-				':commit_hash' => 'feie8e',
-				':branch_name' => 'released/2018-05-31'
-			);
-
-		$this->debug_echo('　□PDO3');
-
-			// 処理実行
-			$stmt->execute($params);
-
-		$this->debug_echo('　□PDO4');
-
-			$params = array(
-				':reserve_dt' => '2018-06-01T10:00:00+00:00',
-				':commit_hash' => 'h83ohi',
-				':branch_name' => 'released/2018-06-01'
-			);
-
-		$this->debug_echo('　□PDO5');
-
-	
-			// 処理実行
-			$stmt->execute($params);
-
-			// デバッグ用
-			$this->debug_var_dump('　□INSERTエラー：' . $stmt->errorInfo());
-			$count = $stmt->rowCount();
-			$this->debug_echo('　□INSERT件数：' . $count);
-
-			$this->debug_echo('　□INSERT END');
-
-
-
-			// UPDATE処理開始
-			$this->debug_echo('　□UPDATE START');
-
-			$update_sql = "UPDATE list SET branch_name = :branch_name WHERE id = :id";
-
-			$this->debug_echo('　□UPDATE　SQL：' . $update_sql);
-
-			$stmt = $this->dbh->prepare($update_sql);
-
-			$params = array(
-				':branch_name' => 'released/2018-06-09',
-				':id' => '2'
-			);
-
-			$stmt->execute($params);
-
-			$this->debug_var_dump('　□UPDATEエラー：' . $stmt->errorInfo());
-			$count = $stmt->rowCount();
-			$this->debug_echo('　□UPDATE件数：' . $count);
-
-			$this->debug_echo('　□UPDATE END');
-
-
-
-			// DELETE処理開始
-			$this->debug_echo('　□DELETE START');
-
-			$delete_sql = "DELETE FROM list WHERE id = :id";
-
-			$this->debug_echo('　□DELETE　SQL：' . $delete_sql);
-
-			$stmt = $this->dbh->prepare($delete_sql);
-
-			$params = array(
-				':id' => '1'
-			);
-
-			$stmt->execute($params);
-
-			$this->debug_var_dump('　□DELETEエラー：' . $stmt->errorInfo());
-			$count = $stmt->rowCount();
-			$this->debug_echo('　□DELETE件数：' . $count);
-
-			$this->debug_echo('　□DELETE END');
-
-
-
-			// SELECT処理開始
-			$this->debug_echo('　□SELECT START');
-
-			$select_sql = "SELECT * FROM list ORDER BY branch_name";
-
-
-			$this->debug_echo('　□SELECT　SQL：' . $select_sql);
-
-			$stmt = $this->dbh->query($select_sql);
-
-			$this->debug_var_dump($stmt->errorInfo());
-			$count = $stmt->rowCount();
-			$this->debug_echo('　□SELECT：' . $count);
-
-			// foreach文で配列の中身を一行ずつ出力
-			foreach ($stmt as $row) {
-			 
-				// データベースのフィールド名で出力
-				$this->debug_echo($row['id'].'：'.$row['branch_name']);
-				
-			}
-
-			$this->debug_echo('　□SELECT END');
-
-
-			// データベースとの接続を閉じる
-			$dbh = null;
+	  		$this->dbh = new \PDO(
+	  			$dsn,
+	  			$db_user,
+	  			$db_pass,
+	  			$option
+	  		);
 
 		} catch (Exception $e) {
+	  		echo 'データベースにアクセスできません。' . $e->getMesseage;
+	  		// 強制終了
+	  		die();
+		}
 			
-			echo 'データベースにアクセスできません！' . $e->getMessage();
-			// 強制終了
-			exit;
+		// エラー表示の設定
+		$this->dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_WARNING);
+		// prepareを利用する
+		$this->dbh->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
+
+		// $this->debug_echo('■ connect end');
+
+	}
+
+	/**
+	 * データベースの接続を閉じる
+	 *	 
+	 */
+	public function close() {
+	
+		// $this->debug_echo('■ connect start');
+
+		try {
+
+			// データベースの接続を閉じる
+			$this->dbh = null;
+
+
+		} catch (Exception $e) {
+	  		echo 'データベースの接続が閉じれません。' . $e->getMesseage;
+	  		// 強制終了
+	  		die();
 		}
+			
+		// エラー表示の設定
+		$this->dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_WARNING);
+		// prepareを利用する
+		$this->dbh->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
 
-		$this->debug_echo('■ __construct end');
-
+		// $this->debug_echo('■ connect end');
 
 	}
 
 
 	/**
-	 * 絶対パスを得る。
-	 *
-	 * パス情報を受け取り、スラッシュから始まるサーバー内部絶対パスに変換して返します。
-	 *
-	 * このメソッドは、PHPの `realpath()` と異なり、存在しないパスも絶対パスに変換します。
-	 *
-	 * @param string $path 対象のパス
-	 * @param string $cd カレントディレクトリパス。
-	 * 実在する有効なディレクトリのパス、または絶対パスの表現で指定される必要があります。
-	 * 省略時、カレントディレクトリを自動採用します。
-	 * @return string 絶対パス
+	 * CREATE処理関数
+	 *	 
 	 */
-	public function get_realpath( $path, $cd = '.' ){
-		$is_dir = false;
-		if( preg_match( '/(\/|\\\\)+$/s', $path ) ){
-			$is_dir = true;
-		}
-		$path = $this->localize_path($path);
-		if( is_null($cd) ){ $cd = '.'; }
-		$cd = $this->localize_path($cd);
-		$preg_dirsep = preg_quote(DIRECTORY_SEPARATOR, '/');
+	public function create_table() {
 
-		if( $this->is_dir($cd) ){
-			$cd = realpath($cd);
-		}elseif( !preg_match('/^((?:[A-Za-z]\\:'.$preg_dirsep.')|'.$preg_dirsep.'{1,2})(.*?)$/', $cd) ){
-			$cd = false;
-		}
-		if( $cd === false ){
-			return false;
-		}
+		$this->debug_echo('■ create_table start');
 
-		$prefix = '';
-		$localpath = $path;
-		if( preg_match('/^((?:[A-Za-z]\\:'.$preg_dirsep.')|'.$preg_dirsep.'{1,2})(.*?)$/', $path, $matched) ){
-			// もともと絶対パスの指定か調べる
-			$prefix = preg_replace('/'.$preg_dirsep.'$/', '', $matched[1]);
-			$localpath = $matched[2];
-			$cd = null; // 元の指定が絶対パスだったら、カレントディレクトリは関係ないので捨てる。
-		}
+		// データベース接続
+		$this->connect();
 
-		$path = $cd.DIRECTORY_SEPARATOR.'.'.DIRECTORY_SEPARATOR.$localpath;
+		// 公開予約テーブル作成
+		$create_sql = 'CREATE TABLE IF NOT EXISTS TS_RESERVE (
+			reserve_id_seq INTEGER PRIMARY KEY,
+			reserve_datetime TEXT,
+			branch_name TEXT,
+			commit_hash TEXT,
+			comment TEXT,
+			delete_flg TEXT,
+			insert_datetime TEXT,
+			insert_user_id TEXT,
+			update_datetime TEXT,
+			update_user_id TEXT
+		)';
 
-		if( file_exists( $prefix.$path ) ){
-			$rtn = realpath( $prefix.$path );
-			if( $is_dir && $rtn != realpath('/') ){
-				$rtn .= DIRECTORY_SEPARATOR;
-			}
-			return $rtn;
+		// 実行
+		$stmt = $this->dbh->query($create_sql);
+
+		if (!$stmt) {
+			// エラー情報表示
+			print_r($this->dbh->errorInfo());
 		}
 
-		$paths = explode( DIRECTORY_SEPARATOR, $path );
-		$path = '';
-		foreach( $paths as $idx=>$row ){
-			if( $row == '' || $row == '.' ){
-				continue;
-			}
-			if( $row == '..' ){
-				$path = dirname($path);
-				if($path == DIRECTORY_SEPARATOR){
-					$path = '';
-				}
-				continue;
-			}
-			if(!($idx===0 && DIRECTORY_SEPARATOR == '\\' && preg_match('/^[a-zA-Z]\:$/s', $row))){
-				$path .= DIRECTORY_SEPARATOR;
-			}
-			$path .= $row;
+		// 公開処理結果テーブル作成
+		$create_sql = 'CREATE TABLE IF NOT EXISTS TS_RESULT (
+			result_id_seq INTEGER PRIMARY KEY,
+			reserve_id INTEGER,
+			reserve_datetime TEXT,
+			branch_name TEXT,
+			commit_hash TEXT,
+			comment TEXT,
+			publish_type TEXT,
+			status TEXT,
+			change_check_flg TEXT,
+			publish_honban_diff_flg TEXT,
+			publish_pre_diff_flg TEXT,
+			start_datetime TEXT,
+			end_datetime TEXT,
+			batch_user_id TEXT,
+			gen_delete_flg TEXT,
+			gen_delete_datetime TEXT,
+			insert_datetime TEXT
+		)';
+
+		// SQL実行
+		$stmt = $this->dbh->query($create_sql);
+
+		// エラー情報表示
+		if (!$stmt) {
+			// エラー情報表示
+			print_r($this->dbh->errorInfo());
 		}
 
-		$rtn = $prefix.$path;
-		if( $is_dir ){
-			$rtn .= DIRECTORY_SEPARATOR;
-		}
-		return $rtn;
+		// データベースの接続を閉じる
+		$this->dbh = null;
+
+
+		$this->debug_echo('■ create_table end');
+
+		return;
 	}
 
 
 	/**
-	 * パスをOSの標準的な表現に変換する。
-	 *
-	 * 受け取ったパスを、OSの標準的な表現に変換します。
-	 * - スラッシュとバックスラッシュの違いを吸収し、`DIRECTORY_SEPARATOR` に置き換えます。
-	 *
-	 * @param string $path ローカライズするパス
-	 * @return string ローカライズされたパス
+	 * SELECT処理関数
+	 *	 
+	 * @param $sql = SQL文
+	 *	 
+	 * @return 取得データ配列
 	 */
-	public function localize_path($path){
-		$path = $this->convert_filesystem_encoding( $path );//文字コードを揃える
-		$path = preg_replace( '/\\/|\\\\/s', '/', $path );//一旦スラッシュに置き換える。
-		if( $this->is_unix() ){
-			// Windows以外だった場合に、ボリュームラベルを受け取ったら削除する
-			$path = preg_replace( '/^[A-Z]\\:\\//s', '/', $path );//Windowsのボリュームラベルを削除
+	public function select($sql) {
+
+		$this->debug_echo('■ select start');
+
+		$ret_array = array();
+		$stmt = null;
+
+		// $this->debug_echo('　□sql：');
+		// $this->debug_var_dump($sql);
+
+		// データベース接続
+		$this->connect();
+
+		// 実行
+		if ($stmt = $this->dbh->query($sql)) {
+
+			// 取得したデータを配列に格納して返す
+			while ($row = $stmt->fetch(\PDO::FETCH_BOTH)) {
+				$ret_array[] = $row;
+			}
 		}
-		$path = preg_replace( '/\\/+/s', '/', $path );//重複するスラッシュを1つにまとめる
-		$path = preg_replace( '/\\/|\\\\/s', DIRECTORY_SEPARATOR, $path );
-		return $path;
+
+		// エラー情報表示
+		if (!$stmt) {
+			echo($this->dbh->errorInfo());
+		}
+		
+		// // データベースの接続を閉じる
+		// $this->dbh = null;
+
+		// $this->debug_echo('　□返却リストデータ：');
+		// $this->debug_var_dump($ret_array);
+
+		$this->debug_echo('■ select end');
+
+		return $ret_array;
 	}
 
+
 	/**
-	 * ディレクトリが存在するかどうか調べる。
-	 *
-	 * @param string $path 検証対象のパス
-	 * @return bool ディレクトリが存在する場合 `true`、存在しない場合、またはファイルが存在する場合に `false` を返します。
+	 * INSERT、UPDATE、DELETE処理関数
+	 *	 
+	 * @param $sql    = SQL文
+	 * @param $params = パラメータ
+	 *	 
+	 * @return 画面表示用のステータス情報
 	 */
-	public function is_dir( $path ){
-		$path = $this->localize_path($path);
-		return @is_dir( $path );
-	}//is_dir()
+	public function execute ($sql, $params) {
 
-	/**
-     *
-	 * 受け取ったテキストを、ファイルシステムエンコードに変換する。
-	 *
-	 * @param mixed $text テキスト
-	 * @return string 文字セット変換後のテキスト
-	 
-	private function convert_filesystem_encoding( $text ){
-		$RTN = $text;
-		if( !is_callable( 'mb_internal_encoding' ) ){
-			return $text;
-		}
-		if( !strlen( $this->filesystem_encoding ) ){
-			return $text;
-		}
+		$this->debug_echo('■ execute start');
 
-		$to_encoding = $this->filesystem_encoding;
-		$from_encoding = mb_internal_encoding().',UTF-8,SJIS-win,eucJP-win,SJIS,EUC-JP,JIS,ASCII';
+		// データベース接続
+		$this->connect();
 
-		return $this->convert_encoding( $text, $to_encoding, $from_encoding );
+		$this->debug_echo('　□sql：');
+		$this->debug_var_dump($sql);
 
-	}//convert_filesystem_encoding()
+		// 前処理
+		$stmt = $this->dbh->prepare($sql);
 
+		// 実行
+		$stmt->execute($params);
 
-	/**
-	 * 受け取ったテキストを、ファイルシステムエンコードに変換する。
-	 *
-	 * @param mixed $text テキスト
-	 * @param string $to_encoding 文字セット(省略時、内部文字セット)
-	 * @param string $from_encoding 変換前の文字セット
-	 * @return string 文字セット変換後のテキスト
-	 */
-	public function convert_encoding( $text, $to_encoding = null, $from_encoding = null ){
-		$RTN = $text;
-		if( !is_callable( 'mb_internal_encoding' ) ){
-			return $text;
-		}
+		// エラー情報表示
+		echo($this->dbh->errorInfo());
 
-		$to_encoding_fin = $to_encoding;
-		if( !strlen($to_encoding_fin) ){
-			$to_encoding_fin = mb_internal_encoding();
-		}
-		if( !strlen($to_encoding_fin) ){
-			$to_encoding_fin = 'UTF-8';
-		}
+		// // データベースの接続を閉じる
+		// $this->dbh = null;
 
-		$from_encoding_fin = (strlen($from_encoding)?$from_encoding.',':'').mb_internal_encoding().',UTF-8,SJIS-win,eucJP-win,SJIS,EUC-JP,JIS,ASCII';
+		$this->debug_echo('■ execute end');
 
-		// ---
-		if( is_array( $text ) ){
-			$RTN = array();
-			if( !count( $text ) ){
-				return $text;
-			}
-			foreach( $text as $key=>$row ){
-				$RTN[$key] = $this->convert_encoding( $row, $to_encoding, $from_encoding );
-			}
-		}else{
-			if( !strlen( $text ) ){
-				return $text;
-			}
-			$RTN = mb_convert_encoding( $text, $to_encoding_fin, $from_encoding_fin );
-		}
-		return $RTN;
-	}//convert_encoding()
-
-	/**
-	 * サーバがUNIXパスか調べる。
-	 *
-	 * @return bool UNIXパスなら `true`、それ以外なら `false` を返します。
-	 */
-	public function is_unix(){
-		if( DIRECTORY_SEPARATOR == '/' ){
-			return true;
-		}
-		return false;
-	}//is_unix()
-
-
-
-	/**
-	 * パスを正規化する。
-	 *
-	 * 受け取ったパスを、スラッシュ区切りの表現に正規化します。
-	 * Windowsのボリュームラベルが付いている場合は削除します。
-	 * URIスキーム(http, https, ftp など) で始まる場合、2つのスラッシュで始まる場合(`//www.example.com/abc/` など)、これを残して正規化します。
-	 *
-	 *  - 例： `\a\b\c.html` → `/a/b/c.html` バックスラッシュはスラッシュに置き換えられます。
-	 *  - 例： `/a/b////c.html` → `/a/b/c.html` 余計なスラッシュはまとめられます。
-	 *  - 例： `C:\a\b\c.html` → `/a/b/c.html` ボリュームラベルは削除されます。
-	 *  - 例： `http://a/b/c.html` → `http://a/b/c.html` URIスキームは残されます。
-	 *  - 例： `//a/b/c.html` → `//a/b/c.html` ドメイン名は残されます。
-	 *
-	 * @param string $path 正規化するパス
-	 * @return string 正規化されたパス
-	 */
-	public function normalize_path($path){
-		$path = trim($path);
-		$path = $this->convert_encoding( $path );//文字コードを揃える
-		$path = preg_replace( '/\\/|\\\\/s', '/', $path );//バックスラッシュをスラッシュに置き換える。
-		$path = preg_replace( '/^[A-Z]\\:\\//s', '/', $path );//Windowsのボリュームラベルを削除
-		$prefix = '';
-		if( preg_match( '/^((?:[a-zA-Z0-9]+\\:)?\\/)(\\/.*)$/', $path, $matched ) ){
-			$prefix = $matched[1];
-			$path = $matched[2];
-		}
-		$path = preg_replace( '/\\/+/s', '/', $path );//重複するスラッシュを1つにまとめる
-		return $prefix.$path;
+		return $stmt;
 	}
-
 
 	/**
 	 * ※デバッグ関数（エラー調査用）
@@ -483,10 +312,10 @@ class pdo
 	 */
 	function debug_echo($text) {
 	
-		echo strval($text);
-		echo "<br>";
+		// echo strval($text);
+		// echo "<br>";
 
-		return;
+		// return;
 	}
 
 	/**
@@ -495,10 +324,10 @@ class pdo
 	 */
 	function debug_var_dump($text) {
 	
-		var_dump($text);
-		echo "<br>";
+		// var_dump($text);
+		// echo "<br>";
 
-		return;
+		// return;
 	}
 
 }

@@ -7,42 +7,9 @@ class file_control
 	private $main;
 
 	/**
-	 * Delimiter
+	 * ファイルシステムの文字セット
 	 */
-	private $_delimiter		= ',';
-
-	/**
-	 * Enclosure
-	 */
-	private $_enclosure		= '"';
-
-	/**
-	 * 本番環境ディレクトリパス
-	 */
-	private $honban_path = './../honban/';
-
-	/**
-	 * backupディレクトリパス
-	 */
-	private $backup_path = './backup/';
-
-	/**
-	 * copyディレクトリパス
-	 */
-	private $copy_path = './copy/';
-
-	/**
-	 * 公開予約管理CSVファイル
-	 */
-	private $reserve_filename = './res/csv/list.csv';
-
-	/**
-	 * 公開予約管理CSV カラム列
-	 */
-	// ステータス列
-	private $reserve_column_status = 5;
-	// 公開予約日時の列
-	private $reserve_column_datetime = 3;
+	private $filesystem_encoding = null;
 
 	/**
 	 * コンストラクタ
@@ -53,217 +20,249 @@ class file_control
 	}
 
 	/**
-	 * status
-	 */
-	public function process() {
-
-		$current_dir = realpath('.');
-
-		$output = "";
-		$result = array('status' => true,
-						'message' => '');
-	
-	
-		try {
-
-			// *** 公開予定から本番環境へ置き換えるものを1件抽出する。（抽出されたものが実行中の場合はスキップする　※処理終了）
-			// 現在時刻
-			$now = date("Y-m-d H:i:s");
-
-			// 公開予約の一覧を取得
-			$data_list = $this->get_csv_data_list(0, $now);
-
-			if (!empty($data_list)) {
-
-				// 取得した一覧から最新の1件を取得
-				$datetime_str = $this->get_datetime_str($data_list, 'reserve_datetime', SORT_DESC);
-
-				echo '<br>' . '実行する公開予約日時：';
-				echo($datetime_str);
-			}
-
-			// *** 本番環境よりバックアップ取得
-
-			// #本番環境ディレクトリのパス取得（１）
-			// 本番環境の絶対パスを取得
-			$honban_real_path = realpath('.') . $this->honban_path;
-			echo '<br>' . '本番環境絶対パス：';
-			echo $honban_real_path;
-
-			// backupディレクトリの絶対パスを取得
-			$bk_real_path = realpath('.') . $this->backup_path;
-			echo '<br>' . 'バックアップフォルダの絶対パス：';
-			echo $bk_real_path;
-
-			// copyディレクトリの絶対パスを取得
-			$copy_real_path = realpath('.') . $this->copy_path;
-			echo '<br>' . 'コピーフォルダの絶対パス：';
-			echo $copy_real_path;
-
-			// #backupディレクトリに公開予定日時を名前としたフォルダを作成（２）
-			if (!file_exists($bk_real_path . $datetime_str)) {
-
-				// ディレクトリ作成
-				if ( !mkdir( $bk_real_path . $datetime_str, 0777, true) ) {
-					// ディレクトリが作成できない場合
-
-					// エラー処理
-					throw new Exception('Creation of master directory failed.');
-				}
-			}
-
-			// #（１）の中身を（２）へコピー
-			exec('cp -r '. $honban_real_path . '* ' . $bk_real_path . $datetime_str, $output);
-
-			// **成功したら
-			//   （１）の中身を削除
-			//       *成功したら
-			 		if (chdir($honban_real_path)) {
-			       		exec('rm -rf ./* ./.*', $output);
-			 		}
-			//      次の処理へ！
-
-			//       *失敗したら
-			// 			・失敗ログを残し、処理終了
-			// 			・中途半端に残っている（１）の中身を一旦削除して、
-			// 			 backupディレクトリから戻す！
-			// 			 ※そこも失敗してしまったら、本番環境が壊れている可能性があるので手動で戻してもらう
-
-			// **失敗したら
-			//   ・失敗ログを残し、処理終了
-			//   ・backupディレクトリは削除？
-
-
-
-			// *** 該当するcopyディレクトリの内容を本番環境へ反映
-			
-			// cron処理で実行対象として認識されたcopyディレクトリのパス取得（３）
-			
-			// （３）の中身を（１）へコピー
-			exec('cp -r '. $copy_real_path . $datetime_str . '* ' . $honban_real_path . $datetime_str, $output);
-
-			// **成功したら
-			//   ・成功ログを出力し、処理を終了する
-
-			// **失敗したら
-			//   ・失敗ログを残し、処理終了
-			//   ・中途半端にアップロードした（１）の中身をすべて削除して、
-			// 	  backupディレクトリから戻す！
-			// 	  ※そこも失敗してしまったら、本番環境が壊れているので手動で戻してもらわないといけない
-
-		
-		} catch (Exception $e) {
-
-			set_time_limit(30);
-
-			$result['status'] = false;
-			$result['message'] = $e->getMessage();
-
-			chdir($current_dir);
-			return json_encode($result);
-		}
-
-		set_time_limit(30);
-
-		$result['status'] = false;
-		
-		chdir($current_dir);
-		return json_encode($result);
-
-	}
-
-	/**
-	 * CSVから公開前のリストを取得する
+	 * 絶対パスを得る。
 	 *
-	 * @param $status = 取得対象のステータス
-	 * @return データリスト
+	 * パス情報を受け取り、スラッシュから始まるサーバー内部絶対パスに変換して返します。
+	 *
+	 * このメソッドは、PHPの `realpath()` と異なり、存在しないパスも絶対パスに変換します。
+	 *
+	 * @param string $path 対象のパス
+	 * @param string $cd カレントディレクトリパス。
+	 * 実在する有効なディレクトリのパス、または絶対パスの表現で指定される必要があります。
+	 * 省略時、カレントディレクトリを自動採用します。
+	 * @return string 絶対パス
 	 */
-	private function get_csv_data_list($status, $now)
-	{
+	public function get_realpath( $path, $cd = '.' ){
 
-		$ret_array = array();
+		$this->debug_echo('■ get_realpath start');
 
-		$filename = realpath('.') . $this->reserve_filename;
-
-		if (!file_exists($filename)) {
-		
-			echo 'ファイルが存在しない';
-		
-		} else {
-
-			// Open file
-			$handle = fopen($filename, "r");
-
-			$title_array = array();
-
-			$is_first = true;
-
-			// CSVリストをループ
-			while ($rowData = fgetcsv($handle, 0, $this->_delimiter, $this->_enclosure)) {
-
-				if($is_first){
-			        // タイトル行
-			        foreach ($rowData as $k => $v) {
-			        	$title_array[] = $v;
-			        }
-			        $is_first = false;
-			        continue;
-			    }
-			    
-				$set_flg = true;
-
-			    // 指定ステータスと一致しない場合
-			    if (isset($status) && ($rowData[$this->reserve_column_status] != $status)) {
-					$set_flg = false;
-			    }
-
-			    // 指定日時より未来日時の場合
-			    if (isset($now) && ($rowData[$this->reserve_column_datetime] > $now)) {
-			    	$set_flg = false;
-			    }
-
-			    if ($set_flg) {
-			    	// タイトルと値の2次元配列作成
-			    	$ret_array[] = array_combine ($title_array, $rowData);
-			    }
-			}
-
-			// Close file
-			fclose($handle);
-
+		$is_dir = false;
+		if( preg_match( '/(\/|\\\\)+$/s', $path ) ){
+			$is_dir = true;
 		}
-					
-		return $ret_array;
+		$path = $this->localize_path($path);
+		if( is_null($cd) ){ $cd = '.'; }
+		$cd = $this->localize_path($cd);
+		$preg_dirsep = preg_quote(DIRECTORY_SEPARATOR, '/');
+
+		if( $this->is_dir($cd) ){
+			$cd = realpath($cd);
+		}elseif( !preg_match('/^((?:[A-Za-z]\\:'.$preg_dirsep.')|'.$preg_dirsep.'{1,2})(.*?)$/', $cd) ){
+			$cd = false;
+		}
+		if( $cd === false ){
+			return false;
+		}
+
+		$prefix = '';
+		$localpath = $path;
+		if( preg_match('/^((?:[A-Za-z]\\:'.$preg_dirsep.')|'.$preg_dirsep.'{1,2})(.*?)$/', $path, $matched) ){
+			// もともと絶対パスの指定か調べる
+			$prefix = preg_replace('/'.$preg_dirsep.'$/', '', $matched[1]);
+			$localpath = $matched[2];
+			$cd = null; // 元の指定が絶対パスだったら、カレントディレクトリは関係ないので捨てる。
+		}
+
+		$path = $cd.DIRECTORY_SEPARATOR.'.'.DIRECTORY_SEPARATOR.$localpath;
+
+		if( file_exists( $prefix.$path ) ){
+			$rtn = realpath( $prefix.$path );
+			if( $is_dir && $rtn != realpath('/') ){
+				$rtn .= DIRECTORY_SEPARATOR;
+			}
+			return $rtn;
+		}
+
+		$paths = explode( DIRECTORY_SEPARATOR, $path );
+		$path = '';
+		foreach( $paths as $idx=>$row ){
+			if( $row == '' || $row == '.' ){
+				continue;
+			}
+			if( $row == '..' ){
+				$path = dirname($path);
+				if($path == DIRECTORY_SEPARATOR){
+					$path = '';
+				}
+				continue;
+			}
+			if(!($idx===0 && DIRECTORY_SEPARATOR == '\\' && preg_match('/^[a-zA-Z]\:$/s', $row))){
+				$path .= DIRECTORY_SEPARATOR;
+			}
+			$path .= $row;
+		}
+
+		$rtn = $prefix.$path;
+		if( $is_dir ){
+			$rtn .= DIRECTORY_SEPARATOR;
+		}
+
+
+		$this->debug_echo('■ get_realpath end');
+
+		return $rtn;
 	}
 
 	/**
-	 * 公開予約一覧用の配列を「公開予定日時の昇順」へソートし返却する
-	 *	 
-	 * @param $array_list = ソート対象の配列
-	 * @param $sort_name  = ソートするキー名称
-	 * @param $sort_kind  = ソートの種類
-	 *	 
-	 * @return ソート後の配列
+	 * パスをOSの標準的な表現に変換する。
+	 *
+	 * 受け取ったパスを、OSの標準的な表現に変換します。
+	 * - スラッシュとバックスラッシュの違いを吸収し、`DIRECTORY_SEPARATOR` に置き換えます。
+	 *
+	 * @param string $path ローカライズするパス
+	 * @return string ローカライズされたパス
 	 */
-	private function get_datetime_str($array_list, $sort_name, $sort_kind) {
+	public function localize_path($path){
+		$path = $this->convert_filesystem_encoding( $path );//文字コードを揃える
+		$path = preg_replace( '/\\/|\\\\/s', '/', $path );//一旦スラッシュに置き換える。
+		if( $this->is_unix() ){
+			// Windows以外だった場合に、ボリュームラベルを受け取ったら削除する
+			$path = preg_replace( '/^[A-Z]\\:\\//s', '/', $path );//Windowsのボリュームラベルを削除
+		}
+		$path = preg_replace( '/\\/+/s', '/', $path );//重複するスラッシュを1つにまとめる
+		$path = preg_replace( '/\\/|\\\\/s', DIRECTORY_SEPARATOR, $path );
+		return $path;
+	}
 
-		$ret = '';
+	/**
+	 * パスを正規化する。
+	 *
+	 * 受け取ったパスを、スラッシュ区切りの表現に正規化します。
+	 * Windowsのボリュームラベルが付いている場合は削除します。
+	 * URIスキーム(http, https, ftp など) で始まる場合、2つのスラッシュで始まる場合(`//www.example.com/abc/` など)、これを残して正規化します。
+	 *
+	 *  - 例： `\a\b\c.html` → `/a/b/c.html` バックスラッシュはスラッシュに置き換えられます。
+	 *  - 例： `/a/b////c.html` → `/a/b/c.html` 余計なスラッシュはまとめられます。
+	 *  - 例： `C:\a\b\c.html` → `/a/b/c.html` ボリュームラベルは削除されます。
+	 *  - 例： `http://a/b/c.html` → `http://a/b/c.html` URIスキームは残されます。
+	 *  - 例： `//a/b/c.html` → `//a/b/c.html` ドメイン名は残されます。
+	 *
+	 * @param string $path 正規化するパス
+	 * @return string 正規化されたパス
+	 */
+	public function normalize_path($path){
+		$path = trim($path);
+		$path = $this->convert_encoding( $path );//文字コードを揃える
+		$path = preg_replace( '/\\/|\\\\/s', '/', $path );//バックスラッシュをスラッシュに置き換える。
+		$path = preg_replace( '/^[A-Z]\\:\\//s', '/', $path );//Windowsのボリュームラベルを削除
+		$prefix = '';
+		if( preg_match( '/^((?:[a-zA-Z0-9]+\\:)?\\/)(\\/.*)$/', $path, $matched ) ){
+			$prefix = $matched[1];
+			$path = $matched[2];
+		}
+		$path = preg_replace( '/\\/+/s', '/', $path );//重複するスラッシュを1つにまとめる
+		return $prefix.$path;
+	}
+	
+	/**
+	 * ディレクトリが存在するかどうか調べる。
+	 *
+	 * @param string $path 検証対象のパス
+	 * @return bool ディレクトリが存在する場合 `true`、存在しない場合、またはファイルが存在する場合に `false` を返します。
+	 */
+	public function is_dir( $path ){
+		$path = $this->localize_path($path);
+		return @is_dir( $path );
+	}//is_dir()
 
-		if (!empty($array_list)) {
+	/**
+	 * サーバがUNIXパスか調べる。
+	 *
+	 * @return bool UNIXパスなら `true`、それ以外なら `false` を返します。
+	 */
+	public function is_unix(){
+		if( DIRECTORY_SEPARATOR == '/' ){
+			return true;
+		}
+		return false;
+	}//is_unix()
 
-			$sort_array = array();
-
-			foreach($array_list as $key => $value) {
-				$sort_array[$key] = $value[$sort_name];
-			}
-
-			// 公開予定日時の昇順へソート	
-			array_multisort($sort_array, $sort_kind, $array_list);
-			// 先頭行の公開予約日時
-			$ret = date('YmdHis', strtotime($array_list[0][$sort_name]));
+	/**
+	 * 受け取ったテキストを、ファイルシステムエンコードに変換する。
+	 *
+	 * @param mixed $text テキスト
+	 * @return string 文字セット変換後のテキスト
+	 */
+	private function convert_filesystem_encoding( $text ){
+		$RTN = $text;
+		if( !is_callable( 'mb_internal_encoding' ) ){
+			return $text;
+		}
+		if( !strlen( $this->filesystem_encoding ) ){
+			return $text;
 		}
 
-		return $ret;
+		$to_encoding = $this->filesystem_encoding;
+		$from_encoding = mb_internal_encoding().',UTF-8,SJIS-win,eucJP-win,SJIS,EUC-JP,JIS,ASCII';
+
+		return $this->convert_encoding( $text, $to_encoding, $from_encoding );
+
+	}//convert_filesystem_encoding()
+
+	/**
+	 * 受け取ったテキストを、ファイルシステムエンコードに変換する。
+	 *
+	 * @param mixed $text テキスト
+	 * @param string $to_encoding 文字セット(省略時、内部文字セット)
+	 * @param string $from_encoding 変換前の文字セット
+	 * @return string 文字セット変換後のテキスト
+	 */
+	public function convert_encoding( $text, $to_encoding = null, $from_encoding = null ){
+		$RTN = $text;
+		if( !is_callable( 'mb_internal_encoding' ) ){
+			return $text;
+		}
+
+		$to_encoding_fin = $to_encoding;
+		if( !strlen($to_encoding_fin) ){
+			$to_encoding_fin = mb_internal_encoding();
+		}
+		if( !strlen($to_encoding_fin) ){
+			$to_encoding_fin = 'UTF-8';
+		}
+
+		$from_encoding_fin = (strlen($from_encoding)?$from_encoding.',':'').mb_internal_encoding().',UTF-8,SJIS-win,eucJP-win,SJIS,EUC-JP,JIS,ASCII';
+
+		// ---
+		if( is_array( $text ) ){
+			$RTN = array();
+			if( !count( $text ) ){
+				return $text;
+			}
+			foreach( $text as $key=>$row ){
+				$RTN[$key] = $this->convert_encoding( $row, $to_encoding, $from_encoding );
+			}
+		}else{
+			if( !strlen( $text ) ){
+				return $text;
+			}
+			$RTN = mb_convert_encoding( $text, $to_encoding_fin, $from_encoding_fin );
+		}
+		return $RTN;
+	}//convert_encoding()
+
+	/**
+	 * ※デバッグ関数（エラー調査用）
+	 *	 
+	 */
+	function debug_echo($text) {
+	
+		echo strval($text);
+		echo "<br>";
+
+		return;
+	}
+
+	/**
+	 * ※デバッグ関数（エラー調査用）
+	 *	 
+	 */
+	function debug_var_dump($text) {
+	
+		var_dump($text);
+		echo "<br>";
+
+		return;
 	}
 
 }

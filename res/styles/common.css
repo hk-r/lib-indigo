@@ -5,41 +5,41 @@
 }
 
 body {
-	background-color: #fff;
-	cursor: default;
-	color: #333;
+  background-color: #fff;
+  cursor: default;
+  color: #333;
 }
 
 
 
 .table th {
-	text-align: center;
-/*	background-color: #666;
-	color: #fff;
-*/	background-color: #e7e7e7;
-	color: #000;
-	border: 1px solid #999 !important;
+  text-align: center;
+/*  background-color: #666;
+  color: #fff;
+*/  background-color: #e7e7e7;
+  color: #000;
+  border: 1px solid #999 !important;
 }
 
 .table td {
-	border: 1px solid #999 !important;
+  border: 1px solid #999 !important;
 }
 
 .dialog_thead {
-	font-weight: bold;
-	text-align: left;
-	width: 25%;
+  font-weight: bold;
+  text-align: left;
+  width: 25%;
 }
 
 .p-center {
-	text-align: center;
+  text-align: center;
 }
 
 #loading{
-	position: absolute;
-	left: 50%;
-	top: 50%;
-	margin-left: -110px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: -110px;
 }
 
 #loader-bg {
@@ -59,12 +59,12 @@ body {
 }
 
 #main-contents{
-	text-align: center;
-	margin-top: 20%;
+  text-align: center;
+  margin-top: 20%;
 }
 
 .dialog_box {
-	width: 80%;
+  width: 80%;
     margin: 3em auto;
     background-color: #fff;
     padding: 15px;
@@ -73,41 +73,51 @@ body {
     box-shadow: 5px 10px 10px rgba(0, 0, 0, 0.2);
 }
 
+.dialog_box_danger {
+  width: 80%;
+    margin: 3em auto;
+    background-color: #fdf8f8;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 5px 10px 10px rgba(0, 0, 0, 0.2);
+}
+
 .dialog-buttons {
-	text-align: center;
+  text-align: center;
 }
 
 .alert_box {
-	/*width:80%;*/
-	padding:15px;
-	margin-bottom: 20px;
-	background: #FEDFE1;
+  /*width:80%;*/
+  padding:15px;
+  margin-bottom: 20px;
+  background: #FEDFE1;
 
 }
 
 .alert_box .alert_title {
-	font-weight: bold;
-	margin: 0 0 10px 0;
+  font-weight: bold;
+  margin: 0 0 10px 0;
 }
 
 .alert_box .alert_content a {
-	color: #724938;
-	font-weight: bold;
-	/*vertical-align: middle;*/
-	/*text-decoration: underline;*/
+  color: #724938;
+  font-weight: bold;
+  /*vertical-align: middle;*/
+  /*text-decoration: underline;*/
 }
 
 .alert_box .alert_content {
-	/*color: #724938;*/
+  /*color: #724938;*/
 
-	margin: 0;
-	line-height: 1.5;
+  margin: 0;
+  line-height: 1.5;
 }
 
 .alert_box .error_message {
-	color: #724938;
-	margin: 0;
-	line-height: 1.5;
+  color: #724938;
+  margin: 0;
+  line-height: 1.5;
 }
 
 /* picklesソースよりボタンスタイル */
