@@ -75,7 +75,7 @@ $(function($){
 				alert('選択されていません');
 				return false;
 			}
-
+			
 			$("#form_table").submit(function(){
 				$('<input />').attr('type', 'hidden')
 				 .attr('name', 'selected_id')
@@ -102,50 +102,50 @@ $(function($){
 		});	
 
 		/*
-		 * [新規][履歴]戻る][確定]ボタン
+		 * [新規][履歴]戻る][確定][即時公開]ボタン
 		 */
-		$('#add_btn, #confirm_btn, #back_btn, #history_btn').on('click', function() {
+		$('#add_btn, #confirm_btn, #back_btn, #history_btn, #sokuji_btn').on('click', function() {
 
 			// ダイアログ画面ロック
 			display_lock();
 		});	
 
-		/*
-		 * 即時公開ボタン
-		 */
-		$('#release_btn').on('click', function() {
+		// /*
+		//  * 即時公開ボタン
+		//  */
+		// $('#release_btn').on('click', function() {
 
-			var selected_flg = false;
+		// 	var selected_flg = false;
 			
-			var element = document.getElementsByName('target');
+		// 	var element = document.getElementsByName('target');
 			
-			var str = "";
+		// 	var str = "";
 
-			for (var i = 0; i < element.length; i++) {
+		// 	for (var i = 0; i < element.length; i++) {
 
-				if (element[i].checked) {
-					selected_flg = true;
-					str = element[i].value;
-					break;
-				}
-			}
+		// 		if (element[i].checked) {
+		// 			selected_flg = true;
+		// 			str = element[i].value;
+		// 			break;
+		// 		}
+		// 	}
 
-			if (!selected_flg) {
+		// 	if (!selected_flg) {
 				
-				alert('選択されていません');
-				return false;
-			}
+		// 		alert('選択されていません');
+		// 		return false;
+		// 	}
 
-			$("#form_table").submit(function(){
-				$('<input />').attr('type', 'hidden')
-				 .attr('name', 'selected_id')
-				 .attr('value', str)
-				 .appendTo('#form_table');
-			});
+		// 	$("#form_table").submit(function(){
+		// 		$('<input />').attr('type', 'hidden')
+		// 		 .attr('name', 'selected_id')
+		// 		 .attr('value', str)
+		// 		 .appendTo('#form_table');
+		// 	});
 
-			// 画面ロック
-			display_lock();
-		});	
+		// 	// 画面ロック
+		// 	display_lock();
+		// });	
 
 		/*
 		 * 状態ダイアログ[閉じる]ボタン
