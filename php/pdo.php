@@ -70,7 +70,7 @@ class pdo
 
 
 		// WAITINGディレクトリの絶対パス
-		$db_path_real = $this->file_control->normalize_path($this->file_control->get_realpath($current_dir . $db_path));
+		$db_path_real = $this->file_control->normalize_path($this->file_control->get_realpath($current_dir));
 
 		$this->debug_echo('■ $db_path_real：' . $db_path_real);
 
