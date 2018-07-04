@@ -24,7 +24,8 @@
         "files": [
             "php/main.php",
             "php/file_control.php",
-            "php/pdo.php"
+            "php/pdo.php",
+            "php/cron.php"
         ]
     },
     "extra": {
