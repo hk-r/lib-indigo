@@ -85,7 +85,7 @@ class pdo
 	  		);
 
 		} catch (\Exception $e) {
-	  		echo 'データベースにアクセスできません。' . $e->getMesseage;
+	  		echo 'データベースにアクセスできません。' . $e->getMessage();
 	  		// // 強制終了
 	  		// die();
 		}
@@ -111,7 +111,7 @@ class pdo
 
 
 		} catch (\Exception $e) {
-	  		echo 'データベースの接続が閉じれません。' . $e->getMesseage;
+	  		echo 'データベースの接続が閉じれません。' . $e->getMessage();
 	  		// // 強制終了
 	  		// die();
 		}
