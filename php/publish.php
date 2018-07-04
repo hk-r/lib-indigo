@@ -217,6 +217,8 @@ class publish
 		$this->main = $main;
 		$this->file_control = new file_control($this);
 		$this->pdo = new pdo($this);
+
+		$this->debug_echo('★publishクラスのコンストラクタ起動！');
 	}
 
 
@@ -245,119 +247,12 @@ class publish
 		return date(DATE_ATOM, time());
 	}
 
-	/**
-	 * 
-	 */
-	public function run() {
 	
-		// $this->debug_echo('■ run start');
-
-		// $this->debug_echo('　□カレントパス：' . realpath('.'));
-		// $this->debug_echo('　□__DIR__：' . __DIR__);
-
-		// $path = self::PATH_CREATE_DIR . self::PATH_WAITING;
-		// $this->debug_echo('　□相対パス' . $path);
-		// $real_path = $this->file_control->normalize_path($this->file_control->get_realpath($path));
-
-		// $this->debug_echo('　□絶対パス' . $real_path);
-
-		// 画面表示
-		$disp = '';  
-
-		// エラーダイアログ表示
-		$alert_message = '';
-
-		// ダイアログの表示
-		$dialog_disp = '';
-		
-		// 画面ロック用
-		$disp_lock = '';
-
-		// 処理実行結果格納
-		$ret = '';
-
-		// 入力画面へ表示させるエラーメッセージ
-		// $error_message = '';
-
-		//timezoneテスト ここから
-		date_default_timezone_set('Asia/Tokyo');
-
-		echo "--------------------------------</br>";
-	
-		$this->debug_echo('　□GMTの現在時刻：');
-		$this->debug_echo(gmdate(DATE_ATOM, time()));
-
-		$this->debug_echo('　□Asiaの現在時刻：');
-		$this->debug_echo(date(DATE_ATOM, time()));
-
-
-		$t = new \DateTime(gmdate(DATE_ATOM, time()));
-		$t->setTimeZone(new \DateTimeZone('Asia/Tokyo'));
-		$this->debug_echo('　□GMTから変換したAsiaの現在時刻：');
-		$this->debug_echo($t->format(DATE_ATOM));
-
-
-		$t = new \DateTime($t->format(DATE_ATOM));
-		$t->setTimeZone(new \DateTimeZone('GMT'));
-
-		$this->debug_echo('　□日本時間から変換したGMTの現在時刻：');
-		$this->debug_echo($t->format(DATE_ATOM));
-
-		// タイムゾーンが取得できる！！！！
-		echo "タイムゾーン取得 ：" . date("e", date(DATE_ATOM, time())). "</br>";
-		
-		echo "--------------------------------</br>";
-		//timezoneテスト ここまで
-
-		try {
-
-			// データベース接続
-			$this->dbh = $this->pdo->connect();
-
-			// テーブル作成（存在している場合は処理しない）
-			$this->pdo->create_table($this->dbh);
-
-			// 即時公開処理
-			$ret = json_decode($this->sokuji_release());
-
-			if ( !$ret->status ) {
-
-				$alert_message = 'sokuji_release faild';
-			}
-
-			if ( !$ret->status ) {
-				// 処理失敗の場合
-
-				// エラーメッセージ表示
-				$dialog_disp = '
-				<script type="text/javascript">
-					console.error("' . $ret->message . '");
-					alert("' . $alert_message .'");
-				</script>';
-				
-			}
-	
-		} catch (\Exception $e) {
-
-			// データベース接続を閉じる
-			$this->pdo->close($this->dbh);
-
-			echo $e->getMessage();
-
-			$this->debug_echo('■ run error end');
-
-			return;
-		}
-
-		// データベース接続を閉じる
-		$this->pdo->close();
-
-	}
 
 	/**
 	 * 時限公開処理
 	 */
-	private function jigen_release() {
+	public function jigen_release() {
 
 		$this->debug_echo('■ jigen_release start');
 
@@ -376,6 +271,9 @@ class publish
 		$start_datetime_dir = gmdate(self::DATETIME_FORMAT_SAVE);
 
 		try {
+
+		error_log(print_r($start_datetime, TRUE), 3, 'C:\workspace\sample-lib-indigo\vendor\pickles2\lib-indigo\php\output.log');
+
 
 	 		// ▼ 未実装
 			/**
