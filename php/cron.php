@@ -9,6 +9,11 @@ class cron
 	private $pdo;
 
 	/**
+	 * PDOインスタンス
+	 */
+	private $dbh;
+
+	/**
 	 * コンストラクタ
 	 * @param $options = オプション
 	 */
