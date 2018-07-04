@@ -164,6 +164,7 @@ class pdo
 			// エラー情報表示
 			throw new \Exception($dbh->errorInfo());
 		}
+		$stmt->closeCursor();
 
 		// 公開処理結果テーブル作成
 		$create_sql = 'CREATE TABLE IF NOT EXISTS TS_RESULT (
@@ -194,7 +195,8 @@ class pdo
 			// エラー情報表示
 			throw new \Exception($dbh->errorInfo());
 		}
-
+		$stmt->closeCursor();
+		
 		// // データベースの接続を閉じる
 		// $this->dbh = null;
 
