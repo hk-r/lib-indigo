@@ -84,8 +84,8 @@ class pdo
 	  			$option
 	  		);
 
-		} catch (\Exception $e) {
-	  		echo 'データベースにアクセスできません。' . $e->getMessage();
+		} catch (\PDOException $e) {
+	  		echo 'Connection failed: ' . $e->getMessage();
 	  		// // 強制終了
 	  		// die();
 		}
@@ -110,8 +110,8 @@ class pdo
 			$dbh = null;
 
 
-		} catch (\Exception $e) {
-	  		echo 'データベースの接続が閉じれません。' . $e->getMessage();
+		} catch (\PDOException $e) {
+	  		echo 'Connection failed: ' . $e->getMessage();
 	  		// // 強制終了
 	  		// die();
 		}
