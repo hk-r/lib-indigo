@@ -7,6 +7,8 @@ class pdo
 
 	private $main;
 
+	private $file_control;
+
 	/**
 	 * Constructor
 	 *
@@ -15,6 +17,8 @@ class pdo
 	public function __construct ($main){
 
 		$this->main = $main;
+		$this->file_control = new file_control($this);
+
 
 		// // DELETE文作成
 		// $delete_sql = "DELETE FROM list WHERE id = :id";
@@ -62,7 +66,13 @@ class pdo
 		$db_name = 'test.db';	// データベース名
 		$db_path = './sqlite/';	// データベースパス
 
-		$dsn = "sqlite:" . $db_path . $db_name;
+		$current_dir = realpath('.');
+
+
+		// WAITINGディレクトリの絶対パス
+		$db_path_real = $this->file_control->normalize_path($this->file_control->get_realpath($current_dir . $db_path));
+
+		$dsn = "sqlite:" . $db_path_real . $db_name;
 
 		$db_user = null;
 		$db_pass = null;
