@@ -66,11 +66,13 @@ class pdo
 		$db_name = 'test.db';	// データベース名
 		$db_path = './sqlite/';	// データベースパス
 
-		$current_dir = realpath('.');
+		$current_dir = '/var/www/html/sample-lib-indigo/htdocs/sqlite/';
 
 
 		// WAITINGディレクトリの絶対パス
 		$db_path_real = $this->file_control->normalize_path($this->file_control->get_realpath($current_dir . $db_path));
+
+		$this->debug_echo('■ $db_path_real：' . $db_path_real);
 
 		$dsn = "sqlite:" . $db_path_real . $db_name;
 
@@ -164,7 +166,6 @@ class pdo
 			// エラー情報表示
 			throw new \Exception($dbh->errorInfo());
 		}
-		$stmt->closeCursor();
 
 		// 公開処理結果テーブル作成
 		$create_sql = 'CREATE TABLE IF NOT EXISTS TS_RESULT (
@@ -195,8 +196,7 @@ class pdo
 			// エラー情報表示
 			throw new \Exception($dbh->errorInfo());
 		}
-		$stmt->closeCursor();
-		
+
 		// // データベースの接続を閉じる
 		// $this->dbh = null;
 
