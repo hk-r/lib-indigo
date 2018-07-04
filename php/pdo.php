@@ -89,7 +89,7 @@ class pdo
 		}
 			
 		// エラー表示の設定
-		$dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_WARNING);
+		$dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 		// prepareを利用する
 		$dbh->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
 
