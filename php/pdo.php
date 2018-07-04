@@ -135,7 +135,7 @@ class pdo
 	 * CREATE処理関数
 	 *	 
 	 */
-	public function create_table($dbh) {
+	public function create_table($p_dbh) {
 
 		$this->debug_echo('■ create_table start');
 
@@ -157,12 +157,12 @@ class pdo
 		)';
 
 		// 実行
-		$stmt = $dbh->query($create_sql);
+		$stmt = $p_dbh->query($create_sql);
 
 		if (!$stmt) {
 
 			// エラー情報表示
-			throw new \Exception($dbh->errorInfo());
+			throw new \Exception($p_dbh->errorInfo());
 		}
 		$stmt->closeCursor();
 
@@ -188,18 +188,14 @@ class pdo
 		)';
 
 		// SQL実行
-		$stmt = $dbh->query($create_sql);
+		$stmt = $p_dbh->query($create_sql);
 
 		if (!$stmt) {
 			
 			// エラー情報表示
-			throw new \Exception($dbh->errorInfo());
+			throw new \Exception($p_dbh->errorInfo());
 		}
 		$stmt->closeCursor();
-		
-		// // データベースの接続を閉じる
-		// $this->dbh = null;
-
 
 		$this->debug_echo('■ create_table end');
 
