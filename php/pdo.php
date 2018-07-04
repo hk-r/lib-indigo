@@ -69,6 +69,8 @@ class pdo
 	
 		$option = array(
 					\PDO::ATTR_PERSISTENT => false, // ←これをtrueにすると、"持続的な接続" になる
+					\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,	// エラー表示の設定
+					\PDO::ATTR_EMULATE_PREPARES => false　	// prepareを利用する
 				);
 
 		$pdo = null;
@@ -88,11 +90,6 @@ class pdo
 	  		// die();
 		}
 			
-		// エラー表示の設定
-		$dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-		// prepareを利用する
-		$dbh->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
-
 		$this->debug_echo('■ connect end');
 
 		return $dbh;
