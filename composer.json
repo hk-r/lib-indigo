@@ -22,11 +22,13 @@
     },
     "autoload": {
         "files": [
-            "php/main.php",
-            "php/file_control.php",
-            "php/pdo.php",
-            "php/cron.php",
-            "php/publish.php"
+            "php/TsReserve.php",
+            "php/TsOutput.php",
+            "php/Publish.php",
+            "php/Pdo.php",
+            "php/Main.php",
+            "php/File.php",
+            "php/Cron.php"
         ]
     },
     "extra": {

@@ -1,7 +1,7 @@
 <?php
 namespace indigo;
 
-class file_control
+class File
 {
 	/** indigo\mainのインスタンス */
 	private $main;
@@ -10,6 +10,8 @@ class file_control
 	 * ファイルシステムの文字セット
 	 */
 	private $filesystem_encoding = null;
+
+	const DIR_PERMISSION_0757 = 0757;
 
 	/**
 	 * コンストラクタ
@@ -141,6 +143,9 @@ class file_control
 	 * @return string 正規化されたパス
 	 */
 	public function normalize_path($path){
+
+		$this->debug_echo('■ normalize_path start');
+
 		$path = trim($path);
 		$path = $this->convert_encoding( $path );//文字コードを揃える
 		$path = preg_replace( '/\\/|\\\\/s', '/', $path );//バックスラッシュをスラッシュに置き換える。
@@ -151,6 +156,9 @@ class file_control
 			$path = $matched[2];
 		}
 		$path = preg_replace( '/\\/+/s', '/', $path );//重複するスラッシュを1つにまとめる
+
+		$this->debug_echo('■ normalize_path end');
+
 		return $prefix.$path;
 	}
 	
@@ -242,13 +250,43 @@ class file_control
 	}//convert_encoding()
 
 	/**
+	 * ディレクトリが存在しない場合はディレクトリを作成する
+	 *	 
+	 * @param $dirpath = ディレクトリパス
+	 *	 
+	 * @return true:成功、false：失敗
+	 */
+	public function is_exists_mkdir($dirpath) {
+
+		$this->debug_echo('■ is_exists_mkdir start');
+
+		$ret = true;
+
+		if ($dirpath) {
+			if ( !file_exists($dirpath) ) {
+				// ディレクトリ作成
+				if ( !mkdir($dirpath, self::DIR_PERMISSION_0757)) {
+					$ret = false;
+				}
+			}
+		} else {
+			$ret = false;
+		}
+
+		$this->debug_echo('　□ return：' . $ret);
+		$this->debug_echo('■ is_exists_mkdir end');
+
+		return $ret;
+	}
+
+	/**
 	 * ※デバッグ関数（エラー調査用）
 	 *	 
 	 */
 	function debug_echo($text) {
 	
-		echo strval($text);
-		echo "<br>";
+		// echo strval($text);
+		// echo "<br>";
 
 		return;
 	}
@@ -259,8 +297,8 @@ class file_control
 	 */
 	function debug_var_dump($text) {
 	
-		var_dump($text);
-		echo "<br>";
+		// var_dump($text);
+		// echo "<br>";
 
 		return;
 	}

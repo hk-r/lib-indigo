@@ -2,15 +2,11 @@
 
 namespace indigo;
 
-class publish
+class Publish
 {
-	public $options;
-
-	private $file_control;
+	private $main;
 
 	private $pdo;
-
-	private $main;
 
 	/**
 	 * PDOインスタンス
@@ -107,32 +103,6 @@ class publish
 	const PATH_PROJECT_DIR = './../../indigo-test-project/';
 
 	/**
-	 * 公開予約管理CSVの列番号定義
-	 */
-	const TS_RESERVE_COLUMN_ID = 'reserve_id_seq';		// ID
-	const TS_RESERVE_COLUMN_RESERVE = 'reserve_datetime';	// 公開予約日時
-	const TS_RESERVE_COLUMN_BRANCH = 'branch_name';	// ブランチ名
-	const TS_RESERVE_COLUMN_COMMIT = 'commit_hash';	// コミットハッシュ値（短縮）
-	const TS_RESERVE_COLUMN_COMMENT = 'comment';	// コメント
-	const TS_RESERVE_COLUMN_INSERT_DATETIME = 'insert_datetime';	// 設定日時
-
-	/**
-	 * 公開予約管理CSVの列番号定義
-	 */
-	const RESERVE_ENTITY_ID = 'reserve_id_seq';		// ID
-	const RESERVE_ENTITY_RESERVE = 'reserve_datetime';	// 公開予約日時
-	const RESERVE_ENTITY_RESERVE_DISPLAY = 'reserve_display';	// 公開予約日時
-	const RESERVE_ENTITY_RESERVE_DATE = 'reserve_date';	// 公開予約日時
-	const RESERVE_ENTITY_RESERVE_TIME = 'reserve_time';	// 公開予約日時
-	const RESERVE_ENTITY_BRANCH = 'branch_name';	// ブランチ名
-	const RESERVE_ENTITY_COMMIT = 'commit_hash';	// コミットハッシュ値（短縮）
-	const RESERVE_ENTITY_COMMENT = 'comment';	// コメント
-	const RESERVE_ENTITY_INSERT_DATETIME = 'insert_datetime';	// 設定日時
-
-
-
-
-	/**
 	 * 公開実施管理CSVの列番号定義
 	 */
 	const TS_RESULT_COLUMN_ID = 'result_id_seq';			// ID
@@ -215,8 +185,8 @@ class publish
 	public function __construct($main) {
 
 		$this->main = $main;
-		$this->file_control = new file_control($this);
-		$this->pdo = new pdo($this);
+		$this->file = new File($this);
+		$this->pdo = new Pdo($this);
 
 		$this->debug_echo('★publishクラスのコンストラクタ起動！');
 	}
@@ -250,13 +220,11 @@ class publish
 	
 
 	/**
-	 * 時限公開処理
+	 * 即時公開処理
 	 */
-	public function jigen_release() {
+	public function immediate_release() {
 
-		$this->debug_echo('■ jigen_release start');
-
-		$is_windows = true;
+		$this->debug_echo('■ immediate_release start');
 
 		$current_dir = realpath('.');
 
@@ -264,16 +232,345 @@ class publish
 		$result = array('status' => true,
 						'message' => '');
 
-		$project_real_path = '';
-
 		// GMTの現在日時
 		$start_datetime = gmdate(self::DATETIME_FORMAT);
 		$start_datetime_dir = gmdate(self::DATETIME_FORMAT_SAVE);
 
 		try {
 
-		error_log(print_r($start_datetime, TRUE), 3, '/var/www/html/sample-lib-indigo/indigo_dir/log/output.log');
+	 		// ▼ 未実装
+			/**
+	 		* 公開タスクロックの確認
+			*/
 
+	 		// クーロン用
+	 		$now = gmdate(self::DATETIME_FORMAT_SAVE);
+			// 公開予約の一覧を取得
+			$data_list = $this->get_ts_reserve_list($now);
+			foreach ( (array)$selected_ret as $data ) {
+				// 公開対象の公開予約日時（文字列）
+				$dirname = $this->get_datetime_str($selected_ret, self::TS_RESERVE_COLUMN_RESERVE, SORT_DESC);
+			}
+
+	 	// 	// 選択された公開予約データを取得
+			// $selected_ret = $this->get_selected_reserve_data();
+
+			// $dirname = '';
+
+			// if ( $selected_ret ) {
+			// 	// 公開対象の公開予約日時（文字列）
+			// 	$dirname = date(self::DATETIME_FORMAT_SAVE, strtotime($selected_ret[self::TS_RESERVE_COLUMN_RESERVE]));
+			// }
+
+			// $this->debug_echo('　□ 公開予約ディレクトリ：');
+			// $this->debug_echo($dirname);
+			$this->debug_echo('　□ 現在日時：');
+			$this->debug_echo($start_datetime);
+
+			// 公開対象が存在する場合
+			if ($start_datetime_dir) {
+
+				// 　公開予約一覧CSVにファイルロックが掛かっていない場合
+				// 　ファイルロックを掛ける
+				// 　実施済み一覧CSVにファイルロックが掛かっていない場合
+				// 　ファイルロックを掛ける
+		 		// 公開対象の行を、実施済みへ切り取り移動する
+		 		$this->debug_echo('　□ 公開処理結果テーブルの登録処理');
+				
+
+				/**
+		 		* 公開処理結果テーブルの登録処理
+				*/ 
+				$ret = json_decode($this->pdo->insert_ts_output($this->dbh, $this->main->options, $start_datetime));
+
+				// インサートしたシーケンスIDを取得（処理終了時の更新処理にて使用）
+				$insert_id = $this->dbh->lastInsertId();
+
+				$this->debug_echo('　□ $insert_id：');
+				$this->debug_echo($insert_id);
+
+				if ( !$ret->status) {
+					throw new \Exception("TS_OUTPUT insert failed.");
+				}
+				
+				// TODO:開発用に、windowsでは処理させていない。後で削除。
+				if (self::DEVELOP_ENV != '1') {
+
+					// TODO:未実装
+			 		// ファイルロックを解除する
+
+					// ログファイルディレクトリが存在しない場合は作成
+					if ( !$this->file_control->is_exists_mkdir($this->main->options->indigo_workdir_path . self::PATH_LOG) ) {
+						// エラー処理
+						throw new \Exception('Creation of log directory failed.');
+					} else {
+						
+						// ログファイル内の公開予約ディレクトリが存在しない場合は削除（存在する場合は作成しない）
+						if ( !$this->file_control->is_exists_mkdir($this->main->options->indigo_workdir_path . self::PATH_LOG . $dirname) ) {
+
+							// エラー処理
+							throw new \Exception('Creation of log publish directory failed.');
+						}
+					}
+
+					// バックアップディレクトリが存在しない場合は作成
+					if ( !$this->file_control->is_exists_mkdir($this->main->options->indigo_workdir_path . self::PATH_BACKUP) ) {
+						// エラー処理
+						throw new \Exception('Creation of backup directory failed.');
+					} else {
+						
+						// 公開予約ディレクトリをデリートインサート
+						if ( !$this->is_exists_remkdir($this->main->options->indigo_workdir_path . self::PATH_BACKUP . $dirname) ) {
+
+							// エラー処理
+							throw new \Exception('Creation of backup publish directory failed.');
+						}
+					}
+
+					// runningディレクトリが存在しない場合は作成
+					if ( !$this->file_control->is_exists_mkdir($this->main->options->indigo_workdir_path . self::PATH_RUNNING) ) {
+						// エラー処理
+						throw new \Exception('Creation of running directory failed.');
+					} else {
+						
+						// 公開予約ディレクトリをデリートインサート
+						if ( !$this->is_exists_remkdir($this->main->options->indigo_workdir_path . self::PATH_RUNNING . $dirname) ) {
+
+							// エラー処理
+							throw new \Exception('Creation of running publish directory failed.');
+						}
+					}
+
+					// releasedディレクトリが存在しない場合は作成
+					if ( !$this->file_control->is_exists_mkdir($this->main->options->indigo_workdir_path . self::PATH_RELEASED) ) {
+						// エラー処理
+						throw new \Exception('Creation of released directory failed.');
+					} else {
+						
+						// 公開予約ディレクトリをデリートインサート
+						if ( !$this->is_exists_remkdir($this->main->options->indigo_workdir_path . self::PATH_RELEASED . $dirname) ) {
+
+							// エラー処理
+							throw new \Exception('Creation of released publish directory failed.');
+						}
+					}
+
+					/**
+			 		* 本番ソースを「backup」ディレクトリへコピー
+					*/
+
+					$this->debug_echo('　▼バックアップ処理開始');
+
+					// バックアップの公開予約ディレクトリの存在確認
+					if ( file_exists($this->main->options->indigo_workdir_path . self::PATH_BACKUP . $dirname) ) {
+
+						// 本番ソースからバックアップディレクトリへコピー
+
+						// $honban_realpath = $current_dir . "/" . self::PATH_PROJECT_DIR;
+
+						$this->debug_echo('　□ カレントディレクトリ：');
+						$this->debug_echo(realpath('.'));
+
+						// TODO:ログフォルダに出力する
+						// $command = 'rsync -avzP ' . self::HONBAN_REALPATH  . '/' . ' ' . $this->main->options->indigo_workdir_path . self::PATH_BACKUP . $dirname . '/' . ' --log-file=' . $this->main->options->indigo_workdir_path . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
+
+						// $this->debug_echo('　□ $command：');
+						// $this->debug_echo($command);
+
+						// $ret = $this->command_execute($command, true);
+
+						$this->debug_echo('　▼本番バックアップの公開処理結果');
+
+						foreach ( (array)$ret['output'] as $element ) {
+							$this->debug_echo($element);
+						}
+					} else {
+							// エラー処理
+							throw new \Exception('Backup directory not found.');
+					}
+
+
+					/**
+			 		* 公開予約ソースを「WAITING」ディレクトリから「running」ディレクトリへ移動
+					*/
+					// runningの公開予約ディレクトリの存在確認
+					if ( file_exists($this->main->options->indigo_workdir_path . self::PATH_RUNNING . $dirname) ) {
+
+						// TODO:ログフォルダに出力する
+						$command = 'rsync -avzP --remove-source-files ' . $this->main->options->indigo_workdir_path . self::PATH_WAITING . $dirname . '/' . ' ' . $this->main->options->indigo_workdir_path . self::PATH_RUNNING . $dirname . '/' . ' --log-file=' . $this->main->options->indigo_workdir_path . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
+
+						$this->debug_echo('　□ $command：');
+						$this->debug_echo($command);
+
+						$ret = $this->command_execute($command, true);
+
+						$this->debug_echo('　▼RUNNINGへの移動の公開処理結果');
+
+						foreach ( (array)$ret['output'] as $element ) {
+							$this->debug_echo($element);
+						}
+
+
+						// waitingの空ディレクトリを削除する
+						$command = 'find ' .  $this->main->options->indigo_workdir_path . self::PATH_WAITING . $dirname . '/ -type d -empty -delete' ;
+
+						$this->debug_echo('　□ $command：');
+						$this->debug_echo($command);
+
+						$ret = $this->command_execute($command, true);
+
+						$this->debug_echo('　▼Waitingディレクトリの削除');
+
+						foreach ( (array)$ret['output'] as $element ) {
+							$this->debug_echo($element);
+						}
+
+						// waitingディレクトリの削除が成功していることを確認
+						if ( file_exists($this->main->options->indigo_workdir_path . self::PATH_WAITING . $dirname) ) {
+							// ディレクトリが削除できていない場合
+							// エラー処理
+							throw new \Exception('Delete of waiting publish directory failed.');
+						}
+					} else {
+							// エラー処理
+							throw new \Exception('Waiting directory not found.');
+					}
+
+					/**
+			 		* 「running」ディレクトリへ移動した公開予約ソースを本番環境へ同期
+					*/
+					// 本番ディレクトリの存在確認
+					// if ( file_exists(self::HONBAN_REALPATH) ) {
+
+					// 	// runningから本番ディレクトリへコピー
+
+					// 	// $honban_realpath = $current_dir . "/" . self::PATH_PROJECT_DIR;
+
+					// 	$this->debug_echo('　□ カレントディレクトリ：');
+					// 	$this->debug_echo(realpath('.'));
+
+					// 	// TODO:ログフォルダに出力する
+					// 	// $command = 'rsync -avzP ' . $this->main->options->indigo_workdir_path . self::PATH_RUNNING . $dirname . '/' . ' ' . self::HONBAN_REALPATH . ' --log-file=' . $this->main->options->indigo_workdir_path . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
+
+					// 	// ★-aではエラーとなる。最低限の同期とする！所有者やグループは変更しない！
+					// 	// r ディレクトリを再帰的に調べる。
+					// 	// -l シンボリックリンクをリンクとして扱う
+					// 	// -p パーミッションも含める
+					// 	// -t 更新時刻などの時刻情報も含める
+					// 	// -o 所有者情報も含める
+					// 	// -g ファイルのグループ情報も含める
+					// 	// -D デバイスファイルはそのままデバイスとして扱う
+					// 	$command = 'rsync -rtvzP --delete ' . $this->main->options->indigo_workdir_path . self::PATH_RUNNING . $dirname . '/' . ' ' . self::HONBAN_REALPATH . '/' . ' ' . '--log-file=' . $this->main->options->indigo_workdir_path . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
+
+					// 	$this->debug_echo('　□ $command：');
+					// 	$this->debug_echo($command);
+
+					// 	$ret = $this->command_execute($command, true);
+
+					// 	$this->debug_echo('　▼本番反映の公開処理結果');
+
+					// 	foreach ( (array)$ret['output'] as $element ) {
+					// 		$this->debug_echo($element);
+					// 	}
+
+					// } else {
+					// 		// エラー処理
+					// 		throw new \Exception('Running directory not found.');
+					// }
+
+					/**
+			 		* 同期が正常終了したら、公開済みソースを「running」ディレクトリから「released」ディレクトリへ移動
+					*/
+					// runningの公開予約ディレクトリの存在確認
+					if ( file_exists($this->main->options->indigo_workdir_path . self::PATH_RELEASED . $dirname) ) {
+
+						// TODO:ログフォルダに出力する
+						$command = 'rsync -avzP --remove-source-files ' . $this->main->options->indigo_workdir_path . self::PATH_RUNNING . $dirname . '/' . ' ' . $this->main->options->indigo_workdir_path . self::PATH_RELEASED . $dirname . '/' . ' --log-file=' . $this->main->options->indigo_workdir_path . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
+
+						$this->debug_echo('　□ $command：');
+						$this->debug_echo($command);
+
+						$ret = $this->command_execute($command, true);
+
+						$this->debug_echo('　▼REALEASEDへの移動の公開処理結果');
+
+						foreach ( (array)$ret['output'] as $element ) {
+							$this->debug_echo($element);
+						}
+
+
+						// runningの空ディレクトリを削除する
+						$command = 'find ' .  $this->main->options->indigo_workdir_path . self::PATH_RUNNING . $dirname . '/ -type d -empty -delete' ;
+
+						$this->debug_echo('　□ $command：');
+						$this->debug_echo($command);
+
+						$ret = $this->command_execute($command, true);
+
+						$this->debug_echo('　▼Runningディレクトリの削除');
+
+						foreach ( (array)$ret['output'] as $element ) {
+							$this->debug_echo($element);
+						}
+
+						// waitingディレクトリの削除が成功していることを確認
+						if ( file_exists($this->main->options->indigo_workdir_path . self::PATH_RUNNING . $dirname) ) {
+							// ディレクトリが削除できていない場合
+							// エラー処理
+							throw new \Exception('Delete of waiting publish directory failed.');
+						}
+					} else {
+							// エラー処理
+							throw new \Exception('Running publish directory not found.');
+					}
+
+				}
+
+				$this->debug_echo('　□ 公開処理結果テーブルの更新処理');
+
+
+				// GMTの現在日時
+				// $end_datetime = gmdate(self::DATETIME_FORMAT);
+				// $end_datetime_dir = gmdate(self::DATETIME_FORMAT_SAVE);
+
+				/**
+		 		* 公開処理結果テーブルの更新処理
+				*/
+		 		$ret = $this->update_ts_output($this->dbh, $insert_id);
+
+				foreach ( (array)$ret['output'] as $element ) {
+					$this->debug_echo($element);
+				}
+
+				// 実施済み一覧CSVにファイルロックが掛かっていない場合
+				// 　ロックを掛ける
+		 		// 「実施開始日時」を設定
+		 		// 「実施終了日時」を設定
+		 		
+				// 公開が成功した場合
+		 		// 　「公開完了日時」を設定
+
+		 		// 公開が失敗し、復元が完了した場合
+		 		// 　「復元完了日時」を設定
+
+		 		// ▼優先度低
+		 		// 本番環境と前回分のソースに差分が存在した場合
+		 		// 　「差分確認フラグ1」を設定
+
+		 		// ▼優先度低
+		 		// 本番環境と今回分のソースに差分が存在した場合
+		 		// 　「差分確認フラグ2」を設定
+
+		 		// ▼優先度低
+		 		// 今回分と前回分のソースに差分が存在した場合
+		 		// 　「差分確認フラグ3」を設定
+
+			} else {
+
+				$this->debug_echo('　□ 公開対象が存在しない');
+
+			}
+		
 		} catch (\Exception $e) {
 
 			// set_time_limit(30);
@@ -281,7 +578,7 @@ class publish
 			$result['status'] = false;
 			$result['message'] = $e->getMessage();
 
-			$this->debug_echo('■ sokuji_release error end');
+			$this->debug_echo('■ immediate_release error end');
 
 			chdir($current_dir);
 			return json_encode($result);
@@ -293,10 +590,12 @@ class publish
 
 		chdir($current_dir);
 
-		$this->debug_echo('■ jigen_release end');
+		$this->debug_echo('■ immediate_release end');
 
 		return json_encode($result);
 	}
+
+
 
 
 	/**

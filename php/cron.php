@@ -2,12 +2,41 @@
 
 namespace indigo;
 
-class cron
+class Cron
 {
 	public $publish;
 
 	private $pdo;
 
+	// 開発環境
+	const DEVELOP_ENV = '1';
+	
+	/**
+	 * 削除フラグ
+	 */
+	const DELETE_FLG_ON = 1;	// 削除済み
+	const DELETE_FLG_OFF = 0;	// 未削除
+	
+	/**
+	 * 公開種別
+	 */
+	// 予約公開
+	const PUBLISH_TYPE_RESERVE = 1;
+
+	/**
+	 * 公開ステータス
+	 */
+	// 処理中
+	const PUBLISH_STATUS_RUNNING = 0;
+	// 成功
+	const PUBLISH_STATUS_SUCCESS = 1;
+	// 成功（警告あり）
+	const PUBLISH_STATUS_ALERT = 2;
+	// 失敗
+	const PUBLISH_STATUS_FAILED = 3;
+	// スキップ
+	const PUBLISH_STATUS_SKIP = 4;
+	
 	/**
 	 * PDOインスタンス
 	 */
@@ -20,9 +49,9 @@ class cron
 	public function __construct($options) {
 
 		$this->options = json_decode(json_encode($options));
-		// $this->file_control = new file_control($this);
-		$this->pdo = new pdo($this);
-		$this->publish = new publish($this);
+		$this->file = new File($this);
+		$this->pdo = new Pdo($this);
+		$this->publish = new Publish($this);
 	}
 
 	/**
@@ -101,7 +130,7 @@ class cron
 		$this->debug_echo('■ [cron] create_table_終了');
 
 			// 即時公開処理
-			$ret = json_decode($this->publish->jigen_release());
+			$ret = json_decode($this->publish->immediate_release());
 
 			if ( !$ret->status ) {
 
@@ -139,6 +168,46 @@ class cron
 
     }
 
+	/**
+	 * ディレクトリの存在有無にかかわらず、ディレクトリを再作成する（存在しているものは削除する）
+	 *	 
+	 * @param $dirpath = ディレクトリパス
+	 *	 
+	 * @return true:成功、false：失敗
+	 */
+	private function is_exists_remkdir($dirpath) {
+		
+		$this->debug_echo('■ is_exists_remkdir start');
+		$this->debug_echo('　■ $dirpath：' . $dirpath);
+
+		if ( file_exists($dirpath) ) {
+			$this->debug_echo('　■ $dirpath2：' . $dirpath);
+
+			// 削除
+			$command = 'rm -rf --preserve-root '. $dirpath;
+			$ret = $this->command_execute($command, true);
+
+			if ( $ret['return'] !== 0 ) {
+				$this->debug_echo('[既存ディレクトリ削除失敗]');
+				return false;
+			}
+		}
+
+		// デプロイ先のディレクトリを作成
+		if ( !file_exists($dirpath)) {
+			if ( !mkdir($dirpath, self::DIR_PERMISSION_0757) ) {
+				$this->debug_echo('　□ [再作成失敗]$dirpath：' . $dirpath);
+				return false;
+			}
+		} else {
+			$this->debug_echo('　□ [既存ディレクトリが残っている]$dirpath：' . $dirpath);
+			return false;
+		}
+	
+		$this->debug_echo('■ is_exists_remkdir end');
+
+		return true;
+	}
 
 	/**
 	 * ※デバッグ関数（エラー調査用）
@@ -165,55 +234,3 @@ class cron
 	}
 
 }
-
-
-
-
-
-
-// // require_once("./../.px_execute.php");
-// require __DIR__ . '/pdo.php';
-
-// debug_echo('------------------------');
-// debug_echo('------------------------');
-// debug_echo(__DIR__);
-// debug_echo('Hello World!');
-
-// // $arr = array( "tokyo"  => "東京",
-// //             "osaka"  => "大阪",
-// //             "nagoya" => "名古屋"
-// //           );
-// // $log = $arr;
-// error_log(print_r($log, TRUE), 3, 'C:\workspace\sample-lib-indigo\vendor\pickles2\lib-indigo\php\output.log');
-
-
-// connect();
-
-
-// /**
-//  * ※デバッグ関数（エラー調査用）
-//  *	 
-//  */
-// function debug_echo($text) {
-
-// 	echo strval($text);
-// 	echo "\n";
-
-// 	return;
-// }
-
-// /**
-//  * ※デバッグ関数（エラー調査用）
-//  *	 
-//  */
-// function debug_var_dump($text) {
-
-// 	var_dump($text);
-// 	echo "\n";
-
-// 	return;
-// }
-
-
-
-

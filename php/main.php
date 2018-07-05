@@ -2,21 +2,26 @@
 
 namespace indigo;
 
-class main
+class Main
 {
 	public $options;
 
-	private $file_control;
+	private $file;
 
 	private $pdo;
+
+	private $tsReserve;
+
+	private $tsOutput;
 
 	/**
 	 * PDOインスタンス
 	 */
 	private $dbh;
+	
+	// 開発環境
+	const DEVELOP_ENV = '1';
 
-	// サーバのタイムゾーン
-	const PARAM_TIME_ZONE = 'Asia/Tokyo';
 	// サーバのタイムゾーン
 	const GMT = 'GMT';
 
@@ -55,9 +60,9 @@ class main
 	// 更新戻り表示モード
 	const INPUT_MODE_UPDATE_BACK = 4;
 	// 即時公開モード
-	const INPUT_MODE_SOKUJI = 5;
+	const INPUT_MODE_immediate = 5;
 	// 即時公開戻り表示モード
-	const INPUT_MODE_SOKUJI_BACK = 6;
+	const INPUT_MODE_immediate_BACK = 6;
 
 	/**
 	 * 公開種別
@@ -67,7 +72,7 @@ class main
 	// 復元公開
 	const PUBLISH_TYPE_RESTORE = 2;
 	// 即時公開
-	const PUBLISH_TYPE_SOKUJI = 3;
+	const PUBLISH_TYPE_IMMEDIATE = 3;
 
 
 	/**
@@ -88,24 +93,26 @@ class main
 	 * 公開用の操作ディレクトリパス定義
 	 */
 	// backupディレクトリパス
-	const PATH_BACKUP = '/backup/';
+	const PATH_BACKUP = '/file/backup/';
 	// waitingディレクトリパス
-	const PATH_WAITING = '/waiting/';
+	const PATH_WAITING = '/file/waiting/';
 	// runnningディレクトリパス
-	const PATH_RUNNING = '/running/';
+	const PATH_RUNNING = '/file/running/';
 	// releasedディレクトリパス
-	const PATH_RELEASED = '/released/';
+	const PATH_RELEASED = '/file/released/';
 	// logディレクトリパス
 	const PATH_LOG = '/log/';
+	// masterディレクトリパス
+	const PATH_MASTER = '/master_repository/';
 
 
-	// 生成ディレクトリパス（後々パラメタ化する）
-	const PATH_CREATE_DIR = './../indigo_dir/';
-	// 本番パス（後々パラメタ化する）
-	const PATH_PROJECT_DIR = './../../indigo-test-project/';
+	// // 生成ディレクトリパス（後々パラメタ化する）
+	// const PATH_CREATE_DIR = './../indigo_dir/';
+	// // 本番パス（後々パラメタ化する）
+	// const PATH_PROJECT_DIR = './../../indigo-test-project/';
 
 	/**
-	 * 公開予約管理CSVの列番号定義
+	 * 公開予約テーブルのカラム定義
 	 */
 	const TS_RESERVE_COLUMN_ID = 'reserve_id_seq';		// ID
 	const TS_RESERVE_COLUMN_RESERVE = 'reserve_datetime';	// 公開予約日時
@@ -115,7 +122,7 @@ class main
 	const TS_RESERVE_COLUMN_INSERT_DATETIME = 'insert_datetime';	// 設定日時
 
 	/**
-	 * 公開予約管理CSVの列番号定義
+	 * 公開予約エンティティのカラム定義
 	 */
 	const RESERVE_ENTITY_ID = 'reserve_id_seq';		// ID
 	const RESERVE_ENTITY_RESERVE = 'reserve_datetime';	// 公開予約日時
@@ -129,32 +136,8 @@ class main
 
 
 
-
 	/**
-	 * 公開実施管理CSVの列番号定義
-	 */
-	const TS_RESULT_COLUMN_ID = 'result_id_seq';			// ID
-	const TS_RESULT_COLUMN_RESERVE = 'reserve_datetime';		// 公開予約日時
-	const TS_RESULT_COLUMN_BRANCH = 'branch_name';		// ブランチ名
-	const TS_RESULT_COLUMN_COMMIT = 'commit_hash';		// コミットハッシュ値（短縮）
-	const TS_RESULT_COLUMN_COMMENT = 'comment';		// コメント
-	// const TS_RESULT_COLUMN_SETTING = '';		// 設定日時
-
-	const TS_RESULT_COLUMN_STATUS = 'status';		// 状態
-	const TS_RESULT_COLUMN_TYPE = 'publish_type';		// 公開種別
-
-	const TS_RESULT_COLUMN_START = 'start_datetime';		// 公開処理開始日時
-	const TS_RESULT_COLUMN_END = 'end_datetime';			// 公開処理終了日時
-
-	const TS_RESULT_COLUMN_RELEASED = 8;		// 公開完了日時
-	const TS_RESULT_COLUMN_RESTORE = 9;		// 復元完了日時
-
-	const TS_RESULT_COLUMN_DIFF_FLG1 = 10;	// 差分フラグ1（本番環境と前回分の差分）
-	const TS_RESULT_COLUMN_DIFF_FLG2 = 11;	// 差分フラグ2（本番環境と今回分の差分）
-	const TS_RESULT_COLUMN_DIFF_FLG3 = 12;	// 差分フラグ3（前回分と今回分の差分）
-
-	/**
-	 * 公開実施管理CSVの列番号定義
+	 * 公開処理結果エンティティのカラム定義
 	 */
 	const RESULT_ENTITY_ID = 'result_id_seq';			// ID
 	const RESULT_ENTITY_RESERVE = 'reserve_datetime';		// 公開予約日時
@@ -182,14 +165,12 @@ class main
 	// const HONBAN_REALPATH = '/var/www/html/indigo-test-project/';
 	const HONBAN_REALPATH = '/var/www/html/test';
 	
-	// 削除済み
-	const DELETE_FLG_ON = 1;
-	// 未削除
-	const DELETE_FLG_OFF = 0;
+	/**
+	 * 削除フラグ
+	 */
+	const DELETE_FLG_ON = 1;	// 削除済み
+	const DELETE_FLG_OFF = 0;	// 未削除
 
-	// const DEFINE_MAX_RECORD = 10;		// 公開予約できる最大件数
-	// const DEFINE_MAX_GENERATION = 10;	// 差分フラグ2（本番環境と今回分の差分）
-	// const DEFINE_MAX_RECORD = 12;		// 差分フラグ3（前回分と今回分の差分）
 
 	/**
 	 * コミットハッシュ値
@@ -201,10 +182,6 @@ class main
 	 */
 	private $input_error_message = '';
 
-	/**
-	 * 本番環境ディレクトリパス（仮）
-	 */
-	private $honban_path = './../honban/';
 
 	/**
 	 * コンストラクタ
@@ -213,8 +190,10 @@ class main
 	public function __construct($options) {
 
 		$this->options = json_decode(json_encode($options));
-		$this->file_control = new file_control($this);
-		$this->pdo = new pdo($this);
+		$this->file = new File($this);
+		$this->pdo = new Pdo($this);
+		$this->tsReserve = new TsReserve($this);
+		$this->tsOutput = new TsOutput($this);
 	}
 
 	/**
@@ -222,42 +201,39 @@ class main
 	 */
 	private function init() {
 
+		$this->debug_echo('■ init start');
+
 		$current_dir = realpath('.');
 
 		$output = "";
 		$result = array('status' => true,
 						'message' => '');
 
-		$master_path = $this->options->git->repository;
+		// masterディレクトリの絶対パス
+		$master_real_path = $this->file_control->normalize_path($this->file_control->get_realpath($this->options->indigo_workdir_path . self::PATH_MASTER));
+
+		$this->debug_echo('　□ master_real_path：');
+		$this->debug_echo($master_real_path);
+
 
 		set_time_limit(0);
 
 		try {
 
-			if ( strlen($master_path) ) {
+			if ( $master_real_path ) {
 
 				// デプロイ先のディレクトリが無い場合は作成
-				if ( !file_exists( $master_path ) ) {
-					// 存在しない場合
-
-					// ディレクトリ作成
-					if ( !mkdir( $master_path, 0777, true ) ) {
-						// ディレクトリが作成できない場合
-
-						// エラー処理
-						throw new \Exception('Creation of master directory failed.');
-					}
-					
-					// コマンドでディレクトリを作成する場合
-					// exec('mkdir -p ' . $master_path . '2>&1', $output, $return_var);
+				if ( !$this->file_control->is_exists_mkdir( $master_real_path ) ) {
+					// ディレクトリ作成に失敗
+					throw new \Exception('Creation of master directory failed.');
 				}
 
 				// 「.git」フォルダが存在すれば初期化済みと判定
-				if ( !file_exists( $master_path . "/.git") ) {
+				if ( !file_exists( $master_real_path . "/.git") ) {
 					// 存在しない場合
 
 					// ディレクトリ移動
-					if ( chdir( $master_path ) ) {
+					if ( chdir( $master_real_path ) ) {
 
 						// git セットアップ
 						$command = 'git init';
@@ -278,10 +254,8 @@ class main
 						$this->command_execute($command, false);
 
 					} else {
-						// ディレクトリが存在しない場合
-
-						// エラー処理
-						throw new \Exception('master directory not found.');
+						// ディレクトリ移動に失敗
+						throw new \Exception('Move to master directory failed.');
 					}
 				}
 			}
@@ -294,6 +268,9 @@ class main
 			$result['message'] = $e->getMessage();
 
 			chdir($current_dir);
+
+			$this->debug_echo('■ init error end');
+
 			return json_encode($result);
 		}
 
@@ -302,6 +279,9 @@ class main
 		$result['status'] = true;
 
 		chdir($current_dir);
+
+		$this->debug_echo('■ init end');
+
 		return json_encode($result);
 	}
 
@@ -316,7 +296,6 @@ class main
 		$this->debug_echo('■ get_branch_list start');
 
 		$current_dir = realpath('.');
-		// echo $current_dir;
 
 		$output_array = array();
 		$result = array('status' => true,
@@ -324,7 +303,13 @@ class main
 
 		try {
 
-			if ( chdir( $this->options->git->repository )) {
+			// masterディレクトリの絶対パス
+			$master_real_path = $this->file_control->normalize_path($this->file_control->get_realpath($this->options->indigo_workdir_path . self::PATH_MASTER));
+
+			$this->debug_echo('　□ master_real_path：');
+			$this->debug_echo($master_real_path);
+
+			if ( chdir( $master_real_path )) {
 
 				// fetch
 				$command = 'git fetch';
@@ -344,10 +329,8 @@ class main
 				$result['branch_list'] = $output_array;
 
 			} else {
-				// 指定リポジトリのディレクトリが存在しない場合
-
-				// エラー処理
-				throw new \Exception('Repository directory not found.');
+				// ディレクトリ移動に失敗
+				throw new \Exception('Move to master directory failed.');
 			}
 
 		} catch (\Exception $e) {
@@ -356,13 +339,14 @@ class main
 			$result['message'] = $e->getMessage();
 
 			chdir($current_dir);
+
+			$this->debug_echo('■ get_branch_list error end');
 			return json_encode($result);
 		}
 
 		$result['status'] = true;
 
 		chdir($current_dir);
-
 
 		$this->debug_echo('■ get_branch_list end');
 		return json_encode($result);
@@ -425,7 +409,7 @@ class main
 			
 			$ret =  '復元公開';
 
-		} else if ($publish_type == self::PUBLISH_TYPE_SOKUJI) {
+		} else if ($publish_type == self::PUBLISH_TYPE_IMMEDIATE) {
 			
 			$ret =  '即時公開';
 
@@ -707,7 +691,9 @@ class main
 		// $selected_id =  $this->options->_POST->selected_id;
 
 		// 画面選択された公開予約情報を取得
-		$selected_data = $this->get_selected_reserve_data();
+		$selected_id =  $this->options->_POST->selected_id;
+
+		$selected_data = $this->tsReserve->get_selected_ts_reserve($this->dbh, $selected_id);
 		
 		$this->debug_echo('　□ 公開予約データ');
 		$this->debug_var_dump($selected_data);
@@ -775,9 +761,9 @@ class main
 	 *	 
 	 * @return 即時公開ダイアログの出力内容
 	 */
-	private function disp_sokuji_dialog() {
+	private function disp_immediate_dialog() {
 		
-		$this->debug_echo('■ disp_sokuji_dialog start');
+		$this->debug_echo('■ disp_immediate_dialog start');
 
 		$branch_select_value = "";
 		$reserve_date = "";
@@ -785,9 +771,9 @@ class main
 		$comment = "";
 
 		// ダイアログHTMLの作成
-		$ret = $this->create_dialog_html(self::INPUT_MODE_SOKUJI, $branch_select_value, $reserve_date, $reserve_time, $comment);
+		$ret = $this->create_dialog_html(self::INPUT_MODE_immediate, $branch_select_value, $reserve_date, $reserve_time, $comment);
 
-		$this->debug_echo('■ disp_sokuji_dialog end');
+		$this->debug_echo('■ disp_immediate_dialog end');
 
 		return $ret;
 	}
@@ -800,9 +786,9 @@ class main
 	 *
 	 * @return 新規ダイアログの出力内容
 	 */
-	private function disp_back_sokuji_dialog() {
+	private function disp_back_immediate_dialog() {
 		
-		$this->debug_echo('■ disp_back_sokuji_dialog start');
+		$this->debug_echo('■ disp_back_immediate_dialog start');
 
 		$branch_select_value = "";
 		$reserve_date = "";
@@ -824,9 +810,9 @@ class main
 		}
 
 		// 入力ダイアログHTMLの作成
-		$ret = $this->create_dialog_html(self::INPUT_MODE_SOKUJI_BACK, $branch_select_value, $reserve_date, $reserve_time, $comment);
+		$ret = $this->create_dialog_html(self::INPUT_MODE_immediate_BACK, $branch_select_value, $reserve_date, $reserve_time, $comment);
 
-		$this->debug_echo('■ disp_back_sokuji_dialog end');
+		$this->debug_echo('■ disp_back_immediate_dialog end');
 
 		return $ret;
 	}
@@ -873,7 +859,7 @@ class main
 		} elseif ( ($input_mode == self::INPUT_MODE_UPDATE) || ($input_mode == self::INPUT_MODE_UPDATE_BACK) ) {
 		  	$ret .= '<h4>変更</h4>';
 
-		} elseif ( ($input_mode == self::INPUT_MODE_SOKUJI) || ($input_mode == self::INPUT_MODE_SOKUJI_BACK) ) {
+		} elseif ( ($input_mode == self::INPUT_MODE_immediate) || ($input_mode == self::INPUT_MODE_immediate_BACK) ) {
 		  	$ret .= '<h4>即時公開</h4>';
 
 		} else {
@@ -914,7 +900,7 @@ class main
 			  // . '</tr>'
 
 		// 「公開予約日時」項目
-		if ( ($input_mode == self::INPUT_MODE_SOKUJI) || ($input_mode == self::INPUT_MODE_SOKUJI_BACK) ) {
+		if ( ($input_mode == self::INPUT_MODE_immediate) || ($input_mode == self::INPUT_MODE_immediate_BACK) ) {
 
 			$ret .= '<tr>'
 				  . '<td class="dialog_thead">公開予約日時</td>'
@@ -948,8 +934,8 @@ class main
 		} elseif ( ($input_mode == self::INPUT_MODE_UPDATE) || ($input_mode == self::INPUT_MODE_UPDATE_BACK) ) {
 		  	$ret .= '<li><input type="submit" id="update_check_btn" name="update_check" class="px2-btn px2-btn--primary" value="確認"/></li>';
 
-		} elseif ( ($input_mode == self::INPUT_MODE_SOKUJI) ||  ($input_mode == self::INPUT_MODE_SOKUJI_BACK) ) {
-		  	$ret .= '<li><input type="submit" id="sokuji_check_btn" name="sokuji_check" class="px2-btn px2-btn--danger" value="確認"/></li>';
+		} elseif ( ($input_mode == self::INPUT_MODE_immediate) ||  ($input_mode == self::INPUT_MODE_immediate_BACK) ) {
+		  	$ret .= '<li><input type="submit" id="immediate_check_btn" name="immediate_check" class="px2-btn px2-btn--danger" value="確認"/></li>';
 
 		} else {
 			throw new \Exception("Input mode is not found.");
@@ -992,7 +978,7 @@ class main
 		
 	// 	$this->debug_echo('■ create_change_before_hidden_html start');
 
-	// 	$this->debug_echo('　□$init_trans_flg：' . $init_trans_flg);
+	// 	$this->debug_echo('　□ $init_trans_flg：' . $init_trans_flg);
 
 	// 	$selected_id = '';
 	// 	$branch_select_value = '';
@@ -1006,9 +992,9 @@ class main
 	// 		// 選択されたID
 	// 		$selected_id = $this->options->_POST->selected_id;
 	// 		// 選択されたIDに紐づく情報を取得
-	// 		$selected_ret = $this->get_selected_reserve_data();
+	// 		$selected_ret = $this->get_selected_ts_reserve();
 			
-	// 		$this->debug_echo('　□selected_ret ：' . $selected_ret);
+	// 		$this->debug_echo('　□ selected_ret ：' . $selected_ret);
 	// 		$this->debug_echo($selected_ret);
 
 	// 		if ($selected_ret) {
@@ -1033,7 +1019,7 @@ class main
  //  			  . '<input type="hidden" name="change_before_reserve_time" value="'. $reserve_time . '"/>'
  //  			  . '<input type="hidden" name="change_before_comment" value="'. $comment . '"/>';
 
-	// 	$this->debug_echo('　□ret ：');
+	// 	$this->debug_echo('　□ ret ：');
 	// 	$this->debug_echo($ret);
 
 	// 	$this->debug_echo('■ create_change_before_hidden_html end');
@@ -1166,7 +1152,7 @@ class main
 		$before_reserve_time = "";
 		$before_comment = "";
 
-		$img_filename = self::PATH_CREATE_DIR . self::IMG_ARROW_RIGHT;
+		$img_filename = $this->options->indigo_workdir_path . self::IMG_ARROW_RIGHT;
 
 		$ret = '<div class="dialog" id="modal_dialog">'
 			. '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
@@ -1181,8 +1167,10 @@ class main
 
 
 		// 画面選択された公開予約情報を取得
-		$selected_data = $this->get_selected_reserve_data();
-		
+		$selected_id =  $this->options->_POST->selected_id;
+
+		$selected_data = $this->tsReserve->get_selected_ts_reserve($this->dbh, $selected_id);
+
 		$this->debug_echo('　□ 公開予約データ');
 		$this->debug_var_dump($selected_data);
 		$this->debug_echo('　');
@@ -1306,9 +1294,9 @@ class main
 	 *
 	 * @return 確認ダイアログ出力内容
 	 */
-	private function disp_check_sokuji_dialog() {
+	private function disp_check_immediate_dialog() {
 		
-		$this->debug_echo('■ disp_check_sokuji_dialog start');
+		$this->debug_echo('■ disp_check_immediate_dialog start');
 
 		$ret = "";
 
@@ -1379,10 +1367,10 @@ class main
 			. '<ul>';
 
 		// 「確定」ボタン
-		$ret .= '<li><input type="submit" id="confirm_btn" name="sokuji_confirm" class="px2-btn px2-btn--danger" value="確定（注意：本番環境への公開処理が開始されます）"/></li>';
+		$ret .= '<li><input type="submit" id="confirm_btn" name="immediate_confirm" class="px2-btn px2-btn--danger" value="確定（注意：本番環境への公開処理が開始されます）"/></li>';
 		
 		// 「キャンセル」ボタン
-		$ret .= '<li><input type="submit" id="back_btn" name="sokuji_back" class="px2-btn" value="戻る"/></li>';
+		$ret .= '<li><input type="submit" id="back_btn" name="immediate_back" class="px2-btn" value="戻る"/></li>';
 
 		$ret .= '</ul>'
 			. '</div>'
@@ -1395,7 +1383,7 @@ class main
 			 . '</div>'
 			 . '</div></div></div>';
 
-		$this->debug_echo('■ disp_check_sokuji_dialog end');
+		$this->debug_echo('■ disp_check_immediate_dialog end');
 
 		return $ret;
 	}
@@ -1444,7 +1432,7 @@ class main
 		/**
  		* 公開予約一覧を取得
 		*/ 
-		$data_list = $this->get_ts_reserve_list(null);
+		$data_list = $this->tsReserve->get_ts_reserve_list($this->dbh, null);
 	
 		// 日時結合（画面表示日時）
 		$combine_datetime = $this->combine_date_time($reserve_date, $reserve_time);
@@ -1494,7 +1482,7 @@ class main
 		$ret = "";
 
 		// 公開予約一覧を取得
-		$data_list = $this->get_ts_reserve_list(null);
+		$data_list = $this->get_ts_reserve_list($this->dbh, null);
 
 		// // お知らせリストの取得
 		// $alert_list = $this->get_csv_alert_list();
@@ -1530,7 +1518,7 @@ class main
 			. '<ul>'
 			. '<li><input type="submit" id="update_btn" name="update" class="px2-btn" value="変更"/></li>'
 			. '<li><input type="submit" id="delete_btn" name="delete" class="px2-btn px2-btn--danger" value="削除"/></li>'
-			. '<li><input type="submit" id="sokuji_btn" name="sokuji" class="px2-btn px2-btn--primary" value="即時公開"/></li>'
+			. '<li><input type="submit" id="immediate_btn" name="immediate" class="px2-btn px2-btn--primary" value="即時公開"/></li>'
 			. '<li><input type="submit" id="history_btn" name="history" class="px2-btn" value="履歴"/></li>'
 			. '</ul>'
 			// . '</div>'
@@ -1586,8 +1574,8 @@ class main
 
 		$ret = "";
 
-		// 処理結果一覧を取得
-		$data_list = $this->get_ts_result_list(null);
+		// 公開処理結果一覧を取得
+		$data_list = $this->get_ts_output_list($this->dbh, null);
 
 		$ret .= '<div style="overflow:hidden">'
 			. '<form method="post">'
@@ -1658,7 +1646,7 @@ class main
 		// $this->debug_echo('　□カレントパス：' . realpath('.'));
 		// $this->debug_echo('　□__DIR__：' . __DIR__);
 
-		// $path = self::PATH_CREATE_DIR . self::PATH_WAITING;
+		// $path = $this->options->indigo_workdir_path . self::PATH_WAITING;
 		// $this->debug_echo('　□相対パス' . $path);
 		// $real_path = $this->file_control->normalize_path($this->file_control->get_realpath($path));
 
@@ -1682,260 +1670,281 @@ class main
 		// 入力画面へ表示させるエラーメッセージ
 		// $error_message = '';
 
-		//timezoneテスト ここから
-		date_default_timezone_set('Asia/Tokyo');
-
-		echo "--------------------------------</br>";
-	
-		$this->debug_echo('　□GMTの現在時刻：');
-		$this->debug_echo(gmdate(DATE_ATOM, time()));
-
-		$this->debug_echo('　□Asiaの現在時刻：');
-		$this->debug_echo(date(DATE_ATOM, time()));
-
-
-		$t = new \DateTime(gmdate(DATE_ATOM, time()));
-		$t->setTimeZone(new \DateTimeZone('Asia/Tokyo'));
-		$this->debug_echo('　□GMTから変換したAsiaの現在時刻：');
-		$this->debug_echo($t->format(DATE_ATOM));
-
-
-		$t = new \DateTime($t->format(DATE_ATOM));
-		$t->setTimeZone(new \DateTimeZone('GMT'));
-
-		$this->debug_echo('　□日本時間から変換したGMTの現在時刻：');
-		$this->debug_echo($t->format(DATE_ATOM));
-
-		// タイムゾーンが取得できる！！！！
-		echo "タイムゾーン取得 ：" . date("e", date(DATE_ATOM, time())). "</br>";
-		
-		echo "--------------------------------</br>";
-		//timezoneテスト ここまで
-
 		try {
 
-			// データベース接続
-			$this->dbh = $this->pdo->connect();
+			$time_zone = $this->options->time_zone;
 
-			// テーブル作成（存在している場合は処理しない）
-			$this->pdo->create_table($this->dbh);
+			if ($time_zone) {
 
-			// gitのmaster情報取得
-			$ret = json_decode($this->init());
+				//timezoneテスト ここから
+				date_default_timezone_set($time_zone);
 
-			if ( !$ret->status ) {
-
-				$alert_message = 'initialized faild';
-
-			} else {
+				echo "--------------------------------</br>";
 			
-				// 初期化成功の場合
-				$combine_reserve_time = '';
-				$convert_reserve_time = '';
+				$this->debug_echo('　□ GMTの現在時刻：');
+				$this->debug_echo(gmdate(DATE_ATOM, time()));
 
-				// 画面入力された日付と時刻を結合
-				$combine_reserve_time = $this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
+				$this->debug_echo('　□ Asiaの現在時刻：');
+				$this->debug_echo(date(DATE_ATOM, time()));
 
-				/**
-			 	* 新規処理
-			 	*/
-				// 初期表示画面の「新規」ボタン押下
-				if (isset($this->options->_POST->add)) {
 
-					// 新規（入力）ダイアログ画面へ遷移
-					$dialog_disp = $this->disp_add_dialog();
+				$t = new \DateTime(gmdate(DATE_ATOM, time()));
+				$t->setTimeZone(new \DateTimeZone('Asia/Tokyo'));
+				$this->debug_echo('　□ GMTから変換したAsiaの現在時刻：');
+				$this->debug_echo($t->format(DATE_ATOM));
 
-				// 新規ダイアログの「確認」ボタン押下
-				} elseif (isset($this->options->_POST->add_check)) {
 
-					$add_flg = true;
+				$t = new \DateTime($t->format(DATE_ATOM));
+				$t->setTimeZone(new \DateTimeZone('GMT'));
 
-					// 一時コメント
-					// 入力チェック処理
-					// $this->input_error_message = $this->do_validation_check(self::INPUT_MODE_ADD);
+				$this->debug_echo('　□ 日本時間から変換したGMTの現在時刻：');
+				$this->debug_echo($t->format(DATE_ATOM));
 
-					if ($input_error_message) {
-						// 入力ダイアログのまま
-						$dialog_disp = $this->disp_back_add_dialog();
-					} else {
-						// 確認ダイアログへ遷移
-						$dialog_disp = $this->disp_check_add_dialog();
-					}
-					
-				// 新規ダイアログの「確定」ボタン
-				} elseif (isset($this->options->_POST->add_confirm)) {
+				// タイムゾーンが取得できる！！！！
+				echo "タイムゾーン取得 ：" . date("e", date(DATE_ATOM, time())). "</br>";
+				
+				echo "--------------------------------</br>";
+				//timezoneテスト ここまで
 
-					// // Gitファイルの取得
-					// $ret = json_decode($this->file_copy($combine_reserve_time));
+				// データベース接続
+				$this->dbh = $this->pdo->connect();
 
-					// if ( !$ret->status ) {
-					// 	// 処理失敗
-					// 	$alert_message = 'add faild';
-					// 	break;
+				// テーブル作成（存在している場合は処理しない）
+				$this->pdo->create_table($this->dbh);
 
-					// } else {
-					// 	// 処理成功
+				// gitのmaster情報取得
+				$ret = json_decode($this->init());
 
-						if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
-							throw new \Exception("Convert time zone failed.");
+				if ( !$ret->status ) {
+
+					$alert_message = 'initialized faild';
+
+				} else {
+				
+					// 初期化成功の場合
+					$combine_reserve_time = '';
+					$convert_reserve_time = '';
+
+					// 画面入力された日付と時刻を結合
+					$combine_reserve_time = $this->combine_date_time($this->options->_POST->reserve_date, $this->options->_POST->reserve_time);
+
+					/**
+				 	* 新規処理
+				 	*/
+					// 初期表示画面の「新規」ボタン押下
+					if (isset($this->options->_POST->add)) {
+
+						// 新規（入力）ダイアログ画面へ遷移
+						$dialog_disp = $this->disp_add_dialog();
+
+					// 新規ダイアログの「確認」ボタン押下
+					} elseif (isset($this->options->_POST->add_check)) {
+
+						$add_flg = true;
+
+						// 一時コメント
+						// 入力チェック処理
+						// $this->input_error_message = $this->do_validation_check(self::INPUT_MODE_ADD);
+
+						if ($input_error_message) {
+							// 入力ダイアログのまま
+							$dialog_disp = $this->disp_back_add_dialog();
+						} else {
+							// 確認ダイアログへ遷移
+							$dialog_disp = $this->disp_check_add_dialog();
 						}
+						
+					// 新規ダイアログの「確定」ボタン
+					} elseif (isset($this->options->_POST->add_confirm)) {
 
-						// 公開予約情報の追加
-						$this->insert_ts_reserve($combine_reserve_time);
+						// // Gitファイルの取得
+						// $ret = json_decode($this->file_copy($combine_reserve_time));
 
-					// }
+						// if ( !$ret->status ) {
+						// 	// 処理失敗
+						// 	$alert_message = 'add faild';
+						// 	break;
 
-				// 新規確認ダイアログの「戻る」ボタン押下
-				} elseif (isset($this->options->_POST->add_back)) {
-				
-					$dialog_disp = $this->disp_back_add_dialog();
+						// } else {
+						// 	// 処理成功
+
+							if ( is_null($combine_reserve_time) || !isset($combine_reserve_time) ) {
+								throw new \Exception("Convert time zone failed.");
+							}
+
+							// 公開予約情報の追加
+							$this->insert_ts_reserve($this->dbh, $this->options, $combine_reserve_time);
+
+						// }
+
+					// 新規確認ダイアログの「戻る」ボタン押下
+					} elseif (isset($this->options->_POST->add_back)) {
+					
+						$dialog_disp = $this->disp_back_add_dialog();
 
 
-				/**
-			 	* 変更処理
-			 	*/
-				// 初期表示画面の「変更」ボタン押下
-				} elseif (isset($this->options->_POST->update)) {
+					/**
+				 	* 変更処理
+				 	*/
+					// 初期表示画面の「変更」ボタン押下
+					} elseif (isset($this->options->_POST->update)) {
 
-					// 「変更入力ダイアログ」画面へ遷移
-					$dialog_disp = $this->disp_update_dialog();
-
-				// 変更ダイアログの確認ボタンが押下された場合
-				} elseif (isset($this->options->_POST->update_check)) {
-				
-					// 一時コメント
-					// 入力チェック処理
-					// $this->input_error_message = $this->do_validation_check(self::INPUT_MODE_UPDATE);
-
-					if ($this->input_error_message) {
-
-						// 入力チェックエラーがあった場合はそのままの画面
+						// 「変更入力ダイアログ」画面へ遷移
 						$dialog_disp = $this->disp_update_dialog();
 
-					} else {
-
-						// 入力チェックエラーがなかった場合は確認ダイアログへ遷移
-						$dialog_disp = $this->disp_check_update_dialog();
-					}	
-
-				// 変更ダイアログの確定ボタンが押下された場合
-				} elseif (isset($this->options->_POST->update_confirm)) {
+					// 変更ダイアログの確認ボタンが押下された場合
+					} elseif (isset($this->options->_POST->update_check)) {
 					
-					// // GitファイルをWAITINGディレクトリへコピー（ディレクトリ名は入力された日付）
-					// $ret = json_decode($this->file_update($combine_reserve_time));
-			
-					// if ( !$ret->status ) {
-					// 	// 処理失敗
-					// 	$alert_message = 'update faild';
-					// 	break;
+						// 一時コメント
+						// 入力チェック処理
+						// $this->input_error_message = $this->do_validation_check(self::INPUT_MODE_UPDATE);
 
-					// } else {
-						// 処理成功
+						if ($this->input_error_message) {
 
-						// CSV入力情報の変更
-						$this->update_reserve_table($combine_reserve_time);
+							// 入力チェックエラーがあった場合はそのままの画面
+							$dialog_disp = $this->disp_update_dialog();
 
-					// }
+						} else {
 
+							// 入力チェックエラーがなかった場合は確認ダイアログへ遷移
+							$dialog_disp = $this->disp_check_update_dialog();
+						}	
 
-				// 変更確認ダイアログの「戻る」ボタン押下
-				} elseif (isset($this->options->_POST->update_back)) {
-				
-					$dialog_disp = $this->disp_back_update_dialog();
-
-
-				/**
-			 	* 削除処理
-			 	*/
-				// 初期表示画面の「削除」ボタン押下
-				} elseif (isset($this->options->_POST->delete)) {
-				
-					// Gitファイルの削除
-					$ret = json_decode($this->file_delete());
-
-					if ( !$ret->status ) {
+					// 変更ダイアログの確定ボタンが押下された場合
+					} elseif (isset($this->options->_POST->update_confirm)) {
 						
-						$alert_message = 'delete faild';
-						// // 処理失敗
-						// break;
-
-					} else {
-
-						// CSV情報の削除
-						$this->delete_reserve_table();
-
-					}
-
-				/**
-			 	* 即時公開処理
-			 	*/
-				// 初期表示画面の「即時公開」ボタン押下
-				} elseif (isset($this->options->_POST->sokuji)) {
+						// // GitファイルをWAITINGディレクトリへコピー（ディレクトリ名は入力された日付）
+						// $ret = json_decode($this->file_update($combine_reserve_time));
 				
-					// 即時公開（入力）ダイアログ画面へ遷移
-					$dialog_disp = $this->disp_sokuji_dialog();
+						// if ( !$ret->status ) {
+						// 	// 処理失敗
+						// 	$alert_message = 'update faild';
+						// 	break;
+
+						// } else {
+							// 処理成功
+
+							$selected_id =  $this->options->_POST->selected_id;
+
+							// CSV入力情報の変更
+							$this->update_reserve_table($this->dbh, $this->options, $combine_reserve_time);
+
+						// }
 
 
-				// 即時公開ダイアログの確認ボタンが押下された場合
-				} elseif (isset($this->options->_POST->sokuji_check)) {
-				
-					// 一時コメント
-					// 入力チェック処理
-					// $this->input_error_message = $this->do_validation_check(self::INPUT_MODE_SOKUJI);
-
-					if ($this->input_error_message) {
-
-						// 入力チェックエラーがあった場合はそのままの画面
-						$dialog_disp = $this->disp_sokuji_dialog();
-
-					} else {
-
-						// 入力チェックエラーがなかった場合は確認ダイアログへ遷移
-						$dialog_disp = $this->disp_check_sokuji_dialog();
-					}	
-
-				// 即時公開ダイアログの「確定」ボタンが押下された場合
-				} elseif (isset($this->options->_POST->sokuji_confirm)) {
+					// 変更確認ダイアログの「戻る」ボタン押下
+					} elseif (isset($this->options->_POST->update_back)) {
 					
-					// 即時公開処理
-					$ret = json_decode($this->sokuji_release());
-		
-					if ( !$ret->status ) {
+						$dialog_disp = $this->disp_back_update_dialog();
 
-						$alert_message = 'sokuji_release faild';
+
+					/**
+				 	* 削除処理
+				 	*/
+					// 初期表示画面の「削除」ボタン押下
+					} elseif (isset($this->options->_POST->delete)) {
+					
+						// Gitファイルの削除
+						$ret = json_decode($this->file_delete());
+
+						if ( !$ret->status ) {
+							
+							$alert_message = 'delete faild';
+							// // 処理失敗
+							// break;
+
+						} else {
+
+							$selected_id =  $this->options->_POST->selected_id;
+
+							// CSV情報の削除
+							$this->delete_reserve_table($this->dbh, $selected_id);
+
+						}
+
+					/**
+				 	* 即時公開処理
+				 	*/
+					// 初期表示画面の「即時公開」ボタン押下
+					} elseif (isset($this->options->_POST->immediate)) {
+					
+						// 即時公開（入力）ダイアログ画面へ遷移
+						$dialog_disp = $this->disp_immediate_dialog();
+
+
+					// 即時公開ダイアログの確認ボタンが押下された場合
+					} elseif (isset($this->options->_POST->immediate_check)) {
+					
+						// 一時コメント
+						// 入力チェック処理
+						// $this->input_error_message = $this->do_validation_check(self::INPUT_MODE_immediate);
+
+						if ($this->input_error_message) {
+
+							// 入力チェックエラーがあった場合はそのままの画面
+							$dialog_disp = $this->disp_immediate_dialog();
+
+						} else {
+
+							// 入力チェックエラーがなかった場合は確認ダイアログへ遷移
+							$dialog_disp = $this->disp_check_immediate_dialog();
+						}	
+
+					// 即時公開ダイアログの「確定」ボタンが押下された場合
+					} elseif (isset($this->options->_POST->immediate_confirm)) {
+						
+						// 即時公開処理
+						$ret = json_decode($this->immediate_release());
+			
+						if ( !$ret->status ) {
+
+							$alert_message = 'immediate_release faild';
+						}
+
+					// 即時公開確認ダイアログの「戻る」ボタン押下
+					} elseif (isset($this->options->_POST->immediate_back)) {
+					
+						$dialog_disp = $this->disp_back_immediate_dialog();
 					}
-
-				// 即時公開確認ダイアログの「戻る」ボタン押下
-				} elseif (isset($this->options->_POST->sokuji_back)) {
-				
-					$dialog_disp = $this->disp_back_sokuji_dialog();
 				}
-			}
 
-			if ( !$ret->status ) {
-				// 処理失敗の場合
+				if ( !$ret->status ) {
+					// 処理失敗の場合
+
+					// エラーメッセージ表示
+					$dialog_disp = '
+					<script type="text/javascript">
+						console.error(' . "'" . $ret->message. "'" . ');
+						alert("' . $alert_message .'");
+					</script>';
+					
+				}
+
+				// 初期表示画面の「履歴」ボタン押下
+				if (isset($this->options->_POST->history)) {
+					// 履歴表示画面の表示
+					$disp = $this->create_history_contents();
+				} else {
+					// 初期表示画面の表示
+					$disp = $this->create_top_contents();
+				}
+
+				// 画面ロック用
+				
+			} else {
+
+				$alert_message = 'Time zone is not set.';
 
 				// エラーメッセージ表示
 				$dialog_disp = '
 				<script type="text/javascript">
-					console.error("' . $ret->message . '");
+					console.error("' . $alert_message . '");
 					alert("' . $alert_message .'");
 				</script>';
-				
-			}
+			}	
 
-			// 初期表示画面の「履歴」ボタン押下
-			if (isset($this->options->_POST->history)) {
-				// 履歴表示画面の表示
-				$disp = $this->create_history_contents();
-			} else {
-				// 初期表示画面の表示
-				$disp = $this->create_top_contents();
-			}
+			$disp_lock = '<div id="loader-bg"><div id="loading"></div></div>';
 
-			// 画面ロック用
-			$disp_lock = '<div id="loader-bg"><div id="loading"></div></div>';	
-	
 		} catch (\Exception $e) {
 
 			// データベース接続を閉じる
@@ -1947,7 +1956,7 @@ class main
 
 			return;
 		}
-
+		
 		// データベース接続を閉じる
 		$this->pdo->close();
 
@@ -1956,572 +1965,6 @@ class main
 		// 画面表示
 		return $disp . $disp_lock . $dialog_disp;
 	}
-
-	/**
-	 * 公開予約一覧テーブルからリストを取得する
-	 *
-	 * @param $now = 現在時刻
-	 * @return データリスト
-	 */
-	private function get_ts_reserve_list($now) {
-
-		$this->debug_echo('■ get_ts_reserve_list start');
-
-		$ret_array = array();
-
-		$conv_ret_array = array();
-
-		try {
-
-			// // テーブル作成
-			// $this->pdo->create_table();
-
-			// SELECT文作成（削除フラグ = 0、ソート順：公開予約日時の昇順）
-			$select_sql = "
-					SELECT * FROM TS_RESERVE WHERE delete_flg = " . self::DELETE_FLG_OFF . " ORDER BY reserve_datetime";
-			// SELECT実行
-			$ret_array = $this->pdo->select($this->dbh, $select_sql);
-
-			foreach ((array)$ret_array as $array) {
-
-				$conv_ret_array[] = $this->convert_ts_reserve_entity($array);
-			}
-
-			// $this->debug_echo('　□conv_ret_array：');
-			// $this->debug_var_dump($conv_ret_array);
-
-		} catch (\Exception $e) {
-
-			echo "例外キャッチ：", $e->getMessage(), "\n";
-
-			return $conv_ret_array;
-		}
-		
-		$this->debug_echo('■ get_ts_reserve_list end');
-
-		return $conv_ret_array;
-	}
-
-	/**
-	 * 処理結果一覧テーブルからリストを取得する
-	 *
-	 * @param $now = 現在時刻
-	 * @return データリスト
-	 */
-	private function get_ts_result_list($now) {
-
-		$this->debug_echo('■ get_ts_reserve_list start');
-
-		$ret_array = array();
-
-		$conv_ret_array = array();
-
-		try {
-
-			// SELECT文作成（世代削除フラグ = 0、ソート順：IDの降順）
-			$select_sql = "
-					SELECT * FROM TS_RESULT WHERE gen_delete_flg = " . self::DELETE_FLG_OFF . " ORDER BY result_id_seq DESC";
-			// SELECT実行
-			$ret_array = $this->pdo->select($this->dbh, $select_sql);
-
-			foreach ((array)$ret_array as $array) {
-
-				$conv_ret_array[] = $this->convert_ts_result_entity($array);
-			}
-
-			// $this->debug_echo('　□SELECTリストデータ：');
-			// $this->debug_var_dump($ret_array);
-
-		} catch (\Exception $e) {
-
-			echo "例外キャッチ：", $e->getMessage(), "\n";
-
-			return $conv_ret_array;
-		}
-		
-		$this->debug_echo('■ get_ts_reserve_list end');
-
-		return $conv_ret_array;
-	}
-
-	/**
-	 * 公開予約テーブルから、選択された公開予約情報を取得する
-	 *
-	 * @return 選択行の情報
-	 */
-	private function get_selected_reserve_data() {
-
-
-		$this->debug_echo('■ get_selected_reserve_data start');
-
-		$ret_array = array();
-
-		$conv_ret_array = array();
-
-		try {
-
-			$selected_id =  $this->options->_POST->selected_id;
-
-			$this->debug_echo('　□selected_id：' . $selected_id);
-
-			if (!$selected_id) {
-				$this->debug_echo('選択値が取得できませんでした。');
-			} else {
-
-				// SELECT文作成
-				$select_sql = "SELECT * from TS_RESERVE
-					WHERE reserve_id_seq = ". $selected_id;
-
-				// // パラメータ作成
-				// $params = array(
-				// 	':id' => $selected_id
-				// );
-
-				// SELECT実行
-				$ret_array = array_shift($this->pdo->select($this->dbh, $select_sql));
-
-				$conv_ret_array = $this->convert_ts_reserve_entity($ret_array);
-
-				// $this->debug_echo('　□SELECTデータ：');
-				// $this->debug_var_dump($ret_array);
-			}
-
-		} catch (\Exception $e) {
-
-			echo "例外キャッチ：", $e->getMessage(), "\n";
-
-			return $conv_ret_array;
-		}
-		
-		$this->debug_echo('■ get_selected_reserve_data end');
-
-		return $conv_ret_array;
-	}
-
-	/**
-	 * 公開予約テーブル登録処理
-	 *
-	 * @return なし
-	 */
-	private function insert_ts_reserve($combine_reserve_time) {
-
-		$this->debug_echo('■ insert_ts_reserve start');
-
-		$result = array('status' => true,
-						'message' => '');
-
-		try {
-
-			// INSERT文作成
-			$insert_sql = "INSERT INTO TS_RESERVE (
-				reserve_datetime,
-				branch_name,
-				commit_hash,
-				comment,
-				delete_flg,
-				insert_datetime,
-				insert_user_id,
-				update_datetime,
-				update_user_id
-			)VALUES(
-				:reserve_datetime,
-				:branch_name,
-				:commit_hash,
-				:comment,
-				:delete_flg,
-				:insert_datetime,
-				:insert_user_id,
-				:update_datetime,
-				:update_user_id
-			)";
-
-			// 現在時刻
-			// $now = date(self::DATETIME_FORMAT);
-			$now = $this->get_current_datetime_of_gmt();
-
-			// パラメータ作成
-			$params = array(
-				':reserve_datetime' => $this->convert_to_gmt_datetime($combine_reserve_time),
-				':branch_name' => $this->options->_POST->branch_select_value,
-				':commit_hash' => $this->commit_hash,
-				':comment' => $this->options->_POST->comment,
-				':delete_flg' => self::DELETE_FLG_OFF,
-				':insert_datetime' => $now,
-				':insert_user_id' => "dummy_insert_user",
-				':update_datetime' => null,
-				':update_user_id' => null
-			);
-		
-			// INSERT実行
-			$stmt = $this->pdo->execute($this->dbh, $insert_sql, $params);
-
-		} catch (Exception $e) {
-
-	  		echo '公開予約テーブルの登録処理に失敗しました。' . $e->getMesseage();
-	  		
-	  		$result['status'] = false;
-			$result['message'] = $e->getMessage();
-
-			return json_encode($result);
-		}
-
-		$result['status'] = true;
-
-		$this->debug_echo('■ insert_ts_reserve end');
-
-		return json_encode($result);
-	}
-
-	/**
-	 * 公開予約テーブル更新処理
-	 *
-	 * @return なし
-	 */
-	private function update_reserve_table($combine_reserve_time) {
-
-		$this->debug_echo('■ update_reserve_table start');
-
-		$result = array('status' => true,
-						'message' => '');
-
-		try {
-
-			$selected_id =  $this->options->_POST->selected_id;
-
-			$this->debug_echo('　□selected_id：' . $selected_id);
-
-			if (!$selected_id) {
-				$this->debug_echo('選択IDが取得できませんでした。');
-			} else {
-
-				// UPDATE文作成
-				$update_sql = "UPDATE TS_RESERVE SET 
-					reserve_datetime = :reserve_datetime,
-					branch_name = :branch_name,
-					commit_hash = :commit_hash,
-					comment = :comment,
-					update_datetime = :update_datetime,
-					update_user_id = :update_user_id
-					WHERE reserve_id_seq = :reserve_id_seq";
-
-				// 現在時刻
-				// $now = date(self::DATETIME_FORMAT);
-				$now = $this->get_current_datetime_of_gmt();
-
-				// パラメータ作成
-				$params = array(
-					':reserve_datetime' => $this->convert_to_gmt_datetime($combine_reserve_time),
-					':branch_name' => $this->options->_POST->branch_select_value,
-					':commit_hash' => $this->commit_hash,
-					':comment' => $this->options->_POST->comment,
-					':update_datetime' => $now,
-					':update_user_id' => "dummy_update_user",
-					':reserve_id_seq' => $selected_id
-				);
-
-				// UPDATE実行
-				$stmt = $this->pdo->execute($this->dbh, $update_sql, $params);
-			}
-
-		} catch (Exception $e) {
-
-	  		echo '公開予約テーブルの更新処理に失敗しました。' . $e->getMesseage();
-	  		
-	  		$result['status'] = false;
-			$result['message'] = $e->getMessage();
-
-			return json_encode($result);
-		}
-
-		$result['status'] = true;
-
-		$this->debug_echo('■ update_reserve_table end');
-
-		return json_encode($result);
-	}
-
-	/**
-	 * 公開予約テーブル論理削除処理
-	 *
-	 * @return なし
-	 */
-	private function delete_reserve_table() {
-
-		$this->debug_echo('■ delete_reserve_table start');
-
-		$result = array('status' => true,
-						'message' => '');
-
-		try {
-
-			$selected_id =  $this->options->_POST->selected_id;
-
-			$this->debug_echo('　□selected_id：' . $selected_id);
-
-			if (!$selected_id) {
-				$this->debug_echo('選択IDが取得できませんでした。');
-			} else {
-
-				// UPDATE文作成（論理削除）
-				$update_sql = "UPDATE TS_RESERVE SET 
-					delete_flg = :delete_flg,
-					update_datetime = :update_datetime,
-					update_user_id = :update_user_id 
-					WHERE reserve_id_seq = :reserve_id_seq";
-
-				// 現在時刻
-				// $now = date(self::DATETIME_FORMAT);
-				$now = $this->get_current_datetime_of_gmt();
-
-				// パラメータ作成
-				$params = array(
-					':delete_flg' => self::DELETE_FLG_ON,
-					':update_datetime' => $now,
-					':update_user_id' => "dummy_delete_user",
-					':reserve_id_seq' => $selected_id
-				);
-
-				// UPDATE実行
-				$stmt = $this->pdo->execute($this->dbh, $update_sql, $params);
-			}
-
-		} catch (Exception $e) {
-
-	  		echo '公開予約テーブルの論理削除処理に失敗しました。' . $e->getMesseage();
-	  		
-	  		$result['status'] = false;
-			$result['message'] = $e->getMessage();
-
-			return json_encode($result);
-		}
-
-		$result['status'] = true;
-
-		$this->debug_echo('■ delete_reserve_table end');
-
-		return json_encode($result);
-	}
-
-
-	/**
-	 * 選択された処理結果情報を取得する
-	 *
-	 * @return 選択行の情報
-	 */
-	private function get_selected_result_data() {
-
-
-		$this->debug_echo('■ get_selected_result_data start');
-
-		$ret_array = array();
-
-		$conv_ret_array = array();
-
-		try {
-
-			$selected_id =  $this->options->_POST->selected_id;
-
-			$this->debug_echo('　□selected_id：' . $selected_id);
-
-			if (!$selected_id) {
-				$this->debug_echo('選択値が取得できませんでした。');
-			} else {
-
-				// SELECT文作成
-				$select_sql = "SELECT * from TS_RESULT
-					WHERE result_id_seq = ". $selected_id;
-
-				// // パラメータ作成
-				// $params = array(
-				// 	':id' => $selected_id
-				// );
-
-				// SELECT実行
-				$ret_array = array_shift($this->pdo->select($this->dbh, $select_sql));
-
-				$conv_ret_array = $this->convert_ts_result_entity($ret_array);
-
-
-				// $this->debug_echo('　□SELECTデータ：');
-				// $this->debug_var_dump($ret_array);
-			}
-
-		} catch (\Exception $e) {
-
-			echo "例外キャッチ：", $e->getMessage(), "\n";
-
-			return $conv_ret_array;
-		}
-		
-		$this->debug_echo('■ get_selected_result_data end');
-
-		return $conv_ret_array;
-	}
-
-
-
-	/**
-	 * 処理結果一覧テーブルの登録処理
-	 *
-	 * @return なし
-	 */
-	private function insert_ts_result($start_datetime) {
-
-		$this->debug_echo('■ insert_ts_result start');
-
-		$result = array('status' => true,
-						'message' => '');
-
-		try {
-
-			// INSERT文作成
-			$insert_sql = "INSERT INTO TS_RESULT (
-				reserve_id,
-				reserve_datetime,
-				branch_name,
-				commit_hash,
-				comment,
-				publish_type,
-				status,
-				change_check_flg,
-				publish_honban_diff_flg,
-				publish_pre_diff_flg,
-				start_datetime,
-				end_datetime,
-				batch_user_id,
-				gen_delete_flg,
-				gen_delete_datetime,
-				insert_datetime
-
-			)VALUES(
-				:reserve_id,
-				:reserve_datetime,
-				:branch_name,
-				:commit_hash,
-				:comment,
-				:publish_type,
-				:status,
-				:change_check_flg,
-				:publish_honban_diff_flg,
-				:publish_pre_diff_flg,
-				:start_datetime,
-				:end_datetime,
-				:batch_user_id,
-				:gen_delete_flg,
-				:gen_delete_datetime,
-				:insert_datetime
-			)";
-
-			// 現在時刻
-			// $now = date(self::DATETIME_FORMAT);
-			$now = $this->get_current_datetime_of_gmt();
-
-			// パラメータ作成
-			$params = array(
-				':reserve_id' => null,
-				':reserve_datetime' => null,
-				':branch_name' => $this->options->_POST->branch_select_value,
-				':commit_hash' => $this->commit_hash,
-				':comment' => $this->options->_POST->comment,
-				':publish_type' => self::PUBLISH_TYPE_SOKUJI,
-				':status' => self::PUBLISH_STATUS_RUNNING,
-				':change_check_flg' => null,
-				':publish_honban_diff_flg' => null,
-				':publish_pre_diff_flg' => null,
-				':start_datetime' => $start_datetime,
-				':end_datetime' => null,
-				':batch_user_id' => "dummy_batch_user_id",
-				':gen_delete_flg' => self::DELETE_FLG_OFF,
-				':gen_delete_datetime' => null,
-				':insert_datetime' => gmdate(self::DATETIME_FORMAT)
-			);
-		
-			// INSERT実行
-			$stmt = $this->pdo->execute($this->dbh, $insert_sql, $params);
-
-		} catch (Exception $e) {
-
-	  		echo '処理結果テーブル登録処理に失敗しました。' . $e->getMesseage();
-	  		
-	  		$result['status'] = false;
-			$result['message'] = $e->getMessage();
-
-			return json_encode($result);
-		}
-
-		$result['status'] = true;
-
-		$this->debug_echo('■ insert_ts_result end');
-
-		return json_encode($result);
-	}
-
-
-	/**
-	 * 処理結果一覧テーブルの更新処理
-	 *
-	 * @return なし
-	 */
-	private function update_ts_result($id) {
-
-		$this->debug_echo('■ update_ts_result start');
-
-		$result = array('status' => true,
-						'message' => '');
-
-		try {
-
-			$this->debug_echo('id：' . $id);
-
-			if (!$id) {
-				$this->debug_echo('処理結果テーブルの更新IDが取得できませんでした。');
-			} else {
-
-				// UPDATE文作成
-				$update_sql = "UPDATE TS_RESULT SET 
-					status = :status,
-					change_check_flg = :change_check_flg,
-					publish_honban_diff_flg = :publish_honban_diff_flg,
-					publish_pre_diff_flg = :publish_pre_diff_flg,
-					end_datetime = :end_datetime
-
-					WHERE result_id_seq = :result_id_seq";
-
-				// 現在時刻
-				$now = gmdate(self::DATETIME_FORMAT);
-
-				// パラメータ作成
-				$params = array(
-					':status' => self::PUBLISH_STATUS_SUCCESS,
-					':change_check_flg' => "0",
-					':publish_honban_diff_flg' => "1",
-					':publish_pre_diff_flg' => "1",
-					':end_datetime' => $now,
-
-					':result_id_seq' => $id
-				);
-
-				// UPDATE実行
-				$stmt = $this->pdo->execute($this->dbh, $update_sql, $params);
-			}
-
-		} catch (Exception $e) {
-
-	  		echo '処理結果テーブルの更新処理に失敗しました。' . $e->getMesseage();
-	  		
-	  		$result['status'] = false;
-			$result['message'] = $e->getMessage();
-
-			return json_encode($result);
-		}
-
-		$result['status'] = true;
-
-		$this->debug_echo('■ update_ts_result end');
-
-		return json_encode($result);
-	}
-
 
 	/**
 	 * 新規追加時のGitファイルのコピー
@@ -2547,19 +1990,19 @@ class main
 		try {
 
 			// WAITINGディレクトリの絶対パス
-			$waiting_real_path = $this->file_control->normalize_path($this->file_control->get_realpath(self::PATH_CREATE_DIR . self::PATH_WAITING));
+			$waiting_real_path = $this->file_control->normalize_path($this->file_control->get_realpath($this->options->indigo_workdir_path . self::PATH_WAITING));
 
 			// WAITINGディレクトリが存在しない場合は作成
-			if ( !$this->is_exists_mkdir($waiting_real_path) ) {
+			if ( !$this->file_control->is_exists_mkdir($waiting_real_path) ) {
 
 					// エラー処理
 					throw new \Exception('Creation of Waiting directory failed.');
 			}
 
 			// WAITING配下公開ソースディレクトリの絶対パス
-			$waiting_src_real_path = $this->file_control->normalize_path($this->file_control->get_realpath(self::PATH_CREATE_DIR . self::PATH_WAITING . $dirname));
+			$waiting_src_real_path = $this->file_control->normalize_path($this->file_control->get_realpath($this->options->indigo_workdir_path . self::PATH_WAITING . $dirname));
 
-			$this->debug_echo('　□$waiting_src_real_path' . $waiting_src_real_path);
+			$this->debug_echo('　□ $waiting_src_real_path' . $waiting_src_real_path);
 
 			// 公開予約ディレクトリをデリートインサート
 			if ( !$this->is_exists_remkdir($waiting_src_real_path) ) {
@@ -2662,7 +2105,7 @@ class main
 		try {
 
 			// 変更元のWAITING配下公開ソースディレクトリの絶対パス
-			$before_waiting_src_real_path = $this->file_control->normalize_path($this->file_control->get_realpath(self::PATH_CREATE_DIR . self::PATH_WAITING . $before_dirname));
+			$before_waiting_src_real_path = $this->file_control->normalize_path($this->file_control->get_realpath($this->options->indigo_workdir_path . self::PATH_WAITING . $before_dirname));
 
 			// 変更元が存在するかチェック
 			if ( !file_exists($before_waiting_src_real_path) ) {
@@ -2672,7 +2115,7 @@ class main
 			}
 
 			// 変更後のWAITING配下公開ソースディレクトリの絶対パス
-			$waiting_src_real_path = $this->file_control->normalize_path($this->file_control->get_realpath(self::PATH_CREATE_DIR . self::PATH_WAITING . $dirname));
+			$waiting_src_real_path = $this->file_control->normalize_path($this->file_control->get_realpath($this->options->indigo_workdir_path . self::PATH_WAITING . $dirname));
 
 			// ディレクトリ名が変更になる場合はリネームする
 			if ($before_dirname != $dirname) {
@@ -2788,13 +2231,16 @@ class main
 		$this->debug_echo('■ file_delete start');
 
 		$current_dir = realpath('.');
-		$this->debug_echo('　□current_dir：' . $current_dir);
+		$this->debug_echo('　□ current_dir：' . $current_dir);
 
 		$output = "";
 		$result = array('status' => true,
 						'message' => '');
 
-		$selected_ret = $this->get_selected_reserve_data();
+
+		$selected_id =  $this->options->_POST->selected_id;
+
+		$selected_ret = $this->tsReserve->get_selected_ts_reserve($this->dbh, $selected_id);
 
 		$dirname = $this->format_datetime($selected_ret[self::RESERVE_ENTITY_RESERVE], self::DATETIME_FORMAT_SAVE);
 
@@ -2802,7 +2248,7 @@ class main
 
 
 			// WAITING配下公開ソースディレクトリの絶対パス
-			$waiting_src_real_path = $this->file_control->normalize_path($this->file_control->get_realpath(self::PATH_CREATE_DIR . self::PATH_WAITING . $dirname));
+			$waiting_src_real_path = $this->file_control->normalize_path($this->file_control->get_realpath($this->options->indigo_workdir_path . self::PATH_WAITING . $dirname));
 
 			// WAITINGに公開予約ディレクトリが存在しない場合は無視する
 			if( file_exists( $waiting_src_real_path )) {
@@ -2843,409 +2289,6 @@ class main
 
 	}
 
-	/**
-	 * 即時公開処理
-	 */
-	private function sokuji_release() {
-
-		$this->debug_echo('■ sokuji_release start');
-
-		$is_windows = true;
-
-		$current_dir = realpath('.');
-
-		$output = "";
-		$result = array('status' => true,
-						'message' => '');
-
-		$project_real_path = '';
-
-		// GMTの現在日時
-		$start_datetime = gmdate(self::DATETIME_FORMAT);
-		$start_datetime_dir = gmdate(self::DATETIME_FORMAT_SAVE);
-
-		try {
-
-	 		// ▼ 未実装
-			/**
-	 		* 公開タスクロックの確認
-			*/
-	 		// 公開タスクロックを確認し、ロックが掛かっている場合は処理終了
-	 		// ロックがかかっていない場合は、処理を進める
-
-	 		// ※ 画面から、どの公開処理が実施中か確認できるようにしたい
-	 		//    処理が異常終了した場合にロックが解除されないままとなってしまう
-
-
-	 	// 	// クーロン用
-	 	// 	$now = gmdate(self::DATETIME_FORMAT_SAVE);
-			// // 公開予約の一覧を取得
-			// $data_list = $this->get_ts_reserve_list($now);
-			// foreach ( (array)$selected_ret as $data ) {
-			// 	// 公開対象の公開予約日時（文字列）
-			// 	$dirname = $this->get_datetime_str($selected_ret, self::TS_RESERVE_COLUMN_RESERVE, SORT_DESC);
-			// }
-
-	 	// 	// 選択された公開予約データを取得
-			// $selected_ret = $this->get_selected_reserve_data();
-
-			// $dirname = '';
-
-			// if ( $selected_ret ) {
-			// 	// 公開対象の公開予約日時（文字列）
-			// 	$dirname = date(self::DATETIME_FORMAT_SAVE, strtotime($selected_ret[self::TS_RESERVE_COLUMN_RESERVE]));
-			// }
-
-			// $this->debug_echo('　□公開予約ディレクトリ：');
-			// $this->debug_echo($dirname);
-			$this->debug_echo('　□現在日時：');
-			$this->debug_echo($start_datetime);
-
-			// 公開対象が存在する場合
-			if ($start_datetime_dir) {
-
-				// 　公開予約一覧CSVにファイルロックが掛かっていない場合
-				// 　ファイルロックを掛ける
-				// 　実施済み一覧CSVにファイルロックが掛かっていない場合
-				// 　ファイルロックを掛ける
-		 		// 公開対象の行を、実施済みへ切り取り移動する
-		 		$this->debug_echo('　□処理結果テーブルの登録処理');
-				
-
-				/**
-		 		* 処理結果テーブルの登録処理
-				*/ 
-				$ret = json_decode($this->insert_ts_result($start_datetime));
-
-				// インサートしたシーケンスIDを取得（処理終了時の更新処理にて使用）
-				$insert_id = $this->dbh->lastInsertId();
-
-				$this->debug_echo('　□$insert_id：');
-				$this->debug_echo($insert_id);
-
-				if ( !$ret->status) {
-					throw new \Exception("TS_RESULT insert failed.");
-				}
-				
-
-				// // 予定CSVへデリート処理
-				// $ret = json_decode($this->delete_reserve_table());
-
-				// if ( !$ret->status ) {
-				// // 削除失敗
-		
-				// 	// // エラーメッセージ
-				// 	// $dialog_disp = '
-				// 	// <script type="text/javascript">
-				// 	// 	console.error("' . $ret->message . '");
-				// 	// 	alert("publish faild");
-				// 	// </script>';
-
-				// 	throw new \Exception("Waiting csv delete failed.");
-				// }
-
-				// TODO:開発用に、windowsでは処理させていない。後で削除。
-				if (!$is_windows) {
-
-					// TODO:未実装
-			 		// ファイルロックを解除する
-
-					// ログファイルディレクトリが存在しない場合は作成
-					if ( !$this->is_exists_mkdir(self::PATH_CREATE_DIR . self::PATH_LOG) ) {
-						// エラー処理
-						throw new \Exception('Creation of log directory failed.');
-					} else {
-						
-						// ログファイル内の公開予約ディレクトリが存在しない場合は削除（存在する場合は作成しない）
-						if ( !$this->is_exists_mkdir(self::PATH_CREATE_DIR . self::PATH_LOG . $dirname) ) {
-
-							// エラー処理
-							throw new \Exception('Creation of log publish directory failed.');
-						}
-					}
-
-					// バックアップディレクトリが存在しない場合は作成
-					if ( !$this->is_exists_mkdir(self::PATH_CREATE_DIR . self::PATH_BACKUP) ) {
-						// エラー処理
-						throw new \Exception('Creation of backup directory failed.');
-					} else {
-						
-						// 公開予約ディレクトリをデリートインサート
-						if ( !$this->is_exists_remkdir(self::PATH_CREATE_DIR . self::PATH_BACKUP . $dirname) ) {
-
-							// エラー処理
-							throw new \Exception('Creation of backup publish directory failed.');
-						}
-					}
-
-					// runningディレクトリが存在しない場合は作成
-					if ( !$this->is_exists_mkdir(self::PATH_CREATE_DIR . self::PATH_RUNNING) ) {
-						// エラー処理
-						throw new \Exception('Creation of running directory failed.');
-					} else {
-						
-						// 公開予約ディレクトリをデリートインサート
-						if ( !$this->is_exists_remkdir(self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname) ) {
-
-							// エラー処理
-							throw new \Exception('Creation of running publish directory failed.');
-						}
-					}
-
-					// releasedディレクトリが存在しない場合は作成
-					if ( !$this->is_exists_mkdir(self::PATH_CREATE_DIR . self::PATH_RELEASED) ) {
-						// エラー処理
-						throw new \Exception('Creation of released directory failed.');
-					} else {
-						
-						// 公開予約ディレクトリをデリートインサート
-						if ( !$this->is_exists_remkdir(self::PATH_CREATE_DIR . self::PATH_RELEASED . $dirname) ) {
-
-							// エラー処理
-							throw new \Exception('Creation of released publish directory failed.');
-						}
-					}
-
-					/**
-			 		* 本番ソースを「backup」ディレクトリへコピー
-					*/
-
-					$this->debug_echo('　▼バックアップ処理開始');
-
-					// バックアップの公開予約ディレクトリの存在確認
-					if ( file_exists(self::PATH_CREATE_DIR . self::PATH_BACKUP . $dirname) ) {
-
-						// 本番ソースからバックアップディレクトリへコピー
-
-						// $honban_realpath = $current_dir . "/" . self::PATH_PROJECT_DIR;
-
-						$this->debug_echo('　□カレントディレクトリ：');
-						$this->debug_echo(realpath('.'));
-
-						// TODO:ログフォルダに出力する
-						$command = 'rsync -avzP ' . self::HONBAN_REALPATH  . '/' . ' ' . self::PATH_CREATE_DIR . self::PATH_BACKUP . $dirname . '/' . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
-
-						$this->debug_echo('　□$command：');
-						$this->debug_echo($command);
-
-						$ret = $this->command_execute($command, true);
-
-						$this->debug_echo('　▼本番バックアップの処理結果');
-
-						foreach ( (array)$ret['output'] as $element ) {
-							$this->debug_echo($element);
-						}
-					} else {
-							// エラー処理
-							throw new \Exception('Backup directory not found.');
-					}
-
-
-					/**
-			 		* 公開予約ソースを「WAITING」ディレクトリから「running」ディレクトリへ移動
-					*/
-					// runningの公開予約ディレクトリの存在確認
-					if ( file_exists(self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname) ) {
-
-						// TODO:ログフォルダに出力する
-						$command = 'rsync -avzP --remove-source-files ' . self::PATH_CREATE_DIR . self::PATH_WAITING . $dirname . '/' . ' ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . '/' . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
-
-						$this->debug_echo('　□$command：');
-						$this->debug_echo($command);
-
-						$ret = $this->command_execute($command, true);
-
-						$this->debug_echo('　▼RUNNINGへの移動の処理結果');
-
-						foreach ( (array)$ret['output'] as $element ) {
-							$this->debug_echo($element);
-						}
-
-
-						// waitingの空ディレクトリを削除する
-						$command = 'find ' .  self::PATH_CREATE_DIR . self::PATH_WAITING . $dirname . '/ -type d -empty -delete' ;
-
-						$this->debug_echo('　□$command：');
-						$this->debug_echo($command);
-
-						$ret = $this->command_execute($command, true);
-
-						$this->debug_echo('　▼Waitingディレクトリの削除');
-
-						foreach ( (array)$ret['output'] as $element ) {
-							$this->debug_echo($element);
-						}
-
-						// waitingディレクトリの削除が成功していることを確認
-						if ( file_exists(self::PATH_CREATE_DIR . self::PATH_WAITING . $dirname) ) {
-							// ディレクトリが削除できていない場合
-							// エラー処理
-							throw new \Exception('Delete of waiting publish directory failed.');
-						}
-					} else {
-							// エラー処理
-							throw new \Exception('Waiting directory not found.');
-					}
-
-					/**
-			 		* 「running」ディレクトリへ移動した公開予約ソースを本番環境へ同期
-					*/
-					// 本番ディレクトリの存在確認
-					if ( file_exists(self::HONBAN_REALPATH) ) {
-
-						// runningから本番ディレクトリへコピー
-
-						// $honban_realpath = $current_dir . "/" . self::PATH_PROJECT_DIR;
-
-						$this->debug_echo('　□カレントディレクトリ：');
-						$this->debug_echo(realpath('.'));
-
-						// TODO:ログフォルダに出力する
-						// $command = 'rsync -avzP ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . '/' . ' ' . self::HONBAN_REALPATH . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
-
-						// ★-aではエラーとなる。最低限の同期とする！所有者やグループは変更しない！
-						// r ディレクトリを再帰的に調べる。
-						// -l シンボリックリンクをリンクとして扱う
-						// -p パーミッションも含める
-						// -t 更新時刻などの時刻情報も含める
-						// -o 所有者情報も含める
-						// -g ファイルのグループ情報も含める
-						// -D デバイスファイルはそのままデバイスとして扱う
-						$command = 'rsync -rtvzP --delete ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . '/' . ' ' . self::HONBAN_REALPATH . '/' . ' ' . '--log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
-
-						$this->debug_echo('　□$command：');
-						$this->debug_echo($command);
-
-						$ret = $this->command_execute($command, true);
-
-						$this->debug_echo('　▼本番反映の処理結果');
-
-						foreach ( (array)$ret['output'] as $element ) {
-							$this->debug_echo($element);
-						}
-
-					} else {
-							// エラー処理
-							throw new \Exception('Running directory not found.');
-					}
-
-					/**
-			 		* 同期が正常終了したら、公開済みソースを「running」ディレクトリから「released」ディレクトリへ移動
-					*/
-					// runningの公開予約ディレクトリの存在確認
-					if ( file_exists(self::PATH_CREATE_DIR . self::PATH_RELEASED . $dirname) ) {
-
-						// TODO:ログフォルダに出力する
-						$command = 'rsync -avzP --remove-source-files ' . self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . '/' . ' ' . self::PATH_CREATE_DIR . self::PATH_RELEASED . $dirname . '/' . ' --log-file=' . self::PATH_CREATE_DIR . self::PATH_LOG . $dirname . '/rsync_' . $dirname . '.log' ;
-
-						$this->debug_echo('　□$command：');
-						$this->debug_echo($command);
-
-						$ret = $this->command_execute($command, true);
-
-						$this->debug_echo('　▼REALEASEDへの移動の処理結果');
-
-						foreach ( (array)$ret['output'] as $element ) {
-							$this->debug_echo($element);
-						}
-
-
-						// runningの空ディレクトリを削除する
-						$command = 'find ' .  self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname . '/ -type d -empty -delete' ;
-
-						$this->debug_echo('　□$command：');
-						$this->debug_echo($command);
-
-						$ret = $this->command_execute($command, true);
-
-						$this->debug_echo('　▼Runningディレクトリの削除');
-
-						foreach ( (array)$ret['output'] as $element ) {
-							$this->debug_echo($element);
-						}
-
-						// waitingディレクトリの削除が成功していることを確認
-						if ( file_exists(self::PATH_CREATE_DIR . self::PATH_RUNNING . $dirname) ) {
-							// ディレクトリが削除できていない場合
-							// エラー処理
-							throw new \Exception('Delete of waiting publish directory failed.');
-						}
-					} else {
-							// エラー処理
-							throw new \Exception('Running publish directory not found.');
-					}
-
-				}
-
-
-				$this->debug_echo('　□処理結果テーブルの更新処理');
-
-
-				// GMTの現在日時
-				// $end_datetime = gmdate(self::DATETIME_FORMAT);
-				// $end_datetime_dir = gmdate(self::DATETIME_FORMAT_SAVE);
-
-				/**
-		 		* 処理結果テーブルの更新処理
-				*/
-		 		$ret = $this->update_ts_result($insert_id);
-
-				foreach ( (array)$ret['output'] as $element ) {
-					$this->debug_echo($element);
-				}
-
-				// 実施済み一覧CSVにファイルロックが掛かっていない場合
-				// 　ロックを掛ける
-		 		// 「実施開始日時」を設定
-		 		// 「実施終了日時」を設定
-		 		
-				// 公開が成功した場合
-		 		// 　「公開完了日時」を設定
-
-		 		// 公開が失敗し、復元が完了した場合
-		 		// 　「復元完了日時」を設定
-
-		 		// ▼優先度低
-		 		// 本番環境と前回分のソースに差分が存在した場合
-		 		// 　「差分確認フラグ1」を設定
-
-		 		// ▼優先度低
-		 		// 本番環境と今回分のソースに差分が存在した場合
-		 		// 　「差分確認フラグ2」を設定
-
-		 		// ▼優先度低
-		 		// 今回分と前回分のソースに差分が存在した場合
-		 		// 　「差分確認フラグ3」を設定
-
-			} else {
-
-				$this->debug_echo('　□ 公開対象が存在しない');
-
-			}
-		
-		} catch (\Exception $e) {
-
-			// set_time_limit(30);
-
-			$result['status'] = false;
-			$result['message'] = $e->getMessage();
-
-			$this->debug_echo('■ sokuji_release error end');
-
-			chdir($current_dir);
-			return json_encode($result);
-		}
-
-		// set_time_limit(30);
-
-		$result['status'] = true;
-
-		chdir($current_dir);
-
-		$this->debug_echo('■ sokuji_release end');
-
-		return json_encode($result);
-	}
 
 
 	/**
@@ -3274,7 +2317,7 @@ class main
 			$ret_str = $this->format_datetime($lead_array[self::TS_RESERVE_COLUMN_RESERVE], self::DATETIME_FORMAT_SAVE);
 		}
 
-		$this->debug_echo('　□return ：' . $ret_str);
+		$this->debug_echo('　□ return ：' . $ret_str);
 
 		$this->debug_echo('■ get_datetime_str end');
 
@@ -3283,38 +2326,11 @@ class main
 
 
 	/**
-	 * ディレクトリの存在チェックをし、存在しなかった場合は作成する
+	 * ディレクトリの存在有無にかかわらず、ディレクトリを再作成する（存在しているものは削除する）
 	 *	 
-	 * @param $path = 作成ディレクトリ名
+	 * @param $dirpath = ディレクトリパス
 	 *	 
-	 * @return ソート後の配列
-	 */
-	private function is_exists_mkdir($dirname) {
-
-		$this->debug_echo('■ is_exists_mkdir start');
-
-		$ret = true;
-
-		if ( !file_exists($dirname) ) {
-
-			// デプロイ先のディレクトリを作成
-			if ( !mkdir($dirname, 0777)) {
-
-				$ret = false;
-			}
-		}
-
-		$this->debug_echo('■ is_exists_mkdir end');
-
-		return $ret;
-	}
-
-	/**
-	 * ディレクトリの再作成
-	 *	 
-	 * @param $path = 作成ディレクトリ名
-	 *	 
-	 * @return ソート後の配列
+	 * @return true:成功、false：失敗
 	 */
 	private function is_exists_remkdir($dirpath) {
 		
@@ -3336,7 +2352,7 @@ class main
 
 		// デプロイ先のディレクトリを作成
 		if ( !file_exists($dirpath)) {
-			if ( !mkdir($dirpath, 0777) ) {
+			if ( !mkdir($dirpath, self::DIR_PERMISSION_0757) ) {
 				$this->debug_echo('　□ [再作成失敗]$dirpath：' . $dirpath);
 				return false;
 			}
@@ -3519,31 +2535,31 @@ class main
 
 
 	/**
-	 * 処理結果テーブルの情報を変換する
+	 * 公開処理結果テーブルの情報を変換する
 	 *	 
 	 * @param $path = 作成ディレクトリ名
 	 *	 
 	 * @return ソート後の配列
 	 */
-	function convert_ts_result_entity($array) {
+	function convert_ts_output_entity($array) {
 	
-		// $this->debug_echo('■ convert_ts_result_entity start');
+		// $this->debug_echo('■ convert_ts_output_entity start');
 
 		$entity = array();
 
 		// ID
-		$entity[self::RESULT_ENTITY_ID] = $array[self::TS_RESULT_COLUMN_ID];
+		$entity[self::RESULT_ENTITY_ID] = $array[self::TS_OUTPUT_COLUMN_ID];
 		
 		// 公開予約日時
 		// タイムゾーンの時刻へ変換
-		$tz_datetime = $this->convert_timezone_datetime($array[self::TS_RESULT_COLUMN_RESERVE]);
+		$tz_datetime = $this->convert_timezone_datetime($array[self::TS_OUTPUT_COLUMN_RESERVE]);
 
 		$entity[self::RESULT_ENTITY_RESERVE] = $tz_datetime;
 		$entity[self::RESULT_ENTITY_RESERVE_DISPLAY] = $this->format_datetime($tz_datetime, self::DATETIME_FORMAT_DISPLAY);
 
 		// 処理開始日時
 		// タイムゾーンの時刻へ変換
-		$tz_datetime = $this->convert_timezone_datetime($array[self::TS_RESULT_COLUMN_START]);
+		$tz_datetime = $this->convert_timezone_datetime($array[self::TS_OUTPUT_COLUMN_START]);
 
 		$entity[self::RESULT_ENTITY_START] = $tz_datetime;
 		$entity[self::RESULT_ENTITY_START_DISPLAY] = $this->format_datetime($tz_datetime, self::DATETIME_FORMAT_DISPLAY);
@@ -3551,26 +2567,26 @@ class main
 
 		// 処理終了日時
 		// タイムゾーンの時刻へ変換
-		$tz_datetime = $this->convert_timezone_datetime($array[self::TS_RESULT_COLUMN_END]);
+		$tz_datetime = $this->convert_timezone_datetime($array[self::TS_OUTPUT_COLUMN_END]);
 		
 		$entity[self::RESULT_ENTITY_END] = $tz_datetime;
 		$entity[self::RESULT_ENTITY_END_DISPLAY] = $this->format_datetime($tz_datetime, self::DATETIME_FORMAT_DISPLAY);
 
 
 		// ブランチ
-		$entity[self::RESULT_ENTITY_BRANCH] = $array[self::TS_RESULT_COLUMN_BRANCH];
+		$entity[self::RESULT_ENTITY_BRANCH] = $array[self::TS_OUTPUT_COLUMN_BRANCH];
 		// コミット
-		$entity[self::RESULT_ENTITY_COMMIT] = $array[self::TS_RESULT_COLUMN_COMMIT];
+		$entity[self::RESULT_ENTITY_COMMIT] = $array[self::TS_OUTPUT_COLUMN_COMMIT];
 		// コメント
-		$entity[self::RESULT_ENTITY_COMMENT] = $array[self::TS_RESULT_COLUMN_COMMENT];
+		$entity[self::RESULT_ENTITY_COMMENT] = $array[self::TS_OUTPUT_COLUMN_COMMENT];
 	
 		// 状態
-		$entity[self::RESULT_ENTITY_STATUS] = $this->convert_status($array[self::TS_RESULT_COLUMN_STATUS]);
+		$entity[self::RESULT_ENTITY_STATUS] = $this->convert_status($array[self::TS_OUTPUT_COLUMN_STATUS]);
 
 		// 公開種別
-		$entity[self::RESULT_ENTITY_TYPE] = $this->convert_publish_type($array[self::TS_RESULT_COLUMN_TYPE]);
+		$entity[self::RESULT_ENTITY_TYPE] = $this->convert_publish_type($array[self::TS_OUTPUT_COLUMN_TYPE]);
 
-		// $this->debug_echo('■ convert_ts_result_entity end');
+		// $this->debug_echo('■ convert_ts_output_entity end');
 
 	    return $entity;
 	}
