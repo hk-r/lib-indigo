@@ -2,12 +2,12 @@
 
 namespace indigo;
 
-class TsReserve
+class tsReserveAccess
 {
 
 	private $main;
 
-	private $pdo;
+	private $pdoManager;
 
 	/**
 	 * 削除フラグ
@@ -24,8 +24,10 @@ class TsReserve
 	 */
 	public function __construct ($main){
 
+		$this->debug_echo('　★ tsReserve');
+
 		$this->main = $main;
-		$this->pdo = new Pdo($this);
+		$this->pdoManager = new pdoManager($this);
 	}
 
 	/**
@@ -34,7 +36,7 @@ class TsReserve
 	 * @param $now = 現在時刻
 	 * @return データリスト
 	 */
-	private function get_ts_reserve_list($dbh, $now) {
+	public function get_ts_reserve_list($dbh, $now) {
 
 		$this->debug_echo('■ get_ts_reserve_list start');
 
@@ -48,7 +50,7 @@ class TsReserve
 			$select_sql = "
 					SELECT * FROM TS_RESERVE WHERE delete_flg = " . self::DELETE_FLG_OFF . " ORDER BY reserve_datetime";
 			// SELECT実行
-			$ret_array = $this->pdo->select($dbh, $select_sql);
+			$ret_array = $this->pdoManager->select($dbh, $select_sql);
 
 			foreach ((array)$ret_array as $array) {
 
@@ -75,7 +77,7 @@ class TsReserve
 	 *
 	 * @return 選択行の情報
 	 */
-	private function get_selected_ts_reserve($dbh, $selected_id) {
+	public function get_selected_ts_reserve($dbh, $selected_id) {
 
 
 		$this->debug_echo('■ get_selected_ts_reserve start');
@@ -102,7 +104,7 @@ class TsReserve
 				// );
 
 				// SELECT実行
-				$ret_array = array_shift($this->pdo->select($dbh, $select_sql));
+				$ret_array = array_shift($this->pdoManager->select($dbh, $select_sql));
 
 				$conv_ret_array = $this->main->convert_ts_reserve_entity($ret_array);
 
@@ -127,7 +129,7 @@ class TsReserve
 	 *
 	 * @return なし
 	 */
-	private function insert_ts_reserve($dbh, $options, $combine_reserve_time) {
+	public function insert_ts_reserve($dbh, $options, $combine_reserve_time) {
 
 		$this->debug_echo('■ insert_ts_reserve start');
 
@@ -177,7 +179,7 @@ class TsReserve
 			);
 		
 			// INSERT実行
-			$stmt = $this->pdo->execute($dbh, $insert_sql, $params);
+			$stmt = $this->pdoManager->execute($dbh, $insert_sql, $params);
 
 		} catch (Exception $e) {
 
@@ -201,7 +203,7 @@ class TsReserve
 	 *
 	 * @return なし
 	 */
-	private function update_reserve_table($dbh, $options, $selected_id, $combine_reserve_time) {
+	public function update_reserve_table($dbh, $options, $selected_id, $combine_reserve_time) {
 
 		$this->debug_echo('■ update_reserve_table start');
 
@@ -242,7 +244,7 @@ class TsReserve
 				);
 
 				// UPDATE実行
-				$stmt = $this->pdo->execute($dbh, $update_sql, $params);
+				$stmt = $this->pdoManager->execute($dbh, $update_sql, $params);
 			}
 
 		} catch (Exception $e) {
@@ -267,7 +269,7 @@ class TsReserve
 	 *
 	 * @return なし
 	 */
-	private function delete_reserve_table($dbh, $selected_id) {
+	public function delete_reserve_table($dbh, $selected_id) {
 
 		$this->debug_echo('■ delete_reserve_table start');
 
@@ -302,7 +304,7 @@ class TsReserve
 				);
 
 				// UPDATE実行
-				$stmt = $this->pdo->execute($dbh, $update_sql, $params);
+				$stmt = $this->pdoManager->execute($dbh, $update_sql, $params);
 			}
 
 		} catch (Exception $e) {

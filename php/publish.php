@@ -2,11 +2,11 @@
 
 namespace indigo;
 
-class Publish
+class publish
 {
 	private $main;
 
-	private $pdo;
+	private $pdoManager;
 
 	/**
 	 * PDOインスタンス
@@ -185,8 +185,8 @@ class Publish
 	public function __construct($main) {
 
 		$this->main = $main;
-		$this->file = new File($this);
-		$this->pdo = new Pdo($this);
+		$this->fileManager = new fileManager($this);
+		$this->pdoManager = new pdoManager($this);
 
 		$this->debug_echo('★publishクラスのコンストラクタ起動！');
 	}
@@ -281,7 +281,7 @@ class Publish
 				/**
 		 		* 公開処理結果テーブルの登録処理
 				*/ 
-				$ret = json_decode($this->pdo->insert_ts_output($this->dbh, $this->main->options, $start_datetime));
+				$ret = json_decode($this->pdoManager->insert_ts_output($this->dbh, $this->main->options, $start_datetime));
 
 				// インサートしたシーケンスIDを取得（処理終了時の更新処理にて使用）
 				$insert_id = $this->dbh->lastInsertId();
@@ -300,13 +300,13 @@ class Publish
 			 		// ファイルロックを解除する
 
 					// ログファイルディレクトリが存在しない場合は作成
-					if ( !$this->file_control->is_exists_mkdir($this->main->options->indigo_workdir_path . self::PATH_LOG) ) {
+					if ( !$this->fileManager->is_exists_mkdir($this->main->options->indigo_workdir_path . self::PATH_LOG) ) {
 						// エラー処理
 						throw new \Exception('Creation of log directory failed.');
 					} else {
 						
 						// ログファイル内の公開予約ディレクトリが存在しない場合は削除（存在する場合は作成しない）
-						if ( !$this->file_control->is_exists_mkdir($this->main->options->indigo_workdir_path . self::PATH_LOG . $dirname) ) {
+						if ( !$this->fileManager->is_exists_mkdir($this->main->options->indigo_workdir_path . self::PATH_LOG . $dirname) ) {
 
 							// エラー処理
 							throw new \Exception('Creation of log publish directory failed.');
@@ -314,7 +314,7 @@ class Publish
 					}
 
 					// バックアップディレクトリが存在しない場合は作成
-					if ( !$this->file_control->is_exists_mkdir($this->main->options->indigo_workdir_path . self::PATH_BACKUP) ) {
+					if ( !$this->fileManager->is_exists_mkdir($this->main->options->indigo_workdir_path . self::PATH_BACKUP) ) {
 						// エラー処理
 						throw new \Exception('Creation of backup directory failed.');
 					} else {
@@ -328,7 +328,7 @@ class Publish
 					}
 
 					// runningディレクトリが存在しない場合は作成
-					if ( !$this->file_control->is_exists_mkdir($this->main->options->indigo_workdir_path . self::PATH_RUNNING) ) {
+					if ( !$this->fileManager->is_exists_mkdir($this->main->options->indigo_workdir_path . self::PATH_RUNNING) ) {
 						// エラー処理
 						throw new \Exception('Creation of running directory failed.');
 					} else {
@@ -342,7 +342,7 @@ class Publish
 					}
 
 					// releasedディレクトリが存在しない場合は作成
-					if ( !$this->file_control->is_exists_mkdir($this->main->options->indigo_workdir_path . self::PATH_RELEASED) ) {
+					if ( !$this->fileManager->is_exists_mkdir($this->main->options->indigo_workdir_path . self::PATH_RELEASED) ) {
 						// エラー処理
 						throw new \Exception('Creation of released directory failed.');
 					} else {

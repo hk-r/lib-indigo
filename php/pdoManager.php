@@ -2,12 +2,12 @@
 
 namespace indigo;
 
-class Pdo
+class pdo
 {
 
 	private $main;
 
-	private $file;
+	private $fileManager;
 	
 	// DBディレクトリパス
 	const SQLITE_DB_PATH = '/sqlite/';
@@ -74,7 +74,7 @@ class Pdo
 	public function __construct ($main){
 
 		$this->main = $main;
-		$this->file = new File($this);
+		$this->fileManager = new fileManager($this);
 
 
 		// // DELETE文作成
@@ -141,12 +141,12 @@ class Pdo
 			 * sqliteの場合 
 			 */
 			// dbディレクトリの絶対パス
-			$db_real_path = $this->file_control->normalize_path($this->file_control->get_realpath($this->main->options->indigo_workdir_path . self::SQLITE_DB_PATH));
+			$db_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::SQLITE_DB_PATH));
 
 			$this->debug_echo('　□ db_real_path：' . $db_real_path);
 
 			// DBディレクトリが存在しない場合は作成
-			if ( !$this->file_control->is_exists_mkdir($db_real_path) ) {
+			if ( !$this->fileManager->is_exists_mkdir($db_real_path) ) {
 
 					// エラー処理
 					throw new \Exception('Creation of sqlite directory failed.');

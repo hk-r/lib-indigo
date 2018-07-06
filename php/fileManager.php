@@ -1,7 +1,7 @@
 <?php
 namespace indigo;
 
-class File
+class fileManager
 {
 	/** indigo\mainのインスタンス */
 	private $main;

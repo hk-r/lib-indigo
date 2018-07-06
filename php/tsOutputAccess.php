@@ -2,12 +2,13 @@
 
 namespace indigo;
 
-class TsOutput
+class tsOutputAccess
 {
 
 	private $main;
 
-	private $pdo;
+	private $pdoManager;
+
 
 	/**
 	 * 公開処理結果テーブルのカラム定義
@@ -74,7 +75,7 @@ class TsOutput
 	public function __construct ($main){
 
 		$this->main = $main;
-		$this->pdo = new Pdo($this);
+		$this->pdoManager = new pdoManager($this);
 	}
 
 	/**
@@ -83,7 +84,7 @@ class TsOutput
 	 * @param $now = 現在時刻
 	 * @return データリスト
 	 */
-	private function get_ts_output_list($dbh, $now) {
+	public function get_ts_output_list($dbh, $now) {
 
 		$this->debug_echo('■ get_ts_reserve_list start');
 
@@ -96,14 +97,14 @@ class TsOutput
 			$select_sql = "
 					SELECT * FROM TS_OUTPUT WHERE gen_delete_flg = " . self::DELETE_FLG_OFF . " ORDER BY result_id_seq DESC";
 			// SELECT実行
-			$ret_array = $this->pdo->select($dbh, $select_sql);
+			$ret_array = $this->pdoManager->select($dbh, $select_sql);
 
 			foreach ((array)$ret_array as $array) {
 				$conv_ret_array[] = $this->main->convert_ts_output_entity($array);
 			}
 
-			// $this->debug_echo('　□ SELECTリストデータ：');
-			// $this->debug_var_dump($ret_array);
+			$this->debug_echo('　□ SELECTリストデータ：');
+			$this->debug_var_dump($ret_array);
 
 		} catch (\Exception $e) {
 
@@ -122,7 +123,7 @@ class TsOutput
 	 *
 	 * @return 選択行の情報
 	 */
-	private function get_selected_ts_output($dbh, $selected_id) {
+	public function get_selected_ts_output($dbh, $selected_id) {
 
 
 		$this->debug_echo('■ get_selected_ts_output start');
@@ -149,7 +150,7 @@ class TsOutput
 				// );
 
 				// SELECT実行
-				$ret_array = array_shift($this->pdo->select($dbh, $select_sql));
+				$ret_array = array_shift($this->pdoManager->select($dbh, $select_sql));
 
 				$conv_ret_array = $this->main->convert_ts_output_entity($ret_array);
 
@@ -184,7 +185,7 @@ class TsOutput
 
 		try {
 
-		$this->debug_echo('　□1');
+		$this->debug_echo('　□ 1');
 
 			// INSERT文作成
 			$insert_sql = "INSERT INTO TS_OUTPUT ("
@@ -232,12 +233,12 @@ class TsOutput
 			 :" . self::TS_OUTPUT_UPDATE_USER_ID . "
 			)";
 
-		$this->debug_echo('　□2');
+		$this->debug_echo('　□ 2');
 		$this->debug_echo($insert_sql);
 			// 現在時刻
 			// $now = date(self::DATETIME_FORMAT);
 			$now = $this->main->get_current_datetime_of_gmt();
-		$this->debug_echo('　□3');
+		$this->debug_echo('　□ 3');
 			// パラメータ作成
 			$params = array(
 				':reserve_id' => null,
@@ -260,10 +261,10 @@ class TsOutput
 				':update_datetime' => null,
 				':update_user_id' => null
 			);
-				$this->debug_echo('　□4');
+				$this->debug_echo('　□ 4');
 			// INSERT実行
-			$stmt = $this->pdo->execute($dbh, $insert_sql, $params);
-		$this->debug_echo('　□5');
+			$stmt = $this->pdoManager->execute($dbh, $insert_sql, $params);
+		$this->debug_echo('　□ 5');
 		} catch (Exception $e) {
 
 	  		echo '公開処理結果テーブル登録処理に失敗しました。' . $e->getMesseage();
@@ -286,7 +287,7 @@ class TsOutput
 	 *
 	 * @return なし
 	 */
-	private function update_ts_output($dbh, $id) {
+	public function update_ts_output($dbh, $id) {
 
 		$this->debug_echo('■ update_ts_output start');
 
@@ -330,7 +331,7 @@ class TsOutput
 				);
 
 				// UPDATE実行
-				$stmt = $this->pdo->execute($dbh, $update_sql, $params);
+				$stmt = $this->pdoManager->execute($dbh, $update_sql, $params);
 			}
 
 		} catch (Exception $e) {

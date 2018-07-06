@@ -2,17 +2,17 @@
 
 namespace indigo;
 
-class Main
+class main
 {
 	public $options;
 
-	private $file;
+	private $fileManager;
 
-	private $pdo;
+	private $pdoManager;
 
-	private $tsReserve;
+	private $tsReserveAccess;
 
-	private $tsOutput;
+	private $tsOutputAccess;
 
 	/**
 	 * PDOインスタンス
@@ -175,7 +175,7 @@ class Main
 	/**
 	 * コミットハッシュ値
 	 */
-	private $commit_hash = '';
+	public $commit_hash = '';
 
 	/**
 	 * 入力画面のエラーメッセージ
@@ -190,10 +190,10 @@ class Main
 	public function __construct($options) {
 
 		$this->options = json_decode(json_encode($options));
-		$this->file = new File($this);
-		$this->pdo = new Pdo($this);
-		$this->tsReserve = new TsReserve($this);
-		$this->tsOutput = new TsOutput($this);
+		$this->fileManager = new fileManager($this);
+		$this->pdoManager = new pdoManager($this);
+		$this->tsReserveAccess = new tsReserveAccess($this);
+		$this->tsOutputAccess = new tsOutputAccess($this);
 	}
 
 	/**
@@ -210,7 +210,7 @@ class Main
 						'message' => '');
 
 		// masterディレクトリの絶対パス
-		$master_real_path = $this->file_control->normalize_path($this->file_control->get_realpath($this->options->indigo_workdir_path . self::PATH_MASTER));
+		$master_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_MASTER));
 
 		$this->debug_echo('　□ master_real_path：');
 		$this->debug_echo($master_real_path);
@@ -223,7 +223,7 @@ class Main
 			if ( $master_real_path ) {
 
 				// デプロイ先のディレクトリが無い場合は作成
-				if ( !$this->file_control->is_exists_mkdir( $master_real_path ) ) {
+				if ( !$this->fileManager->is_exists_mkdir( $master_real_path ) ) {
 					// ディレクトリ作成に失敗
 					throw new \Exception('Creation of master directory failed.');
 				}
@@ -304,7 +304,7 @@ class Main
 		try {
 
 			// masterディレクトリの絶対パス
-			$master_real_path = $this->file_control->normalize_path($this->file_control->get_realpath($this->options->indigo_workdir_path . self::PATH_MASTER));
+			$master_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_MASTER));
 
 			$this->debug_echo('　□ master_real_path：');
 			$this->debug_echo($master_real_path);
@@ -593,7 +593,7 @@ class Main
 	 *  一致する場合：selected（文字列）
 	 *  一致しない場合：空文字
 	 */
-	private function get_current_datetime_of_gmt() {
+	public function get_current_datetime_of_gmt() {
 
 		return gmdate(DATE_ATOM, time());
 	}
@@ -693,7 +693,7 @@ class Main
 		// 画面選択された公開予約情報を取得
 		$selected_id =  $this->options->_POST->selected_id;
 
-		$selected_data = $this->tsReserve->get_selected_ts_reserve($this->dbh, $selected_id);
+		$selected_data = $this->tsReserveAccess->get_selected_ts_reserve($this->dbh, $selected_id);
 		
 		$this->debug_echo('　□ 公開予約データ');
 		$this->debug_var_dump($selected_data);
@@ -1169,7 +1169,7 @@ class Main
 		// 画面選択された公開予約情報を取得
 		$selected_id =  $this->options->_POST->selected_id;
 
-		$selected_data = $this->tsReserve->get_selected_ts_reserve($this->dbh, $selected_id);
+		$selected_data = $this->tsReserveAccess->get_selected_ts_reserve($this->dbh, $selected_id);
 
 		$this->debug_echo('　□ 公開予約データ');
 		$this->debug_var_dump($selected_data);
@@ -1432,7 +1432,7 @@ class Main
 		/**
  		* 公開予約一覧を取得
 		*/ 
-		$data_list = $this->tsReserve->get_ts_reserve_list($this->dbh, null);
+		$data_list = $this->tsReserveAccess->get_ts_reserve_list($this->dbh, null);
 	
 		// 日時結合（画面表示日時）
 		$combine_datetime = $this->combine_date_time($reserve_date, $reserve_time);
@@ -1482,7 +1482,7 @@ class Main
 		$ret = "";
 
 		// 公開予約一覧を取得
-		$data_list = $this->get_ts_reserve_list($this->dbh, null);
+		$data_list = $this->tsReserveAccess->get_ts_reserve_list($this->dbh, null);
 
 		// // お知らせリストの取得
 		// $alert_list = $this->get_csv_alert_list();
@@ -1575,7 +1575,7 @@ class Main
 		$ret = "";
 
 		// 公開処理結果一覧を取得
-		$data_list = $this->get_ts_output_list($this->dbh, null);
+		$data_list = $this->tsOutputAccess->get_ts_output_list($this->dbh, null);
 
 		$ret .= '<div style="overflow:hidden">'
 			. '<form method="post">'
@@ -1648,7 +1648,7 @@ class Main
 
 		// $path = $this->options->indigo_workdir_path . self::PATH_WAITING;
 		// $this->debug_echo('　□相対パス' . $path);
-		// $real_path = $this->file_control->normalize_path($this->file_control->get_realpath($path));
+		// $real_path = $this->file->normalize_path($this->file->get_realpath($path));
 
 		// $this->debug_echo('　□絶対パス' . $real_path);
 
@@ -1707,10 +1707,10 @@ class Main
 				//timezoneテスト ここまで
 
 				// データベース接続
-				$this->dbh = $this->pdo->connect();
+				$this->dbh = $this->pdoManager->connect();
 
 				// テーブル作成（存在している場合は処理しない）
-				$this->pdo->create_table($this->dbh);
+				$this->pdoManager->create_table($this->dbh);
 
 				// gitのmaster情報取得
 				$ret = json_decode($this->init());
@@ -1773,7 +1773,7 @@ class Main
 							}
 
 							// 公開予約情報の追加
-							$this->insert_ts_reserve($this->dbh, $this->options, $combine_reserve_time);
+							$this->tsReserveAccess->insert_ts_reserve($this->dbh, $this->options, $combine_reserve_time);
 
 						// }
 
@@ -1827,7 +1827,7 @@ class Main
 							$selected_id =  $this->options->_POST->selected_id;
 
 							// CSV入力情報の変更
-							$this->update_reserve_table($this->dbh, $this->options, $combine_reserve_time);
+							$this->tsReserveAccess->update_reserve_table($this->dbh, $this->options, $selected_id, $combine_reserve_time);
 
 						// }
 
@@ -1858,7 +1858,7 @@ class Main
 							$selected_id =  $this->options->_POST->selected_id;
 
 							// CSV情報の削除
-							$this->delete_reserve_table($this->dbh, $selected_id);
+							$this->tsReserveAccess->delete_reserve_table($this->dbh, $selected_id);
 
 						}
 
@@ -1920,6 +1920,8 @@ class Main
 					
 				}
 
+		$this->debug_echo(' ▼6');
+
 				// 初期表示画面の「履歴」ボタン押下
 				if (isset($this->options->_POST->history)) {
 					// 履歴表示画面の表示
@@ -1948,7 +1950,7 @@ class Main
 		} catch (\Exception $e) {
 
 			// データベース接続を閉じる
-			$this->pdo->close($this->dbh);
+			$this->pdoManager->close($this->dbh);
 
 			echo $e->getMessage();
 
@@ -1958,7 +1960,7 @@ class Main
 		}
 		
 		// データベース接続を閉じる
-		$this->pdo->close();
+		$this->pdoManager->close();
 
 		// $this->debug_echo('■ run end');
 
@@ -1990,17 +1992,17 @@ class Main
 		try {
 
 			// WAITINGディレクトリの絶対パス
-			$waiting_real_path = $this->file_control->normalize_path($this->file_control->get_realpath($this->options->indigo_workdir_path . self::PATH_WAITING));
+			$waiting_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_WAITING));
 
 			// WAITINGディレクトリが存在しない場合は作成
-			if ( !$this->file_control->is_exists_mkdir($waiting_real_path) ) {
+			if ( !$this->fileManager->is_exists_mkdir($waiting_real_path) ) {
 
 					// エラー処理
 					throw new \Exception('Creation of Waiting directory failed.');
 			}
 
 			// WAITING配下公開ソースディレクトリの絶対パス
-			$waiting_src_real_path = $this->file_control->normalize_path($this->file_control->get_realpath($this->options->indigo_workdir_path . self::PATH_WAITING . $dirname));
+			$waiting_src_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_WAITING . $dirname));
 
 			$this->debug_echo('　□ $waiting_src_real_path' . $waiting_src_real_path);
 
@@ -2105,7 +2107,7 @@ class Main
 		try {
 
 			// 変更元のWAITING配下公開ソースディレクトリの絶対パス
-			$before_waiting_src_real_path = $this->file_control->normalize_path($this->file_control->get_realpath($this->options->indigo_workdir_path . self::PATH_WAITING . $before_dirname));
+			$before_waiting_src_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_WAITING . $before_dirname));
 
 			// 変更元が存在するかチェック
 			if ( !file_exists($before_waiting_src_real_path) ) {
@@ -2115,7 +2117,7 @@ class Main
 			}
 
 			// 変更後のWAITING配下公開ソースディレクトリの絶対パス
-			$waiting_src_real_path = $this->file_control->normalize_path($this->file_control->get_realpath($this->options->indigo_workdir_path . self::PATH_WAITING . $dirname));
+			$waiting_src_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_WAITING . $dirname));
 
 			// ディレクトリ名が変更になる場合はリネームする
 			if ($before_dirname != $dirname) {
@@ -2240,7 +2242,7 @@ class Main
 
 		$selected_id =  $this->options->_POST->selected_id;
 
-		$selected_ret = $this->tsReserve->get_selected_ts_reserve($this->dbh, $selected_id);
+		$selected_ret = $this->tsReserveAccess->get_selected_ts_reserve($this->dbh, $selected_id);
 
 		$dirname = $this->format_datetime($selected_ret[self::RESERVE_ENTITY_RESERVE], self::DATETIME_FORMAT_SAVE);
 
@@ -2248,7 +2250,7 @@ class Main
 
 
 			// WAITING配下公開ソースディレクトリの絶対パス
-			$waiting_src_real_path = $this->file_control->normalize_path($this->file_control->get_realpath($this->options->indigo_workdir_path . self::PATH_WAITING . $dirname));
+			$waiting_src_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_WAITING . $dirname));
 
 			// WAITINGに公開予約ディレクトリが存在しない場合は無視する
 			if( file_exists( $waiting_src_real_path )) {
@@ -2439,7 +2441,7 @@ class Main
 	 *	 
 	 * @return ソート後の配列
 	 */
-	function convert_to_gmt_datetime($datetime) {
+	public function convert_to_gmt_datetime($datetime) {
 	
 		$this->debug_echo('■ convert_to_gmt_datetime start');
 
@@ -2506,7 +2508,7 @@ class Main
 	 */
 	function convert_ts_reserve_entity($array) {
 	
-		// $this->debug_echo('■ convert_ts_reserve_entity start');
+		$this->debug_echo('■ convert_ts_reserve_entity start');
 
 		$entity = array();
 
@@ -2528,7 +2530,7 @@ class Main
 		// コメント
 		$entity[self::RESERVE_ENTITY_COMMENT] = $array[self::TS_RESERVE_COLUMN_COMMENT];
 	
-		// $this->debug_echo('■ convert_ts_reserve_entity end');
+		$this->debug_echo('■ convert_ts_reserve_entity end');
 
 	    return $entity;
 	}

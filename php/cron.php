@@ -2,11 +2,11 @@
 
 namespace indigo;
 
-class Cron
+class cron
 {
 	public $publish;
 
-	private $pdo;
+	private $pdoManager;
 
 	// 開発環境
 	const DEVELOP_ENV = '1';
@@ -49,8 +49,8 @@ class Cron
 	public function __construct($options) {
 
 		$this->options = json_decode(json_encode($options));
-		$this->file = new File($this);
-		$this->pdo = new Pdo($this);
+		$this->fileManager = new fileManager($this);
+		$this->pdoManager = new pdoManager($this);
 		$this->publish = new Publish($this);
 	}
 
@@ -122,10 +122,10 @@ class Cron
 		try {
 
 			// データベース接続
-			$this->dbh = $this->pdo->connect();
+			$this->dbh = $this->pdoManager->connect();
 
 			// テーブル作成（存在している場合は処理しない）
-			$this->pdo->create_table($this->dbh);
+			$this->pdoManager->create_table($this->dbh);
 
 		$this->debug_echo('■ [cron] create_table_終了');
 
@@ -152,7 +152,7 @@ class Cron
 		} catch (\Exception $e) {
 
 			// データベース接続を閉じる
-			$this->pdo->close($this->dbh);
+			$this->pdoManager->close($this->dbh);
 
 			echo $e->getMessage();
 
