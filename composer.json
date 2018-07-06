@@ -22,13 +22,13 @@
     },
     "autoload": {
         "files": [
-            "php/tsReserveAccess.php",
-            "php/tsOutputAccess.php",
-            "php/publish.php",
-            "php/pdoManager.php",
             "php/main.php",
+            "php/cron.php",
+           "php/publish.php",
+            "php/pdoManager.php",
             "php/fileManager.php",
-            "php/cron.php"
+            "php/tsReserveAccess.php",
+            "php/tsOutputAccess.php"
         ]
     },
     "extra": {

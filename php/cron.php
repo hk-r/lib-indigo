@@ -51,7 +51,7 @@ class cron
 		$this->options = json_decode(json_encode($options));
 		$this->fileManager = new fileManager($this);
 		$this->pdoManager = new pdoManager($this);
-		$this->publish = new Publish($this);
+		$this->publish = new publish($this);
 	}
 
 	/**
