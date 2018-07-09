@@ -233,7 +233,6 @@ class tsReserve
 			
 			// パラメータ作成
 			$params = array(
-				":" . self::TS_RESERVE_RESERVE_ID_SEQ => $options->_POST->gmt_reserve_datetime,
 				":" . self::TS_RESERVE_RESERVE => $options->_POST->branch_select_value,
 				":" . self::TS_RESERVE_BRANCH => $commit_hash,
 				":" . self::TS_RESERVE_COMMIT => $options->_POST->comment,
