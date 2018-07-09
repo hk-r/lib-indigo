@@ -2541,7 +2541,7 @@ class main
 		$entity = array();
 
 		// ID
-		$entity[self::RESERVE_ENTITY_ID] = $array[tsReserve::TS_RESERVE_RESERVE_ID];
+		$entity[self::RESERVE_ENTITY_ID] = $array[tsReserve::TS_RESERVE_RESERVE_ID_SEQ];
 		
 		// 公開予約日時
 		// タイムゾーンの時刻へ変換
@@ -2578,7 +2578,7 @@ class main
 		$entity = array();
 
 		// ID
-		$entity[self::RESULT_ENTITY_ID] = $array[tsOutput::TS_OUTPUT_RESULT_ID];
+		$entity[self::RESULT_ENTITY_ID] = $array[tsOutput::TS_OUTPUT_RESULT_ID_SEQ];
 		
 		// 公開予約日時
 		// タイムゾーンの時刻へ変換

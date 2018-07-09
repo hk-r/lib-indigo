@@ -14,31 +14,6 @@ class pdoManager
 	// DBディレクトリパス
 	const SQLITE_DB_NAME = 'indigo.db';
 
-
-	/**
-	 * 公開処理結果テーブルのカラム定義
-	 */
-	const TS_OUTPUT_RESULT_ID = 'result_id_seq';		// 公開処理結果ID
-	const TS_OUTPUT_RESERVE_ID = 'reserve_id';			// 公開予約ID
-	const TS_OUTPUT_BACKUP_ID = 'backup_id';			// バックアップID
-	const TS_OUTPUT_RESERVE = 'reserve_datetime';		// 公開予約日時
-	const TS_OUTPUT_BRANCH = 'branch_name';		// ブランチ名
-	const TS_OUTPUT_COMMIT = 'commit_hash';		// コミットハッシュ値（短縮）
-	const TS_OUTPUT_COMMENT = 'comment';		// コメント
-	const TS_OUTPUT_PUBLISH_TYPE = 'publish_type';	// 公開種別
-	const TS_OUTPUT_STATUS = 'status';				// 状態
-	const TS_OUTPUT_DIFF_FLG1 = 'change_check_flg';
-	const TS_OUTPUT_DIFF_FLG2 = 'publish_honban_diff_flg';
-	const TS_OUTPUT_DIFF_FLG3 = 'publish_pre_diff_flg';
-	const TS_OUTPUT_START = 'start_datetime';		// 公開処理開始日時
-	const TS_OUTPUT_END = 'end_datetime';			// 公開処理終了日時
-	const TS_OUTPUT_DELETE_FLG = 'gen_delete_flg';		// 世代削除フラグ
-	const TS_OUTPUT_DELETE = 'gen_delete_datetime';		// 世代削除日時
-	const TS_OUTPUT_INSERT_DATETIME = 'insert_datetime';	// 登録日時
-	const TS_OUTPUT_INSERT_USER_ID = 'insert_user_id';		// 登録ユーザID
-	const TS_OUTPUT_UPDATE_DATETIME = 'update_datetime';	// 更新日時
-	const TS_OUTPUT_UPDATE_USER_ID = 'update_user_id';		// 更新ユーザID
-
 	/**
 	 * 公開種別
 	 */
@@ -221,17 +196,16 @@ class pdoManager
 		//============================================================
 		// 公開予約テーブル作成
 		//============================================================
-		$create_sql = 'CREATE TABLE IF NOT EXISTS TS_RESERVE (
-			reserve_id_seq INTEGER PRIMARY KEY AUTOINCREMENT,
-			reserve_datetime TEXT,
-			branch_name TEXT,
-			commit_hash TEXT,
-			comment TEXT,
-			delete_flg TEXT,
-			insert_datetime TEXT,
-			insert_user_id TEXT,
-			update_datetime TEXT,
-			update_user_id TEXT
+		$create_sql = 'CREATE TABLE IF NOT EXISTS TS_RESERVE ('
+			  . tsReserve::TS_RESERVE_RESERVE_ID_SEQ . ' INTEGER PRIMARY KEY AUTOINCREMENT,
+			' . tsReserve::TS_RESERVE_RESERVE . ' TEXT,
+			' . tsReserve::TS_RESERVE_BRANCH . ' TEXT,
+			' . tsReserve::TS_RESERVE_COMMIT . ' TEXT,
+			' . tsReserve::TS_RESERVE_COMMENT . ' TEXT,
+			' . tsReserve::TS_RESERVE_INSERT_DATETIME . ' TEXT,
+			' . tsReserve::TS_RESERVE_INSERT_USER_ID . ' TEXT,
+			' . tsReserve::TS_RESERVE_UPDATE_DATETIME . ' TEXT,
+			' . tsReserve::TS_RESERVE_UPDATE_USER_ID . ' TEXT
 		)';
 
 		// SQL実行
@@ -246,26 +220,26 @@ class pdoManager
 		// 公開処理結果テーブル作成
 		//============================================================
 		$create_sql = 'CREATE TABLE IF NOT EXISTS TS_OUTPUT ('
-			. self::TS_OUTPUT_RESULT_ID . ' INTEGER PRIMARY KEY AUTOINCREMENT,
-			' . self::TS_OUTPUT_RESERVE_ID . ' INTEGER,
-			' . self::TS_OUTPUT_BACKUP_ID . ' INTEGER,
-			' . self::TS_OUTPUT_RESERVE . ' TEXT,
-			' . self::TS_OUTPUT_BRANCH . ' TEXT,
-			' . self::TS_OUTPUT_COMMIT . ' TEXT,
-			' . self::TS_OUTPUT_COMMENT . ' TEXT,
-			' . self::TS_OUTPUT_PUBLISH_TYPE . ' TEXT,
-			' . self::TS_OUTPUT_STATUS . ' TEXT,
-			' . self::TS_OUTPUT_DIFF_FLG1 . ' TEXT,
-			' . self::TS_OUTPUT_DIFF_FLG2 . ' TEXT,
-			' . self::TS_OUTPUT_DIFF_FLG3 . ' TEXT,
-			' . self::TS_OUTPUT_START . ' TEXT,
-			' . self::TS_OUTPUT_END . ' TEXT,
-			' . self::TS_OUTPUT_DELETE_FLG . ' TEXT,
-			' . self::TS_OUTPUT_DELETE . ' TEXT,
-			' . self::TS_OUTPUT_INSERT_DATETIME . ' TEXT,
-			' . self::TS_OUTPUT_INSERT_USER_ID . ' TEXT,
-			' . self::TS_OUTPUT_UPDATE_DATETIME . ' TEXT,
-			' . self::TS_OUTPUT_UPDATE_USER_ID . ' TEXT
+			  . tsOutput::TS_OUTPUT_RESULT_ID_SEQ . ' INTEGER PRIMARY KEY AUTOINCREMENT,
+			' . tsOutput::TS_OUTPUT_RESERVE_ID . ' INTEGER,
+			' . tsOutput::TS_OUTPUT_BACKUP_ID . ' INTEGER,
+			' . tsOutput::TS_OUTPUT_RESERVE . ' TEXT,
+			' . tsOutput::TS_OUTPUT_BRANCH . ' TEXT,
+			' . tsOutput::TS_OUTPUT_COMMIT . ' TEXT,
+			' . tsOutput::TS_OUTPUT_COMMENT . ' TEXT,
+			' . tsOutput::TS_OUTPUT_PUBLISH_TYPE . ' TEXT,
+			' . tsOutput::TS_OUTPUT_STATUS . ' TEXT,
+			' . tsOutput::TS_OUTPUT_DIFF_FLG1 . ' TEXT,
+			' . tsOutput::TS_OUTPUT_DIFF_FLG2 . ' TEXT,
+			' . tsOutput::TS_OUTPUT_DIFF_FLG3 . ' TEXT,
+			' . tsOutput::TS_OUTPUT_START . ' TEXT,
+			' . tsOutput::TS_OUTPUT_END . ' TEXT,
+			' . tsOutput::TS_OUTPUT_DELETE_FLG . ' TEXT,
+			' . tsOutput::TS_OUTPUT_DELETE . ' TEXT,
+			' . tsOutput::TS_OUTPUT_INSERT_DATETIME . ' TEXT,
+			' . tsOutput::TS_OUTPUT_INSERT_USER_ID . ' TEXT,
+			' . tsOutput::TS_OUTPUT_UPDATE_DATETIME . ' TEXT,
+			' . tsOutput::TS_OUTPUT_UPDATE_USER_ID . ' TEXT
 		)';
 
 		// SQL実行

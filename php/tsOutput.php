@@ -13,7 +13,7 @@ class tsOutput
 	/**
 	 * 公開処理結果テーブルのカラム定義
 	 */
-	const TS_OUTPUT_RESULT_ID = 'result_id_seq';		// 公開処理結果ID
+	const TS_OUTPUT_RESULT_ID_SEQ = 'result_id_seq';		// 公開処理結果ID
 	const TS_OUTPUT_RESERVE_ID = 'reserve_id';			// 公開予約ID
 	const TS_OUTPUT_BACKUP_ID = 'backup_id';			// バックアップID
 	const TS_OUTPUT_RESERVE = 'reserve_datetime';		// 公開予約日時
