@@ -36,7 +36,7 @@ class tsReserveAccess
 	 * @param $now = 現在時刻
 	 * @return データリスト
 	 */
-	public function get_ts_reserve_list($dbh, $now) {
+	public function get_ts_reserve_list($dbh) {
 
 		$this->debug_echo('■ get_ts_reserve_list start');
 
@@ -49,6 +49,7 @@ class tsReserveAccess
 			// SELECT文作成（削除フラグ = 0、ソート順：公開予約日時の昇順）
 			$select_sql = "
 					SELECT * FROM TS_RESERVE WHERE delete_flg = " . self::DELETE_FLG_OFF . " ORDER BY reserve_datetime";
+
 			// SELECT実行
 			$ret_array = $this->pdoManager->select($dbh, $select_sql);
 
@@ -71,6 +72,56 @@ class tsReserveAccess
 
 		return $conv_ret_array;
 	}
+
+	/**
+	 * 公開予約一覧テーブルからリストを取得する（公開処理用：現在日時以前の公開日時であること）
+	 *
+	 * @param $now = 現在時刻
+	 * @return データリスト
+	 */
+	public function get_ts_reserve_publish_list($dbh, $now) {
+
+		$this->debug_echo('■ get_ts_reserve_list start');
+
+		$ret_array = array();
+
+		$conv_ret_array = array();
+
+		$option_param = '';
+
+		try {
+
+			if ($now) {
+				$option_param = ' and reserve_datetime >= ' . $now;
+			}
+
+			// SELECT文作成（削除フラグ = 0、公開予約日時>=現在日時、ソート順：公開予約日時の降順）
+			$select_sql = "
+					SELECT * FROM TS_RESERVE WHERE delete_flg = " . self::DELETE_FLG_OFF . $option_param . " ORDER BY reserve_datetime DESC";
+
+			// SELECT実行
+			$ret_array = $this->pdoManager->select($dbh, $select_sql);
+
+			foreach ((array)$ret_array as $array) {
+
+				$conv_ret_array[] = $this->main->convert_ts_reserve_entity($array);
+			}
+
+			// $this->debug_echo('　□ conv_ret_array：');
+			// $this->debug_var_dump($conv_ret_array);
+
+		} catch (\Exception $e) {
+
+			echo "例外キャッチ：", $e->getMessage(), "\n";
+
+			return $conv_ret_array;
+		}
+		
+		$this->debug_echo('■ get_ts_reserve_list end');
+
+		return $conv_ret_array;
+	}
+
 
 	/**
 	 * 公開予約テーブルから、選択された公開予約情報を取得する
@@ -129,7 +180,7 @@ class tsReserveAccess
 	 *
 	 * @return なし
 	 */
-	public function insert_ts_reserve($dbh, $options, $combine_reserve_time) {
+	public function insert_ts_reserve($dbh, $options, $commit_hash) {
 
 		$this->debug_echo('■ insert_ts_reserve start');
 
@@ -162,14 +213,13 @@ class tsReserveAccess
 			)";
 
 			// 現在時刻
-			// $now = date(self::DATETIME_FORMAT);
 			$now = $this->main->get_current_datetime_of_gmt();
-
+			
 			// パラメータ作成
 			$params = array(
-				':reserve_datetime' => $this->main->convert_to_gmt_datetime($combine_reserve_time),
+				':reserve_datetime' => $options->_POST->gmt_reserve_datetime),
 				':branch_name' => $options->_POST->branch_select_value,
-				':commit_hash' => $this->main->commit_hash,
+				':commit_hash' => $commit_hash,
 				':comment' => $options->_POST->comment,
 				':delete_flg' => self::DELETE_FLG_OFF,
 				':insert_datetime' => $now,
@@ -203,7 +253,7 @@ class tsReserveAccess
 	 *
 	 * @return なし
 	 */
-	public function update_reserve_table($dbh, $options, $selected_id, $combine_reserve_time) {
+	public function update_reserve_table($dbh, $options, $selected_id, $commit_hash) {
 
 		$this->debug_echo('■ update_reserve_table start');
 
@@ -229,14 +279,13 @@ class tsReserveAccess
 					WHERE reserve_id_seq = :reserve_id_seq";
 
 				// 現在時刻
-				// $now = date(self::DATETIME_FORMAT);
 				$now = $this->main->get_current_datetime_of_gmt();
 
 				// パラメータ作成
 				$params = array(
-					':reserve_datetime' => $this->main->convert_to_gmt_datetime($combine_reserve_time),
+					':reserve_datetime' => $options->_POST->gmt_reserve_datetime),
 					':branch_name' => $options->_POST->branch_select_value,
-					':commit_hash' => $this->main->commit_hash,
+					':commit_hash' => $commit_hash,
 					':comment' => $options->_POST->comment,
 					':update_datetime' => $now,
 					':update_user_id' => "dummy_update_user",

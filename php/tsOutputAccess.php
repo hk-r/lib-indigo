@@ -176,7 +176,7 @@ class tsOutputAccess
 	 *
 	 * @return なし
 	 */
-	public function insert_ts_output($dbh, $options, $start_datetime) {
+	public function insert_ts_output($dbh, $options, $start_datetime, $type) {
 
 		$this->debug_echo('■ insert_ts_output start');
 
@@ -233,12 +233,12 @@ class tsOutputAccess
 			 :" . self::TS_OUTPUT_UPDATE_USER_ID . "
 			)";
 
-		$this->debug_echo('　□ 2');
-		$this->debug_echo($insert_sql);
+			$this->debug_echo('　□ insert_sql');
+			$this->debug_echo($insert_sql);
+
 			// 現在時刻
-			// $now = date(self::DATETIME_FORMAT);
 			$now = $this->main->get_current_datetime_of_gmt();
-		$this->debug_echo('　□ 3');
+
 			// パラメータ作成
 			$params = array(
 				':reserve_id' => null,
@@ -247,7 +247,7 @@ class tsOutputAccess
 				':branch_name' => "ブランチ名",
 				':commit_hash' => "dummy_commit_hash",
 				':comment' => "コメント",
-				':publish_type' => self::PUBLISH_TYPE_RESERVE,
+				':publish_type' => $type,
 				':status' => self::PUBLISH_STATUS_RUNNING,
 				':change_check_flg' => null,
 				':publish_honban_diff_flg' => null,
@@ -261,10 +261,10 @@ class tsOutputAccess
 				':update_datetime' => null,
 				':update_user_id' => null
 			);
-				$this->debug_echo('　□ 4');
+
 			// INSERT実行
 			$stmt = $this->pdoManager->execute($dbh, $insert_sql, $params);
-		$this->debug_echo('　□ 5');
+
 		} catch (Exception $e) {
 
 	  		echo '公開処理結果テーブル登録処理に失敗しました。' . $e->getMesseage();
@@ -287,7 +287,7 @@ class tsOutputAccess
 	 *
 	 * @return なし
 	 */
-	public function update_ts_output($dbh, $id) {
+	public function update_ts_output($dbh, $id, $end_datetime, $status) {
 
 		$this->debug_echo('■ update_ts_output start');
 
@@ -299,7 +299,7 @@ class tsOutputAccess
 			$this->debug_echo('id：' . $id);
 
 			if (!$id) {
-				$this->debug_echo('公開処理結果テーブルの更新IDが取得できませんでした。');
+				$this->debug_echo('公開処理結果テーブルの更新対象のIDが取得できませんでした。');
 			} else {
 
 				// UPDATE文作成
@@ -319,11 +319,11 @@ class tsOutputAccess
 
 				// パラメータ作成
 				$params = array(
-					':status' => self::PUBLISH_STATUS_SUCCESS,
+					':status' => $status,
 					':change_check_flg' => "0",
 					':publish_honban_diff_flg' => "1",
 					':publish_pre_diff_flg' => "1",
-					':end_datetime' => $now,
+					':end_datetime' => $end_datetime,
 					':update_datetime' => $now,
 					':update_user_id' => "dummy_update_user",
 

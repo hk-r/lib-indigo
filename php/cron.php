@@ -48,105 +48,147 @@ class cron
 	 */
 	public function __construct($options) {
 
+		$this->debug_echo('■ [cron] __construct start');
+
 		$this->options = json_decode(json_encode($options));
 		$this->fileManager = new fileManager($this);
 		$this->pdoManager = new pdoManager($this);
 		$this->publish = new publish($this);
+
+		$this->debug_echo('■ [cron] __construct end');
+
 	}
 
 	/**
 	 * 
 	 */
     public function run(){
-
 	
 		$this->debug_echo('■ [cron] run start');
-
-		// $this->debug_echo('　□カレントパス：' . realpath('.'));
-		// $this->debug_echo('　□__DIR__：' . __DIR__);
-
-		// $path = self::PATH_CREATE_DIR . self::PATH_WAITING;
-		// $this->debug_echo('　□相対パス' . $path);
-		// $real_path = $this->file_control->normalize_path($this->file_control->get_realpath($path));
-
-		// $this->debug_echo('　□絶対パス' . $real_path);
-
-		// 画面表示
-		$disp = '';  
-
-		// エラーダイアログ表示
-		$alert_message = '';
-
-		// ダイアログの表示
-		$dialog_disp = '';
-		
-		// 画面ロック用
-		$disp_lock = '';
 
 		// 処理実行結果格納
 		$ret = '';
 
-		// 入力画面へ表示させるエラーメッセージ
-		// $error_message = '';
-
-		//timezoneテスト ここから
-		date_default_timezone_set('Asia/Tokyo');
-
-		echo "--------------------------------</br>";
-	
-		$this->debug_echo('　□GMTの現在時刻：');
-		$this->debug_echo(gmdate(DATE_ATOM, time()));
-
-		$this->debug_echo('　□Asiaの現在時刻：');
-		$this->debug_echo(date(DATE_ATOM, time()));
-
-
-		$t = new \DateTime(gmdate(DATE_ATOM, time()));
-		$t->setTimeZone(new \DateTimeZone('Asia/Tokyo'));
-		$this->debug_echo('　□GMTから変換したAsiaの現在時刻：');
-		$this->debug_echo($t->format(DATE_ATOM));
-
-
-		$t = new \DateTime($t->format(DATE_ATOM));
-		$t->setTimeZone(new \DateTimeZone('GMT'));
-
-		$this->debug_echo('　□日本時間から変換したGMTの現在時刻：');
-		$this->debug_echo($t->format(DATE_ATOM));
-
-		// タイムゾーンが取得できる！！！！
-		echo "タイムゾーン取得 ：" . date("e", date(DATE_ATOM, time())). "</br>";
-		
-		echo "--------------------------------</br>";
-		//timezoneテスト ここまで
-
 		try {
 
+			//============================================================
 			// データベース接続
+			//============================================================
 			$this->dbh = $this->pdoManager->connect();
 
-			// テーブル作成（存在している場合は処理しない）
-			$this->pdoManager->create_table($this->dbh);
 
-		$this->debug_echo('■ [cron] create_table_終了');
+			//============================================================
+			// 作業用ディレクトリの作成（既にある場合は作成しない）
+			//============================================================
+			$this->main->create_work_dir();
 
-			// 即時公開処理
-			$ret = json_decode($this->publish->immediate_release());
 
-			if ( !$ret->status ) {
+			//============================================================
+			// 公開予約テーブルより、公開対象データの取得
+			//============================================================
+			// GMTの現在日時
+			$start_datetime = $this->main->get_current_datetime_of_gmt();
 
-				$alert_message = 'jigen_release faild';
+			$this->debug_echo('　□ 現在日時：');
+			$this->debug_echo($start_datetime);
+
+			// 公開予約の一覧を取得
+			$data_list = $this->get_ts_reserve_publish_list($this->dbh, $start_datetime);
+
+			// TODO:ここで複数件取れてきた場合は、最新データ以外はスキップデータとして公開処理結果テーブルへ登録する
+			foreach ( (array)$data_list as $data ) {
+
+				$this->debug_echo('　□公開取得データ[配列]');
+				$this->debug_var_dump($data);
+
+				$dirname = $this->format_datetime($data[self::TS_RESERVE_COLUMN_RESERVE], self::DATETIME_FORMAT_SAVE);
+		
+				$this->debug_echo('　□公開ディレクトリ名');
+				$this->debug_var_dump($dirname);
 			}
 
-			if ( !$ret->status ) {
-				// 処理失敗の場合
+			//============================================================
+			// 公開予約ディレクトリを「waiting」から「running」ディレクトリへ移動
+			//============================================================
 
-				// エラーメッセージ表示
-				$dialog_disp = '
-				<script type="text/javascript">
-					console.error("' . $ret->message . '");
-					alert("' . $alert_message .'");
-				</script>';
-				
+			// waitingディレクトリの絶対パスを取得。
+			$waiting_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_WAITING));
+
+			// runningディレクトリの絶対パスを取得。
+			$running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_RUNNING));
+
+			// logディレクトリの絶対パスを取得。
+			$log_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_LOG));
+
+			if ( file_exists($waiting_real_path) && file_exists($running_real_path) ) {
+
+				// TODO:ログフォルダに出力する
+				$command = 'rsync -avzP --remove-source-files ' . $waiting_real_path . $dirname . '/ ' . $running_real_path . $dirname . '/' . ' --log-file=' . $log_real_path . $dirname . '/rsync_' . $dirname . '.log' ;
+
+				$this->debug_echo('　□ $command：');
+				$this->debug_echo($command);
+
+				$ret = $this->command_execute($command, true);
+
+				$this->debug_echo('　▼ waiting⇒runningのファイル移動結果');
+
+				foreach ( (array)$ret['output'] as $element ) {
+					$this->debug_echo($element);
+				}
+
+				// waitingの空ディレクトリを削除する
+				$command = 'find ' .  $waiting_real_path . $dirname . '/ -type d -empty -delete' ;
+
+				$this->debug_echo('　□ $command：');
+				$this->debug_echo($command);
+
+				$ret = $this->command_execute($command, true);
+
+				$this->debug_echo('　▼ Waitingディレクトリの削除');
+
+				foreach ( (array)$ret['output'] as $element ) {
+					$this->debug_echo($element);
+				}
+
+			} else {
+					// エラー処理
+					throw new \Exception('Waiting or running directory not found.');
+			}
+
+
+			//============================================================
+			// 公開処理結果テーブルの登録処理
+			//============================================================
+			$ret = json_decode($this->tsOutputAccess->insert_ts_output($this->dbh, $this->main->options, $start_datetime, self::PUBLISH_TYPE_RESERVE));
+			if ( !$ret->status) {
+				throw new \Exception("TS_OUTPUT insert failed.");
+			}
+
+			// インサートしたシーケンスIDを取得（処理終了時の更新処理にて使用）
+			$insert_id = $this->dbh->lastInsertId();
+
+			$this->debug_echo('　□ $insert_id：');
+			$this->debug_echo($insert_id);
+
+
+
+			//============================================================
+			// ※公開処理※
+			//============================================================
+			$ret = json_decode($this->publish->do_publish($dirname));
+
+
+
+
+			//============================================================
+			// 公開処理結果テーブルの更新処理
+			//============================================================
+			// GMTの現在日時
+			$end_datetime = $this->main->get_current_datetime_of_gmt();
+
+	 		$ret = $this->tsOutputAccess->update_ts_output($this->dbh, $insert_id, $end_datetime, self::PUBLISH_STATUS_SUCCESS);
+			if ( !$ret->status) {
+				throw new \Exception("TS_OUTPUT update failed.");
 			}
 	
 		} catch (\Exception $e) {
@@ -166,48 +208,8 @@ class cron
 
 		$this->debug_echo('■ [cron] run end');
 
+		return;
     }
-
-	/**
-	 * ディレクトリの存在有無にかかわらず、ディレクトリを再作成する（存在しているものは削除する）
-	 *	 
-	 * @param $dirpath = ディレクトリパス
-	 *	 
-	 * @return true:成功、false：失敗
-	 */
-	private function is_exists_remkdir($dirpath) {
-		
-		$this->debug_echo('■ is_exists_remkdir start');
-		$this->debug_echo('　■ $dirpath：' . $dirpath);
-
-		if ( file_exists($dirpath) ) {
-			$this->debug_echo('　■ $dirpath2：' . $dirpath);
-
-			// 削除
-			$command = 'rm -rf --preserve-root '. $dirpath;
-			$ret = $this->command_execute($command, true);
-
-			if ( $ret['return'] !== 0 ) {
-				$this->debug_echo('[既存ディレクトリ削除失敗]');
-				return false;
-			}
-		}
-
-		// デプロイ先のディレクトリを作成
-		if ( !file_exists($dirpath)) {
-			if ( !mkdir($dirpath, self::DIR_PERMISSION_0757) ) {
-				$this->debug_echo('　□ [再作成失敗]$dirpath：' . $dirpath);
-				return false;
-			}
-		} else {
-			$this->debug_echo('　□ [既存ディレクトリが残っている]$dirpath：' . $dirpath);
-			return false;
-		}
-	
-		$this->debug_echo('■ is_exists_remkdir end');
-
-		return true;
-	}
 
 	/**
 	 * ※デバッグ関数（エラー調査用）
