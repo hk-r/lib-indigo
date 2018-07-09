@@ -1488,7 +1488,7 @@ class main
 			$this->debug_echo($dirname);
 
 			// コピー処理
-			$ret = json_decode($this->file_update($waiting_real_path, $dirname));
+			$ret = json_decode($this->file_copy($waiting_real_path, $dirname));
 
 			if ( !$ret->status ) {
 				throw new \Exception('Git file copy failed.');
