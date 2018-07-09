@@ -2264,27 +2264,27 @@ class main
 			$this->debug_echo('　□ 現在日時：');
 			$this->debug_echo($start_datetime);
 
-			//============================================================
-			// 指定ブランチのGit情報を「running」ディレクトリへコピー
-			//============================================================
+			============================================================
+			指定ブランチのGit情報を「running」ディレクトリへコピー
+			============================================================
 
-			// // runningディレクトリの絶対パスを取得。
-			// $running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_RUNNING));
+			// runningディレクトリの絶対パスを取得。
+			$running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_RUNNING));
 
-			// // 公開予約ディレクトリ名の取得
-			// $dirname = $this->format_datetime($start_datetime, self::DATETIME_FORMAT_SAVE);
+			// 公開予約ディレクトリ名の取得
+			$dirname = $this->format_datetime($start_datetime, self::DATETIME_FORMAT_SAVE);
 
-			// $this->debug_echo('　□ 公開予約ディレクトリ：');
-			// $this->debug_echo($dirname);
+			$this->debug_echo('　□ 公開予約ディレクトリ：');
+			$this->debug_echo($dirname);
 
-			// // コピー処理
-			// $ret = json_decode($this->file_copy($running_real_path, $dirname));
+			// コピー処理
+			$ret = json_decode($this->file_copy($running_real_path, $dirname));
 
-			// if ( !$ret->status ) {
-			// 	throw new \Exception('Git file copy failed.');
-			// }
+			if ( !$ret->status ) {
+				throw new \Exception('Git file copy failed.');
+			}
 
-	 	// 	$this->debug_echo('　□ -----公開処理結果テーブルの登録処理-----');
+	 		$this->debug_echo('　□ -----公開処理結果テーブルの登録処理-----');
 			
 
 			//============================================================
@@ -2309,11 +2309,11 @@ class main
 			//============================================================
 			// ※公開処理※
 			//============================================================
-			// $ret = json_decode($this->publish->do_publish($dirname));
+			$ret = json_decode($this->publish->do_publish($dirname));
 		
-			// if ( !$ret->status ) {
-			// 	throw new \Exception('Publish failed.');
-			// }
+			if ( !$ret->status ) {
+				throw new \Exception('Publish failed.');
+			}
 
 
 			//============================================================

@@ -127,7 +127,7 @@ class pdoManager
 			$db_pass = $this->main->options->mysql_db_pass;
 
 			$option = array(
-						PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES '.SELF::UTF
+						\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES '.SELF::UTF
 					);
 
 	
