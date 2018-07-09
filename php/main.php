@@ -95,13 +95,13 @@ class main
 	 * 公開用の操作ディレクトリパス定義
 	 */
 	// backupディレクトリパス
-	const PATH_BACKUP = '/file/backup/';
+	const PATH_BACKUP = '/backup/';
 	// waitingディレクトリパス
-	const PATH_WAITING = '/file/waiting/';
+	const PATH_WAITING = '/waiting/';
 	// runnningディレクトリパス
-	const PATH_RUNNING = '/file/running/';
+	const PATH_RUNNING = '/running/';
 	// releasedディレクトリパス
-	const PATH_RELEASED = '/file/released/';
+	const PATH_RELEASED = '/released/';
 	// logディレクトリパス
 	const PATH_LOG = '/log/';
 	// masterディレクトリパス
