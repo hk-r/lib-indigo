@@ -131,7 +131,7 @@ class publish
 			// 	throw new \Exception('Creation of Backup publish directory failed.');
 			// }
 
-			if ( file_exists($backup_dir_real_path) && file_exists($project_real_path) ) {
+			if ( file_exists($backup_real_path) && file_exists($project_real_path) ) {
 
 				// TODO:ログフォルダに出力する
 				$command = 'rsync -avzP' . ' ' . $project_real_path . ' ' . $backup_real_path . $dirname . '/' . ' --log-file=' . $log_real_path . '/rsync_' . $dirname . '.log' ;
