@@ -114,16 +114,6 @@ class main
 	// const PATH_PROJECT_DIR = './../../indigo-test-project/';
 
 	/**
-	 * 公開予約テーブルのカラム定義
-	 */
-	const TS_RESERVE_COLUMN_ID = 'reserve_id_seq';		// ID
-	const TS_RESERVE_COLUMN_RESERVE = 'reserve_datetime';	// 公開予約日時
-	const TS_RESERVE_COLUMN_BRANCH = 'branch_name';	// ブランチ名
-	const TS_RESERVE_COLUMN_COMMIT = 'commit_hash';	// コミットハッシュ値（短縮）
-	const TS_RESERVE_COLUMN_COMMENT = 'comment';	// コメント
-	const TS_RESERVE_COLUMN_INSERT_DATETIME = 'insert_datetime';	// 設定日時
-
-	/**
 	 * 公開予約エンティティのカラム定義
 	 */
 	const RESERVE_ENTITY_ID = 'reserve_id_seq';		// ID
@@ -2551,22 +2541,22 @@ class main
 		$entity = array();
 
 		// ID
-		$entity[self::RESERVE_ENTITY_ID] = $array[self::TS_RESERVE_COLUMN_ID];
+		$entity[self::RESERVE_ENTITY_ID] = $array[tsReserve::TS_RESERVE_RESERVE_ID];
 		
 		// 公開予約日時
 		// タイムゾーンの時刻へ変換
-		$tz_datetime = $this->convert_to_timezone_datetime($array[self::TS_RESERVE_COLUMN_RESERVE]);
+		$tz_datetime = $this->convert_to_timezone_datetime($array[tsReserve::TS_RESERVE_RESERVE]);
 		$entity[self::RESERVE_ENTITY_RESERVE] = $tz_datetime;
 		$entity[self::RESERVE_ENTITY_RESERVE_DISPLAY] = $this->format_datetime($tz_datetime, self::DATETIME_FORMAT_DISPLAY);
 		$entity[self::RESERVE_ENTITY_RESERVE_DATE] = $this->format_datetime($tz_datetime, self::DATE_FORMAT_YMD);
 		$entity[self::RESERVE_ENTITY_RESERVE_TIME] = $this->format_datetime($tz_datetime, self::TIME_FORMAT_HI);
 
 		// ブランチ
-		$entity[self::RESERVE_ENTITY_BRANCH] = $array[self::TS_RESERVE_COLUMN_BRANCH];
+		$entity[self::RESERVE_ENTITY_BRANCH] = $array[tsReserve::TS_RESERVE_BRANCH];
 		// コミット
-		$entity[self::RESERVE_ENTITY_COMMIT] = $array[self::TS_RESERVE_COLUMN_COMMIT];
+		$entity[self::RESERVE_ENTITY_COMMIT] = $array[tsReserve::TS_RESERVE_COMMIT];
 		// コメント
-		$entity[self::RESERVE_ENTITY_COMMENT] = $array[self::TS_RESERVE_COLUMN_COMMENT];
+		$entity[self::RESERVE_ENTITY_COMMENT] = $array[tsReserve::TS_RESERVE_COMMENT];
 	
 		// $this->debug_echo('■ convert_ts_reserve_entity end');
 
@@ -2610,8 +2600,6 @@ class main
 		
 		$entity[self::RESULT_ENTITY_END] = $tz_datetime;
 		$entity[self::RESULT_ENTITY_END_DISPLAY] = $this->format_datetime($tz_datetime, self::DATETIME_FORMAT_DISPLAY);
-
-		$this->debug_echo('　□　4');
 
 		// ブランチ
 		$entity[self::RESULT_ENTITY_BRANCH] = $array[tsOutput::TS_OUTPUT_BRANCH];

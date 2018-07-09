@@ -192,48 +192,49 @@ class tsOutput
 
 			// INSERT文作成
 			$insert_sql = "INSERT INTO TS_OUTPUT ("
-			. self::TS_OUTPUT_RESERVE_ID . ",
-			" .	self::TS_OUTPUT_BACKUP_ID . ",
-			" .	self::TS_OUTPUT_RESERVE . ",
-			" .	self::TS_OUTPUT_BRANCH . ",
-			" .	self::TS_OUTPUT_COMMIT . ",
-			" .	self::TS_OUTPUT_COMMENT . ",
-			" .	self::TS_OUTPUT_PUBLISH_TYPE . ",
-			" .	self::TS_OUTPUT_STATUS . ",
-			" .	self::TS_OUTPUT_DIFF_FLG1 . ",
-			" .	self::TS_OUTPUT_DIFF_FLG2 . ",
-			" .	self::TS_OUTPUT_DIFF_FLG3 . ",
-			" .	self::TS_OUTPUT_START . ",
-			" .	self::TS_OUTPUT_END . ",
-			" .	self::TS_OUTPUT_DELETE_FLG . ",
-			" .	self::TS_OUTPUT_DELETE . ",
-			" .	self::TS_OUTPUT_INSERT_DATETIME . ",
-			" .	self::TS_OUTPUT_INSERT_USER_ID . ",
-			" .	self::TS_OUTPUT_UPDATE_DATETIME . ",
-			" .	self::TS_OUTPUT_UPDATE_USER_ID
+			. self::TS_OUTPUT_RESERVE_ID . ","
+			. self::TS_OUTPUT_BACKUP_ID . ","
+			. self::TS_OUTPUT_RESERVE . ","
+			. self::TS_OUTPUT_BRANCH . ","
+			. self::TS_OUTPUT_COMMIT . ","
+			. self::TS_OUTPUT_COMMENT . ","
+			. self::TS_OUTPUT_PUBLISH_TYPE . ","
+			. self::TS_OUTPUT_STATUS . ","
+			. self::TS_OUTPUT_DIFF_FLG1 . ","
+			. self::TS_OUTPUT_DIFF_FLG2 . ","
+			. self::TS_OUTPUT_DIFF_FLG3 . ","
+			. self::TS_OUTPUT_START . ","
+			. self::TS_OUTPUT_END . ","
+			. self::TS_OUTPUT_DELETE_FLG . ","
+			. self::TS_OUTPUT_DELETE . ","
+			. self::TS_OUTPUT_INSERT_DATETIME . ","
+			. self::TS_OUTPUT_INSERT_USER_ID . ","
+			. self::TS_OUTPUT_UPDATE_DATETIME . ","
+			. self::TS_OUTPUT_UPDATE_USER_ID
 
-			. ") VALUES (
+			. ") VALUES (" .
 
-			 :" . self::TS_OUTPUT_RESERVE_ID . ",
-			 :" . self::TS_OUTPUT_BACKUP_ID . ",
-			 :" . self::TS_OUTPUT_RESERVE . ",
-			 :" . self::TS_OUTPUT_BRANCH . ",
-			 :" . self::TS_OUTPUT_COMMIT . ",
-			 :" . self::TS_OUTPUT_COMMENT . ",
-			 :" . self::TS_OUTPUT_PUBLISH_TYPE . ",
-			 :" . self::TS_OUTPUT_STATUS . ",
-			 :" . self::TS_OUTPUT_DIFF_FLG1 . ",
-			 :" . self::TS_OUTPUT_DIFF_FLG2 . ",
-			 :" . self::TS_OUTPUT_DIFF_FLG3 . ",
-			 :" . self::TS_OUTPUT_START . ",
-			 :" . self::TS_OUTPUT_END . ",
-			 :" . self::TS_OUTPUT_DELETE_FLG . ",
-			 :" . self::TS_OUTPUT_DELETE . ",
-			 :" . self::TS_OUTPUT_INSERT_DATETIME . ",
-			 :" . self::TS_OUTPUT_INSERT_USER_ID . ",
-			 :" . self::TS_OUTPUT_UPDATE_DATETIME . ",
-			 :" . self::TS_OUTPUT_UPDATE_USER_ID . "
-			)";
+			 ":" . self::TS_OUTPUT_RESERVE_ID . "," .
+			 ":" . self::TS_OUTPUT_BACKUP_ID . "," .
+			 ":" . self::TS_OUTPUT_RESERVE . "," .
+			 ":" . self::TS_OUTPUT_BRANCH . "," .
+			 ":" . self::TS_OUTPUT_COMMIT . "," .
+			 ":" . self::TS_OUTPUT_COMMENT . "," .
+			 ":" . self::TS_OUTPUT_PUBLISH_TYPE . "," .
+			 ":" . self::TS_OUTPUT_STATUS . "," .
+			 ":" . self::TS_OUTPUT_DIFF_FLG1 . "," .
+			 ":" . self::TS_OUTPUT_DIFF_FLG2 . "," .
+			 ":" . self::TS_OUTPUT_DIFF_FLG3 . "," .
+			 ":" . self::TS_OUTPUT_START . "," .
+			 ":" . self::TS_OUTPUT_END . "," .
+			 ":" . self::TS_OUTPUT_DELETE_FLG . "," .
+			 ":" . self::TS_OUTPUT_DELETE . "," .
+			 ":" . self::TS_OUTPUT_INSERT_DATETIME . "," .
+			 ":" . self::TS_OUTPUT_INSERT_USER_ID . "," .
+			 ":" . self::TS_OUTPUT_UPDATE_DATETIME . "," .
+			 ":" . self::TS_OUTPUT_UPDATE_USER_ID
+
+			. ");";
 
 			$this->debug_echo('　□ insert_sql');
 			$this->debug_echo($insert_sql);

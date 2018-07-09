@@ -18,6 +18,20 @@ class tsReserve
 	const DELETE_FLG_OFF = 0;
 
 	/**
+	 * 公開予約テーブルのカラム定義
+	 */
+	const TS_RESERVE_RESERVE_ID = 'reserve_id_seq';		// ID
+	const TS_RESERVE_RESERVE = 'reserve_datetime';	// 公開予約日時
+	const TS_RESERVE_BRANCH = 'branch_name';	// ブランチ名
+	const TS_RESERVE_COMMIT = 'commit_hash';	// コミットハッシュ値（短縮）
+	const TS_RESERVE_COMMENT = 'comment';	// コメント
+	const TS_RESERVE_INSERT_DATETIME = 'insert_datetime';	// 登録日時
+	const TS_RESERVE_INSERT_USER_ID = 'insert_user_id';	// 登録ユーザID
+	const TS_RESERVE_UPDATE_DATETIME = 'update_datetime';	// 更新日時
+	const TS_RESERVE_UPDATE_USER_ID = 'update_user_id';	// 更新ユーザID
+	
+
+	/**
 	 * Constructor
 	 *
 	 * @param object $px Picklesオブジェクト
@@ -188,42 +202,42 @@ class tsReserve
 		try {
 
 			// INSERT文作成
-			$insert_sql = "INSERT INTO TS_RESERVE (
-				reserve_datetime,
-				branch_name,
-				commit_hash,
-				comment,
-				delete_flg,
-				insert_datetime,
-				insert_user_id,
-				update_datetime,
-				update_user_id
-			)VALUES(
-				:reserve_datetime,
-				:branch_name,
-				:commit_hash,
-				:comment,
-				:delete_flg,
-				:insert_datetime,
-				:insert_user_id,
-				:update_datetime,
-				:update_user_id
-			)";
+			$insert_sql = "INSERT INTO TS_RESERVE ("
+			. self::TS_RESERVE_RESERVE_ID . ","
+			. self::TS_RESERVE_RESERVE . ","
+			. self::TS_RESERVE_BRANCH . ","
+			. self::TS_RESERVE_COMMIT . ","
+			. self::TS_RESERVE_COMMENT . ","
+			. self::TS_RESERVE_INSERT_DATETIME
+
+			. ") VALUES (" .
+
+			 ":" . self::TS_RESERVE_RESERVE_ID . "," .
+			 ":" . self::TS_RESERVE_RESERVE . "," .
+			 ":" . self::TS_RESERVE_BRANCH . "," .
+			 ":" . self::TS_RESERVE_COMMIT . "," .
+			 ":" . self::TS_RESERVE_COMMENT . "," .
+			 ":" . self::TS_RESERVE_INSERT_DATETIME
+
+			. ");";
+
+			$this->debug_echo('　□ insert_sql');
+			$this->debug_echo($insert_sql);
 
 			// 現在時刻
 			$now = $this->main->get_current_datetime_of_gmt();
 			
 			// パラメータ作成
 			$params = array(
-				':reserve_datetime' => $options->_POST->gmt_reserve_datetime,
-				':branch_name' => $options->_POST->branch_select_value,
-				':commit_hash' => $commit_hash,
-				':comment' => $options->_POST->comment,
-				':delete_flg' => self::DELETE_FLG_OFF,
-				':insert_datetime' => $now,
-				':insert_user_id' => "dummy_insert_user",
-				':update_datetime' => null,
-				':update_user_id' => null
+				":" . self::TS_RESERVE_RESERVE_ID => $options->_POST->gmt_reserve_datetime,
+				":" . self::TS_RESERVE_RESERVE => $options->_POST->branch_select_value,
+				":" . self::TS_RESERVE_BRANCH => $commit_hash,
+				":" . self::TS_RESERVE_COMMIT => $options->_POST->comment,
+				":" . self::TS_RESERVE_COMMENT => self::DELETE_FLG_OFF,
+				":" . self::TS_RESERVE_INSERT_DATETIME => $now,
+				":" . self::TS_RESERVE_INSERT_USER_ID => "dummy_insert_user",
+				":" . self::TS_RESERVE_UPDATE_DATETIME => null,
+				":" . self::TS_RESERVE_UPDATE_USER_ID => null
 			);
 		
 			// INSERT実行
