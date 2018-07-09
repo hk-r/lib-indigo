@@ -215,24 +215,30 @@ class publish
 		try {
 
 			// 本番環境ディレクトリの絶対パスを取得。
-			$project_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->project_real_path));
+			$project_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->project_real_path));
 
 			// backupディレクトリの絶対パスを取得。
-			$backup_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_BACKUP));
+			$backup_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_BACKUP));
 
 			// runningディレクトリの絶対パスを取得。
-			$running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_RUNNING));
+			$running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_RUNNING));
 
 			// releasedディレクトリの絶対パスを取得。
-			$released_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_RELEASED));
+			$released_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_RELEASED));
 
 			// logディレクトリの絶対パスを取得。
-			$log_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_LOG));
+			$log_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_LOG));
 
 
 			//============================================================
 			// 本番ソースを「backup」ディレクトリへコピー
 			//============================================================
+
+	 		$this->debug_echo('　□ -----本番ソースを「backup」ディレクトリへコピー-----');
+			
+			// // 公開ソースディレクトリの絶対パスを取得。すでに存在している場合は削除して再作成する。
+			// $dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($path . $dirname));
+
 			if ( file_exists($backup_real_path) && file_exists($project_real_path) ) {
 
 				// TODO:ログフォルダに出力する
@@ -259,6 +265,10 @@ class publish
 			//============================================================
 			// 「running」ディレクトリのソースを本番環境へ同期
 			//============================================================
+
+	 		$this->debug_echo('　□ -----「running」ディレクトリのソースを本番環境へ同期ー-----');
+			
+
 			if ( file_exists($running_real_path) && file_exists($project_real_path) ) {
 
 				// 以下のコマンド（-a）だと、パーミッションまで変えようとするためエラーが発生する。

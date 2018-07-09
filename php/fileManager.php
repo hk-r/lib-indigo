@@ -36,8 +36,6 @@ class fileManager
 	 */
 	public function get_realpath( $path, $cd = '.' ){
 
-		$this->debug_echo('■ get_realpath start');
-
 		$is_dir = false;
 		if( preg_match( '/(\/|\\\\)+$/s', $path ) ){
 			$is_dir = true;
@@ -99,9 +97,6 @@ class fileManager
 			$rtn .= DIRECTORY_SEPARATOR;
 		}
 
-
-		$this->debug_echo('■ get_realpath end');
-
 		return $rtn;
 	}
 
@@ -144,8 +139,6 @@ class fileManager
 	 */
 	public function normalize_path($path){
 
-		$this->debug_echo('■ normalize_path start');
-
 		$path = trim($path);
 		$path = $this->convert_encoding( $path );//文字コードを揃える
 		$path = preg_replace( '/\\/|\\\\/s', '/', $path );//バックスラッシュをスラッシュに置き換える。
@@ -156,8 +149,6 @@ class fileManager
 			$path = $matched[2];
 		}
 		$path = preg_replace( '/\\/+/s', '/', $path );//重複するスラッシュを1つにまとめる
-
-		$this->debug_echo('■ normalize_path end');
 
 		return $prefix.$path;
 	}
