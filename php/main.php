@@ -2633,7 +2633,7 @@ class main
 		$ret = true;
 
 		// logファイルディレクトリが存在しない場合は作成
-		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_LOG));
+		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_LOG));
 
 		$this->debug_echo('　□ パス：' . $dir_real_path);
 
@@ -2642,7 +2642,7 @@ class main
 		}
 
 		// backupディレクトリが存在しない場合は作成
-		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_BACKUP));
+		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_BACKUP));
 
 		$this->debug_echo('　□ パス：' . $dir_real_path);
 
@@ -2651,7 +2651,7 @@ class main
 		}
 
 		// waitingディレクトリが存在しない場合は作成
-		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_WAITING));
+		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_WAITING));
 
 		$this->debug_echo('　□ パス：' . $dir_real_path);
 
@@ -2660,7 +2660,7 @@ class main
 		}
 
 		// runningディレクトリが存在しない場合は作成
-		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_RUNNING));
+		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_RUNNING));
 
 		$this->debug_echo('　□ パス：' . $dir_real_path);
 
@@ -2669,7 +2669,7 @@ class main
 		}
 
 		// releasedディレクトリが存在しない場合は作成
-		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_RELEASED));
+		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_RELEASED));
 
 		$this->debug_echo('　□ パス：' . $dir_real_path);
 
