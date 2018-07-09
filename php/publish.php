@@ -17,7 +17,7 @@ class publish
 	// const DATETIME_FORMAT = "Y-m-d H:i:s";
 	// // 日時フォーマット_保存用（YmdHis）
 	// const DATETIME_FORMAT_SAVE = "YmdHis";
-	
+
 	// /**
 	//  * 公開種別
 	//  */
@@ -122,15 +122,19 @@ class publish
 
 	 		$this->debug_echo('　□ -----本番ソースを「backup」ディレクトリへコピー-----');
 			
-			// 公開ソースディレクトリの絶対パスを取得。すでに存在している場合は削除して再作成する。
-			$backup_dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($backup_real_path . $dirname . "/"));
+			// // 公開ソースディレクトリの絶対パスを取得。すでに存在している場合は削除して再作成する。
+			// $backup_dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($backup_real_path . $dirname . "/"));
 
-			$this->debug_echo('　□ backup_dir_real_path' . $backup_dir_real_path);
+			// $this->debug_echo('　□ backup_dir_real_path' . $backup_dir_real_path);
+			
+			// if ( !$this->fileManager->is_exists_remkdir($backup_dir_real_path) ) {
+			// 	throw new \Exception('Creation of Backup publish directory failed.');
+			// }
 
 			if ( file_exists($backup_dir_real_path) && file_exists($project_real_path) ) {
 
 				// TODO:ログフォルダに出力する
-				$command = 'rsync -avzP' . ' ' . $project_real_path . ' ' . $backup_dir_real_path . ' --log-file=' . $log_real_path . '/rsync_' . $dirname . '.log' ;
+				$command = 'rsync -avzP' . ' ' . $project_real_path . ' ' . $backup_real_path . $dirname . '/' . ' --log-file=' . $log_real_path . '/rsync_' . $dirname . '.log' ;
 
 				$this->debug_echo('　□ $command：');
 				$this->debug_echo($command);
@@ -156,7 +160,6 @@ class publish
 
 	 		$this->debug_echo('　□ -----「running」ディレクトリのソースを本番環境へ同期ー-----');
 			
-
 			if ( file_exists($running_real_path) && file_exists($project_real_path) ) {
 
 				// 以下のコマンド（-a）だと、パーミッションまで変えようとするためエラーが発生する。
