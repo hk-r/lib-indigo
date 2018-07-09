@@ -202,6 +202,7 @@ class pdoManager
 			' . tsReserve::TS_RESERVE_BRANCH . ' TEXT,
 			' . tsReserve::TS_RESERVE_COMMIT . ' TEXT,
 			' . tsReserve::TS_RESERVE_COMMENT . ' TEXT,
+			' . tsReserve::TS_RESERVE_DELETE_FLG . ' TEXT,			
 			' . tsReserve::TS_RESERVE_INSERT_DATETIME . ' TEXT,
 			' . tsReserve::TS_RESERVE_INSERT_USER_ID . ' TEXT,
 			' . tsReserve::TS_RESERVE_UPDATE_DATETIME . ' TEXT,

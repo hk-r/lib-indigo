@@ -25,6 +25,7 @@ class tsReserve
 	const TS_RESERVE_BRANCH = 'branch_name';	// ブランチ名
 	const TS_RESERVE_COMMIT = 'commit_hash';	// コミットハッシュ値（短縮）
 	const TS_RESERVE_COMMENT = 'comment';	// コメント
+	const TS_RESERVE_DELETE_FLG = 'delete_flg';	// 削除フラグ
 	const TS_RESERVE_INSERT_DATETIME = 'insert_datetime';	// 登録日時
 	const TS_RESERVE_INSERT_USER_ID = 'insert_user_id';	// 登録ユーザID
 	const TS_RESERVE_UPDATE_DATETIME = 'update_datetime';	// 更新日時
@@ -207,6 +208,7 @@ class tsReserve
 			. self::TS_RESERVE_BRANCH . ","
 			. self::TS_RESERVE_COMMIT . ","
 			. self::TS_RESERVE_COMMENT . ","
+			. self::TS_RESERVE_DELETE_FLG . ","
 			. self::TS_RESERVE_INSERT_DATETIME . ","
 			. self::TS_RESERVE_INSERT_USER_ID . ","
 			. self::TS_RESERVE_UPDATE_DATETIME . ","
@@ -218,6 +220,7 @@ class tsReserve
 			 ":" . self::TS_RESERVE_BRANCH . "," .
 			 ":" . self::TS_RESERVE_COMMIT . "," .
 			 ":" . self::TS_RESERVE_COMMENT . "," .
+			 ":" . self::TS_RESERVE_DELETE_FLG . "," .
 			 ":" . self::TS_RESERVE_INSERT_DATETIME . "," .
 			 ":" . self::TS_RESERVE_INSERT_USER_ID . "," .
 			 ":" . self::TS_RESERVE_UPDATE_DATETIME . "," .
@@ -233,10 +236,11 @@ class tsReserve
 			
 			// パラメータ作成
 			$params = array(
-				":" . self::TS_RESERVE_RESERVE => $options->_POST->branch_select_value,
-				":" . self::TS_RESERVE_BRANCH => $commit_hash,
-				":" . self::TS_RESERVE_COMMIT => $options->_POST->comment,
-				":" . self::TS_RESERVE_COMMENT => self::DELETE_FLG_OFF,
+				":" . self::TS_RESERVE_RESERVE => $options->_POST->gmt_reserve_datetime,
+				":" . self::TS_RESERVE_BRANCH => $options->_POST->branch_select_value,
+				":" . self::TS_RESERVE_COMMIT => $commit_hash,
+				":" . self::TS_RESERVE_COMMENT => $options->_POST->comment,
+				":" . self::TS_RESERVE_DELETE_FLG => self::DELETE_FLG_OFF,
 				":" . self::TS_RESERVE_INSERT_DATETIME => $now,
 				":" . self::TS_RESERVE_INSERT_USER_ID => "dummy_insert_user",
 				":" . self::TS_RESERVE_UPDATE_DATETIME => null,
