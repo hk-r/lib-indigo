@@ -326,15 +326,9 @@ class publish
 					$this->debug_echo($element);
 				}
 
-				} else {
-						// エラー処理
-						throw new \Exception('Running or released directory not found.');
-				}
-
 			} else {
-
-				$this->debug_echo('　□ 公開対象が存在しない');
-
+					// エラー処理
+					throw new \Exception('Running or released directory not found.');
 			}
 		
 		} catch (\Exception $e) {

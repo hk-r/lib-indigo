@@ -10,9 +10,9 @@ class main
 
 	private $pdoManager;
 
-	private $tsReserveAccess;
+	private $tsReserve;
 
-	private $tsOutputAccess;
+	private $tsOutput;
 
 	/**
 	 * PDOインスタンス
@@ -196,8 +196,8 @@ class main
 		$this->options = json_decode(json_encode($options));
 		$this->fileManager = new fileManager($this);
 		$this->pdoManager = new pdoManager($this);
-		$this->tsReserveAccess = new tsReserveAccess($this);
-		$this->tsOutputAccess = new tsOutputAccess($this);
+		$this->tsReserve = new tsReserve($this);
+		$this->tsOutput = new tsOutput($this);
 
 		$this->debug_echo('■ __construct end');
 
@@ -373,23 +373,23 @@ class main
 
 		if ($status == self::PUBLISH_STATUS_RUNNING) {
 		
-			$ret =  '？(処理中)';
+			$ret =  '？（処理中）';
 		
 		} else if ($status == self::PUBLISH_STATUS_SUCCESS) {
 			
-			$ret =  '〇(公開成功)';
+			$ret =  '〇（公開成功）';
 
 		} else if ($status == self::PUBLISH_STATUS_ALERT) {
 			
-			$ret =  '△(警告あり)';
+			$ret =  '△（警告あり）';
 
 		} else if ($status == self::PUBLISH_STATUS_FAILED) {
 			
-			$ret =  '×(公開失敗)';
+			$ret =  '×（公開失敗）';
 			
 		} else if ($status == self::PUBLISH_STATUS_SKIP) {
 			
-			$ret =  '-(スキップ)';
+			$ret =  '-（スキップ）';
 			
 		}
 
@@ -697,7 +697,7 @@ class main
 		// 画面選択された公開予約情報を取得
 		$selected_id =  $this->options->_POST->selected_id;
 
-		$selected_data = $this->tsReserveAccess->get_selected_ts_reserve($this->dbh, $selected_id);
+		$selected_data = $this->tsReserve->get_selected_ts_reserve($this->dbh, $selected_id);
 		
 		$this->debug_echo('　□ 公開予約データ');
 		$this->debug_var_dump($selected_data);
@@ -1183,7 +1183,7 @@ class main
 
 		// 画面選択された変更前の公開予約情報を取得
 		$selected_id =  $this->options->_POST->selected_id;
-		$selected_data = $this->tsReserveAccess->get_selected_ts_reserve($this->dbh, $selected_id);
+		$selected_data = $this->tsReserve->get_selected_ts_reserve($this->dbh, $selected_id);
 
 		if ($selected_data) {
 
@@ -1436,7 +1436,7 @@ class main
 			$waiting_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_WAITING));
 
 			// 公開予約ディレクトリ名の取得
-			$dirname = $this->format_datetime($this->options->_POST->gmt_reserve_datetime, self::DATETIME_FORMAT_SAVE) . '_reserve';
+			$dirname = $this->format_gmt_datetime($this->options->_POST->gmt_reserve_datetime, self::DATETIME_FORMAT_SAVE) . '_reserve';
 
 			$this->debug_echo('　□ 公開予約ディレクトリ：');
 			$this->debug_echo($dirname);
@@ -1453,7 +1453,7 @@ class main
 			//============================================================
 			// 入力情報を公開予約テーブルへ登録
 			//============================================================
-			$this->tsReserveAccess->insert_ts_reserve($this->dbh, $this->options, $this->commit_hash);
+			$this->tsReserve->insert_ts_reserve($this->dbh, $this->options, $this->commit_hash);
 			
 		} catch (\Exception $e) {
 
@@ -1535,7 +1535,7 @@ class main
 			//============================================================
 			$selected_id =  $this->options->_POST->selected_id;
 
-			$this->tsReserveAccess->update_reserve_table($this->dbh, $this->options, $selected_id, $this->commit_hash);
+			$this->tsReserve->update_reserve_table($this->dbh, $this->options, $selected_id, $this->commit_hash);
 			
 		} catch (\Exception $e) {
 
@@ -1582,7 +1582,7 @@ class main
 			//============================================================
 			// 公開予約ディレクトリ名の取得
 			$selected_id =  $this->options->_POST->selected_id;
-			$selected_ret = $this->tsReserveAccess->get_selected_ts_reserve($this->dbh, $selected_id);
+			$selected_ret = $this->tsReserve->get_selected_ts_reserve($this->dbh, $selected_id);
 			$dirname = $this->format_datetime($selected_ret[self::RESERVE_ENTITY_RESERVE], self::DATETIME_FORMAT_SAVE) . '_reserve';
 
 			$this->debug_echo('　□ 公開予約ディレクトリ：');
@@ -1599,7 +1599,7 @@ class main
 			//============================================================
 			// 入力情報を公開予約テーブルへ更新
 			//============================================================
-			$this->tsReserveAccess->delete_reserve_table($this->dbh, $selected_id);
+			$this->tsReserve->delete_reserve_table($this->dbh, $selected_id);
 			
 		} catch (\Exception $e) {
 
@@ -1664,7 +1664,7 @@ class main
 		/**
  		* 公開予約一覧を取得
 		*/ 
-		$data_list = $this->tsReserveAccess->get_ts_reserve_list($this->dbh);
+		$data_list = $this->tsReserve->get_ts_reserve_list($this->dbh);
 	
 		// 画面入力された日時を結合し、GMTへ変換する
 		$gmt_reserve_datetime = $this->combine_to_gmt_date_and_time($reserve_date, $reserve_time);
@@ -1713,7 +1713,7 @@ class main
 		$ret = "";
 
 		// 公開予約一覧を取得
-		$data_list = $this->tsReserveAccess->get_ts_reserve_list($this->dbh);
+		$data_list = $this->tsReserve->get_ts_reserve_list($this->dbh);
 
 		// // お知らせリストの取得
 		// $alert_list = $this->get_csv_alert_list();
@@ -1806,7 +1806,7 @@ class main
 		$ret = "";
 
 		// 公開処理結果一覧を取得
-		$data_list = $this->tsOutputAccess->get_ts_output_list($this->dbh, null);
+		$data_list = $this->tsOutput->get_ts_output_list($this->dbh, null);
 
 		$ret .= '<div style="overflow:hidden">'
 			. '<form method="post">'
@@ -1894,10 +1894,14 @@ class main
 
 		try {
 
+			//============================================================
+			// タイムゾーンの設定
+			//============================================================
 			$time_zone = $this->options->time_zone;
 			if (!$time_zone) {
 				throw new \Exception('Parameter of timezone not found.');
 			}
+			date_default_timezone_set($time_zone);
 
 			//============================================================
 			// データベース接続
@@ -2104,7 +2108,7 @@ class main
 
 			$this->debug_echo('　□ $dir_real_path' . $dir_real_path);
 
-			if ( !$this->is_exists_remkdir($dir_real_path) ) {
+			if ( !$this->fileManager->is_exists_remkdir($dir_real_path) ) {
 				throw new \Exception('Creation of Waiting publish directory failed.');
 			}
 
@@ -2274,29 +2278,29 @@ class main
 			// 指定ブランチのGit情報を「running」ディレクトリへコピー
 			//============================================================
 
-			// runningディレクトリの絶対パスを取得。
-			$running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_RUNNING));
+			// // runningディレクトリの絶対パスを取得。
+			// $running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_RUNNING));
 
-			// 公開予約ディレクトリ名の取得
-			$dirname = $this->format_datetime($start_datetime, self::DATETIME_FORMAT_SAVE);
+			// // 公開予約ディレクトリ名の取得
+			// $dirname = $this->format_datetime($start_datetime, self::DATETIME_FORMAT_SAVE);
 
-			$this->debug_echo('　□ 公開予約ディレクトリ：');
-			$this->debug_echo($dirname);
+			// $this->debug_echo('　□ 公開予約ディレクトリ：');
+			// $this->debug_echo($dirname);
 
-			// コピー処理
-			$ret = json_decode($this->file_copy($running_real_path, $dirname));
+			// // コピー処理
+			// $ret = json_decode($this->file_copy($running_real_path, $dirname));
 
-			if ( !$ret->status ) {
-				throw new \Exception('Git file copy failed.');
-			}
+			// if ( !$ret->status ) {
+			// 	throw new \Exception('Git file copy failed.');
+			// }
 
-	 		$this->debug_echo('　□ -----公開処理結果テーブルの登録処理-----');
+	 	// 	$this->debug_echo('　□ -----公開処理結果テーブルの登録処理-----');
 			
 
 			//============================================================
 			// 公開処理結果テーブルの登録処理
 			//============================================================
-			$ret = json_decode($this->tsOutputAccess->insert_ts_output($this->dbh, $this->main->options, $start_datetime, self::PUBLISH_TYPE_IMMEDIATE));
+			$ret = json_decode($this->tsOutput->insert_ts_output($this->dbh, $this->main->options, $start_datetime, self::PUBLISH_TYPE_IMMEDIATE));
 			if ( !$ret->status) {
 				throw new \Exception("TS_OUTPUT insert failed.");
 			}
@@ -2315,8 +2319,11 @@ class main
 			//============================================================
 			// ※公開処理※
 			//============================================================
-			$ret = json_decode($this->publish->do_publish($dirname));
-
+			// $ret = json_decode($this->publish->do_publish($dirname));
+		
+			// if ( !$ret->status ) {
+			// 	throw new \Exception('Publish failed.');
+			// }
 
 
 			//============================================================
@@ -2325,7 +2332,7 @@ class main
 			// GMTの現在日時
 			$end_datetime = $this->get_current_datetime_of_gmt();
 
-	 		$ret = $this->tsOutputAccess->update_ts_output($this->dbh, $insert_id, $end_datetime, self::PUBLISH_STATUS_SUCCESS);
+	 		$ret = json_decode($this->tsOutput->update_ts_output($this->dbh, $insert_id, $end_datetime, self::PUBLISH_STATUS_SUCCESS));
 	 		
 			if ( !$ret->status) {
 				throw new \Exception("TS_OUTPUT update failed.");
@@ -2353,47 +2360,6 @@ class main
 		$this->debug_echo('■ immediate_publish end');
 
 		return json_encode($result);
-	}
-
-	/**
-	 * ディレクトリの存在有無にかかわらず、ディレクトリを再作成する（存在しているものは削除する）
-	 *	 
-	 * @param $dirpath = ディレクトリパス
-	 *	 
-	 * @return true:成功、false：失敗
-	 */
-	private function is_exists_remkdir($dirpath) {
-		
-		$this->debug_echo('■ is_exists_remkdir start');
-		$this->debug_echo('　■ $dirpath：' . $dirpath);
-
-		if ( file_exists($dirpath) ) {
-			$this->debug_echo('　■ $dirpath2：' . $dirpath);
-
-			// 削除
-			$command = 'rm -rf --preserve-root '. $dirpath;
-			$ret = $this->command_execute($command, true);
-
-			if ( $ret['return'] !== 0 ) {
-				$this->debug_echo('[既存ディレクトリ削除失敗]');
-				return false;
-			}
-		}
-
-		// デプロイ先のディレクトリを作成
-		if ( !file_exists($dirpath)) {
-			if ( !mkdir($dirpath, self::DIR_PERMISSION_0757) ) {
-				$this->debug_echo('　□ [再作成失敗]$dirpath：' . $dirpath);
-				return false;
-			}
-		} else {
-			$this->debug_echo('　□ [既存ディレクトリが残っている]$dirpath：' . $dirpath);
-			return false;
-		}
-	
-		$this->debug_echo('■ is_exists_remkdir end');
-
-		return true;
 	}
 
 	/**
@@ -2432,7 +2398,7 @@ class main
 	 */
 	function convert_to_timezone_datetime($datetime) {
 	
-		$this->debug_echo('■ convert_to_timezone_datetime start');
+		// $this->debug_echo('■ convert_to_timezone_datetime start');
 
 		$ret = '';
 
@@ -2446,10 +2412,10 @@ class main
 			// $this->debug_echo('タイムゾーン：' . $timezone);
 		}
 
-		$this->debug_echo('　□変換前の時刻（GMT）：' . $datetime);
-		$this->debug_echo('　□変換後の時刻：'. $ret);
+		// $this->debug_echo('　□変換前の時刻（GMT）：' . $datetime);
+		// $this->debug_echo('　□変換後の時刻：'. $ret);
 		
-		$this->debug_echo('■ convert_to_timezone_datetime end');
+		// $this->debug_echo('■ convert_to_timezone_datetime end');
 
 	    return $ret;
 	}
@@ -2458,13 +2424,14 @@ class main
 	/**
 	 * 引数の日付と日時を結合し、GMTの日時へ変換する
 	 *	 
-	 * @param $path = 作成ディレクトリ名
+	 * @param $date = 設定タイムゾーンの日付
+	 * @param $time = 設定タイムゾーンの時刻
 	 *	 
-	 * @return ソート後の配列
+	 * @return GMT日時
 	 */
 	function combine_to_gmt_date_and_time($date, $time) {
 	
-		$this->debug_echo('■ combine_to_gmt_date_and_time start');
+		// $this->debug_echo('■ combine_to_gmt_date_and_time start');
 
 		$ret = '';
 
@@ -2481,47 +2448,47 @@ class main
 			// $this->debug_echo('　□timezone：' . $timezone);
 		}
 		
-		$this->debug_echo('　□変換前の時刻：' . $datetime);
-		$this->debug_echo('　□変換後の時刻（GMT）：'. $ret);
+		// $this->debug_echo('　□変換前の時刻：' . $datetime);
+		// $this->debug_echo('　□変換後の時刻（GMT）：'. $ret);
 		
-		$this->debug_echo('■ combine_to_gmt_date_and_time end');
+		// $this->debug_echo('■ combine_to_gmt_date_and_time end');
 
 	    return $ret;
 	}
 
-	/**
-	 * 引数日時をGMTの日時へ変換する
-	 *	 
-	 * @param $path = 作成ディレクトリ名
-	 *	 
-	 * @return ソート後の配列
-	 */
-	public function convert_to_gmt_datetime($datetime) {
+	// /**
+	//  * 引数日時をGMTの日時へ変換する
+	//  *	 
+	//  * @param $path = 作成ディレクトリ名
+	//  *	 
+	//  * @return ソート後の配列
+	//  */
+	// public function convert_to_gmt_datetime($datetime) {
 	
-		$this->debug_echo('■ convert_to_gmt_datetime start');
+	// 	$this->debug_echo('■ convert_to_gmt_datetime start');
 
-		$ret = '';
+	// 	$ret = '';
 
-		if ($datetime) {
-			// サーバのタイムゾーン取得
-			$timezone = date_default_timezone_get();
-			$t = new \DateTime($datetime, new \DateTimeZone($timezone));
-			$t->setTimeZone(new \DateTimeZone(self::GMT));
-			$ret = $t->format(DATE_ATOM);
+	// 	if ($datetime) {
+	// 		// サーバのタイムゾーン取得
+	// 		$timezone = date_default_timezone_get();
+	// 		$t = new \DateTime($datetime, new \DateTimeZone($timezone));
+	// 		$t->setTimeZone(new \DateTimeZone(self::GMT));
+	// 		$ret = $t->format(DATE_ATOM);
 				
-			// $this->debug_echo('タイムゾーン：' . $timezone);
-		}
+	// 		// $this->debug_echo('タイムゾーン：' . $timezone);
+	// 	}
 		
-		$this->debug_echo('　□変換前の時刻：' . $datetime);
-		$this->debug_echo('　□変換後の時刻（GMT）：'. $ret);
+	// 	$this->debug_echo('　□変換前の時刻：' . $datetime);
+	// 	$this->debug_echo('　□変換後の時刻（GMT）：'. $ret);
 		
-		$this->debug_echo('■ convert_to_gmt_datetime end');
+	// 	$this->debug_echo('■ convert_to_gmt_datetime end');
 
-	    return $ret;
-	}
+	//     return $ret;
+	// }
 
 	/**
-	 * 日付のフォーマット変換
+	 * 日付のフォーマット変換（※設定タイムゾーン用）
 	 *	 
 	 * @param $path = 作成ディレクトリ名
 	 *	 
@@ -2536,8 +2503,36 @@ class main
 		if ($datetime) {
 			$ret = date($format, strtotime($datetime));
 		}
-	
+		
+		// $this->debug_echo('　★変換前の時刻：' . $datetime);
+		// $this->debug_echo('　★変換後の時刻：'. $ret);
+
 		// $this->debug_echo('■ format_datetime end');
+
+	    return $ret;
+	}
+
+	/**
+	 * 日付のフォーマット変換（※GMT用）
+	 *	 
+	 * @param $path = 作成ディレクトリ名
+	 *	 
+	 * @return ソート後の配列
+	 */
+	function format_gmt_datetime($datetime, $format) {
+	
+		$this->debug_echo('■ format_datetime start');
+
+		$ret = '';
+
+		if ($datetime) {
+			$ret = gmdate($format, strtotime($datetime));
+		}
+		
+		$this->debug_echo('　★変換前の時刻：' . $datetime);
+		$this->debug_echo('　★変換後の時刻：'. $ret);
+
+		$this->debug_echo('■ format_datetime end');
 
 	    return $ret;
 	}
@@ -2551,7 +2546,7 @@ class main
 	 */
 	function convert_ts_reserve_entity($array) {
 	
-		$this->debug_echo('■ convert_ts_reserve_entity start');
+		// $this->debug_echo('■ convert_ts_reserve_entity start');
 
 		$entity = array();
 
@@ -2573,7 +2568,7 @@ class main
 		// コメント
 		$entity[self::RESERVE_ENTITY_COMMENT] = $array[self::TS_RESERVE_COLUMN_COMMENT];
 	
-		$this->debug_echo('■ convert_ts_reserve_entity end');
+		// $this->debug_echo('■ convert_ts_reserve_entity end');
 
 	    return $entity;
 	}
@@ -2593,43 +2588,43 @@ class main
 		$entity = array();
 
 		// ID
-		$entity[self::RESULT_ENTITY_ID] = $array[self::TS_OUTPUT_COLUMN_ID];
+		$entity[self::RESULT_ENTITY_ID] = $array[tsOutput::TS_OUTPUT_RESULT_ID];
 		
 		// 公開予約日時
 		// タイムゾーンの時刻へ変換
-		$tz_datetime = $this->convert_to_timezone_datetime($array[self::TS_OUTPUT_COLUMN_RESERVE]);
+		$tz_datetime = $this->convert_to_timezone_datetime($array[tsOutput::TS_OUTPUT_RESERVE]);
 
 		$entity[self::RESULT_ENTITY_RESERVE] = $tz_datetime;
 		$entity[self::RESULT_ENTITY_RESERVE_DISPLAY] = $this->format_datetime($tz_datetime, self::DATETIME_FORMAT_DISPLAY);
 
 		// 処理開始日時
 		// タイムゾーンの時刻へ変換
-		$tz_datetime = $this->convert_to_timezone_datetime($array[self::TS_OUTPUT_COLUMN_START]);
+		$tz_datetime = $this->convert_to_timezone_datetime($array[tsOutput::TS_OUTPUT_START]);
 
 		$entity[self::RESULT_ENTITY_START] = $tz_datetime;
 		$entity[self::RESULT_ENTITY_START_DISPLAY] = $this->format_datetime($tz_datetime, self::DATETIME_FORMAT_DISPLAY);
 
-
 		// 処理終了日時
 		// タイムゾーンの時刻へ変換
-		$tz_datetime = $this->convert_to_timezone_datetime($array[self::TS_OUTPUT_COLUMN_END]);
+		$tz_datetime = $this->convert_to_timezone_datetime($array[tsOutput::TS_OUTPUT_END]);
 		
 		$entity[self::RESULT_ENTITY_END] = $tz_datetime;
 		$entity[self::RESULT_ENTITY_END_DISPLAY] = $this->format_datetime($tz_datetime, self::DATETIME_FORMAT_DISPLAY);
 
+		$this->debug_echo('　□　4');
 
 		// ブランチ
-		$entity[self::RESULT_ENTITY_BRANCH] = $array[self::TS_OUTPUT_COLUMN_BRANCH];
+		$entity[self::RESULT_ENTITY_BRANCH] = $array[tsOutput::TS_OUTPUT_BRANCH];
 		// コミット
-		$entity[self::RESULT_ENTITY_COMMIT] = $array[self::TS_OUTPUT_COLUMN_COMMIT];
+		$entity[self::RESULT_ENTITY_COMMIT] = $array[tsOutput::TS_OUTPUT_COMMIT];
 		// コメント
-		$entity[self::RESULT_ENTITY_COMMENT] = $array[self::TS_OUTPUT_COLUMN_COMMENT];
+		$entity[self::RESULT_ENTITY_COMMENT] = $array[tsOutput::TS_OUTPUT_COMMENT];
 	
 		// 状態
-		$entity[self::RESULT_ENTITY_STATUS] = $this->convert_status($array[self::TS_OUTPUT_COLUMN_STATUS]);
+		$entity[self::RESULT_ENTITY_STATUS] = $this->convert_status($array[tsOutput::TS_OUTPUT_STATUS]);
 
 		// 公開種別
-		$entity[self::RESULT_ENTITY_TYPE] = $this->convert_publish_type($array[self::TS_OUTPUT_COLUMN_TYPE]);
+		$entity[self::RESULT_ENTITY_TYPE] = $this->convert_publish_type($array[tsOutput::TS_OUTPUT_PUBLISH_TYPE]);
 
 		// $this->debug_echo('■ convert_ts_output_entity end');
 

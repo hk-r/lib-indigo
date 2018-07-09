@@ -280,6 +280,47 @@ class fileManager
 	}
 
 	/**
+	 * ディレクトリの存在有無にかかわらず、ディレクトリを再作成する（存在しているものは削除する）
+	 *	 
+	 * @param $dirpath = ディレクトリパス
+	 *	 
+	 * @return true:成功、false：失敗
+	 */
+	public function is_exists_remkdir($dirpath) {
+		
+		$this->debug_echo('■ is_exists_remkdir start');
+		$this->debug_echo('　■ $dirpath：' . $dirpath);
+
+		if ( file_exists($dirpath) ) {
+			$this->debug_echo('　■ $dirpath2：' . $dirpath);
+
+			// 削除
+			$command = 'rm -rf --preserve-root '. $dirpath;
+			$ret = $this->command_execute($command, true);
+
+			if ( $ret['return'] !== 0 ) {
+				$this->debug_echo('[既存ディレクトリ削除失敗]');
+				return false;
+			}
+		}
+
+		// デプロイ先のディレクトリを作成
+		if ( !file_exists($dirpath)) {
+			if ( !mkdir($dirpath, self::DIR_PERMISSION_0757) ) {
+				$this->debug_echo('　□ [再作成失敗]$dirpath：' . $dirpath);
+				return false;
+			}
+		} else {
+			$this->debug_echo('　□ [既存ディレクトリが残っている]$dirpath：' . $dirpath);
+			return false;
+		}
+	
+		$this->debug_echo('■ is_exists_remkdir end');
+
+		return true;
+	}
+
+	/**
 	 * ※デバッグ関数（エラー調査用）
 	 *	 
 	 */

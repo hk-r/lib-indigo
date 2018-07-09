@@ -2,7 +2,7 @@
 
 namespace indigo;
 
-class tsOutputAccess
+class tsOutput
 {
 
 	private $main;
@@ -86,7 +86,7 @@ class tsOutputAccess
 	 */
 	public function get_ts_output_list($dbh, $now) {
 
-		$this->debug_echo('■ get_ts_reserve_list start');
+		$this->debug_echo('■ get_ts_output_list start');
 
 		$ret_array = array();
 		$conv_ret_array = array();
@@ -103,8 +103,8 @@ class tsOutputAccess
 				$conv_ret_array[] = $this->main->convert_ts_output_entity($array);
 			}
 
-			$this->debug_echo('　□ SELECTリストデータ：');
-			$this->debug_var_dump($ret_array);
+			// $this->debug_echo('　□ SELECTリストデータ：');
+			// $this->debug_var_dump($ret_array);
 
 		} catch (\Exception $e) {
 
@@ -113,7 +113,7 @@ class tsOutputAccess
 			return $conv_ret_array;
 		}
 		
-		$this->debug_echo('■ get_ts_reserve_list end');
+		$this->debug_echo('■ get_ts_output_list end');
 
 		return $conv_ret_array;
 	}
@@ -143,6 +143,9 @@ class tsOutputAccess
 				// SELECT文作成
 				$select_sql = "SELECT * from TS_OUTPUT 
 					WHERE result_id_seq = ". $selected_id;
+
+				$this->debug_echo('　□ select_sql');
+				$this->debug_echo($select_sql);
 
 				// // パラメータ作成
 				// $params = array(
@@ -211,7 +214,6 @@ class tsOutputAccess
 
 			. ") VALUES (
 
-			 :" . self::TS_OUTPUT_RESULT_ID . ",
 			 :" . self::TS_OUTPUT_RESERVE_ID . ",
 			 :" . self::TS_OUTPUT_BACKUP_ID . ",
 			 :" . self::TS_OUTPUT_RESERVE . ",
@@ -241,31 +243,31 @@ class tsOutputAccess
 
 			// パラメータ作成
 			$params = array(
-				':reserve_id' => null,
-				':backup_id' => null,
-				':reserve_datetime' => null,
-				':branch_name' => "ブランチ名",
-				':commit_hash' => "dummy_commit_hash",
-				':comment' => "コメント",
-				':publish_type' => $type,
-				':status' => self::PUBLISH_STATUS_RUNNING,
-				':change_check_flg' => null,
-				':publish_honban_diff_flg' => null,
-				':publish_pre_diff_flg' => null,
-				':start_datetime' => $start_datetime,
-				':end_datetime' => null,
-				':gen_delete_flg' => self::DELETE_FLG_OFF,
-				':gen_delete_datetime' => null,
-				':insert_datetime' => $now,
-				':insert_user_id' => "dummy_insert_user",
-				':update_datetime' => null,
-				':update_user_id' => null
+				":" . self::TS_OUTPUT_RESERVE_ID => null,
+				":" . self::TS_OUTPUT_BACKUP_ID => null,
+				":" . self::TS_OUTPUT_RESERVE => null,
+				":" . self::TS_OUTPUT_BRANCH => "ブランチ名",
+				":" . self::TS_OUTPUT_COMMIT => "dummy_commit_hash",
+				":" . self::TS_OUTPUT_COMMENT => "コメント",
+				":" . self::TS_OUTPUT_PUBLISH_TYPE => $type,
+				":" . self::TS_OUTPUT_STATUS => self::PUBLISH_STATUS_RUNNING,
+				":" . self::TS_OUTPUT_DIFF_FLG1 => null,
+				":" . self::TS_OUTPUT_DIFF_FLG2 => null,
+				":" . self::TS_OUTPUT_DIFF_FLG3 => null,
+				":" . self::TS_OUTPUT_START => $start_datetime,
+				":" . self::TS_OUTPUT_END => null,
+				":" . self::TS_OUTPUT_DELETE_FLG => self::DELETE_FLG_OFF,
+				":" . self::TS_OUTPUT_DELETE => null,
+				":" . self::TS_OUTPUT_INSERT_DATETIME => $now,
+				":" . self::TS_OUTPUT_INSERT_USER_ID => "dummy_insert_user",
+				":" . self::TS_OUTPUT_UPDATE_DATETIME => null,
+				":" . self::TS_OUTPUT_UPDATE_USER_ID => null
 			);
 
 			// INSERT実行
 			$stmt = $this->pdoManager->execute($dbh, $insert_sql, $params);
 
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 
 	  		echo '公開処理結果テーブル登録処理に失敗しました。' . $e->getMesseage();
 	  		
@@ -314,6 +316,9 @@ class tsOutputAccess
 
 					WHERE result_id_seq = :result_id_seq";
 
+				$this->debug_echo('　□ update_sql');
+				$this->debug_echo($update_sql);
+
 				// 現在時刻
 				$now = $this->main->get_current_datetime_of_gmt();
 
@@ -334,7 +339,7 @@ class tsOutputAccess
 				$stmt = $this->pdoManager->execute($dbh, $update_sql, $params);
 			}
 
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 
 	  		echo '公開処理結果テーブルの更新処理に失敗しました。' . $e->getMesseage();
 	  		

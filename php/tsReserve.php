@@ -2,7 +2,7 @@
 
 namespace indigo;
 
-class tsReserveAccess
+class tsReserve
 {
 
 	private $main;
@@ -23,8 +23,6 @@ class tsReserveAccess
 	 * @param object $px Picklesオブジェクト
 	 */
 	public function __construct ($main){
-
-		$this->debug_echo('　★ tsReserve');
 
 		$this->main = $main;
 		$this->pdoManager = new pdoManager($this);
@@ -217,7 +215,7 @@ class tsReserveAccess
 			
 			// パラメータ作成
 			$params = array(
-				':reserve_datetime' => $options->_POST->gmt_reserve_datetime),
+				':reserve_datetime' => $options->_POST->gmt_reserve_datetime,
 				':branch_name' => $options->_POST->branch_select_value,
 				':commit_hash' => $commit_hash,
 				':comment' => $options->_POST->comment,
@@ -283,7 +281,7 @@ class tsReserveAccess
 
 				// パラメータ作成
 				$params = array(
-					':reserve_datetime' => $options->_POST->gmt_reserve_datetime),
+					':reserve_datetime' => $options->_POST->gmt_reserve_datetime,
 					':branch_name' => $options->_POST->branch_select_value,
 					':commit_hash' => $commit_hash,
 					':comment' => $options->_POST->comment,

@@ -4,9 +4,20 @@ namespace indigo;
 
 class cron
 {
+	public $options;
+
 	public $publish;
 
+	private $fileManager;
+
 	private $pdoManager;
+
+	private $tsOutput;
+
+	/**
+	 * PDOインスタンス
+	 */
+	private $dbh;
 
 	// 開発環境
 	const DEVELOP_ENV = '1';
@@ -37,11 +48,7 @@ class cron
 	// スキップ
 	const PUBLISH_STATUS_SKIP = 4;
 	
-	/**
-	 * PDOインスタンス
-	 */
-	private $dbh;
-
+	
 	/**
 	 * コンストラクタ
 	 * @param $options = オプション
@@ -54,6 +61,7 @@ class cron
 		$this->fileManager = new fileManager($this);
 		$this->pdoManager = new pdoManager($this);
 		$this->publish = new publish($this);
+		$this->tsOutput = new tsOutput($this);
 
 		$this->debug_echo('■ [cron] __construct end');
 
@@ -159,7 +167,7 @@ class cron
 			//============================================================
 			// 公開処理結果テーブルの登録処理
 			//============================================================
-			$ret = json_decode($this->tsOutputAccess->insert_ts_output($this->dbh, $this->main->options, $start_datetime, self::PUBLISH_TYPE_RESERVE));
+			$ret = json_decode($this->tsOutput->insert_ts_output($this->dbh, $this->main->options, $start_datetime, self::PUBLISH_TYPE_RESERVE));
 			if ( !$ret->status) {
 				throw new \Exception("TS_OUTPUT insert failed.");
 			}
@@ -186,7 +194,7 @@ class cron
 			// GMTの現在日時
 			$end_datetime = $this->main->get_current_datetime_of_gmt();
 
-	 		$ret = $this->tsOutputAccess->update_ts_output($this->dbh, $insert_id, $end_datetime, self::PUBLISH_STATUS_SUCCESS);
+	 		$ret = $this->tsOutput->update_ts_output($this->dbh, $insert_id, $end_datetime, self::PUBLISH_STATUS_SUCCESS);
 			if ( !$ret->status) {
 				throw new \Exception("TS_OUTPUT update failed.");
 			}
