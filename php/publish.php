@@ -217,8 +217,12 @@ class publish
 			// 本番環境ディレクトリの絶対パスを取得。
 			$project_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->project_real_path));
 
+			$this->debug_echo('　□ project_real_path' . $project_real_path);
+
 			// backupディレクトリの絶対パスを取得。
 			$backup_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_BACKUP));
+
+			$this->debug_echo('　□ backup_real_path' . $backup_real_path);
 
 			// runningディレクトリの絶対パスを取得。
 			$running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_RUNNING));
