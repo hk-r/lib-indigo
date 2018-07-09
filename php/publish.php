@@ -13,59 +13,15 @@ class publish
 	 */
 	private $dbh;
 
-	// サーバのタイムゾーン
-	const PARAM_TIME_ZONE = 'Asia/Tokyo';
-	// サーバのタイムゾーン
-	const GMT = 'GMT';
-
-	// 日時フォーマット（Y-m-d H:i:s）
-	const DATETIME_FORMAT = "Y-m-d H:i:s";
-	// 時間フォーマット（Y-m-d）
-	const DATE_FORMAT_YMD = "Y-m-d";
-	// 時間フォーマット（H:i）
-	const TIME_FORMAT_HI = "H:i";
-	// 時間フォーマット（H:i:s）
-	const TIME_FORMAT_HIS = "H:i:s";
-
-	// 日時フォーマット_表示用（Y-m-d H:i）
-	const DATETIME_FORMAT_DISPLAY = "Y-m-d H:i";
-	// 日時フォーマット_保存用（YmdHis）
-	const DATETIME_FORMAT_SAVE = "YmdHis";
-
-	/**
-	 * 画像パス定義
-	 */
-	// 右矢印
-	const IMG_ARROW_RIGHT = '/images/arrow_right.png';
-	// エラーアイコン
-	const IMG_ERROR_ICON = '/images/error_icon.png';
-
-
-	/**
-	 * 入力モード
-	 */
-	// 追加モード
-	const INPUT_MODE_ADD = 1;
-	// 追加戻り表示モード
-	const INPUT_MODE_ADD_BACK = 2;
-	// 更新モード
-	const INPUT_MODE_UPDATE = 3;
-	// 更新戻り表示モード
-	const INPUT_MODE_UPDATE_BACK = 4;
-	// 即時公開モード
-	const INPUT_MODE_SOKUJI = 5;
-	// 即時公開戻り表示モード
-	const INPUT_MODE_SOKUJI_BACK = 6;
-
-	/**
-	 * 公開種別
-	 */
-	// 予約公開
-	const PUBLISH_TYPE_RESERVE = 1;
-	// 復元公開
-	const PUBLISH_TYPE_RESTORE = 2;
-	// 即時公開
-	const PUBLISH_TYPE_SOKUJI = 3;
+	// /**
+	//  * 公開種別
+	//  */
+	// // 予約公開
+	// const PUBLISH_TYPE_RESERVE = 1;
+	// // 復元公開
+	// const PUBLISH_TYPE_RESTORE = 2;
+	// // 即時公開
+	// const PUBLISH_TYPE_SOKUJI = 3;
 
 
 	/**
@@ -96,87 +52,10 @@ class publish
 	// logディレクトリパス
 	const PATH_LOG = '/log/';
 
-
-	// 生成ディレクトリパス（後々パラメタ化する）
-	const PATH_CREATE_DIR = './../indigo_dir/';
-	// 本番パス（後々パラメタ化する）
-	const PATH_PROJECT_DIR = './../../indigo-test-project/';
-
-	/**
-	 * 公開実施管理CSVの列番号定義
-	 */
-	const TS_RESULT_COLUMN_ID = 'result_id_seq';			// ID
-	const TS_RESULT_COLUMN_RESERVE = 'reserve_datetime';		// 公開予約日時
-	const TS_RESULT_COLUMN_BRANCH = 'branch_name';		// ブランチ名
-	const TS_RESULT_COLUMN_COMMIT = 'commit_hash';		// コミットハッシュ値（短縮）
-	const TS_RESULT_COLUMN_COMMENT = 'comment';		// コメント
-	// const TS_RESULT_COLUMN_SETTING = '';		// 設定日時
-
-	const TS_RESULT_COLUMN_STATUS = 'status';		// 状態
-	const TS_RESULT_COLUMN_TYPE = 'publish_type';		// 公開種別
-
-	const TS_RESULT_COLUMN_START = 'start_datetime';		// 公開処理開始日時
-	const TS_RESULT_COLUMN_END = 'end_datetime';			// 公開処理終了日時
-
-	const TS_RESULT_COLUMN_RELEASED = 8;		// 公開完了日時
-	const TS_RESULT_COLUMN_RESTORE = 9;		// 復元完了日時
-
-	const TS_RESULT_COLUMN_DIFF_FLG1 = 10;	// 差分フラグ1（本番環境と前回分の差分）
-	const TS_RESULT_COLUMN_DIFF_FLG2 = 11;	// 差分フラグ2（本番環境と今回分の差分）
-	const TS_RESULT_COLUMN_DIFF_FLG3 = 12;	// 差分フラグ3（前回分と今回分の差分）
-
-	/**
-	 * 公開実施管理CSVの列番号定義
-	 */
-	const RESULT_ENTITY_ID = 'result_id_seq';			// ID
-	const RESULT_ENTITY_RESERVE = 'reserve_datetime';		// 公開予約日時
-	const RESULT_ENTITY_RESERVE_DISPLAY = 'reserve_display';	// 公開予約日時
-	const RESULT_ENTITY_BRANCH = 'branch_name';		// ブランチ名
-	const RESULT_ENTITY_COMMIT = 'commit_hash';		// コミットハッシュ値（短縮）
-	const RESULT_ENTITY_COMMENT = 'comment';		// コメント
-	// const RESULT_ENTITY_SETTING = '';		// 設定日時
-
-	const RESULT_ENTITY_STATUS = 'status';		// 状態
-	const RESULT_ENTITY_TYPE = 'publish_type';		// 公開種別
-
-	const RESULT_ENTITY_START = 'start_datetime';		// 公開処理開始日時
-	const RESULT_ENTITY_START_DISPLAY = 'start_display';	// 公開処理開始日時
-	const RESULT_ENTITY_END = 'end_datetime';			// 公開処理終了日時
-	const RESULT_ENTITY_END_DISPLAY = 'end_display';	// 公開処理終了日時
-
-	const RESULT_ENTITY_RELEASED = 8;		// 公開完了日時
-	const RESULT_ENTITY_RESTORE = 9;		// 復元完了日時
-
-	const RESULT_ENTITY_DIFF_FLG1 = 10;	// 差分フラグ1（本番環境と前回分の差分）
-	const RESULT_ENTITY_DIFF_FLG2 = 11;	// 差分フラグ2（本番環境と今回分の差分）
-	const RESULT_ENTITY_DIFF_FLG3 = 12;	// 差分フラグ3（前回分と今回分の差分）
-
-	// const HONBAN_REALPATH = '/var/www/html/indigo-test-project/';
-	const HONBAN_REALPATH = '/var/www/html/test';
-	
 	// 削除済み
 	const DELETE_FLG_ON = 1;
 	// 未削除
 	const DELETE_FLG_OFF = 0;
-
-	// const DEFINE_MAX_RECORD = 10;		// 公開予約できる最大件数
-	// const DEFINE_MAX_GENERATION = 10;	// 差分フラグ2（本番環境と今回分の差分）
-	// const DEFINE_MAX_RECORD = 12;		// 差分フラグ3（前回分と今回分の差分）
-
-	/**
-	 * コミットハッシュ値
-	 */
-	private $commit_hash = '';
-
-	/**
-	 * 入力画面のエラーメッセージ
-	 */
-	private $input_error_message = '';
-
-	/**
-	 * 本番環境ディレクトリパス（仮）
-	 */
-	private $honban_path = './../honban/';
 
 	/**
 	 * コンストラクタ
@@ -187,8 +66,6 @@ class publish
 		$this->main = $main;
 		$this->fileManager = new fileManager($this);
 		$this->pdoManager = new pdoManager($this);
-
-		$this->debug_echo('★publishクラスのコンストラクタ起動！');
 	}
 
 
@@ -215,7 +92,7 @@ class publish
 		try {
 
 			// 本番環境ディレクトリの絶対パスを取得。
-			$project_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->project_real_path));
+			$project_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->project_real_path . "/"));
 
 			$this->debug_echo('　□ project_real_path' . $project_real_path);
 
@@ -240,13 +117,15 @@ class publish
 
 	 		$this->debug_echo('　□ -----本番ソースを「backup」ディレクトリへコピー-----');
 			
-			// // 公開ソースディレクトリの絶対パスを取得。すでに存在している場合は削除して再作成する。
-			// $dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($path . $dirname));
+			// 公開ソースディレクトリの絶対パスを取得。すでに存在している場合は削除して再作成する。
+			$backup_dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($backup_real_path . $dirname . "/"));
 
-			if ( file_exists($backup_real_path) && file_exists($project_real_path) ) {
+			$this->debug_echo('　□ backup_dir_real_path' . $backup_dir_real_path);
+
+			if ( file_exists($backup_dir_real_path) && file_exists($project_real_path) ) {
 
 				// TODO:ログフォルダに出力する
-				$command = 'rsync -avzP' . ' ' . $project_real_path . ' ' . $backup_real_path . ' --log-file=' . $log_real_path . '/rsync_' . $dirname . '.log' ;
+				$command = 'rsync -avzP' . ' ' . $project_real_path . ' ' . $backup_dir_real_path . ' --log-file=' . $log_real_path . '/rsync_' . $dirname . '.log' ;
 
 				$this->debug_echo('　□ $command：');
 				$this->debug_echo($command);

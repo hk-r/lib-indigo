@@ -20,7 +20,7 @@ class main
 	 */
 	private $dbh;
 	
-	
+
 	// サーバのタイムゾーン
 	const GMT = 'GMT';
 
@@ -94,7 +94,7 @@ class main
 	 * 公開用の操作ディレクトリパス定義
 	 */
 	// backupディレクトリパス
-	const PATH_BACKUP = '/backup/';
+	const PATH_BACKUP = '/backup';
 	// waitingディレクトリパス
 	const PATH_WAITING = '/waiting/';
 	// runnningディレクトリパス
@@ -2598,16 +2598,12 @@ class main
 		// logファイルディレクトリが存在しない場合は作成
 		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_LOG));
 
-		$this->debug_echo('　□ パス：' . $dir_real_path);
-
 		if ( !$this->fileManager->is_exists_mkdir($dir_real_path) ) {
 			$ret = false;
 		}
 
 		// backupディレクトリが存在しない場合は作成
 		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_BACKUP));
-
-		$this->debug_echo('　□ パス：' . $dir_real_path);
 
 		if ( !$this->fileManager->is_exists_mkdir($dir_real_path) ) {
 			$ret = false;
@@ -2616,8 +2612,6 @@ class main
 		// waitingディレクトリが存在しない場合は作成
 		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_WAITING));
 
-		$this->debug_echo('　□ パス：' . $dir_real_path);
-
 		if ( !$this->fileManager->is_exists_mkdir($dir_real_path) ) {
 			$ret = false;
 		}
@@ -2625,16 +2619,12 @@ class main
 		// runningディレクトリが存在しない場合は作成
 		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_RUNNING));
 
-		$this->debug_echo('　□ パス：' . $dir_real_path);
-
 		if ( !$this->fileManager->is_exists_mkdir($dir_real_path) ) {
 			$ret = false;
 		}
 
 		// releasedディレクトリが存在しない場合は作成
 		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_RELEASED));
-
-		$this->debug_echo('　□ パス：' . $dir_real_path);
 
 		if ( !$this->fileManager->is_exists_mkdir($dir_real_path) ) {
 			$ret = false;
