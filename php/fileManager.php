@@ -249,7 +249,7 @@ class fileManager
 	 */
 	public function is_exists_mkdir($dirpath) {
 
-		$this->debug_echo('■ is_exists_mkdir start');
+		// $this->debug_echo('■ is_exists_mkdir start');
 
 		$ret = true;
 
@@ -264,8 +264,8 @@ class fileManager
 			$ret = false;
 		}
 
-		$this->debug_echo('　□ return：' . $ret);
-		$this->debug_echo('■ is_exists_mkdir end');
+		// $this->debug_echo('　□ return：' . $ret);
+		// $this->debug_echo('■ is_exists_mkdir end');
 
 		return $ret;
 	}

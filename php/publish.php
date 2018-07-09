@@ -13,6 +13,11 @@ class publish
 	 */
 	private $dbh;
 
+	// // 日時フォーマット（Y-m-d H:i:s）
+	// const DATETIME_FORMAT = "Y-m-d H:i:s";
+	// // 日時フォーマット_保存用（YmdHis）
+	// const DATETIME_FORMAT_SAVE = "YmdHis";
+	
 	// /**
 	//  * 公開種別
 	//  */
@@ -82,9 +87,9 @@ class publish
 		$result = array('status' => true,
 						'message' => '');
 
-		// GMTの現在日時
-		$start_datetime = gmdate(self::DATETIME_FORMAT);
-		$start_datetime_dir = gmdate(self::DATETIME_FORMAT_SAVE);
+		// // GMTの現在日時
+		// $start_datetime = gmdate(self::DATETIME_FORMAT);
+		// $start_datetime_dir = gmdate(self::DATETIME_FORMAT_SAVE);
 
 		$this->debug_echo('　□ 公開ファイル日時：');
 		$this->debug_echo($dirname);
