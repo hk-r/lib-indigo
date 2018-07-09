@@ -2264,9 +2264,9 @@ class main
 			$this->debug_echo('　□ 現在日時：');
 			$this->debug_echo($start_datetime);
 
-			============================================================
-			指定ブランチのGit情報を「running」ディレクトリへコピー
-			============================================================
+			// ============================================================
+			// 指定ブランチのGit情報を「running」ディレクトリへコピー
+			// ============================================================
 
 			// runningディレクトリの絶対パスを取得。
 			$running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_RUNNING));
