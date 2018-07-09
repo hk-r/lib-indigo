@@ -2,7 +2,7 @@
 
 namespace indigo;
 
-class pdo
+class pdoManager
 {
 
 	private $main;
