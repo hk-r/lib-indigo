@@ -2275,7 +2275,7 @@ class main
 			$ret = json_decode($this->publish->do_publish($dirname));
 		
 			if ( !$ret->status ) {
-				throw new \Exception('Publish failed.');
+				throw new \Exception($ret->message);
 			}
 
 
