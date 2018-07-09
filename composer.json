@@ -23,8 +23,12 @@
     "autoload": {
         "files": [
             "php/main.php",
-            "php/file_control.php",
-            "php/pdo.php"
+            "php/cron.php",
+            "php/publish.php",
+            "php/pdoManager.php",
+            "php/fileManager.php",
+            "php/tsReserve.php",
+            "php/tsOutput.php"
         ]
     },
     "extra": {

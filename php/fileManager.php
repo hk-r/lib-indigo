@@ -1,7 +1,7 @@
 <?php
 namespace indigo;
 
-class file_control
+class fileManager
 {
 	/** indigo\mainのインスタンス */
 	private $main;
@@ -10,6 +10,8 @@ class file_control
 	 * ファイルシステムの文字セット
 	 */
 	private $filesystem_encoding = null;
+
+	const DIR_PERMISSION_0757 = 0757;
 
 	/**
 	 * コンストラクタ
@@ -33,8 +35,6 @@ class file_control
 	 * @return string 絶対パス
 	 */
 	public function get_realpath( $path, $cd = '.' ){
-
-		$this->debug_echo('■ get_realpath start');
 
 		$is_dir = false;
 		if( preg_match( '/(\/|\\\\)+$/s', $path ) ){
@@ -97,9 +97,6 @@ class file_control
 			$rtn .= DIRECTORY_SEPARATOR;
 		}
 
-
-		$this->debug_echo('■ get_realpath end');
-
 		return $rtn;
 	}
 
@@ -141,6 +138,7 @@ class file_control
 	 * @return string 正規化されたパス
 	 */
 	public function normalize_path($path){
+
 		$path = trim($path);
 		$path = $this->convert_encoding( $path );//文字コードを揃える
 		$path = preg_replace( '/\\/|\\\\/s', '/', $path );//バックスラッシュをスラッシュに置き換える。
@@ -151,6 +149,7 @@ class file_control
 			$path = $matched[2];
 		}
 		$path = preg_replace( '/\\/+/s', '/', $path );//重複するスラッシュを1つにまとめる
+
 		return $prefix.$path;
 	}
 	
@@ -242,13 +241,84 @@ class file_control
 	}//convert_encoding()
 
 	/**
+	 * ディレクトリが存在しない場合はディレクトリを作成する
+	 *	 
+	 * @param $dirpath = ディレクトリパス
+	 *	 
+	 * @return true:成功、false：失敗
+	 */
+	public function is_exists_mkdir($dirpath) {
+
+		// $this->debug_echo('■ is_exists_mkdir start');
+
+		$ret = true;
+
+		if ($dirpath) {
+			if ( !file_exists($dirpath) ) {
+				// ディレクトリ作成
+				if ( !mkdir($dirpath, self::DIR_PERMISSION_0757)) {
+					$ret = false;
+				}
+			}
+		} else {
+			$ret = false;
+		}
+
+		// $this->debug_echo('　□ return：' . $ret);
+		// $this->debug_echo('■ is_exists_mkdir end');
+
+		return $ret;
+	}
+
+	/**
+	 * ディレクトリの存在有無にかかわらず、ディレクトリを再作成する（存在しているものは削除する）
+	 *	 
+	 * @param $dirpath = ディレクトリパス
+	 *	 
+	 * @return true:成功、false：失敗
+	 */
+	public function is_exists_remkdir($dirpath) {
+		
+		$this->debug_echo('■ is_exists_remkdir start');
+		$this->debug_echo('　■ $dirpath：' . $dirpath);
+
+		if ( file_exists($dirpath) ) {
+			$this->debug_echo('　■ $dirpath2：' . $dirpath);
+
+			// 削除
+			$command = 'rm -rf --preserve-root '. $dirpath;
+			$ret = $this->main->command_execute($command, true);
+
+			if ( $ret['return'] !== 0 ) {
+				$this->debug_echo('[既存ディレクトリ削除失敗]');
+				return false;
+			}
+		}
+
+		// デプロイ先のディレクトリを作成
+		if ( !file_exists($dirpath)) {
+			if ( !mkdir($dirpath, self::DIR_PERMISSION_0757) ) {
+				$this->debug_echo('　□ [再作成失敗]$dirpath：' . $dirpath);
+				return false;
+			}
+		} else {
+			$this->debug_echo('　□ [既存ディレクトリが残っている]$dirpath：' . $dirpath);
+			return false;
+		}
+	
+		$this->debug_echo('■ is_exists_remkdir end');
+
+		return true;
+	}
+
+	/**
 	 * ※デバッグ関数（エラー調査用）
 	 *	 
 	 */
 	function debug_echo($text) {
 	
-		echo strval($text);
-		echo "<br>";
+		// echo strval($text);
+		// echo "<br>";
 
 		return;
 	}
@@ -259,8 +329,8 @@ class file_control
 	 */
 	function debug_var_dump($text) {
 	
-		var_dump($text);
-		echo "<br>";
+		// var_dump($text);
+		// echo "<br>";
 
 		return;
 	}
