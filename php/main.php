@@ -1969,7 +1969,7 @@ class main
 					// 初期表示画面の「削除」ボタン押下				
 
 					// Gitファイルの削除
-					$ret = json_decode($this->file_delete());
+					$ret = json_decode($this->do_delete());
 					if ( !$ret->status ) {				
 						$alert_message = 'delete faild';
 					}
@@ -2193,9 +2193,11 @@ class main
 				if ( $ret['return'] !== 0 ) {
 					throw new \Exception('Delete directory failed.');
 				}
-			} else {
-				throw new \Exception('Delete directory not found.');
-			}
+			} 
+
+			// else {
+			// 	throw new \Exception('Delete directory not found.');
+			// }
 		
 		} catch (\Exception $e) {
 
