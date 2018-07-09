@@ -136,7 +136,7 @@ class cron
 				$this->debug_echo('　□ $command：');
 				$this->debug_echo($command);
 
-				$ret = $this->command_execute($command, true);
+				$ret = $this->main->command_execute($command, true);
 
 				$this->debug_echo('　▼ waiting⇒runningのファイル移動結果');
 
@@ -150,7 +150,7 @@ class cron
 				$this->debug_echo('　□ $command：');
 				$this->debug_echo($command);
 
-				$ret = $this->command_execute($command, true);
+				$ret = $this->main->command_execute($command, true);
 
 				$this->debug_echo('　▼ Waitingディレクトリの削除');
 

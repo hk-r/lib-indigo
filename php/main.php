@@ -2359,7 +2359,7 @@ class main
 	 *	 
 	 * @return ソート後の配列
 	 */
-	function command_execute($command, $captureStderr) {
+	public function command_execute($command, $captureStderr) {
 	
 		$this->debug_echo('■ execute start');
 

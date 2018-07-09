@@ -241,7 +241,7 @@ class publish
 				$this->debug_echo('　□ $command：');
 				$this->debug_echo($command);
 
-				$ret = $this->command_execute($command, true);
+				$ret = $this->main->command_execute($command, true);
 
 				$this->debug_echo('　▼ 本番バックアップの公開処理結果');
 
@@ -276,7 +276,7 @@ class publish
 				$this->debug_echo('　□ $command：');
 				$this->debug_echo($command);
 
-				$ret = $this->command_execute($command, true);
+				$ret = $this->main->command_execute($command, true);
 
 				$this->debug_echo('　▼本番反映の公開処理結果');
 
@@ -303,7 +303,7 @@ class publish
 				$this->debug_echo('　□ $command：');
 				$this->debug_echo($command);
 
-				$ret = $this->command_execute($command, true);
+				$ret = $this->main->command_execute($command, true);
 
 				$this->debug_echo('　▼REALEASEDへの移動の公開処理結果');
 
@@ -318,7 +318,7 @@ class publish
 				$this->debug_echo('　□ $command：');
 				$this->debug_echo($command);
 
-				$ret = $this->command_execute($command, true);
+				$ret = $this->main->command_execute($command, true);
 
 				$this->debug_echo('　▼Runningディレクトリの削除');
 

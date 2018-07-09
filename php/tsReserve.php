@@ -208,7 +208,10 @@ class tsReserve
 			. self::TS_RESERVE_BRANCH . ","
 			. self::TS_RESERVE_COMMIT . ","
 			. self::TS_RESERVE_COMMENT . ","
-			. self::TS_RESERVE_INSERT_DATETIME
+			. self::TS_RESERVE_INSERT_DATETIME . ","
+			. self::TS_RESERVE_INSERT_USER_ID . ","
+			. self::TS_RESERVE_UPDATE_DATETIME . ","
+			. self::TS_RESERVE_UPDATE_USER_ID
 
 			. ") VALUES (" .
 
@@ -217,7 +220,10 @@ class tsReserve
 			 ":" . self::TS_RESERVE_BRANCH . "," .
 			 ":" . self::TS_RESERVE_COMMIT . "," .
 			 ":" . self::TS_RESERVE_COMMENT . "," .
-			 ":" . self::TS_RESERVE_INSERT_DATETIME
+			 ":" . self::TS_RESERVE_UPDATE_USER_ID . "," .
+			 ":" . self::TS_RESERVE_INSERT_USER_ID . "," .
+			 ":" . self::TS_RESERVE_UPDATE_DATETIME . "," .
+			 ":" . self::TS_RESERVE_UPDATE_USER_ID
 
 			. ");";
 
