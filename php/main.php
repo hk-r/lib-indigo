@@ -2634,30 +2634,45 @@ class main
 
 		// logファイルディレクトリが存在しない場合は作成
 		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_LOG));
+
+		$this->debug_echo('　□ パス：' . $dir_real_path);
+
 		if ( !$this->fileManager->is_exists_mkdir($dir_real_path) ) {
 			$ret = false;
 		}
 
 		// backupディレクトリが存在しない場合は作成
 		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_BACKUP));
+
+		$this->debug_echo('　□ パス：' . $dir_real_path);
+
 		if ( !$this->fileManager->is_exists_mkdir($dir_real_path) ) {
 			$ret = false;
 		}
 
 		// waitingディレクトリが存在しない場合は作成
 		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_WAITING));
+
+		$this->debug_echo('　□ パス：' . $dir_real_path);
+
 		if ( !$this->fileManager->is_exists_mkdir($dir_real_path) ) {
 			$ret = false;
 		}
 
 		// runningディレクトリが存在しない場合は作成
 		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_RUNNING));
+
+		$this->debug_echo('　□ パス：' . $dir_real_path);
+
 		if ( !$this->fileManager->is_exists_mkdir($dir_real_path) ) {
 			$ret = false;
 		}
 
 		// releasedディレクトリが存在しない場合は作成
 		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_RELEASED));
+
+		$this->debug_echo('　□ パス：' . $dir_real_path);
+
 		if ( !$this->fileManager->is_exists_mkdir($dir_real_path) ) {
 			$ret = false;
 		}
