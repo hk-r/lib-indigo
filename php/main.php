@@ -498,7 +498,7 @@ class main
 		$ret = true;
 
 		// GMTの現在日時
-		$now = $this->get_current_datetime_of_timezone();
+		$now = $this->get_current_datetime_of_gmt();
 
 		if (strtotime($now) > strtotime($datetime)) {
 			$ret = false;
@@ -559,30 +559,6 @@ class main
 		return $ret;
 	}
 
-
-	/**
-	 * 日付と時間を結合（Y-m-i H:i:s）
-	 *	 
-	 * @param $date = 日付
-	 * @param $time = 時間
-	 *	 
-	 * @return 
-	 *  一致する場合：selected（文字列）
-	 *  一致しない場合：空文字
-	 */
-	private function combine_date_time($date, $time) {
-
-		$ret = '';
-
-		if (isset($date) && isset($time)) {
-
-			$ret = $date . ' ' . $this->format_datetime($time, self::TIME_FORMAT_HIS);
-		}
-
-		return $ret;
-	}
-
-
 	/**
 	 * GMTの現在時刻を取得
 	 *	 
@@ -596,17 +572,17 @@ class main
 	}
 
 
-	/**
-	 * タイムゾーンの現在時刻を取得
-	 *	 
-	 * @return 
-	 *  一致する場合：selected（文字列）
-	 *  一致しない場合：空文字
-	 */
-	private function get_current_datetime_of_timezone() {
+	// /**
+	//  * タイムゾーンの現在時刻を取得
+	//  *	 
+	//  * @return 
+	//  *  一致する場合：selected（文字列）
+	//  *  一致しない場合：空文字
+	//  */
+	// private function get_current_datetime_of_timezone() {
 
-		return date(DATE_ATOM, time());
-	}
+	// 	return date(DATE_ATOM, time());
+	// }
 
 	/**
 	 * 新規ダイアログの表示
@@ -1490,10 +1466,10 @@ class main
 			// 「waiting」ディレクトリの変更前の公開ソースディレクトリを削除
 			//============================================================
 			// 変更前の公開予約ディレクトリ名の取得
-			$before_dirname = $this->format_datetime($this->options->_POST->before_gmt_reserve_datetime, self::DATETIME_FORMAT_SAVE) . '_reserve';
+			$before_dirname = $this->format_gmt_datetime($this->options->_POST->before_gmt_reserve_datetime, self::DATETIME_FORMAT_SAVE) . '_reserve';
 
 			$this->debug_echo('　□ 変更前の公開予約ディレクトリ：');
-			$this->debug_echo($dirname);
+			$this->debug_echo($before_dirname);
 
 			// コピー処理
 			$ret = json_decode($this->file_delete($waiting_real_path, $before_dirname));
@@ -1506,7 +1482,7 @@ class main
 			// 変更後ブランチのGit情報を「waiting」ディレクトリへコピー
 			//============================================================
 			// 公開予約ディレクトリ名の取得
-			$dirname = $this->format_datetime($this->options->_POST->gmt_reserve_datetime, self::DATETIME_FORMAT_SAVE) . '_reserve';
+			$dirname = $this->format_gmt_datetime($this->options->_POST->gmt_reserve_datetime, self::DATETIME_FORMAT_SAVE) . '_reserve';
 
 			$this->debug_echo('　□ 変更後の公開予約ディレクトリ：');
 			$this->debug_echo($dirname);
@@ -1573,7 +1549,7 @@ class main
 			// 公開予約ディレクトリ名の取得
 			$selected_id =  $this->options->_POST->selected_id;
 			$selected_ret = $this->tsReserve->get_selected_ts_reserve($this->dbh, $selected_id);
-			$dirname = $this->format_datetime($selected_ret[self::RESERVE_ENTITY_RESERVE], self::DATETIME_FORMAT_SAVE) . '_reserve';
+			$dirname = $this->format_gmt_datetime($selected_ret[self::RESERVE_ENTITY_RESERVE], self::DATETIME_FORMAT_SAVE) . '_reserve';
 
 			$this->debug_echo('　□ 公開予約ディレクトリ：');
 			$this->debug_echo($dirname);
@@ -2272,7 +2248,7 @@ class main
 			$running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_RUNNING));
 
 			// 公開予約ディレクトリ名の取得
-			$dirname = $this->format_datetime($start_datetime, self::DATETIME_FORMAT_SAVE);
+			$dirname = $this->format_gmt_datetime($start_datetime, self::DATETIME_FORMAT_SAVE);
 
 			$this->debug_echo('　□ 公開予約ディレクトリ：');
 			$this->debug_echo($dirname);
