@@ -14,14 +14,13 @@ class main
 
 	private $tsOutput;
 
+	private $publish;
 	/**
 	 * PDOインスタンス
 	 */
 	private $dbh;
 	
-	// 開発環境
-	const DEVELOP_ENV = '1';
-
+	
 	// サーバのタイムゾーン
 	const GMT = 'GMT';
 
@@ -108,11 +107,6 @@ class main
 	const PATH_MASTER = '/master_repository/';
 
 
-	// // 生成ディレクトリパス（後々パラメタ化する）
-	// const PATH_CREATE_DIR = './../indigo_dir/';
-	// // 本番パス（後々パラメタ化する）
-	// const PATH_PROJECT_DIR = './../../indigo-test-project/';
-
 	/**
 	 * 公開予約エンティティのカラム定義
 	 */
@@ -125,7 +119,6 @@ class main
 	const RESERVE_ENTITY_COMMIT = 'commit_hash';	// コミットハッシュ値（短縮）
 	const RESERVE_ENTITY_COMMENT = 'comment';	// コメント
 	const RESERVE_ENTITY_INSERT_DATETIME = 'insert_datetime';	// 設定日時
-
 
 
 	/**
@@ -181,16 +174,12 @@ class main
 	 */
 	public function __construct($options) {
 
-		$this->debug_echo('■ __construct start');
-
 		$this->options = json_decode(json_encode($options));
 		$this->fileManager = new fileManager($this);
 		$this->pdoManager = new pdoManager($this);
 		$this->tsReserve = new tsReserve($this);
 		$this->tsOutput = new tsOutput($this);
-
-		$this->debug_echo('■ __construct end');
-
+		$this->publish = new publish($this);
 	}
 
 	/**
@@ -2278,10 +2267,6 @@ class main
 
 			$this->debug_echo('　□ $insert_id：');
 			$this->debug_echo($insert_id);
-
-			// TODO:開発用に、windowsでは処理させていない。後で削除。
-			if (self::DEVELOP_ENV != '1') {
-			}
 
 
 			//============================================================

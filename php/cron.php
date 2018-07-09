@@ -6,22 +6,20 @@ class cron
 {
 	public $options;
 
-	public $publish;
-
 	private $fileManager;
 
 	private $pdoManager;
 
 	private $tsOutput;
 
+	public $publish;
+
 	/**
 	 * PDOインスタンス
 	 */
 	private $dbh;
 
-	// 開発環境
-	const DEVELOP_ENV = '1';
-	
+
 	/**
 	 * 削除フラグ
 	 */
