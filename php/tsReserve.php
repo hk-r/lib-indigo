@@ -110,7 +110,7 @@ class tsReserve
 
 			// SELECT文作成（削除フラグ = 0、公開予約日時>=現在日時、ソート順：公開予約日時の降順）
 			$select_sql = "
-					SELECT * FROM TS_RESERVE WHERE delete_flg = " . self::DELETE_FLG_OFF . $option_param . " ORDER BY reserve_datetime DESC";
+					SELECT * FROM TS_RESERVE WHERE delete_flg = " . self::DELETE_FLG_OFF . $option_param . " ORDER BY reserve_datetime DESC;";
 
 			$this->debug_echo('　□ select_sql');
 			$this->debug_echo($select_sql);
