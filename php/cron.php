@@ -6,6 +6,8 @@ class cron
 {
 	public $options;
 
+	public $main;
+
 	private $fileManager;
 
 	private $pdoManager;
@@ -56,6 +58,7 @@ class cron
 		$this->debug_echo('■ [cron] __construct start');
 
 		$this->options = json_decode(json_encode($options));
+		$this->main = new main($main);
 		$this->fileManager = new fileManager($this);
 		$this->pdoManager = new pdoManager($this);
 		$this->publish = new publish($this);
