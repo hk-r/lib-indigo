@@ -28,7 +28,7 @@
             "php/pdoManager.php",
             "php/fileManager.php",
             "php/tsReserve.php",
-            "php/tsOutput.php"
+            "php/tsOutput.php",
             "php/check.php",
             "php/common.php"
         ]
