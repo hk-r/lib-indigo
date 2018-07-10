@@ -112,6 +112,9 @@ class tsReserve
 			$select_sql = "
 					SELECT * FROM TS_RESERVE WHERE delete_flg = " . self::DELETE_FLG_OFF . $option_param . " ORDER BY reserve_datetime DESC";
 
+			$this->debug_echo('　□ select_sql');
+			$this->debug_echo($select_sql);
+
 			// SELECT実行
 			$ret_array = $this->pdoManager->select($dbh, $select_sql);
 
