@@ -116,7 +116,10 @@ class tsReserve
 			$this->debug_echo($select_sql);
 
 			// SELECT実行
-			$ret_array = $this->pdoManager->select($dbh, $select_sql);
+			$ret_array = json_decode($this->pdoManager->select($dbh, $select_sql));
+
+			$this->debug_echo('　□ ret_array');
+			$this->debug_var_dump($ret_array);
 
 			foreach ((array)$ret_array as $array) {
 
