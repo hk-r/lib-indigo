@@ -105,7 +105,7 @@ class tsReserve
 		try {
 
 			if ($now) {
-				$option_param = ' and reserve_datetime >= ' . $now;
+				$option_param = " and reserve_datetime >= '" . $now . "'";
 			}
 
 			// SELECT文作成（削除フラグ = 0、公開予約日時>=現在日時、ソート順：公開予約日時の降順）
