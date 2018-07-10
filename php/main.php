@@ -557,7 +557,8 @@ class main
 	 */
 	public function get_current_datetime_of_gmt() {
 
-		return gmdate(DATE_ATOM, time());
+		// return gmdate(DATE_ATOM, time());
+		return gmdate(self::DATETIME_FORMAT, time());
 	}
 
 
@@ -2364,7 +2365,8 @@ class main
 			$timezone = date_default_timezone_get();
 			$t = new \DateTime($datetime, new \DateTimeZone(self::GMT));
 			$t->setTimeZone(new \DateTimeZone($timezone));
-			$ret = $t->format(DATE_ATOM);
+			// $ret = $t->format(DATE_ATOM);
+			$ret = $t->format(self::DATETIME_FORMAT);
 		
 			// $this->debug_echo('タイムゾーン：' . $timezone);
 		}
@@ -2401,7 +2403,8 @@ class main
 			// タイムゾーン変更
 			$t->setTimeZone(new \DateTimeZone(self::GMT));
 		
-			$ret = $t->format(DATE_ATOM);
+			// $ret = $t->format(DATE_ATOM);
+			$ret = $t->format(self::DATETIME_FORMAT);
 			// $this->debug_echo('　□timezone：' . $timezone);
 		}
 		

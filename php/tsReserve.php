@@ -94,7 +94,7 @@ class tsReserve
 	 */
 	public function get_ts_reserve_publish_list($dbh, $now) {
 
-		$this->debug_echo('■ get_ts_reserve_list start');
+		$this->debug_echo('■ get_ts_reserve_publish_list start');
 
 		$ret_array = array();
 
@@ -130,7 +130,7 @@ class tsReserve
 			return $conv_ret_array;
 		}
 		
-		$this->debug_echo('■ get_ts_reserve_list end');
+		$this->debug_echo('■ get_ts_reserve_publish_list end');
 
 		return $conv_ret_array;
 	}
