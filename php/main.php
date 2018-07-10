@@ -2274,8 +2274,12 @@ class main
 			//============================================================
 			$ret = json_decode($this->publish->do_publish($dirname));
 		
-			if ( !$ret->status ) {
-				throw new \Exception($ret->message);
+			// 公開ステータスの設定
+			$publish_status;
+			if ( $ret->status) {
+				$publish_status = self::PUBLISH_STATUS_SUCCESS;
+			} else {
+				$publish_status = self::PUBLISH_STATUS_FAILED;
 			}
 
 
@@ -2283,12 +2287,12 @@ class main
 			// 公開処理結果テーブルの更新処理
 			//============================================================
 			// GMTの現在日時
-			$end_datetime = $this->get_current_datetime_of_gmt();
+			$end_datetime = $this->main->get_current_datetime_of_gmt();
 
-	 		$ret = json_decode($this->tsOutput->update_ts_output($this->dbh, $insert_id, $end_datetime, self::PUBLISH_STATUS_SUCCESS));
-	 		
+	 		$ret = $this->tsOutput->update_ts_output($this->dbh, $insert_id, $end_datetime, $publish_status);
+
 			if ( !$ret->status) {
-				throw new \Exception("TS_OUTPUT update failed.");
+				throw new \Exception("TS_OUTPUT update failed. " . $ret->message);
 			}
 
 		} catch (\Exception $e) {

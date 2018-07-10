@@ -134,7 +134,7 @@ class publish
 			if ( file_exists($backup_real_path) && file_exists($project_real_path) ) {
 
 				// TODO:ログフォルダに出力する
-				$command = 'rsync -avzP' . ' ' . $project_real_path . ' ' . $backup_real_path . $dirname . '/' . ' --log-file=' . $log_real_path . '/rsync_' . $dirname . '.log' ;
+				$command = 'rsync -rtvzP' . ' ' . $project_real_path . ' ' . $backup_real_path . $dirname . '/' . ' --log-file=' . $log_real_path . '/rsync_' . $dirname . '.log' ;
 
 				$this->debug_echo('　□ $command：');
 				$this->debug_echo($command);
@@ -165,13 +165,16 @@ class publish
 				// 以下のコマンド（-a）だと、パーミッションまで変えようとするためエラーが発生する。
 				// $command = 'rsync -avzP ' . $running_real_path . $dirname . '/' . ' ' . $project_real_path . ' --log-file=' . $log_real_path . $dirname . '/rsync_' . $dirname . '.log' ;
 
-				// r ディレクトリを再帰的に調べる。
-				// -l シンボリックリンクをリンクとして扱う
-				// -p パーミッションも含める
+				// -r ディレクトリを再帰的に調べる。
+				// -l シンボリックリンクをリンクとして扱う（？）
+				// -p パーミッションも含める（除外）
 				// -t 更新時刻などの時刻情報も含める
-				// -o 所有者情報も含める
-				// -g ファイルのグループ情報も含める
-				// -D デバイスファイルはそのままデバイスとして扱う
+				// -o 所有者情報も含める（除外）
+				// -g ファイルのグループ情報も含める（除外）
+				// -D デバイスファイルはそのままデバイスとして扱う（？）
+
+				// -v 進捗を表示
+				// -P ファイル転送中の場合、途中から再開するように
 				$command = 'rsync -rtvzP --delete ' . $running_real_path . $dirname . '/' . ' ' . $project_real_path . '/' . ' ' . '--log-file=' . $log_real_path . $dirname . '/rsync_' . $dirname . '.log' ;
 
 				$this->debug_echo('　□ $command：');

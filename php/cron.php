@@ -129,7 +129,7 @@ class cron
 			if ( file_exists($waiting_real_path) && file_exists($running_real_path) ) {
 
 				// TODO:ログフォルダに出力する
-				$command = 'rsync -avzP --remove-source-files ' . $waiting_real_path . $dirname . '/ ' . $running_real_path . $dirname . '/' . ' --log-file=' . $log_real_path . $dirname . '/rsync_' . $dirname . '.log' ;
+				$command = 'rsync -rtvzP --remove-source-files ' . $waiting_real_path . $dirname . '/ ' . $running_real_path . $dirname . '/' . ' --log-file=' . $log_real_path . $dirname . '/rsync_' . $dirname . '.log' ;
 
 				$this->debug_echo('　□ $command：');
 				$this->debug_echo($command);
@@ -167,7 +167,7 @@ class cron
 			//============================================================
 			$ret = json_decode($this->tsOutput->insert_ts_output($this->dbh, $this->main->options, $start_datetime, self::PUBLISH_TYPE_RESERVE));
 			if ( !$ret->status) {
-				throw new \Exception("TS_OUTPUT insert failed.");
+				throw new \Exception("TS_OUTPUT insert failed. " . $ret->message);
 			}
 
 			// インサートしたシーケンスIDを取得（処理終了時の更新処理にて使用）
@@ -183,7 +183,13 @@ class cron
 			//============================================================
 			$ret = json_decode($this->publish->do_publish($dirname));
 
-
+			// 公開ステータスの設定
+			$publish_status;
+			if ( $ret->status) {
+				$publish_status = self::PUBLISH_STATUS_SUCCESS;
+			} else {
+				$publish_status = self::PUBLISH_STATUS_FAILED;
+			}
 
 
 			//============================================================
@@ -192,10 +198,12 @@ class cron
 			// GMTの現在日時
 			$end_datetime = $this->main->get_current_datetime_of_gmt();
 
-	 		$ret = $this->tsOutput->update_ts_output($this->dbh, $insert_id, $end_datetime, self::PUBLISH_STATUS_SUCCESS);
+	 		$ret = $this->tsOutput->update_ts_output($this->dbh, $insert_id, $end_datetime, $publish_status);
+
 			if ( !$ret->status) {
-				throw new \Exception("TS_OUTPUT update failed.");
+				throw new \Exception("TS_OUTPUT update failed. " . $ret->message);
 			}
+
 	
 		} catch (\Exception $e) {
 
