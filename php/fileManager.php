@@ -5,6 +5,7 @@ class fileManager
 {
 	/** indigo\mainのインスタンス */
 	private $main;
+	private $common;
 
 	/**
 	 * ファイルシステムの文字セット
@@ -19,6 +20,7 @@ class fileManager
 	 */
 	public function __construct($main) {
 		$this->main = $main;
+		$this->common = new common($this);
 	}
 
 	/**
@@ -249,7 +251,7 @@ class fileManager
 	 */
 	public function is_exists_mkdir($dirpath) {
 
-		// $this->debug_echo('■ is_exists_mkdir start');
+		// $this->common->debug_echo('■ is_exists_mkdir start');
 
 		$ret = true;
 
@@ -264,8 +266,8 @@ class fileManager
 			$ret = false;
 		}
 
-		// $this->debug_echo('　□ return：' . $ret);
-		// $this->debug_echo('■ is_exists_mkdir end');
+		// $this->common->debug_echo('　□ return：' . $ret);
+		// $this->common->debug_echo('■ is_exists_mkdir end');
 
 		return $ret;
 	}
@@ -279,18 +281,18 @@ class fileManager
 	 */
 	public function is_exists_remkdir($dirpath) {
 		
-		$this->debug_echo('■ is_exists_remkdir start');
-		$this->debug_echo('　■ $dirpath：' . $dirpath);
+		$this->common->debug_echo('■ is_exists_remkdir start');
+		$this->common->debug_echo('　■ $dirpath：' . $dirpath);
 
 		if ( file_exists($dirpath) ) {
-			$this->debug_echo('　■ $dirpath2：' . $dirpath);
+			$this->common->debug_echo('　■ $dirpath2：' . $dirpath);
 
 			// 削除
 			$command = 'rm -rf --preserve-root '. $dirpath;
 			$ret = $this->main->command_execute($command, true);
 
 			if ( $ret['return'] !== 0 ) {
-				$this->debug_echo('[既存ディレクトリ削除失敗]');
+				$this->common->debug_echo('[既存ディレクトリ削除失敗]');
 				return false;
 			}
 		}
@@ -298,41 +300,17 @@ class fileManager
 		// デプロイ先のディレクトリを作成
 		if ( !file_exists($dirpath)) {
 			if ( !mkdir($dirpath, self::DIR_PERMISSION_0757) ) {
-				$this->debug_echo('　□ [再作成失敗]$dirpath：' . $dirpath);
+				$this->common->debug_echo('　□ [再作成失敗]$dirpath：' . $dirpath);
 				return false;
 			}
 		} else {
-			$this->debug_echo('　□ [既存ディレクトリが残っている]$dirpath：' . $dirpath);
+			$this->common->debug_echo('　□ [既存ディレクトリが残っている]$dirpath：' . $dirpath);
 			return false;
 		}
 	
-		$this->debug_echo('■ is_exists_remkdir end');
+		$this->common->debug_echo('■ is_exists_remkdir end');
 
 		return true;
-	}
-
-	/**
-	 * ※デバッグ関数（エラー調査用）
-	 *	 
-	 */
-	function debug_echo($text) {
-	
-		echo strval($text);
-		echo "<br>";
-
-		return;
-	}
-
-	/**
-	 * ※デバッグ関数（エラー調査用）
-	 *	 
-	 */
-	function debug_var_dump($text) {
-	
-		var_dump($text);
-		echo "<br>";
-
-		return;
 	}
 
 }

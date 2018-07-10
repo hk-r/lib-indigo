@@ -17,6 +17,7 @@ class cron
 	private $tsOutput;
 
 	public $publish;
+	private $common;
 
 	/**
 	 * PDOインスタンス
@@ -24,11 +25,8 @@ class cron
 	private $dbh;
 
 
-	/**
-	 * 削除フラグ
-	 */
-	const DELETE_FLG_ON = 1;	// 削除済み
-	const DELETE_FLG_OFF = 0;	// 未削除
+	// 日時フォーマット_保存用（YmdHis）
+	const DATETIME_FORMAT_SAVE = "YmdHis";
 	
 	/**
 	 * 公開種別
@@ -57,7 +55,7 @@ class cron
 	 */
 	public function __construct($options) {
 
-		$this->debug_echo('■ [cron] __construct start');
+		$this->common->debug_echo('■ [cron] __construct start');
 
 		$this->options = json_decode(json_encode($options));
 		$this->main = new main($this);
@@ -66,8 +64,9 @@ class cron
 		$this->tsReserve = new tsReserve($this);
 		$this->tsOutput = new tsOutput($this);
 		$this->publish = new publish($this);
+		$this->common = new common($this);
 
-		$this->debug_echo('■ [cron] __construct end');
+		$this->common->debug_echo('■ [cron] __construct end');
 
 	}
 
@@ -76,7 +75,7 @@ class cron
 	 */
     public function run(){
 	
-		$this->debug_echo('■ [cron] run start');
+		$this->common->debug_echo('■ [cron] run start');
 
 		// 処理実行結果格納
 		$ret = '';
@@ -88,8 +87,8 @@ class cron
 			//============================================================
 			$this->dbh = $this->pdoManager->connect();
 
-			$this->debug_echo('　□ $this->dbh：');
-			$this->debug_echo($this->dbh);
+			$this->common->debug_echo('　□ $this->dbh：');
+			$this->common->debug_var_dump($this->dbh);
 
 
 			//============================================================
@@ -104,8 +103,8 @@ class cron
 			// GMTの現在日時
 			$start_datetime = $this->main->get_current_datetime_of_gmt();
 
-			$this->debug_echo('　□ 現在日時：');
-			$this->debug_echo($start_datetime);
+			$this->common->debug_echo('　□ 現在日時：');
+			$this->common->debug_echo($start_datetime);
 
 			// 公開予約の一覧を取得
 			$data_list = json_decode($this->tsReserve->get_ts_reserve_publish_list($this->dbh, $start_datetime));
@@ -113,13 +112,13 @@ class cron
 			// TODO:ここで複数件取れてきた場合は、最新データ以外はスキップデータとして公開処理結果テーブルへ登録する
 			foreach ( (array)$data_list as $data ) {
 
-				$this->debug_echo('　□公開取得データ[配列]');
-				$this->debug_var_dump($data);
+				$this->common->debug_echo('　□公開取得データ[配列]');
+				$this->common->debug_var_dump($data);
 
-				$dirname = $this->format_datetime($data[self::TS_RESERVE_COLUMN_RESERVE], self::DATETIME_FORMAT_SAVE);
+				$dirname = $this->common->format_datetime($data[self::TS_RESERVE_COLUMN_RESERVE], self::DATETIME_FORMAT_SAVE);
 		
-				$this->debug_echo('　□公開ディレクトリ名');
-				$this->debug_var_dump($dirname);
+				$this->common->debug_echo('　□公開ディレクトリ名');
+				$this->common->debug_var_dump($dirname);
 			}
 
 			//============================================================
@@ -140,29 +139,29 @@ class cron
 				// TODO:ログフォルダに出力する
 				$command = 'rsync -rtvzP --remove-source-files ' . $waiting_real_path . $dirname . '/ ' . $running_real_path . $dirname . '/' . ' --log-file=' . $log_real_path . $dirname . '/rsync_' . $dirname . '.log' ;
 
-				$this->debug_echo('　□ $command：');
-				$this->debug_echo($command);
+				$this->common->debug_echo('　□ $command：');
+				$this->common->debug_echo($command);
 
 				$ret = $this->main->command_execute($command, true);
 
-				$this->debug_echo('　▼ waiting⇒runningのファイル移動結果');
+				$this->common->debug_echo('　▼ waiting⇒runningのファイル移動結果');
 
 				foreach ( (array)$ret['output'] as $element ) {
-					$this->debug_echo($element);
+					$this->common->debug_echo($element);
 				}
 
 				// waitingの空ディレクトリを削除する
 				$command = 'find ' .  $waiting_real_path . $dirname . '/ -type d -empty -delete' ;
 
-				$this->debug_echo('　□ $command：');
-				$this->debug_echo($command);
+				$this->common->debug_echo('　□ $command：');
+				$this->common->debug_echo($command);
 
 				$ret = $this->main->command_execute($command, true);
 
-				$this->debug_echo('　▼ Waitingディレクトリの削除');
+				$this->common->debug_echo('　▼ Waitingディレクトリの削除');
 
 				foreach ( (array)$ret['output'] as $element ) {
-					$this->debug_echo($element);
+					$this->common->debug_echo($element);
 				}
 
 			} else {
@@ -182,8 +181,8 @@ class cron
 			// インサートしたシーケンスIDを取得（処理終了時の更新処理にて使用）
 			$insert_id = $this->dbh->lastInsertId();
 
-			$this->debug_echo('　□ $insert_id：');
-			$this->debug_echo($insert_id);
+			$this->common->debug_echo('　□ $insert_id：');
+			$this->common->debug_echo($insert_id);
 
 
 
@@ -221,7 +220,7 @@ class cron
 
 			echo $e->getMessage();
 
-			$this->debug_echo('■ [cron] run error end');
+			$this->common->debug_echo('■ [cron] run error end');
 
 			return;
 		}
@@ -229,33 +228,9 @@ class cron
 		// データベース接続を閉じる
 		$this->pdo->close();
 
-		$this->debug_echo('■ [cron] run end');
+		$this->common->debug_echo('■ [cron] run end');
 
 		return;
     }
-
-	/**
-	 * ※デバッグ関数（エラー調査用）
-	 *	 
-	 */
-	function debug_echo($text) {
-
-		echo strval($text);
-		echo "</br>";
-
-		return;
-	}
-
-	/**
-	 * ※デバッグ関数（エラー調査用）
-	 *	 
-	 */
-	function debug_var_dump($text) {
-
-		var_dump($text);
-		echo "</br>";
-
-		return;
-	}
 
 }

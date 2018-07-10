@@ -5,16 +5,14 @@ namespace indigo;
 class main
 {
 	public $options;
-
 	private $fileManager;
-
 	private $pdoManager;
-
 	private $tsReserve;
-
 	private $tsOutput;
-
 	private $publish;
+	private $common;
+	private $check;
+
 	/**
 	 * PDOインスタンス
 	 */
@@ -26,19 +24,10 @@ class main
 
 	// 日時フォーマット（Y-m-d H:i:s）
 	const DATETIME_FORMAT = "Y-m-d H:i:s";
-	// 時間フォーマット（Y-m-d）
-	const DATE_FORMAT_YMD = "Y-m-d";
-	// 時間フォーマット（H:i）
-	const TIME_FORMAT_HI = "H:i";
 	// 時間フォーマット（H:i:s）
 	const TIME_FORMAT_HIS = "H:i:s";
-
-	// 日時フォーマット_表示用（Y-m-d H:i）
-	const DATETIME_FORMAT_DISPLAY = "Y-m-d H:i";
 	// 日時フォーマット_保存用（YmdHis）
 	const DATETIME_FORMAT_SAVE = "YmdHis";
-	// 日時フォーマット_保存用（YmdHis）
-	const DATETIME_FORMAT_RESERVE = "YmdHis_reserve";
 
 	/**
 	 * 画像パス定義
@@ -106,57 +95,6 @@ class main
 	// masterディレクトリパス
 	const PATH_MASTER = '/master_repository/';
 
-
-	/**
-	 * 公開予約エンティティのカラム定義
-	 */
-	const RESERVE_ENTITY_ID = 'reserve_id_seq';		// ID
-	const RESERVE_ENTITY_RESERVE = 'reserve_datetime';	// 公開予約日時
-	const RESERVE_ENTITY_RESERVE_DISPLAY = 'reserve_display';	// 公開予約日時
-	const RESERVE_ENTITY_RESERVE_DATE = 'reserve_date';	// 公開予約日時
-	const RESERVE_ENTITY_RESERVE_TIME = 'reserve_time';	// 公開予約日時
-	const RESERVE_ENTITY_BRANCH = 'branch_name';	// ブランチ名
-	const RESERVE_ENTITY_COMMIT = 'commit_hash';	// コミットハッシュ値（短縮）
-	const RESERVE_ENTITY_COMMENT = 'comment';	// コメント
-	const RESERVE_ENTITY_INSERT_DATETIME = 'insert_datetime';	// 設定日時
-
-
-	/**
-	 * 公開処理結果エンティティのカラム定義
-	 */
-	const RESULT_ENTITY_ID = 'result_id_seq';			// ID
-	const RESULT_ENTITY_RESERVE = 'reserve_datetime';		// 公開予約日時
-	const RESULT_ENTITY_RESERVE_DISPLAY = 'reserve_display';	// 公開予約日時
-	const RESULT_ENTITY_BRANCH = 'branch_name';		// ブランチ名
-	const RESULT_ENTITY_COMMIT = 'commit_hash';		// コミットハッシュ値（短縮）
-	const RESULT_ENTITY_COMMENT = 'comment';		// コメント
-	// const RESULT_ENTITY_SETTING = '';		// 設定日時
-
-	const RESULT_ENTITY_STATUS = 'status';		// 状態
-	const RESULT_ENTITY_TYPE = 'publish_type';		// 公開種別
-
-	const RESULT_ENTITY_START = 'start_datetime';		// 公開処理開始日時
-	const RESULT_ENTITY_START_DISPLAY = 'start_display';	// 公開処理開始日時
-	const RESULT_ENTITY_END = 'end_datetime';			// 公開処理終了日時
-	const RESULT_ENTITY_END_DISPLAY = 'end_display';	// 公開処理終了日時
-
-	const RESULT_ENTITY_RELEASED = 8;		// 公開完了日時
-	const RESULT_ENTITY_RESTORE = 9;		// 復元完了日時
-
-	const RESULT_ENTITY_DIFF_FLG1 = 10;	// 差分フラグ1（本番環境と前回分の差分）
-	const RESULT_ENTITY_DIFF_FLG2 = 11;	// 差分フラグ2（本番環境と今回分の差分）
-	const RESULT_ENTITY_DIFF_FLG3 = 12;	// 差分フラグ3（前回分と今回分の差分）
-
-	// const HONBAN_REALPATH = '/var/www/html/indigo-test-project/';
-	const HONBAN_REALPATH = '/var/www/html/test';
-	
-	/**
-	 * 削除フラグ
-	 */
-	const DELETE_FLG_ON = 1;	// 削除済み
-	const DELETE_FLG_OFF = 0;	// 未削除
-
-
 	/**
 	 * コミットハッシュ値
 	 */
@@ -180,6 +118,8 @@ class main
 		$this->tsReserve = new tsReserve($this);
 		$this->tsOutput = new tsOutput($this);
 		$this->publish = new publish($this);
+		$this->common = new common($this);
+		$this->check = new check($this);
 	}
 
 	/**
@@ -187,7 +127,7 @@ class main
 	 */
 	private function init() {
 
-		$this->debug_echo('■ init start');
+		$this->common->debug_echo('■ init start');
 
 		$current_dir = realpath('.');
 
@@ -198,8 +138,8 @@ class main
 		// masterディレクトリの絶対パス
 		$master_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_MASTER));
 
-		$this->debug_echo('　□ master_real_path：');
-		$this->debug_echo($master_real_path);
+		$this->common->debug_echo('　□ master_real_path：');
+		$this->common->debug_echo($master_real_path);
 
 
 		set_time_limit(0);
@@ -255,7 +195,7 @@ class main
 
 			chdir($current_dir);
 
-			$this->debug_echo('■ init error end');
+			$this->common->debug_echo('■ init error end');
 
 			return json_encode($result);
 		}
@@ -266,7 +206,7 @@ class main
 
 		chdir($current_dir);
 
-		$this->debug_echo('■ init end');
+		$this->common->debug_echo('■ init end');
 
 		return json_encode($result);
 	}
@@ -279,7 +219,7 @@ class main
 	private function get_branch_list() {
 
 
-		$this->debug_echo('■ get_branch_list start');
+		$this->common->debug_echo('■ get_branch_list start');
 
 		$current_dir = realpath('.');
 
@@ -292,8 +232,8 @@ class main
 			// masterディレクトリの絶対パス
 			$master_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_MASTER));
 
-			$this->debug_echo('　□ master_real_path：');
-			$this->debug_echo($master_real_path);
+			$this->common->debug_echo('　□ master_real_path：');
+			$this->common->debug_echo($master_real_path);
 
 			if ( chdir( $master_real_path )) {
 
@@ -326,7 +266,7 @@ class main
 
 			chdir($current_dir);
 
-			$this->debug_echo('■ get_branch_list error end');
+			$this->common->debug_echo('■ get_branch_list error end');
 			return json_encode($result);
 		}
 
@@ -334,7 +274,7 @@ class main
 
 		chdir($current_dir);
 
-		$this->debug_echo('■ get_branch_list end');
+		$this->common->debug_echo('■ get_branch_list end');
 		return json_encode($result);
 
 	}
@@ -427,141 +367,6 @@ class main
 	}
 
 
-	/**
-	 * 公開予約の最大件数チェック
-	 *	 
-	 * @param $data_list       = データリスト
-	 *	 
-	 * @return 
-	 *  重複なし：true
-	 *  重複あり：false
-	 */
-	private function check_reserve_max_record($data_list) {
-
-		$ret = true;
-
-		// TODO:定数化
-		$max = 10;
-
-		if ($max <= count($data_list)) {
-			$ret = false;
-		}
-
-		return $ret;
-	}
-
-	/**
-	 * 日付の妥当性チェック
-	 *	 
-	 * @param $reserve_date  = 公開予約日時
-	 *	 
-	 * @return 
-	 *  重複なし：true
-	 *  重複あり：false
-	 */
-	private function check_date($reserve_date) {
-
-		$ret = true;
-
-		// 日付の妥当性チェック
-		list($Y, $m, $d) = explode('-', $reserve_date);
-
-		if (!checkdate(intval($m), intval($d), intval($Y))) {
-			$ret = false;
-		}	
-
-		return $ret;
-	}
-
-	/**
-	 * 日付未来チェック
-	 *	 
-	 * @param $datetime       = 公開予約日時の日付
-	 *	 
-	 * @return 
-	 *  重複なし：true
-	 *  重複あり：false
-	 */
-	private function check_future_date($datetime) {
-
-		$ret = true;
-
-		// GMTの現在日時
-		$now = $this->get_current_datetime_of_gmt();
-
-		if (strtotime($now) > strtotime($datetime)) {
-			$ret = false;
-		}	
-
-		return $ret;
-	}
-
-
-	/**
-	 * ブランチ重複チェック
-	 *	 
-	 * @param $data_list       = データリスト
-	 * @param $selected_branch = 選択されたブランチ
-	 * @param $selected_id   = 変更ID
-	 *	 
-	 * @return 
-	 *  重複なし：true
-	 *  重複あり：false
-	 */
-	private function check_exist_branch($data_list, $selected_branch, $selected_id) {
-
-		$ret = true;
-
-		foreach ((array)$data_list as $array) {
-			
-			if (($array[self::RESERVE_ENTITY_ID] != $selected_id) && ($array[self::RESERVE_ENTITY_BRANCH] == $selected_branch)) {
-				$ret = false;
-				break;
-			}
-		}		
-
-		return $ret;
-	}
-
-	/**
-	 * 公開予約日時重複チェック
-	 *	 
-	 * @param $data_list     = データリスト
-	 * @param $input_reserve = 入力された日時
-	 * @param $selected_id   = 変更ID
-	 *	 
-	 * @return 
-	 *  重複なし：true
-	 *  重複あり：false
-	 */
-	private function check_exist_reserve($data_list, $input_reserve, $selected_id) {
-
-		$ret = true;
-
-		foreach ((array)$data_list as $array) {
-			if (($array[self::RESERVE_ENTITY_ID] != $selected_id) && ($array[self::RESERVE_ENTITY_RESERVE] == $input_reserve)) {
-				$ret = false;
-				break;
-			}
-		}		
-
-		return $ret;
-	}
-
-	/**
-	 * GMTの現在時刻を取得
-	 *	 
-	 * @return 
-	 *  一致する場合：selected（文字列）
-	 *  一致しない場合：空文字
-	 */
-	public function get_current_datetime_of_gmt() {
-
-		// return gmdate(DATE_ATOM, time());
-		return gmdate(self::DATETIME_FORMAT, time());
-	}
-
-
 	// /**
 	//  * タイムゾーンの現在時刻を取得
 	//  *	 
@@ -581,7 +386,7 @@ class main
 	 */
 	private function disp_add_dialog() {
 		
-		$this->debug_echo('■ disp_add_dialog start');
+		$this->common->debug_echo('■ disp_add_dialog start');
 
 		$branch_select_value = "";
 		$reserve_date = "";
@@ -591,7 +396,7 @@ class main
 		// ダイアログHTMLの作成
 		$ret = $this->create_dialog_html(self::INPUT_MODE_ADD, $branch_select_value, $reserve_date, $reserve_time, $comment);
 
-		$this->debug_echo('■ disp_add_dialog end');
+		$this->common->debug_echo('■ disp_add_dialog end');
 
 		return $ret;
 	}
@@ -606,7 +411,7 @@ class main
 	 */
 	private function disp_back_add_dialog() {
 		
-		$this->debug_echo('■ disp_back_add_dialog start');
+		$this->common->debug_echo('■ disp_back_add_dialog start');
 
 		$branch_select_value = "";
 		$reserve_date = "";
@@ -630,7 +435,7 @@ class main
 		// 入力ダイアログHTMLの作成
 		$ret = $this->create_dialog_html(self::INPUT_MODE_ADD_BACK, $branch_select_value, $reserve_date, $reserve_time, $comment);
 
-		$this->debug_echo('■ disp_back_add_dialog end');
+		$this->common->debug_echo('■ disp_back_add_dialog end');
 
 		return $ret;
 	}
@@ -643,7 +448,7 @@ class main
 	 */
 	private function disp_update_dialog() {
 		
-		$this->debug_echo('■ disp_update_dialog start');
+		$this->common->debug_echo('■ disp_update_dialog start');
 
 		$branch_select_value = "";
 		$reserve_date = "";
@@ -655,24 +460,24 @@ class main
 
 		$selected_data = $this->tsReserve->get_selected_ts_reserve($this->dbh, $selected_id);
 		
-		$this->debug_echo('　□ 公開予約データ');
-		$this->debug_var_dump($selected_data);
-		$this->debug_echo('　');
+		$this->common->debug_echo('　□ 公開予約データ');
+		$this->common->debug_var_dump($selected_data);
+		$this->common->debug_echo('　');
 
 		if ($selected_data) {
 
-			$branch_select_value = $selected_data[self::RESERVE_ENTITY_BRANCH];
+			$branch_select_value = $selected_data[tsReserve::RESERVE_ENTITY_BRANCH];
 
-			$reserve_date = $selected_data[self::RESERVE_ENTITY_RESERVE_DATE];
-			$reserve_time = $selected_data[self::RESERVE_ENTITY_RESERVE_TIME];
+			$reserve_date = $selected_data[tsReserve::RESERVE_ENTITY_RESERVE_DATE];
+			$reserve_time = $selected_data[tsReserve::RESERVE_ENTITY_RESERVE_TIME];
 
-			$comment = $selected_data[self::RESERVE_ENTITY_COMMENT];
+			$comment = $selected_data[tsReserve::RESERVE_ENTITY_COMMENT];
 		}
 
 		// ダイアログHTMLの作成
 		$ret = $this->create_dialog_html(self::INPUT_MODE_UPDATE, $branch_select_value, $reserve_date, $reserve_time, $comment);
 
-		$this->debug_echo('■ disp_update_dialog end');
+		$this->common->debug_echo('■ disp_update_dialog end');
 
 		return $ret;
 	}
@@ -687,7 +492,7 @@ class main
 	 */
 	private function disp_back_update_dialog() {
 		
-		$this->debug_echo('■ disp_back_update_dialog start');
+		$this->common->debug_echo('■ disp_back_update_dialog start');
 
 		$branch_select_value = "";
 		$reserve_date = "";
@@ -711,7 +516,7 @@ class main
 		// ダイアログHTMLの作成
 		$ret = $this->create_dialog_html(self::INPUT_MODE_UPDATE_BACK, $branch_select_value, $reserve_date, $reserve_time, $comment);
 
-		$this->debug_echo('■ disp_back_update_dialog end');
+		$this->common->debug_echo('■ disp_back_update_dialog end');
 
 		return $ret;
 	}
@@ -723,7 +528,7 @@ class main
 	 */
 	private function disp_immediate_dialog() {
 		
-		$this->debug_echo('■ disp_immediate_dialog start');
+		$this->common->debug_echo('■ disp_immediate_dialog start');
 
 		$branch_select_value = "";
 		$reserve_date = "";
@@ -733,7 +538,7 @@ class main
 		// ダイアログHTMLの作成
 		$ret = $this->create_dialog_html(self::INPUT_MODE_immediate, $branch_select_value, $reserve_date, $reserve_time, $comment);
 
-		$this->debug_echo('■ disp_immediate_dialog end');
+		$this->common->debug_echo('■ disp_immediate_dialog end');
 
 		return $ret;
 	}
@@ -748,7 +553,7 @@ class main
 	 */
 	private function disp_back_immediate_dialog() {
 		
-		$this->debug_echo('■ disp_back_immediate_dialog start');
+		$this->common->debug_echo('■ disp_back_immediate_dialog start');
 
 		$branch_select_value = "";
 		$reserve_date = "";
@@ -772,7 +577,7 @@ class main
 		// 入力ダイアログHTMLの作成
 		$ret = $this->create_dialog_html(self::INPUT_MODE_immediate_BACK, $branch_select_value, $reserve_date, $reserve_time, $comment);
 
-		$this->debug_echo('■ disp_back_immediate_dialog end');
+		$this->common->debug_echo('■ disp_back_immediate_dialog end');
 
 		return $ret;
 	}
@@ -795,7 +600,7 @@ class main
 	 */
 	private function create_dialog_html($input_mode, $branch_select_value, $reserve_date, $reserve_time, $comment) {
 		
-		$this->debug_echo('■ create_dialog_html start');
+		$this->common->debug_echo('■ create_dialog_html start');
 
 		$ret = "";
 
@@ -914,79 +719,10 @@ class main
 			  . '</div>'
 			  . '</div></div>';
 
-		$this->debug_echo('■ create_dialog_html end');
+		$this->common->debug_echo('■ create_dialog_html end');
 
 		return $ret;
 	}
-
-	// /**
-	//  * 変更前hidden項目HTMLの作成
-	//  *	 
-	//  * @param $add_flg       = 新規フラグ
-	//  * @param $error_message = エラーメッセージ出力内容
-	//  * @param $branch_list   = ブランチリスト
-	//  * @param $branch_select_value = ブランチ選択値
-	//  * @param $reserve_date = 公開予約日時
-	//  * @param $reserve_time = 公開予約時間
-	//  * @param $comment      = コメント
-	//  * @param $selected_id  = 変更時の選択ID
-	//  *
-	//  * @return 
-	//  *  入力ダイアログ出力内容
-	//  */
-	// private function create_change_before_hidden_html($init_trans_flg) {
-		
-	// 	$this->debug_echo('■ create_change_before_hidden_html start');
-
-	// 	$this->debug_echo('　□ $init_trans_flg：' . $init_trans_flg);
-
-	// 	$selected_id = '';
-	// 	$branch_select_value = '';
-	// 	$reserve_date = '';
-	// 	$reserve_time = '';
-	// 	$comment = '';
-
-	// 	// 初期画面からの遷移の場合、CSVから変更の情報を取得する
-	// 	if ($init_trans_flg) {
-
-	// 		// 選択されたID
-	// 		$selected_id = $this->options->_POST->selected_id;
-	// 		// 選択されたIDに紐づく情報を取得
-	// 		$selected_ret = $this->get_selected_ts_reserve();
-			
-	// 		$this->debug_echo('　□ selected_ret ：' . $selected_ret);
-	// 		$this->debug_echo($selected_ret);
-
-	// 		if ($selected_ret) {
-	// 			$branch_select_value = $selected_ret[self::TS_RESERVE_COLUMN_BRANCH];
-	// 			$reserve_date = date(self::DATE_FORMAT_YMD,  strtotime($selected_ret[self::TS_RESERVE_COLUMN_RESERVE]));
-	// 			$reserve_time = date(self::TIME_FORMAT_HI,  strtotime($selected_ret[self::TS_RESERVE_COLUMN_RESERVE]));
-	// 			$comment = $selected_ret[self::TS_RESERVE_COLUMN_COMMENT];
-	// 		}
-			
-	// 	} else {
-
-	// 		$selected_id =  $this->options->_POST->selected_id;		
-	// 		$branch_select_value = $this->options->_POST->change_before_branch_select_value;
-	// 		$reserve_date = $this->options->_POST->change_before_reserve_date;
-	// 		$reserve_time = $this->options->_POST->change_before_reserve_time;
-	// 		$comment = $this->options->_POST->change_before_comment;
-	// 	}
-
-	// 	$ret = '<input type="hidden" name="selected_id" value="' . $selected_id . '"/>'
- //  			  . '<input type="hidden" name="change_before_branch_select_value" value="'. $branch_select_value . '"/>'
- //  			  . '<input type="hidden" name="change_before_reserve_date" value="'. $reserve_date . '"/>'
- //  			  . '<input type="hidden" name="change_before_reserve_time" value="'. $reserve_time . '"/>'
- //  			  . '<input type="hidden" name="change_before_comment" value="'. $comment . '"/>';
-
-	// 	$this->debug_echo('　□ ret ：');
-	// 	$this->debug_echo($ret);
-
-	// 	$this->debug_echo('■ create_change_before_hidden_html end');
-
-	// 	return $ret;
-	// }
-
 
 	/**
 	 * 新規確認ダイアログの表示
@@ -1001,7 +737,7 @@ class main
 	 */
 	private function disp_check_add_dialog() {
 		
-		$this->debug_echo('■ disp_check_add_dialog start');
+		$this->common->debug_echo('■ disp_check_add_dialog start');
 
 		$branch_select_value = "";
 		$reserve_date = "";
@@ -1093,7 +829,7 @@ class main
 			 . '</div>'
 			 . '</div></div></div>';
 
-		$this->debug_echo('■ disp_check_add_dialog end');
+		$this->common->debug_echo('■ disp_check_add_dialog end');
 
 		return $ret;
 	}
@@ -1107,7 +843,7 @@ class main
 	 */
 	private function disp_check_update_dialog() {
 		
-		$this->debug_echo('■ disp_check_update_dialog start');
+		$this->common->debug_echo('■ disp_check_update_dialog start');
 
 		$branch_select_value = "";
 		$reserve_date = "";
@@ -1143,10 +879,10 @@ class main
 
 		if ($selected_data) {
 
-			$before_branch_select_value = $selected_data[self::RESERVE_ENTITY_BRANCH];
-			$before_reserve_date = $selected_data[self::RESERVE_ENTITY_RESERVE_DATE];
-			$before_reserve_time = $selected_data[self::RESERVE_ENTITY_RESERVE_TIME];
-			$before_comment = $selected_data[self::RESERVE_ENTITY_COMMENT];
+			$before_branch_select_value = $selected_data[tsReserve::RESERVE_ENTITY_BRANCH];
+			$before_reserve_date = $selected_data[tsReserve::RESERVE_ENTITY_RESERVE_DATE];
+			$before_reserve_time = $selected_data[tsReserve::RESERVE_ENTITY_RESERVE_TIME];
+			$before_comment = $selected_data[tsReserve::RESERVE_ENTITY_COMMENT];
 	
 			// 画面入力された日時を結合し、GMTへ変換する
 			$before_gmt_reserve_datetime = $this->combine_to_gmt_date_and_time($before_reserve_date, $before_reserve_time);
@@ -1254,7 +990,7 @@ class main
 			. '</div>'
 			. '</div></div>';
 
-		$this->debug_echo('■ disp_check_update_dialog end');
+		$this->common->debug_echo('■ disp_check_update_dialog end');
 
 		return $ret;
 	}
@@ -1272,7 +1008,7 @@ class main
 	 */
 	private function disp_check_immediate_dialog() {
 		
-		$this->debug_echo('■ disp_check_immediate_dialog start');
+		$this->common->debug_echo('■ disp_check_immediate_dialog start');
 
 		$ret = "";
 
@@ -1359,7 +1095,7 @@ class main
 			 . '</div>'
 			 . '</div></div></div>';
 
-		$this->debug_echo('■ disp_check_immediate_dialog end');
+		$this->common->debug_echo('■ disp_check_immediate_dialog end');
 
 		return $ret;
 	}
@@ -1372,7 +1108,7 @@ class main
 	 */
 	private function do_add_confirm() {
 		
-		$this->debug_echo('■ do_add_confirm start');
+		$this->common->debug_echo('■ do_add_confirm start');
 	
 		$current_dir = realpath('.');
 	
@@ -1386,16 +1122,16 @@ class main
 			// 指定ブランチのGit情報を「waiting」ディレクトリへコピー
 			//============================================================
 
-	 		$this->debug_echo('　□ -----Gitのファイルコピー処理-----');
+	 		$this->common->debug_echo('　□ -----Gitのファイルコピー処理-----');
 			
 			// waitingディレクトリの絶対パスを取得。
 			$waiting_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_WAITING));
 
 			// 公開予約ディレクトリ名の取得
-			$dirname = $this->format_gmt_datetime($this->options->_POST->gmt_reserve_datetime, self::DATETIME_FORMAT_SAVE) . '_reserve';
+			$dirname = $this->common->format_gmt_datetime($this->options->_POST->gmt_reserve_datetime, self::DATETIME_FORMAT_SAVE) . '_reserve';
 
-			$this->debug_echo('　□ 公開予約ディレクトリ：');
-			$this->debug_echo($dirname);
+			$this->common->debug_echo('　□ 公開予約ディレクトリ：');
+			$this->common->debug_echo($dirname);
 
 			// コピー処理
 			$ret = json_decode($this->file_copy($waiting_real_path, $dirname));
@@ -1404,7 +1140,7 @@ class main
 				throw new \Exception('Git file copy failed.');
 			}
 
-	 		$this->debug_echo('　□ -----公開処理結果テーブルの登録処理-----');
+	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの登録処理-----');
 			
 			//============================================================
 			// 入力情報を公開予約テーブルへ登録
@@ -1426,7 +1162,7 @@ class main
 		$result['status'] = true;
 		chdir($current_dir);
 
-		$this->debug_echo('■ do_add_confirm end');
+		$this->common->debug_echo('■ do_add_confirm end');
 
 		return json_encode($result);
 	}
@@ -1439,7 +1175,7 @@ class main
 	 */
 	private function do_update_confirm() {
 		
-		$this->debug_echo('■ do_add_confirm start');
+		$this->common->debug_echo('■ do_add_confirm start');
 	
 		$current_dir = realpath('.');
 	
@@ -1456,10 +1192,10 @@ class main
 			// 「waiting」ディレクトリの変更前の公開ソースディレクトリを削除
 			//============================================================
 			// 変更前の公開予約ディレクトリ名の取得
-			$before_dirname = $this->format_gmt_datetime($this->options->_POST->before_gmt_reserve_datetime, self::DATETIME_FORMAT_SAVE) . '_reserve';
+			$before_dirname = $this->common->format_gmt_datetime($this->options->_POST->before_gmt_reserve_datetime, self::DATETIME_FORMAT_SAVE) . '_reserve';
 
-			$this->debug_echo('　□ 変更前の公開予約ディレクトリ：');
-			$this->debug_echo($before_dirname);
+			$this->common->debug_echo('　□ 変更前の公開予約ディレクトリ：');
+			$this->common->debug_echo($before_dirname);
 
 			// コピー処理
 			$ret = json_decode($this->file_delete($waiting_real_path, $before_dirname));
@@ -1472,10 +1208,10 @@ class main
 			// 変更後ブランチのGit情報を「waiting」ディレクトリへコピー
 			//============================================================
 			// 公開予約ディレクトリ名の取得
-			$dirname = $this->format_gmt_datetime($this->options->_POST->gmt_reserve_datetime, self::DATETIME_FORMAT_SAVE) . '_reserve';
+			$dirname = $this->common->format_gmt_datetime($this->options->_POST->gmt_reserve_datetime, self::DATETIME_FORMAT_SAVE) . '_reserve';
 
-			$this->debug_echo('　□ 変更後の公開予約ディレクトリ：');
-			$this->debug_echo($dirname);
+			$this->common->debug_echo('　□ 変更後の公開予約ディレクトリ：');
+			$this->common->debug_echo($dirname);
 
 			// コピー処理
 			$ret = json_decode($this->file_copy($waiting_real_path, $dirname));
@@ -1484,7 +1220,7 @@ class main
 				throw new \Exception('Git file copy failed.');
 			}
 
-	 		$this->debug_echo('　□ -----公開処理結果テーブルの更新処理-----');
+	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの更新処理-----');
 			
 			//============================================================
 			// 入力情報を公開予約テーブルへ更新
@@ -1508,7 +1244,7 @@ class main
 		$result['status'] = true;
 		chdir($current_dir);
 
-		$this->debug_echo('■ do_add_confirm end');
+		$this->common->debug_echo('■ do_add_confirm end');
 
 		return json_encode($result);
 	}
@@ -1520,7 +1256,7 @@ class main
 	 */
 	private function do_delete() {
 		
-		$this->debug_echo('■ do_delete start');
+		$this->common->debug_echo('■ do_delete start');
 	
 		$current_dir = realpath('.');
 	
@@ -1539,10 +1275,10 @@ class main
 			// 公開予約ディレクトリ名の取得
 			$selected_id =  $this->options->_POST->selected_id;
 			$selected_ret = $this->tsReserve->get_selected_ts_reserve($this->dbh, $selected_id);
-			$dirname = $this->format_gmt_datetime($selected_ret[self::RESERVE_ENTITY_RESERVE], self::DATETIME_FORMAT_SAVE) . '_reserve';
+			$dirname = $this->common->format_gmt_datetime($selected_ret[tsReserve::RESERVE_ENTITY_RESERVE], self::DATETIME_FORMAT_SAVE) . '_reserve';
 
-			$this->debug_echo('　□ 公開予約ディレクトリ：');
-			$this->debug_echo($dirname);
+			$this->common->debug_echo('　□ 公開予約ディレクトリ：');
+			$this->common->debug_echo($dirname);
 
 			// コピー処理
 			$ret = json_decode($this->file_delete($waiting_real_path, $dirname));
@@ -1550,7 +1286,7 @@ class main
 			if ( !$ret->status ) {
 				throw new \Exception('Git file delete failed.');
 			}
-			$this->debug_echo('　□ -----公開処理結果テーブルの削除処理-----');
+			$this->common->debug_echo('　□ -----公開処理結果テーブルの削除処理-----');
 			
 			//============================================================
 			// 入力情報を公開予約テーブルへ更新
@@ -1572,7 +1308,7 @@ class main
 		$result['status'] = true;
 		chdir($current_dir);
 
-		$this->debug_echo('■ do_delete end');
+		$this->common->debug_echo('■ do_delete end');
 
 		return json_encode($result);
 	}
@@ -1585,7 +1321,7 @@ class main
 	 */
 	private function do_validation_check($input_mode) {
 				
-		$this->debug_echo('■ do_validation_check start');
+		$this->common->debug_echo('■ do_validation_check start');
 
 		$ret = "";
 
@@ -1627,32 +1363,32 @@ class main
 
 		if ($input_mode == self::INPUT_MODE_ADD) {
 			// 公開予約の最大件数チェック
-			if (!$this->check_reserve_max_record($data_list)) {
+			if (!$this->check->check_reserve_max_record($data_list)) {
 				$ret .= '<p class="error_message">公開予約は最大' . $max . '件までの登録になります。</p>';
 			}
 		}
 
 		// 日付の妥当性チェック
-		if (!$this->check_date($reserve_date)) {
+		if (!$this->check->check_date($reserve_date)) {
 			$ret .= '<p class="error_message">「公開予約日時」の日付が有効ではありません。</p>';
 		}
 
 		// 未来の日付であるかチェック
-		if (!$this->check_future_date($gmt_reserve_datetime)) {
+		if (!$this->check->check_future_date($gmt_reserve_datetime)) {
 			$ret .= '<p class="error_message">「公開予約日時」は未来日時を設定してください。</p>';
 		}
 
 		// ブランチの重複チェック
-		if (!$this->check_exist_branch($data_list, $branch_select_value, $selected_id)) {
+		if (!$this->check->check_exist_branch($data_list, $branch_select_value, $selected_id)) {
 			$ret .= '<p class="error_message">1つのブランチで複数の公開予約を作成することはできません。</p>';
 		}
 
 		// 公開予約日時の重複チェック
-		if (!$this->check_exist_reserve($data_list, $gmt_reserve_datetime, $selected_id)) {
+		if (!$this->check->check_exist_reserve($data_list, $gmt_reserve_datetime, $selected_id)) {
 			$ret .= '<p class="error_message">入力された日時はすでに公開予約が作成されています。</p>';
 		}
 
-		$this->debug_echo('■ do_validation_check end');
+		$this->common->debug_echo('■ do_validation_check end');
 
 		return $ret;
 	}
@@ -1664,7 +1400,7 @@ class main
 	 */
 	private function create_top_contents() {
 		
-		$this->debug_echo('■ create_top_contents start');
+		$this->common->debug_echo('■ create_top_contents start');
 
 		$ret = "";
 
@@ -1725,18 +1461,18 @@ class main
 			. '</thead>'
 			. '<tbody>';
 
-		// $this->debug_echo('　□data_list：');
-		// $this->debug_var_dump($data_list);
+		// $this->common->debug_echo('　□data_list：');
+		// $this->common->debug_var_dump($data_list);
 
 		// テーブルデータリスト
 		foreach ((array)$data_list as $array) {
 			
 			$ret .= '<tr>'
-				. '<td class="p-center"><input type="radio" name="target" value="' . $array[self::RESERVE_ENTITY_ID] . '"/></td>'
-				. '<td class="p-center">' . $array[self::RESERVE_ENTITY_RESERVE_DISPLAY] . '</td>'
-				. '<td class="p-center">' . $array[self::RESERVE_ENTITY_COMMIT] . '</td>'
-				. '<td class="p-center">' . $array[self::RESERVE_ENTITY_BRANCH] . '</td>'
-				. '<td>' . $array[self::RESERVE_ENTITY_COMMENT] . '</td>'
+				. '<td class="p-center"><input type="radio" name="target" value="' . $array[tsReserve::RESERVE_ENTITY_ID] . '"/></td>'
+				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_RESERVE_DISPLAY] . '</td>'
+				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_COMMIT] . '</td>'
+				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_BRANCH] . '</td>'
+				. '<td>' . $array[tsReserve::RESERVE_ENTITY_COMMENT] . '</td>'
 				. '</tr>';
 		}
 
@@ -1745,7 +1481,7 @@ class main
 			. '</form>'
 			. '</div>';
 
-		$this->debug_echo('■ create_top_contents end');
+		$this->common->debug_echo('■ create_top_contents end');
 
 		return $ret;
 	}
@@ -1757,7 +1493,7 @@ class main
 	 */
 	private function create_history_contents() {
 		
-		$this->debug_echo('■ create_history_contents start');
+		$this->common->debug_echo('■ create_history_contents start');
 
 		$ret = "";
 
@@ -1818,7 +1554,7 @@ class main
 			. '</form>'
 			. '</div>';
 		
-		$this->debug_echo('■ create_history_contents end');
+		$this->common->debug_echo('■ create_history_contents end');
 
 		return $ret;
 	}
@@ -1828,7 +1564,7 @@ class main
 	 */
 	public function run() {
 	
-		// $this->debug_echo('■ run start');
+		// $this->common->debug_echo('■ run start');
 
 		// 画面表示
 		$disp = '';  
@@ -1864,8 +1600,8 @@ class main
 			//============================================================
 			$this->dbh = $this->pdoManager->connect();
 
-			$this->debug_echo('　□ $this->dbh：');
-			$this->debug_echo($this->dbh);
+			$this->common->debug_echo('　□ $this->dbh：');
+			$this->common->debug_var_dump($this->dbh);
 
 			//============================================================
 			// テーブル作成（既にある場合は作成しない）
@@ -2031,7 +1767,7 @@ class main
 
 			echo $e->getMessage();
 
-			$this->debug_echo('■ run error end');
+			$this->common->debug_echo('■ run error end');
 
 			return;
 		}
@@ -2039,7 +1775,7 @@ class main
 		// データベース接続を閉じる
 		$this->pdoManager->close();
 
-		// $this->debug_echo('■ run end');
+		// $this->common->debug_echo('■ run end');
 
 		// 画面表示
 		return $disp . $disp_lock . $dialog_disp;
@@ -2052,7 +1788,7 @@ class main
 	 */
 	private function file_copy($path, $dirname) {
 
-		$this->debug_echo('■ file_copy start');
+		$this->common->debug_echo('■ file_copy start');
 
 		$current_dir = realpath('.');
 
@@ -2065,7 +1801,7 @@ class main
 			// 公開ソースディレクトリの絶対パスを取得。すでに存在している場合は削除して再作成する。
 			$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($path . $dirname));
 
-			$this->debug_echo('　□ $dir_real_path' . $dir_real_path);
+			$this->common->debug_echo('　□ $dir_real_path' . $dir_real_path);
 
 			if ( !$this->fileManager->is_exists_remkdir($dir_real_path) ) {
 				throw new \Exception('Creation of Waiting publish directory failed.');
@@ -2097,7 +1833,7 @@ class main
 		
 		chdir($current_dir);
 
-		$this->debug_echo('■ file_copy end');
+		$this->common->debug_echo('■ file_copy end');
 
 		return json_encode($result);
 
@@ -2110,7 +1846,7 @@ class main
 	 */
 	private function git_pull() {
 
-		$this->debug_echo('■ git_pull start');
+		$this->common->debug_echo('■ git_pull start');
 
 		try {
 
@@ -2150,7 +1886,7 @@ class main
 
 		$result['status'] = true;
 		
-		$this->debug_echo('■ git_pull end');
+		$this->common->debug_echo('■ git_pull end');
 
 		return json_encode($result);
 
@@ -2163,7 +1899,7 @@ class main
 	 */
 	private function file_delete($path, $dirname) {
 		
-		$this->debug_echo('■ file_delete start');
+		$this->common->debug_echo('■ file_delete start');
 
 		$current_dir = realpath('.');
 
@@ -2176,7 +1912,7 @@ class main
 			// 公開ソースディレクトリの絶対パスを取得
 			$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($path . $dirname));
 
-			$this->debug_echo('　□ $dir_real_path' . $dir_real_path);
+			$this->common->debug_echo('　□ $dir_real_path' . $dir_real_path);
 
 			if( $dir_real_path && file_exists( $dir_real_path )) {
 				// ディレクトリが存在する場合、削除コマンド実行
@@ -2207,7 +1943,7 @@ class main
 		$result['status'] = true;
 		chdir($current_dir);
 
-		$this->debug_echo('■ file_delete end');
+		$this->common->debug_echo('■ file_delete end');
 
 		return json_encode($result);
 
@@ -2219,7 +1955,7 @@ class main
 	 */
 	public function do_immediate_publish() {
 
-		$this->debug_echo('■ do_immediate_publish start');
+		$this->common->debug_echo('■ do_immediate_publish start');
 
 		$current_dir = realpath('.');
 
@@ -2232,8 +1968,8 @@ class main
 			// GMTの現在日時
 			$start_datetime = $this->get_current_datetime_of_gmt();
 
-			$this->debug_echo('　□ 現在日時：');
-			$this->debug_echo($start_datetime);
+			$this->common->debug_echo('　□ 現在日時：');
+			$this->common->debug_echo($start_datetime);
 
 			// ============================================================
 			// 指定ブランチのGit情報を「running」ディレクトリへコピー
@@ -2243,10 +1979,10 @@ class main
 			$running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_RUNNING));
 
 			// 公開予約ディレクトリ名の取得
-			$dirname = $this->format_gmt_datetime($start_datetime, self::DATETIME_FORMAT_SAVE);
+			$dirname = $this->common->format_gmt_datetime($start_datetime, self::DATETIME_FORMAT_SAVE);
 
-			$this->debug_echo('　□ 公開予約ディレクトリ：');
-			$this->debug_echo($dirname);
+			$this->common->debug_echo('　□ 公開予約ディレクトリ：');
+			$this->common->debug_echo($dirname);
 
 			// コピー処理
 			$ret = json_decode($this->file_copy($running_real_path, $dirname));
@@ -2255,7 +1991,7 @@ class main
 				throw new \Exception('Git file copy failed.');
 			}
 
-	 		$this->debug_echo('　□ -----公開処理結果テーブルの登録処理-----');
+	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの登録処理-----');
 			
 
 			//============================================================
@@ -2269,8 +2005,8 @@ class main
 			// インサートしたシーケンスIDを取得（処理終了時の更新処理にて使用）
 			$insert_id = $this->dbh->lastInsertId();
 
-			$this->debug_echo('　□ $insert_id：');
-			$this->debug_echo($insert_id);
+			$this->common->debug_echo('　□ $insert_id：');
+			$this->common->debug_echo($insert_id);
 
 
 			//============================================================
@@ -2306,7 +2042,7 @@ class main
 			$result['status'] = false;
 			$result['message'] = $e->getMessage();
 
-			$this->debug_echo('■ immediate_publish error end');
+			$this->common->debug_echo('■ immediate_publish error end');
 
 			chdir($current_dir);
 			return json_encode($result);
@@ -2318,69 +2054,11 @@ class main
 
 		chdir($current_dir);
 
-		$this->debug_echo('■ immediate_publish end');
+		$this->common->debug_echo('■ immediate_publish end');
 
 		return json_encode($result);
 	}
 
-	/**
-	 * コマンド実行処理
-	 *	 
-	 * @param $path = 作成ディレクトリ名
-	 *	 
-	 * @return ソート後の配列
-	 */
-	public function command_execute($command, $captureStderr) {
-	
-		$this->debug_echo('■ execute start');
-
-	    $output = array();
-	    $return = 0;
-
-	    // 標準出力とエラー出力を両方とも出力する
-	    if ($captureStderr === true) {
-	        $command .= ' 2>&1';
-	    }
-
-	    exec($command, $output, $return);
-
-		$this->debug_echo('■ execute end');
-
-	    return array('output' => $output, 'return' => $return);
-	}
-
-
-	/**
-	 * 引数日時を引数タイムゾーンの日時へ変換する（画面表示時の変換用）
-	 *	 
-	 * @param $path = 作成ディレクトリ名
-	 *	 
-	 * @return ソート後の配列
-	 */
-	function convert_to_timezone_datetime($datetime) {
-	
-		// $this->debug_echo('■ convert_to_timezone_datetime start');
-
-		$ret = '';
-
-		if ($datetime) {
-
-			$timezone = date_default_timezone_get();
-			$t = new \DateTime($datetime, new \DateTimeZone(self::GMT));
-			$t->setTimeZone(new \DateTimeZone($timezone));
-			// $ret = $t->format(DATE_ATOM);
-			$ret = $t->format(self::DATETIME_FORMAT);
-		
-			// $this->debug_echo('タイムゾーン：' . $timezone);
-		}
-
-		// $this->debug_echo('　□変換前の時刻（GMT）：' . $datetime);
-		// $this->debug_echo('　□変換後の時刻：'. $ret);
-		
-		// $this->debug_echo('■ convert_to_timezone_datetime end');
-
-	    return $ret;
-	}
 
 
 	/**
@@ -2393,7 +2071,7 @@ class main
 	 */
 	function combine_to_gmt_date_and_time($date, $time) {
 	
-		// $this->debug_echo('■ combine_to_gmt_date_and_time start');
+		// $this->common->debug_echo('■ combine_to_gmt_date_and_time start');
 
 		$ret = '';
 
@@ -2408,191 +2086,16 @@ class main
 		
 			// $ret = $t->format(DATE_ATOM);
 			$ret = $t->format(self::DATETIME_FORMAT);
-			// $this->debug_echo('　□timezone：' . $timezone);
+			// $this->common->debug_echo('　□timezone：' . $timezone);
 		}
 		
-		// $this->debug_echo('　□変換前の時刻：' . $datetime);
-		// $this->debug_echo('　□変換後の時刻（GMT）：'. $ret);
+		// $this->common->debug_echo('　□変換前の時刻：' . $datetime);
+		// $this->common->debug_echo('　□変換後の時刻（GMT）：'. $ret);
 		
-		// $this->debug_echo('■ combine_to_gmt_date_and_time end');
+		// $this->common->debug_echo('■ combine_to_gmt_date_and_time end');
 
 	    return $ret;
 	}
-
-	// /**
-	//  * 引数日時をGMTの日時へ変換する
-	//  *	 
-	//  * @param $path = 作成ディレクトリ名
-	//  *	 
-	//  * @return ソート後の配列
-	//  */
-	// public function convert_to_gmt_datetime($datetime) {
-	
-	// 	$this->debug_echo('■ convert_to_gmt_datetime start');
-
-	// 	$ret = '';
-
-	// 	if ($datetime) {
-	// 		// サーバのタイムゾーン取得
-	// 		$timezone = date_default_timezone_get();
-	// 		$t = new \DateTime($datetime, new \DateTimeZone($timezone));
-	// 		$t->setTimeZone(new \DateTimeZone(self::GMT));
-	// 		$ret = $t->format(DATE_ATOM);
-				
-	// 		// $this->debug_echo('タイムゾーン：' . $timezone);
-	// 	}
-		
-	// 	$this->debug_echo('　□変換前の時刻：' . $datetime);
-	// 	$this->debug_echo('　□変換後の時刻（GMT）：'. $ret);
-		
-	// 	$this->debug_echo('■ convert_to_gmt_datetime end');
-
-	//     return $ret;
-	// }
-
-	/**
-	 * 日付のフォーマット変換（※設定タイムゾーン用）
-	 *	 
-	 * @param $path = 作成ディレクトリ名
-	 *	 
-	 * @return ソート後の配列
-	 */
-	function format_datetime($datetime, $format) {
-	
-		// $this->debug_echo('■ format_datetime start');
-
-		$ret = '';
-
-		if ($datetime) {
-			$ret = date($format, strtotime($datetime));
-		}
-		
-		// $this->debug_echo('　★変換前の時刻：' . $datetime);
-		// $this->debug_echo('　★変換後の時刻：'. $ret);
-
-		// $this->debug_echo('■ format_datetime end');
-
-	    return $ret;
-	}
-
-	/**
-	 * 日付のフォーマット変換（※GMT用）
-	 *	 
-	 * @param $path = 作成ディレクトリ名
-	 *	 
-	 * @return ソート後の配列
-	 */
-	function format_gmt_datetime($datetime, $format) {
-	
-		$this->debug_echo('■ format_datetime start');
-
-		$ret = '';
-
-		if ($datetime) {
-			$ret = gmdate($format, strtotime($datetime));
-		}
-		
-		$this->debug_echo('　★変換前の時刻：' . $datetime);
-		$this->debug_echo('　★変換後の時刻：'. $ret);
-
-		$this->debug_echo('■ format_datetime end');
-
-	    return $ret;
-	}
-
-	/**
-	 * 公開予約テーブルの情報を変換する
-	 *	 
-	 * @param $path = 作成ディレクトリ名
-	 *	 
-	 * @return ソート後の配列
-	 */
-	function convert_ts_reserve_entity($array) {
-	
-		// $this->debug_echo('■ convert_ts_reserve_entity start');
-
-		$entity = array();
-
-		// ID
-		$entity[self::RESERVE_ENTITY_ID] = $array[tsReserve::TS_RESERVE_RESERVE_ID_SEQ];
-		
-		// 公開予約日時
-		// タイムゾーンの時刻へ変換
-		$tz_datetime = $this->convert_to_timezone_datetime($array[tsReserve::TS_RESERVE_RESERVE]);
-		$entity[self::RESERVE_ENTITY_RESERVE] = $tz_datetime;
-		$entity[self::RESERVE_ENTITY_RESERVE_DISPLAY] = $this->format_datetime($tz_datetime, self::DATETIME_FORMAT_DISPLAY);
-		$entity[self::RESERVE_ENTITY_RESERVE_DATE] = $this->format_datetime($tz_datetime, self::DATE_FORMAT_YMD);
-		$entity[self::RESERVE_ENTITY_RESERVE_TIME] = $this->format_datetime($tz_datetime, self::TIME_FORMAT_HI);
-
-		// ブランチ
-		$entity[self::RESERVE_ENTITY_BRANCH] = $array[tsReserve::TS_RESERVE_BRANCH];
-		// コミット
-		$entity[self::RESERVE_ENTITY_COMMIT] = $array[tsReserve::TS_RESERVE_COMMIT];
-		// コメント
-		$entity[self::RESERVE_ENTITY_COMMENT] = $array[tsReserve::TS_RESERVE_COMMENT];
-	
-		// $this->debug_echo('■ convert_ts_reserve_entity end');
-
-	    return $entity;
-	}
-
-
-	/**
-	 * 公開処理結果テーブルの情報を変換する
-	 *	 
-	 * @param $path = 作成ディレクトリ名
-	 *	 
-	 * @return ソート後の配列
-	 */
-	function convert_ts_output_entity($array) {
-	
-		// $this->debug_echo('■ convert_ts_output_entity start');
-
-		$entity = array();
-
-		// ID
-		$entity[self::RESULT_ENTITY_ID] = $array[tsOutput::TS_OUTPUT_RESULT_ID_SEQ];
-		
-		// 公開予約日時
-		// タイムゾーンの時刻へ変換
-		$tz_datetime = $this->convert_to_timezone_datetime($array[tsOutput::TS_OUTPUT_RESERVE]);
-
-		$entity[self::RESULT_ENTITY_RESERVE] = $tz_datetime;
-		$entity[self::RESULT_ENTITY_RESERVE_DISPLAY] = $this->format_datetime($tz_datetime, self::DATETIME_FORMAT_DISPLAY);
-
-		// 処理開始日時
-		// タイムゾーンの時刻へ変換
-		$tz_datetime = $this->convert_to_timezone_datetime($array[tsOutput::TS_OUTPUT_START]);
-
-		$entity[self::RESULT_ENTITY_START] = $tz_datetime;
-		$entity[self::RESULT_ENTITY_START_DISPLAY] = $this->format_datetime($tz_datetime, self::DATETIME_FORMAT_DISPLAY);
-
-		// 処理終了日時
-		// タイムゾーンの時刻へ変換
-		$tz_datetime = $this->convert_to_timezone_datetime($array[tsOutput::TS_OUTPUT_END]);
-		
-		$entity[self::RESULT_ENTITY_END] = $tz_datetime;
-		$entity[self::RESULT_ENTITY_END_DISPLAY] = $this->format_datetime($tz_datetime, self::DATETIME_FORMAT_DISPLAY);
-
-		// ブランチ
-		$entity[self::RESULT_ENTITY_BRANCH] = $array[tsOutput::TS_OUTPUT_BRANCH];
-		// コミット
-		$entity[self::RESULT_ENTITY_COMMIT] = $array[tsOutput::TS_OUTPUT_COMMIT];
-		// コメント
-		$entity[self::RESULT_ENTITY_COMMENT] = $array[tsOutput::TS_OUTPUT_COMMENT];
-	
-		// 状態
-		$entity[self::RESULT_ENTITY_STATUS] = $this->convert_status($array[tsOutput::TS_OUTPUT_STATUS]);
-
-		// 公開種別
-		$entity[self::RESULT_ENTITY_TYPE] = $this->convert_publish_type($array[tsOutput::TS_OUTPUT_PUBLISH_TYPE]);
-
-		// $this->debug_echo('■ convert_ts_output_entity end');
-
-	    return $entity;
-	}
-
-
 
 	/**
 	 * 作業用ディレクトリの作成（既にある場合は作成しない）
@@ -2601,7 +2104,7 @@ class main
 	 */
 	function create_work_dir() {
 	
-		$this->debug_echo('■ create_work_dir start');
+		$this->common->debug_echo('■ create_work_dir start');
 
 		$ret = true;
 
@@ -2640,34 +2143,9 @@ class main
 			$ret = false;
 		}
 
-		$this->debug_echo('■ create_work_dir end');
+		$this->common->debug_echo('■ create_work_dir end');
 
 		return $ret;
 	}
 
-	/**
-	 * ※デバッグ関数（エラー調査用）
-	 *	 
-	 */
-	function debug_echo($text) {
-	
-		echo strval($text);
-		echo "<br>";
-
-		return;
-	}
-
-	/**
-	 * ※デバッグ関数（エラー調査用）
-	 *	 
-	 */
-	function debug_var_dump($text) {
-	
-		var_dump($text);
-		echo "<br>";
-
-		return;
-	}
-
 }
-

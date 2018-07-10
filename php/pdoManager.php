@@ -8,23 +8,12 @@ class pdoManager
 	private $main;
 
 	private $fileManager;
-	
+	private $common;
+
 	// DBディレクトリパス
 	const SQLITE_DB_PATH = '/sqlite/';
 	// DBディレクトリパス
 	const SQLITE_DB_NAME = 'indigo.db';
-
-	/**
-	 * 公開種別
-	 */
-	// 予約公開
-	const PUBLISH_TYPE_RESERVE = 1;
-	
-	// 削除済み
-	const DELETE_FLG_ON = 1;
-	// 未削除
-	const DELETE_FLG_OFF = 0;
-
 
 	/**
 	 * 公開ステータス
@@ -50,6 +39,7 @@ class pdoManager
 
 		$this->main = $main;
 		$this->fileManager = new fileManager($this);
+		$this->common = new common($this);
 
 
 		// // DELETE文作成
@@ -72,7 +62,7 @@ class pdoManager
 	 */
 	public function connect() {
 	
-		$this->debug_echo('■ connect start');
+		$this->common->debug_echo('■ connect start');
 
 		$dbh = null; // 初期化
 
@@ -83,12 +73,12 @@ class pdoManager
 
 		$db_type = $this->main->options->db_type;
 
-		$this->debug_echo('　□ db_type');
-		$this->debug_echo($db_type);
+		$this->common->debug_echo('　□ db_type');
+		$this->common->debug_echo($db_type);
 
 		if ($db_type && $db_type == 'mysql') {
 
-			$this->debug_echo('　□ mysql');
+			$this->common->debug_echo('　□ mysql');
 
 			/**
 			 * mysqlの場合
@@ -108,9 +98,9 @@ class pdoManager
 	
 		} else {
 
-			$this->debug_echo('　□ sqlite');
+			$this->common->debug_echo('　□ sqlite');
 
-			$this->debug_echo($this->main->options->indigo_workdir_path . self::SQLITE_DB_PATH);
+			$this->common->debug_echo($this->main->options->indigo_workdir_path . self::SQLITE_DB_PATH);
 
 			/**
 			 * sqliteの場合 
@@ -118,7 +108,7 @@ class pdoManager
 			// dbディレクトリの絶対パス
 			$db_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::SQLITE_DB_PATH));
 
-			$this->debug_echo('　□ db_real_path：' . $db_real_path);
+			$this->common->debug_echo('　□ db_real_path：' . $db_real_path);
 
 			// DBディレクトリが存在しない場合は作成
 			if ( !$this->fileManager->is_exists_mkdir($db_real_path) ) {
@@ -154,7 +144,7 @@ class pdoManager
 	  		// die();
 		}
 			
-		$this->debug_echo('■ connect end');
+		$this->common->debug_echo('■ connect end');
 
 		return $dbh;
 
@@ -166,7 +156,7 @@ class pdoManager
 	 */
 	public function close($dbh) {
 	
-		$this->debug_echo('■ close start');
+		$this->common->debug_echo('■ close start');
 
 		try {
 
@@ -180,7 +170,7 @@ class pdoManager
 	  		// die();
 		}
 		
-		$this->debug_echo('■ close end');
+		$this->common->debug_echo('■ close end');
 
 	}
 
@@ -191,7 +181,7 @@ class pdoManager
 	 */
 	public function create_table($dbh) {
 
-		$this->debug_echo('■ create_table start');
+		$this->common->debug_echo('■ create_table start');
 
 		//============================================================
 		// 公開予約テーブル作成
@@ -274,7 +264,7 @@ class pdoManager
 			throw new \Exception($dbh->errorInfo());
 		}
 
-		$this->debug_echo('■ create_table end');
+		$this->common->debug_echo('■ create_table end');
 
 		return;
 	}
@@ -289,13 +279,13 @@ class pdoManager
 	 */
 	public function select($dbh, $sql) {
 
-		$this->debug_echo('■ select start');
+		$this->common->debug_echo('■ select start');
 
 		$ret_array = array();
 		$stmt = null;
 
-		// $this->debug_echo('　□sql：');
-		// $this->debug_var_dump($sql);
+		// $this->common->debug_echo('　□sql：');
+		// $this->common->debug_var_dump($sql);
 
 		// 実行
 		if ($stmt = $dbh->query($sql)) {
@@ -312,10 +302,10 @@ class pdoManager
 			throw new \Exception($dbh->errorInfo());
 		}
 		
-		// $this->debug_echo('　□返却リストデータ：');
-		// $this->debug_var_dump($ret_array);
+		// $this->common->debug_echo('　□返却リストデータ：');
+		// $this->common->debug_var_dump($ret_array);
 
-		$this->debug_echo('■ select end');
+		$this->common->debug_echo('■ select end');
 
 		return $ret_array;
 	}
@@ -331,7 +321,7 @@ class pdoManager
 	 */
 	public function execute ($dbh, $sql, $params) {
 
-		$this->debug_echo('■ execute start');
+		$this->common->debug_echo('■ execute start');
 
 		// 前処理
 		$stmt = $dbh->prepare($sql);
@@ -341,39 +331,15 @@ class pdoManager
 
 		if (!$stmt) {
 			
-			$this->debug_echo('　□ execute error');
+			$this->common->debug_echo('　□ execute error');
 
 			// エラー情報表示
 			throw new \Exception($dbh->errorInfo());
 		}
 
-		$this->debug_echo('■ execute end');
+		$this->common->debug_echo('■ execute end');
 
 		return $stmt;
-	}
-
-	/**
-	 * ※デバッグ関数（エラー調査用）
-	 *	 
-	 */
-	function debug_echo($text) {
-	
-		echo strval($text);
-		echo "<br>";
-
-		return;
-	}
-
-	/**
-	 * ※デバッグ関数（エラー調査用）
-	 *	 
-	 */
-	function debug_var_dump($text) {
-	
-		var_dump($text);
-		echo "<br>";
-
-		return;
 	}
 
 }
