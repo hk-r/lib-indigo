@@ -19,9 +19,6 @@ class main
 	private $dbh;
 	
 
-	// サーバのタイムゾーン
-	const GMT = 'GMT';
-
 	// 日時フォーマット（Y-m-d H:i:s）
 	const DATETIME_FORMAT = "Y-m-d H:i:s";
 	// 時間フォーマット（H:i:s）
@@ -53,17 +50,6 @@ class main
 	const INPUT_MODE_immediate = 5;
 	// 即時公開戻り表示モード
 	const INPUT_MODE_immediate_BACK = 6;
-
-	/**
-	 * 公開種別
-	 */
-	// 予約公開
-	const PUBLISH_TYPE_RESERVE = 1;
-	// 復元公開
-	const PUBLISH_TYPE_RESTORE = 2;
-	// 即時公開
-	const PUBLISH_TYPE_IMMEDIATE = 3;
-
 
 	/**
 	 * 公開ステータス
@@ -163,21 +149,21 @@ class main
 
 						// git セットアップ
 						$command = 'git init';
-						$this->command_execute($command, false);
+						$this->common->command_execute($command, false);
 
 						// git urlのセット
 						$url = $this->options->git->protocol . "://" . urlencode($this->options->git->username) . ":" . urlencode($this->options->git->password) . "@" . $this->options->git->url;
 
 						$command = 'git remote add origin ' . $url;
-						$this->command_execute($command, false);
+						$this->common->command_execute($command, false);
 
 						// git fetch
 						$command = 'git fetch origin';
-						$this->command_execute($command, false);
+						$this->common->command_execute($command, false);
 
 						// git pull
 						$command = 'git pull origin master';
-						$this->command_execute($command, false);
+						$this->common->command_execute($command, false);
 
 					} else {
 						// ディレクトリ移動に失敗
@@ -239,11 +225,11 @@ class main
 
 				// fetch
 				$command = 'git fetch';
-				$this->command_execute($command, false);
+				$this->common->command_execute($command, false);
 
 				// ブランチの一覧取得
 				$command = 'git branch -r';
-				$ret = $this->command_execute($command, false);
+				$ret = $this->common->command_execute($command, false);
 
 				foreach ((array)$ret['output'] as $key => $value) {
 					if( strpos($value, '/HEAD') !== false ){
@@ -277,71 +263,6 @@ class main
 		$this->common->debug_echo('■ get_branch_list end');
 		return json_encode($result);
 
-	}
-
-	/**
-	 * ステータスを画面表示用に変換し返却する
-	 *	 
-	 * @param $status = ステータスのコード値
-	 *	 
-	 * @return 画面表示用のステータス情報
-	 */
-	private function convert_status($status) {
-
-		$ret = '';
-
-		if ($status == self::PUBLISH_STATUS_RUNNING) {
-		
-			$ret =  '？（処理中）';
-		
-		} else if ($status == self::PUBLISH_STATUS_SUCCESS) {
-			
-			$ret =  '〇（公開成功）';
-
-		} else if ($status == self::PUBLISH_STATUS_ALERT) {
-			
-			$ret =  '△（警告あり）';
-
-		} else if ($status == self::PUBLISH_STATUS_FAILED) {
-			
-			$ret =  '×（公開失敗）';
-			
-		} else if ($status == self::PUBLISH_STATUS_SKIP) {
-			
-			$ret =  '-（スキップ）';
-			
-		}
-
-		return $ret;
-	}
-
-
-	/**
-	 * 公開種別を画面表示用に変換し返却する
-	 *	 
-	 * @param $publish_type = 公開種別のコード値
-	 *	 
-	 * @return 画面表示用のステータス情報
-	 */
-	private function convert_publish_type($publish_type) {
-
-		$ret = '';
-
-		if ($publish_type == self::PUBLISH_TYPE_RESERVE) {
-		
-			$ret =  '予約公開';
-		
-		} else if ($publish_type == self::PUBLISH_TYPE_RESTORE) {
-			
-			$ret =  '復元公開';
-
-		} else if ($publish_type == self::PUBLISH_TYPE_IMMEDIATE) {
-			
-			$ret =  '即時公開';
-
-		}
-
-		return $ret;
 	}
 
 	/**
@@ -1127,6 +1048,9 @@ class main
 			// waitingディレクトリの絶対パスを取得。
 			$waiting_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_WAITING));
 
+			$this->common->debug_echo('　□ waiting_real_path');
+			$this->common->debug_echo($waiting_real_path);
+
 			// 公開予約ディレクトリ名の取得
 			$dirname = $this->common->format_gmt_datetime($this->options->_POST->gmt_reserve_datetime, self::DATETIME_FORMAT_SAVE) . '_reserve';
 
@@ -1468,7 +1392,7 @@ class main
 		foreach ((array)$data_list as $array) {
 			
 			$ret .= '<tr>'
-				. '<td class="p-center"><input type="radio" name="target" value="' . $array[tsReserve::RESERVE_ENTITY_ID] . '"/></td>'
+				. '<td class="p-center"><input type="radio" name="target" value="' . $array[tsReserve::RESERVE_ENTITY_ID_SEQ] . '"/></td>'
 				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_RESERVE_DISPLAY] . '</td>'
 				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_COMMIT] . '</td>'
 				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_BRANCH] . '</td>'
@@ -1530,18 +1454,18 @@ class main
 		foreach ((array)$data_list as $array) {
 			
 			$ret .= '<tr>'
-				. '<td class="p-center"><input type="radio" name="target" value="' . $array[self::RESULT_ENTITY_ID] . '"/></td>'
-				. '<td class="p-center">' . $array[self::RESULT_ENTITY_STATUS] . '</td>'
-				. '<td class="p-center">' . $array[self::RESULT_ENTITY_TYPE] . '</td>'
-				. '<td class="p-center">' . $array[self::RESULT_ENTITY_RESERVE_DISPLAY] . '</td>'
-				. '<td class="p-center">' . $array[self::RESULT_ENTITY_START_DISPLAY] . '</td>'
-				. '<td class="p-center">' . $array[self::RESULT_ENTITY_END_DISPLAY] . '</td>'
-				. '<td class="p-center">' . $array[self::RESULT_ENTITY_COMMIT] . '</td>'
-				. '<td class="p-center">' . $array[self::RESULT_ENTITY_BRANCH] . '</td>'
-				. '<td>' . $array[self::RESULT_ENTITY_COMMENT] . '</td>'
+				. '<td class="p-center"><input type="radio" name="target" value="' . $array[tsOutput::OUTPUT_ENTITY_ID_SEQ] . '"/></td>'
+				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_STATUS] . '</td>'
+				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_TYPE] . '</td>'
+				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_RESERVE_DISPLAY] . '</td>'
+				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_START_DISPLAY] . '</td>'
+				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_END_DISPLAY] . '</td>'
+				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_COMMIT] . '</td>'
+				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_BRANCH] . '</td>'
+				. '<td>' . $array[tsOutput::OUTPUT_ENTITY_COMMENT] . '</td>'
 				. '</tr>';
 		}
-
+		
 		$ret .= '</tbody></table>';
 		
 		$ret .= '<div class="button_contents_box">'
@@ -1855,22 +1779,22 @@ class main
 
 			// git init
 			$command = 'git init';
-			$this->command_execute($command, false);
+			$this->common->command_execute($command, false);
 
 			// git urlのセット
 			$url = $this->options->git->protocol . "://" . urlencode($this->options->git->username) . ":" . urlencode($this->options->git->password) . "@" . $this->options->git->url;
 			
 			// initしたリポジトリに名前を付ける
 			$command = 'git remote add origin ' . $url;
-			$this->command_execute($command, false);
+			$this->common->command_execute($command, false);
 
 			// git fetch（リモートリポジトリの指定ブランチの情報をローカルブランチへ反映）
 			$command = 'git fetch origin' . ' ' . $branch_name;
-			$this->command_execute($command, false);
+			$this->common->command_execute($command, false);
 
 			// git pull（リモート取得ブランチを任意のローカルブランチにマージするコマンド）
 			$command = 'git pull origin' . ' ' . $branch_name;
-			$this->command_execute($command, false);
+			$this->common->command_execute($command, false);
 	
 		} catch (\Exception $e) {
 
@@ -1917,7 +1841,7 @@ class main
 			if( $dir_real_path && file_exists( $dir_real_path )) {
 				// ディレクトリが存在する場合、削除コマンド実行
 				$command = 'rm -rf --preserve-root '. $dir_real_path;
-				$ret = $this->command_execute($command, true);
+				$ret = $this->common->command_execute($command, true);
 
 				if ( $ret['return'] !== 0 ) {
 					throw new \Exception('Delete directory failed.');
@@ -1966,7 +1890,7 @@ class main
 		try {
 
 			// GMTの現在日時
-			$start_datetime = $this->get_current_datetime_of_gmt();
+			$start_datetime = $this->common->get_current_datetime_of_gmt();
 
 			$this->common->debug_echo('　□ 現在日時：');
 			$this->common->debug_echo($start_datetime);
@@ -2027,7 +1951,7 @@ class main
 			// 公開処理結果テーブルの更新処理
 			//============================================================
 			// GMTの現在日時
-			$end_datetime = $this->main->get_current_datetime_of_gmt();
+			$end_datetime = $this->common->get_current_datetime_of_gmt();
 
 	 		$ret = $this->tsOutput->update_ts_output($this->dbh, $insert_id, $end_datetime, $publish_status);
 
@@ -2082,7 +2006,7 @@ class main
 			$t = new \DateTime($date . ' ' . $time, new \DateTimeZone($timezone));
 
 			// タイムゾーン変更
-			$t->setTimeZone(new \DateTimeZone(self::GMT));
+			$t->setTimeZone(new \DateTimeZone('GMT'));
 		
 			// $ret = $t->format(DATE_ATOM);
 			$ret = $t->format(self::DATETIME_FORMAT);

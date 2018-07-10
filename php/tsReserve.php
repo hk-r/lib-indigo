@@ -262,7 +262,7 @@ class tsReserve
 			$this->common->debug_echo($insert_sql);
 
 			// 現在時刻
-			$now = $this->main->get_current_datetime_of_gmt();
+			$now = $this->common->get_current_datetime_of_gmt();
 			
 			// パラメータ作成
 			$params = array(
@@ -328,7 +328,7 @@ class tsReserve
 					WHERE reserve_id_seq = :reserve_id_seq";
 
 				// 現在時刻
-				$now = $this->main->get_current_datetime_of_gmt();
+				$now = $this->common->get_current_datetime_of_gmt();
 
 				// パラメータ作成
 				$params = array(
@@ -391,7 +391,7 @@ class tsReserve
 
 				// 現在時刻
 				// $now = date(self::DATETIME_FORMAT);
-				$now = $this->main->get_current_datetime_of_gmt();
+				$now = $this->common->get_current_datetime_of_gmt();
 
 				// パラメータ作成
 				$params = array(

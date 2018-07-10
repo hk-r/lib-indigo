@@ -69,7 +69,7 @@ class common
 	 */
 	public function format_datetime($datetime, $format) {
 	
-		// $this->common->debug_echo('■ format_datetime start');
+		// $this->debug_echo('■ format_datetime start');
 
 		$ret = '';
 
@@ -77,10 +77,10 @@ class common
 			$ret = date($format, strtotime($datetime));
 		}
 		
-		// $this->common->debug_echo('　★変換前の時刻：' . $datetime);
-		// $this->common->debug_echo('　★変換後の時刻：'. $ret);
+		// $this->debug_echo('　★変換前の時刻：' . $datetime);
+		// $this->debug_echo('　★変換後の時刻：'. $ret);
 
-		// $this->common->debug_echo('■ format_datetime end');
+		// $this->debug_echo('■ format_datetime end');
 
 	    return $ret;
 	}
@@ -94,7 +94,7 @@ class common
 	 */
 	public function format_gmt_datetime($datetime, $format) {
 	
-		$this->common->debug_echo('■ format_datetime start');
+		$this->debug_echo('■ format_datetime start');
 
 		$ret = '';
 
@@ -102,10 +102,10 @@ class common
 			$ret = gmdate($format, strtotime($datetime));
 		}
 		
-		$this->common->debug_echo('　★変換前の時刻：' . $datetime);
-		$this->common->debug_echo('　★変換後の時刻：'. $ret);
+		$this->debug_echo('　★変換前の時刻：' . $datetime);
+		$this->debug_echo('　★変換後の時刻：'. $ret);
 
-		$this->common->debug_echo('■ format_datetime end');
+		$this->debug_echo('■ format_datetime end');
 
 	    return $ret;
 	}
@@ -120,23 +120,23 @@ class common
 	 */
 	public function convert_to_timezone_datetime($datetime) {
 	
-		// $this->common->debug_echo('■ convert_to_timezone_datetime start');
+		// $this->debug_echo('■ convert_to_timezone_datetime start');
 
 		$ret = '';
 
 		if ($datetime) {
 
 			$timezone = date_default_timezone_get();
-			$t = new \DateTime($datetime, new \DateTimeZone(self::GMT));
+			$t = new \DateTime($datetime, new \DateTimeZone('GMT'));
 			$t->setTimeZone(new \DateTimeZone($timezone));
 			// $ret = $t->format(DATE_ATOM);
 			$ret = $t->format(self::DATETIME_FORMAT);
 		}
 
-		// $this->common->debug_echo('　□変換前の時刻（GMT）：' . $datetime);
-		// $this->common->debug_echo('　□変換後の時刻：'. $ret);
+		// $this->debug_echo('　□変換前の時刻（GMT）：' . $datetime);
+		// $this->debug_echo('　□変換後の時刻：'. $ret);
 		
-		// $this->common->debug_echo('■ convert_to_timezone_datetime end');
+		// $this->debug_echo('■ convert_to_timezone_datetime end');
 
 	    return $ret;
 	}

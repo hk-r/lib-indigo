@@ -14,9 +14,28 @@ class tsOutput
 	const DATETIME_FORMAT_DISPLAY = "Y-m-d H:i";
 
 	/**
+	 * 削除フラグ
+	 */
+	// 削除済み
+	const DELETE_FLG_ON = 1;
+	// 未削除
+	const DELETE_FLG_OFF = 0;
+
+	/**
+	 * 公開種別
+	 */
+	// 予約公開
+	const PUBLISH_TYPE_RESERVE = 1;
+	// 復元公開
+	const PUBLISH_TYPE_RESTORE = 2;
+	// 即時公開
+	const PUBLISH_TYPE_IMMEDIATE = 3;
+
+
+	/**
 	 * 公開処理結果テーブルのカラム定義
 	 */
-	const TS_OUTPUT_OUTPUT_ID_SEQ = 'result_id_seq';		// 公開処理結果ID
+	const TS_OUTPUT_ID_SEQ = 'output_id_seq';		// 公開処理結果ID
 	const TS_OUTPUT_RESERVE_ID = 'reserve_id';			// 公開予約ID
 	const TS_OUTPUT_BACKUP_ID = 'backup_id';			// バックアップID
 	const TS_OUTPUT_RESERVE = 'reserve_datetime';		// 公開予約日時
@@ -41,7 +60,7 @@ class tsOutput
 	/**
 	 * 公開処理結果エンティティのカラム定義
 	 */
-	const OUTPUT_ENTITY_ID_SEQ = 'result_id_seq';			// ID
+	const OUTPUT_ENTITY_ID_SEQ = 'output_id_seq';			// ID
 	const OUTPUT_ENTITY_RESERVE = 'reserve_datetime';		// 公開予約日時
 	const OUTPUT_ENTITY_RESERVE_DISPLAY = 'reserve_display';	// 公開予約日時
 	const OUTPUT_ENTITY_BRANCH = 'branch_name';		// ブランチ名
@@ -53,6 +72,20 @@ class tsOutput
 	const OUTPUT_ENTITY_START_DISPLAY = 'start_display';	// 公開処理開始日時
 	const OUTPUT_ENTITY_END = 'end_datetime';			// 公開処理終了日時
 	const OUTPUT_ENTITY_END_DISPLAY = 'end_display';	// 公開処理終了日時
+
+	/**
+	 * 公開ステータス
+	 */
+	// 処理中
+	const PUBLISH_STATUS_RUNNING = 0;
+	// 成功
+	const PUBLISH_STATUS_SUCCESS = 1;
+	// 成功（警告あり）
+	const PUBLISH_STATUS_ALERT = 2;
+	// 失敗
+	const PUBLISH_STATUS_FAILED = 3;
+	// スキップ
+	const PUBLISH_STATUS_SKIP = 4;
 
 	/**
 	 * Constructor
@@ -83,7 +116,7 @@ class tsOutput
 
 			// SELECT文作成（世代削除フラグ = 0、ソート順：IDの降順）
 			$select_sql = "
-					SELECT * FROM TS_OUTPUT WHERE gen_delete_flg = " . self::DELETE_FLG_OFF . " ORDER BY result_id_seq DESC";
+					SELECT * FROM TS_OUTPUT WHERE gen_delete_flg = " . self::DELETE_FLG_OFF . " ORDER BY output_id_seq DESC";
 			// SELECT実行
 			$ret_array = $this->pdoManager->select($dbh, $select_sql);
 
@@ -130,7 +163,7 @@ class tsOutput
 
 				// SELECT文作成
 				$select_sql = "SELECT * from TS_OUTPUT 
-					WHERE result_id_seq = ". $selected_id;
+					WHERE output_id_seq = ". $selected_id;
 
 				$this->common->debug_echo('　□ select_sql');
 				$this->common->debug_echo($select_sql);
@@ -228,7 +261,7 @@ class tsOutput
 			$this->common->debug_echo($insert_sql);
 
 			// 現在時刻
-			$now = $this->main->get_current_datetime_of_gmt();
+			$now = $this->common->get_current_datetime_of_gmt();
 
 			// パラメータ作成
 			$params = array(
@@ -303,13 +336,13 @@ class tsOutput
 					update_datetime = :update_datetime,
 					update_user_id = :update_user_id 		
 
-					WHERE result_id_seq = :result_id_seq";
+					WHERE output_id_seq = :output_id_seq";
 
 				$this->common->debug_echo('　□ update_sql');
 				$this->common->debug_echo($update_sql);
 
 				// 現在時刻
-				$now = $this->main->get_current_datetime_of_gmt();
+				$now = $this->common->get_current_datetime_of_gmt();
 
 				// パラメータ作成
 				$params = array(
@@ -321,7 +354,7 @@ class tsOutput
 					':update_datetime' => $now,
 					':update_user_id' => "dummy_update_user",
 
-					':result_id_seq' => $id
+					':output_id_seq' => $id
 				);
 
 				// UPDATE実行
@@ -360,7 +393,7 @@ class tsOutput
 		$entity = array();
 
 		// ID
-		$entity[self::OUTPUT_ENTITY_ID_SEQ] = $array[self::TS_OUTPUT_OUTPUT_ID_SEQ];
+		$entity[self::OUTPUT_ENTITY_ID_SEQ] = $array[self::TS_OUTPUT_ID_SEQ];
 		
 		// 公開予約日時
 		// タイムゾーンの時刻へ変換
@@ -399,6 +432,72 @@ class tsOutput
 		$this->common->debug_echo('■ convert_ts_output_entity end');
 
 	    return $entity;
+	}
+
+
+	/**
+	 * ステータスを画面表示用に変換し返却する
+	 *	 
+	 * @param $status = ステータスのコード値
+	 *	 
+	 * @return 画面表示用のステータス情報
+	 */
+	private function convert_status($status) {
+
+		$ret = '';
+
+		if ($status == self::PUBLISH_STATUS_RUNNING) {
+		
+			$ret =  '？（処理中）';
+		
+		} else if ($status == self::PUBLISH_STATUS_SUCCESS) {
+			
+			$ret =  '〇（公開成功）';
+
+		} else if ($status == self::PUBLISH_STATUS_ALERT) {
+			
+			$ret =  '△（警告あり）';
+
+		} else if ($status == self::PUBLISH_STATUS_FAILED) {
+			
+			$ret =  '×（公開失敗）';
+			
+		} else if ($status == self::PUBLISH_STATUS_SKIP) {
+			
+			$ret =  '-（スキップ）';
+			
+		}
+
+		return $ret;
+	}
+
+
+	/**
+	 * 公開種別を画面表示用に変換し返却する
+	 *	 
+	 * @param $publish_type = 公開種別のコード値
+	 *	 
+	 * @return 画面表示用のステータス情報
+	 */
+	private function convert_publish_type($publish_type) {
+
+		$ret = '';
+
+		if ($publish_type == self::PUBLISH_TYPE_RESERVE) {
+		
+			$ret =  '予約公開';
+		
+		} else if ($publish_type == self::PUBLISH_TYPE_RESTORE) {
+			
+			$ret =  '復元公開';
+
+		} else if ($publish_type == self::PUBLISH_TYPE_IMMEDIATE) {
+			
+			$ret =  '即時公開';
+
+		}
+
+		return $ret;
 	}
 
 

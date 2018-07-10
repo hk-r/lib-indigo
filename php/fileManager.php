@@ -289,7 +289,7 @@ class fileManager
 
 			// 削除
 			$command = 'rm -rf --preserve-root '. $dirpath;
-			$ret = $this->main->command_execute($command, true);
+			$ret = $this->common->command_execute($command, true);
 
 			if ( $ret['return'] !== 0 ) {
 				$this->common->debug_echo('[既存ディレクトリ削除失敗]');

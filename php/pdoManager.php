@@ -207,11 +207,13 @@ class pdoManager
 			throw new \Exception($dbh->errorInfo());
 		}
 
+		$this->common->debug_echo('　□ 公開予約テーブル作成完了');
+
 		//============================================================
 		// 公開処理結果テーブル作成
 		//============================================================
 		$create_sql = 'CREATE TABLE IF NOT EXISTS TS_OUTPUT ('
-			  . tsOutput::TS_OUTPUT_RESULT_ID_SEQ . ' INTEGER PRIMARY KEY AUTOINCREMENT,
+			  . tsOutput::TS_OUTPUT_ID_SEQ . ' INTEGER PRIMARY KEY AUTOINCREMENT,
 			' . tsOutput::TS_OUTPUT_RESERVE_ID . ' INTEGER,
 			' . tsOutput::TS_OUTPUT_BACKUP_ID . ' INTEGER,
 			' . tsOutput::TS_OUTPUT_RESERVE . ' TEXT,
@@ -241,6 +243,8 @@ class pdoManager
 			throw new \Exception($dbh->errorInfo());
 		}
 
+		$this->common->debug_echo('　□ 公開処理結果テーブル作成完了');
+
 		//============================================================
 		// バックアップテーブル作成
 		//============================================================
@@ -263,6 +267,8 @@ class pdoManager
 			// エラー情報表示
 			throw new \Exception($dbh->errorInfo());
 		}
+
+		$this->common->debug_echo('　□ バックアップテーブル作成完了');
 
 		$this->common->debug_echo('■ create_table end');
 

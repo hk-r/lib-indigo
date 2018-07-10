@@ -15,20 +15,6 @@ class publish
 	private $dbh;
 
 	/**
-	 * 公開ステータス
-	 */
-	// 処理中
-	const PUBLISH_STATUS_RUNNING = 0;
-	// 成功
-	const PUBLISH_STATUS_SUCCESS = 1;
-	// 成功（警告あり）
-	const PUBLISH_STATUS_ALERT = 2;
-	// 失敗
-	const PUBLISH_STATUS_FAILED = 3;
-	// スキップ
-	const PUBLISH_STATUS_SKIP = 4;
-
-	/**
 	 * 公開用の操作ディレクトリパス定義
 	 */
 	// backupディレクトリパス
@@ -116,7 +102,7 @@ class publish
 				$this->common->debug_echo('　□ $command：');
 				$this->common->debug_echo($command);
 
-				$ret = $this->main->command_execute($command, true);
+				$ret = $this->common->command_execute($command, true);
 
 				$this->common->debug_echo('　▼ 本番バックアップの公開処理結果');
 
@@ -157,7 +143,7 @@ class publish
 				$this->common->debug_echo('　□ $command：');
 				$this->common->debug_echo($command);
 
-				$ret = $this->main->command_execute($command, true);
+				$ret = $this->common->command_execute($command, true);
 
 				$this->common->debug_echo('　▼本番反映の公開処理結果');
 
@@ -184,7 +170,7 @@ class publish
 				$this->common->debug_echo('　□ $command：');
 				$this->common->debug_echo($command);
 
-				$ret = $this->main->command_execute($command, true);
+				$ret = $this->common->command_execute($command, true);
 
 				$this->common->debug_echo('　▼REALEASEDへの移動の公開処理結果');
 
@@ -199,7 +185,7 @@ class publish
 				$this->common->debug_echo('　□ $command：');
 				$this->common->debug_echo($command);
 
-				$ret = $this->main->command_execute($command, true);
+				$ret = $this->common->command_execute($command, true);
 
 				$this->common->debug_echo('　▼Runningディレクトリの削除');
 

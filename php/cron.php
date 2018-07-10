@@ -101,7 +101,7 @@ class cron
 			// 公開予約テーブルより、公開対象データの取得
 			//============================================================
 			// GMTの現在日時
-			$start_datetime = $this->main->get_current_datetime_of_gmt();
+			$start_datetime = $this->common->get_current_datetime_of_gmt();
 
 			$this->common->debug_echo('　□ 現在日時：');
 			$this->common->debug_echo($start_datetime);
@@ -142,7 +142,7 @@ class cron
 				$this->common->debug_echo('　□ $command：');
 				$this->common->debug_echo($command);
 
-				$ret = $this->main->command_execute($command, true);
+				$ret = $this->common->command_execute($command, true);
 
 				$this->common->debug_echo('　▼ waiting⇒runningのファイル移動結果');
 
@@ -156,7 +156,7 @@ class cron
 				$this->common->debug_echo('　□ $command：');
 				$this->common->debug_echo($command);
 
-				$ret = $this->main->command_execute($command, true);
+				$ret = $this->common->command_execute($command, true);
 
 				$this->common->debug_echo('　▼ Waitingディレクトリの削除');
 
@@ -204,7 +204,7 @@ class cron
 			// 公開処理結果テーブルの更新処理
 			//============================================================
 			// GMTの現在日時
-			$end_datetime = $this->main->get_current_datetime_of_gmt();
+			$end_datetime = $this->common->get_current_datetime_of_gmt();
 
 	 		$ret = $this->tsOutput->update_ts_output($this->dbh, $insert_id, $end_datetime, $publish_status);
 
