@@ -29,6 +29,8 @@
             "php/fileManager.php",
             "php/tsReserve.php",
             "php/tsOutput.php"
+            "php/check.php",
+            "php/common.php"
         ]
     },
     "extra": {
