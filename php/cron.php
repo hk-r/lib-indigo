@@ -105,7 +105,7 @@ class cron
 			$this->debug_echo($start_datetime);
 
 			// 公開予約の一覧を取得
-			$data_list = $this->tsReserve->get_ts_reserve_publish_list($this->dbh, $start_datetime);
+			$data_list = json_decode($this->tsReserve->get_ts_reserve_publish_list($this->dbh, $start_datetime));
 
 			// TODO:ここで複数件取れてきた場合は、最新データ以外はスキップデータとして公開処理結果テーブルへ登録する
 			foreach ( (array)$data_list as $data ) {
