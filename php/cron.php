@@ -60,7 +60,7 @@ class cron
 		$this->debug_echo('■ [cron] __construct start');
 
 		$this->options = json_decode(json_encode($options));
-		$this->main = new main($main);
+		$this->main = new main($this);
 		$this->fileManager = new fileManager($this);
 		$this->pdoManager = new pdoManager($this);
 		$this->tsReserve = new tsReserve($this);
