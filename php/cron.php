@@ -26,8 +26,6 @@ class cron
 	 */
 	public function __construct($options) {
 
-		$this->common->debug_echo('■ [cron] __construct start');
-
 		$this->options = json_decode(json_encode($options));
 
 		$this->fileManager = new fileManager($this);
@@ -36,8 +34,6 @@ class cron
 		$this->tsOutput = new tsOutput($this);
 		$this->publish = new publish($this);
 		$this->common = new common($this);
-
-		$this->common->debug_echo('■ [cron] __construct end');
 
 	}
 
