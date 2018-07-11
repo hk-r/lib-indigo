@@ -214,7 +214,7 @@ class main
 
 				$disp = $this->historyScreen->disp_history_screen($this->dbh);
 
-			} else (isset($this->options->_POST->backup)) {
+			} elseif (isset($this->options->_POST->backup)) {
 				// 初期表示画面の「バックアップ一覧」ボタン押下
 
 				$disp = $this->backupScreen->disp_backup_screen($this->dbh);
