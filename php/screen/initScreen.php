@@ -1287,7 +1287,10 @@ class initScreen
 			//============================================================
 			// バックアップテーブルの登録処理
 			//============================================================
-			$ret = json_decode($this->tsBackup->insert_ts_backup($this->main->dbh, $this->main->options, $backup_datetime, define::PUBLISH_TYPE_IMMEDIATE));
+
+	 		$this->common->debug_echo('　□ -----バックアップテーブルの登録処理-----');
+			
+			$ret = json_decode($this->tsBackup->insert_ts_backup($this->main->dbh, $this->main->options, $backup_datetime, $insert_id));
 			if ( !$ret->status) {
 				throw new \Exception("TS_OUTPUT insert failed.");
 			}
@@ -1303,6 +1306,10 @@ class initScreen
 			//============================================================
 			// ※公開処理※
 			//============================================================
+
+	 		$this->common->debug_echo('　□ -----公開処理-----');
+			
+
 			$ret = json_decode($this->publish->do_publish($dirname));
 		
 			// 公開ステータスの設定
@@ -1317,6 +1324,9 @@ class initScreen
 			//============================================================
 			// 公開処理結果テーブルの更新処理
 			//============================================================
+
+	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの更新処理-----');
+			
 			// GMTの現在日時
 			$end_datetime = $this->common->get_current_datetime_of_gmt();
 
