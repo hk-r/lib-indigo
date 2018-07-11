@@ -33,6 +33,7 @@
             "php/screen/historyScreen.php",
             "php/screen/backupScreen.php",
             "php/check.php",
+            "php/define.php",
             "php/common.php"
         ]
     },
