@@ -29,6 +29,7 @@
             "php/pdoManager.php",
             "php/db/tsReserve.php",
             "php/db/tsOutput.php",
+            "php/db/tsBackup.php",
             "php/screen/initScreen.php",
             "php/screen/historyScreen.php",
             "php/screen/backupScreen.php",
