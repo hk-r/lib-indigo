@@ -9,6 +9,7 @@ class main
 	private $pdoManager;
 	private $initScreen;
 	private $historyScreen;
+	private $backupScreen;
 	private $common;
 
 
@@ -33,6 +34,7 @@ class main
 		$this->pdoManager = new pdoManager($this);
 		$this->initScreen = new initScreen($this);
 		$this->historyScreen = new historyScreen($this);
+		$this->backupScreen = new backupScreen($this);
 		$this->common = new common($this);
 
 	}
@@ -209,10 +211,18 @@ class main
 
 			if (isset($this->options->_POST->history)) {
 				// 初期表示画面の「履歴」ボタン押下
-				$disp = $this->historyScreen->disp_history_screen();
+
+				$disp = $this->historyScreen->disp_history_screen($this->dbh);
+
+			} else (isset($this->options->_POST->backup)) {
+				// 初期表示画面の「バックアップ一覧」ボタン押下
+
+				$disp = $this->backupScreen->disp_backup_screen($this->dbh);
 			} else {
 				// 初期表示画面の表示
-				$disp = $this->initScreen->disp_init_screen();
+
+				$disp = $this->initScreen->disp_init_screen($this->dbh);
+
 			}
 
 			// 画面ロック用

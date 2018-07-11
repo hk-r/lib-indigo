@@ -35,7 +35,7 @@ class tsReserve
 	 */
 	const RESERVE_ENTITY_ID_SEQ = 'reserve_id_seq';		// ID
 	const RESERVE_ENTITY_RESERVE = 'reserve_datetime';	// 公開予約日時
-	const RESERVE_ENTITY_RESERVE_DISPLAY = 'reserve_display';	// 公開予約日時
+	const RESERVE_ENTITY_RESERVE_DISPLAY = 'reserve_datetime_display';	// 公開予約日時
 	const RESERVE_ENTITY_RESERVE_DATE = 'reserve_date';	// 公開予約日時
 	const RESERVE_ENTITY_RESERVE_TIME = 'reserve_time';	// 公開予約日時
 	const RESERVE_ENTITY_BRANCH = 'branch_name';	// ブランチ名

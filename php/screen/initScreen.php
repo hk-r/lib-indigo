@@ -4,10 +4,13 @@ namespace indigo;
 
 class initScreen
 {
-	public $options;
+	private $main;
+	
+	private $tsReserve;
 
 	private $check;
 	private $publish;
+	private $common;
 
 	/**
 	 * PDOインスタンス
@@ -54,9 +57,12 @@ class initScreen
 	 */
 	public function __construct($options) {
 
-		$this->options = json_decode(json_encode($options));
+		$this->main = $main;
+
+		$this->tsReserve = new tsReserve($this);
 		$this->check = new check($this);
 		$this->publish = new publish($this);
+		$this->common = new common($this);
 
 	}
 
@@ -66,14 +72,14 @@ class initScreen
 	 *	 
 	 * @return 初期表示の出力内容
 	 */
-	public function disp_init_screen() {
+	public function disp_init_screen($dbh) {
 		
-		$this->common->debug_echo('■ create_top_contents start');
+		$this->common->debug_echo('■ disp_init_screen start');
 
 		$ret = "";
 
 		// 公開予約一覧を取得
-		$data_list = $this->tsReserve->get_ts_reserve_list($this->dbh);
+		$data_list = $this->tsReserve->get_ts_reserve_list($dbh);
 
 		// // お知らせリストの取得
 		// $alert_list = $this->get_csv_alert_list();
@@ -111,6 +117,7 @@ class initScreen
 			. '<li><input type="submit" id="delete_btn" name="delete" class="px2-btn px2-btn--danger" value="削除"/></li>'
 			. '<li><input type="submit" id="immediate_btn" name="immediate" class="px2-btn px2-btn--primary" value="即時公開"/></li>'
 			. '<li><input type="submit" id="history_btn" name="history" class="px2-btn" value="履歴"/></li>'
+			. '<li><input type="submit" id="backup_btn" name="backup" class="px2-btn" value="バックアップ一覧"/></li>'
 			. '</ul>'
 			// . '</div>'
 			. '</div>';
@@ -149,7 +156,7 @@ class initScreen
 			. '</form>'
 			. '</div>';
 
-		$this->common->debug_echo('■ create_top_contents end');
+		$this->common->debug_echo('■ disp_init_screen end');
 
 		return $ret;
 	}

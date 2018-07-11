@@ -12,7 +12,7 @@ $(function($){
 				
 			var str = "";
 
-			for (i = 0; i < element.length; i++) {
+			for (var i = 0; i < element.length; i++) {
 
 				if (element[i].checked) {
 					selected_flg = true;
@@ -102,50 +102,13 @@ $(function($){
 		});	
 
 		/*
-		 * [新規][履歴]戻る][確定][即時公開]ボタン
+		 * [新規][履歴][戻る][確定][即時公開][バックアップ一覧]ボタン
 		 */
-		$('#add_btn, #confirm_btn, #back_btn, #history_btn, #sokuji_btn').on('click', function() {
+		$('#add_btn, #confirm_btn, #back_btn, #history_btn, #backup_btn, #sokuji_btn').on('click', function() {
 
 			// ダイアログ画面ロック
 			display_lock();
 		});	
-
-		// /*
-		//  * 即時公開ボタン
-		//  */
-		// $('#release_btn').on('click', function() {
-
-		// 	var selected_flg = false;
-			
-		// 	var element = document.getElementsByName('target');
-			
-		// 	var str = "";
-
-		// 	for (var i = 0; i < element.length; i++) {
-
-		// 		if (element[i].checked) {
-		// 			selected_flg = true;
-		// 			str = element[i].value;
-		// 			break;
-		// 		}
-		// 	}
-
-		// 	if (!selected_flg) {
-				
-		// 		alert('選択されていません');
-		// 		return false;
-		// 	}
-
-		// 	$("#form_table").submit(function(){
-		// 		$('<input />').attr('type', 'hidden')
-		// 		 .attr('name', 'selected_id')
-		// 		 .attr('value', str)
-		// 		 .appendTo('#form_table');
-		// 	});
-
-		// 	// 画面ロック
-		// 	display_lock();
-		// });	
 
 		/*
 		 * 状態ダイアログ[閉じる]ボタン
@@ -168,11 +131,9 @@ $(function($){
 		var date = document.getElementById('datepicker').value;
 		var time = document.getElementById('reserve_time').value;
 
-	    if(date == "" || time == ""){
+	    if(date === "" || time === ""){
 	      
 	        alert("日付と時間を入力して下さい。");
-
-	        var now = new Date();
 
 			return false;
 	    }

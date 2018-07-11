@@ -4,7 +4,9 @@ namespace indigo;
 
 class historyScreen
 {
-	public $options;
+	private $main;
+	private $tsOutput;
+	private $common;
 
 	/**
 	 * PDOインスタンス
@@ -16,25 +18,28 @@ class historyScreen
 	 * コンストラクタ
 	 * @param $options = オプション
 	 */
-	public function __construct($options) {
+	public function __construct($main) {
 
-		$this->options = json_decode(json_encode($options));
+		$this->main = $main;
 
+		$this->tsOutput = new tsOutput($this);
+		$this->common = new common($this);
 	}
+	
 
 	/**
 	 * 履歴表示のコンテンツ作成
 	 *	 
 	 * @return 履歴表示の出力内容
 	 */
-	public function disp_history_screen() {
+	public function disp_history_screen($dbh) {
 		
-		$this->common->debug_echo('■ create_history_contents start');
+		$this->common->debug_echo('■ disp_history_screen start');
 
 		$ret = "";
 
 		// 公開処理結果一覧を取得
-		$data_list = $this->tsOutput->get_ts_output_list($this->dbh, null);
+		$data_list = $this->tsOutput->get_ts_output_list($dbh, null);
 
 		$ret .= '<div style="overflow:hidden">'
 			. '<form method="post">'
@@ -90,7 +95,7 @@ class historyScreen
 			. '</form>'
 			. '</div>';
 		
-		$this->common->debug_echo('■ create_history_contents end');
+		$this->common->debug_echo('■ disp_history_screen end');
 
 		return $ret;
 	}

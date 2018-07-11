@@ -9,7 +9,11 @@ class pdoManager
 
 	private $fileManager;
 	private $common;
-
+	/**
+	 * PDOインスタンス
+	 */
+	private $dbh;
+	
 	// DBディレクトリパス
 	const SQLITE_DB_PATH = '/sqlite/';
 	// DBディレクトリパス
@@ -235,7 +239,7 @@ class pdoManager
 		//============================================================
 		$create_sql = 'CREATE TABLE IF NOT EXISTS TS_BACKUP (
 			backup_id_seq INTEGER PRIMARY KEY AUTOINCREMENT,
-			result_id INTEGER,
+			output_id INTEGER,
 			backup_datetime TEXT,
 			gen_delete_flg TEXT,
 			gen_delete_datetime TEXT,

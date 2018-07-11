@@ -140,6 +140,34 @@ class common
 	}
 	
 	/**
+	 * 公開種別を画面表示用に変換し返却する
+	 *	 
+	 * @param $publish_type = 公開種別のコード値
+	 *	 
+	 * @return 画面表示用のステータス情報
+	 */
+	public function convert_publish_type($publish_type) {
+
+		$ret = '';
+
+		if ($publish_type == define::PUBLISH_TYPE_RESERVE) {
+		
+			$ret =  '予約公開';
+		
+		} else if ($publish_type == define::PUBLISH_TYPE_RESTORE) {
+			
+			$ret =  '復元公開';
+
+		} else if ($publish_type == define::PUBLISH_TYPE_IMMEDIATE) {
+			
+			$ret =  '即時公開';
+
+		}
+
+		return $ret;
+	}
+
+	/**
 	 * ※デバッグ関数（エラー調査用）
 	 *	 
 	 */

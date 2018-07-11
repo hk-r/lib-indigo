@@ -41,16 +41,16 @@ class tsOutput
 	 */
 	const OUTPUT_ENTITY_ID_SEQ = 'output_id_seq';			// ID
 	const OUTPUT_ENTITY_RESERVE = 'reserve_datetime';		// 公開予約日時
-	const OUTPUT_ENTITY_RESERVE_DISPLAY = 'reserve_display';	// 公開予約日時
+	const OUTPUT_ENTITY_RESERVE_DISPLAY = 'reserve_datetime_display';	// 公開予約日時
 	const OUTPUT_ENTITY_BRANCH = 'branch_name';		// ブランチ名
 	const OUTPUT_ENTITY_COMMIT = 'commit_hash';		// コミットハッシュ値（短縮）
 	const OUTPUT_ENTITY_COMMENT = 'comment';		// コメント
 	const OUTPUT_ENTITY_STATUS = 'status';		// 状態
 	const OUTPUT_ENTITY_TYPE = 'publish_type';		// 公開種別
 	const OUTPUT_ENTITY_START = 'start_datetime';		// 公開処理開始日時
-	const OUTPUT_ENTITY_START_DISPLAY = 'start_display';	// 公開処理開始日時
+	const OUTPUT_ENTITY_START_DISPLAY = 'start_datetime_display';	// 公開処理開始日時
 	const OUTPUT_ENTITY_END = 'end_datetime';			// 公開処理終了日時
-	const OUTPUT_ENTITY_END_DISPLAY = 'end_display';	// 公開処理終了日時
+	const OUTPUT_ENTITY_END_DISPLAY = 'end_datetime_display';	// 公開処理終了日時
 
 	/**
 	 * Constructor
@@ -392,7 +392,7 @@ class tsOutput
 		$entity[self::OUTPUT_ENTITY_STATUS] = $this->convert_status($array[self::TS_OUTPUT_STATUS]);
 
 		// 公開種別
-		$entity[self::OUTPUT_ENTITY_TYPE] = $this->convert_publish_type($array[self::TS_OUTPUT_PUBLISH_TYPE]);
+		$entity[self::OUTPUT_ENTITY_TYPE] = $this->common->convert_publish_type($array[self::TS_OUTPUT_PUBLISH_TYPE]);
 
 		$this->common->debug_echo('■ convert_ts_output_entity end');
 
@@ -431,35 +431,6 @@ class tsOutput
 			
 			$ret =  '-（スキップ）';
 			
-		}
-
-		return $ret;
-	}
-
-
-	/**
-	 * 公開種別を画面表示用に変換し返却する
-	 *	 
-	 * @param $publish_type = 公開種別のコード値
-	 *	 
-	 * @return 画面表示用のステータス情報
-	 */
-	private function convert_publish_type($publish_type) {
-
-		$ret = '';
-
-		if ($publish_type == define::PUBLISH_TYPE_RESERVE) {
-		
-			$ret =  '予約公開';
-		
-		} else if ($publish_type == define::PUBLISH_TYPE_RESTORE) {
-			
-			$ret =  '復元公開';
-
-		} else if ($publish_type == define::PUBLISH_TYPE_IMMEDIATE) {
-			
-			$ret =  '即時公開';
-
 		}
 
 		return $ret;
