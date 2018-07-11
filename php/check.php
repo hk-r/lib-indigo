@@ -107,7 +107,7 @@ class check
 
 		foreach ((array)$data_list as $array) {
 			
-			if (($array[main::RESERVE_ENTITY_ID] != $selected_id) && ($array[main::RESERVE_ENTITY_BRANCH] == $selected_branch)) {
+			if (($array[tsReserve::RESERVE_ENTITY_ID] != $selected_id) && ($array[tsReserve::RESERVE_ENTITY_BRANCH] == $selected_branch)) {
 				$ret = false;
 				break;
 			}
@@ -132,7 +132,7 @@ class check
 		$ret = true;
 
 		foreach ((array)$data_list as $array) {
-			if (($array[main::RESERVE_ENTITY_ID] != $selected_id) && ($array[main::RESERVE_ENTITY_RESERVE] == $input_reserve)) {
+			if (($array[tsReserve::RESERVE_ENTITY_ID] != $selected_id) && ($array[tsReserve::RESERVE_ENTITY_RESERVE] == $input_reserve)) {
 				$ret = false;
 				break;
 			}

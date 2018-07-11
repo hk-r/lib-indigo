@@ -10,27 +10,6 @@ class tsOutput
 	private $pdoManager;
 	private $common;
 
-	// 日時フォーマット_表示用（Y-m-d H:i）
-	const DATETIME_FORMAT_DISPLAY = "Y-m-d H:i";
-
-	/**
-	 * 削除フラグ
-	 */
-	// 削除済み
-	const DELETE_FLG_ON = 1;
-	// 未削除
-	const DELETE_FLG_OFF = 0;
-
-	/**
-	 * 公開種別
-	 */
-	// 予約公開
-	const PUBLISH_TYPE_RESERVE = 1;
-	// 復元公開
-	const PUBLISH_TYPE_RESTORE = 2;
-	// 即時公開
-	const PUBLISH_TYPE_IMMEDIATE = 3;
-
 
 	/**
 	 * 公開処理結果テーブルのカラム定義
@@ -74,20 +53,6 @@ class tsOutput
 	const OUTPUT_ENTITY_END_DISPLAY = 'end_display';	// 公開処理終了日時
 
 	/**
-	 * 公開ステータス
-	 */
-	// 処理中
-	const PUBLISH_STATUS_RUNNING = 0;
-	// 成功
-	const PUBLISH_STATUS_SUCCESS = 1;
-	// 成功（警告あり）
-	const PUBLISH_STATUS_ALERT = 2;
-	// 失敗
-	const PUBLISH_STATUS_FAILED = 3;
-	// スキップ
-	const PUBLISH_STATUS_SKIP = 4;
-
-	/**
 	 * Constructor
 	 *
 	 * @param object $px Picklesオブジェクト
@@ -116,7 +81,7 @@ class tsOutput
 
 			// SELECT文作成（世代削除フラグ = 0、ソート順：IDの降順）
 			$select_sql = "
-					SELECT * FROM TS_OUTPUT WHERE gen_delete_flg = " . self::DELETE_FLG_OFF . " ORDER BY output_id_seq DESC";
+					SELECT * FROM TS_OUTPUT WHERE gen_delete_flg = " . define::DELETE_FLG_OFF . " ORDER BY output_id_seq DESC";
 			// SELECT実行
 			$ret_array = $this->pdoManager->select($dbh, $select_sql);
 
@@ -272,13 +237,13 @@ class tsOutput
 				":" . self::TS_OUTPUT_COMMIT => "dummy_commit_hash",
 				":" . self::TS_OUTPUT_COMMENT => "コメント",
 				":" . self::TS_OUTPUT_PUBLISH_TYPE => $type,
-				":" . self::TS_OUTPUT_STATUS => self::PUBLISH_STATUS_RUNNING,
+				":" . self::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_RUNNING,
 				":" . self::TS_OUTPUT_DIFF_FLG1 => null,
 				":" . self::TS_OUTPUT_DIFF_FLG2 => null,
 				":" . self::TS_OUTPUT_DIFF_FLG3 => null,
 				":" . self::TS_OUTPUT_START => $start_datetime,
 				":" . self::TS_OUTPUT_END => null,
-				":" . self::TS_OUTPUT_DELETE_FLG => self::DELETE_FLG_OFF,
+				":" . self::TS_OUTPUT_DELETE_FLG => define::DELETE_FLG_OFF,
 				":" . self::TS_OUTPUT_DELETE => null,
 				":" . self::TS_OUTPUT_INSERT_DATETIME => $now,
 				":" . self::TS_OUTPUT_INSERT_USER_ID => "dummy_insert_user",
@@ -400,21 +365,21 @@ class tsOutput
 		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_OUTPUT_RESERVE]);
 
 		$entity[self::OUTPUT_ENTITY_RESERVE] = $tz_datetime;
-		$entity[self::OUTPUT_ENTITY_RESERVE_DISPLAY] = $this->common->format_datetime($tz_datetime, self::DATETIME_FORMAT_DISPLAY);
+		$entity[self::OUTPUT_ENTITY_RESERVE_DISPLAY] = $this->common->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISPLAY);
 
 		// 処理開始日時
 		// タイムゾーンの時刻へ変換
 		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_OUTPUT_START]);
 
 		$entity[self::OUTPUT_ENTITY_START] = $tz_datetime;
-		$entity[self::OUTPUT_ENTITY_START_DISPLAY] = $this->common->format_datetime($tz_datetime, self::DATETIME_FORMAT_DISPLAY);
+		$entity[self::OUTPUT_ENTITY_START_DISPLAY] = $this->common->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISPLAY);
 
 		// 処理終了日時
 		// タイムゾーンの時刻へ変換
 		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_OUTPUT_END]);
 		
 		$entity[self::OUTPUT_ENTITY_END] = $tz_datetime;
-		$entity[self::OUTPUT_ENTITY_END_DISPLAY] = $this->common->format_datetime($tz_datetime, self::DATETIME_FORMAT_DISPLAY);
+		$entity[self::OUTPUT_ENTITY_END_DISPLAY] = $this->common->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISPLAY);
 
 		// ブランチ
 		$entity[self::OUTPUT_ENTITY_BRANCH] = $array[self::TS_OUTPUT_BRANCH];
@@ -446,23 +411,23 @@ class tsOutput
 
 		$ret = '';
 
-		if ($status == self::PUBLISH_STATUS_RUNNING) {
+		if ($status == define::PUBLISH_STATUS_RUNNING) {
 		
 			$ret =  '？（処理中）';
 		
-		} else if ($status == self::PUBLISH_STATUS_SUCCESS) {
+		} else if ($status == define::PUBLISH_STATUS_SUCCESS) {
 			
 			$ret =  '〇（公開成功）';
 
-		} else if ($status == self::PUBLISH_STATUS_ALERT) {
+		} else if ($status == define::PUBLISH_STATUS_ALERT) {
 			
 			$ret =  '△（警告あり）';
 
-		} else if ($status == self::PUBLISH_STATUS_FAILED) {
+		} else if ($status == define::PUBLISH_STATUS_FAILED) {
 			
 			$ret =  '×（公開失敗）';
 			
-		} else if ($status == self::PUBLISH_STATUS_SKIP) {
+		} else if ($status == define::PUBLISH_STATUS_SKIP) {
 			
 			$ret =  '-（スキップ）';
 			
@@ -483,15 +448,15 @@ class tsOutput
 
 		$ret = '';
 
-		if ($publish_type == self::PUBLISH_TYPE_RESERVE) {
+		if ($publish_type == define::PUBLISH_TYPE_RESERVE) {
 		
 			$ret =  '予約公開';
 		
-		} else if ($publish_type == self::PUBLISH_TYPE_RESTORE) {
+		} else if ($publish_type == define::PUBLISH_TYPE_RESTORE) {
 			
 			$ret =  '復元公開';
 
-		} else if ($publish_type == self::PUBLISH_TYPE_IMMEDIATE) {
+		} else if ($publish_type == define::PUBLISH_TYPE_IMMEDIATE) {
 			
 			$ret =  '即時公開';
 

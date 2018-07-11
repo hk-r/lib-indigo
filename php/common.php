@@ -7,8 +7,6 @@ class common
 
 	private $main;
 
-	// 日時フォーマット（Y-m-d H:i:s）
-	const DATETIME_FORMAT = "Y-m-d H:i:s";
 
 	/**
 	 * Constructor
@@ -30,7 +28,7 @@ class common
 	public function get_current_datetime_of_gmt() {
 
 		// return gmdate(DATE_ATOM, time());
-		return gmdate(self::DATETIME_FORMAT, time());
+		return gmdate(define::DATETIME_FORMAT, time());
 	}
 
 	/**
@@ -130,7 +128,7 @@ class common
 			$t = new \DateTime($datetime, new \DateTimeZone('GMT'));
 			$t->setTimeZone(new \DateTimeZone($timezone));
 			// $ret = $t->format(DATE_ATOM);
-			$ret = $t->format(self::DATETIME_FORMAT);
+			$ret = $t->format(define::DATETIME_FORMAT);
 		}
 
 		// $this->debug_echo('　□変換前の時刻（GMT）：' . $datetime);

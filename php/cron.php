@@ -6,48 +6,19 @@ class cron
 {
 	public $options;
 
-	public $main;
-
 	private $fileManager;
-
 	private $pdoManager;
-
 	private $tsReserve;
-
 	private $tsOutput;
-
 	public $publish;
 	private $common;
+
 
 	/**
 	 * PDOインスタンス
 	 */
 	private $dbh;
 
-
-	// 日時フォーマット_保存用（YmdHis）
-	const DATETIME_FORMAT_SAVE = "YmdHis";
-	
-	/**
-	 * 公開種別
-	 */
-	// 予約公開
-	const PUBLISH_TYPE_RESERVE = 1;
-
-	/**
-	 * 公開ステータス
-	 */
-	// 処理中
-	const PUBLISH_STATUS_RUNNING = 0;
-	// 成功
-	const PUBLISH_STATUS_SUCCESS = 1;
-	// 成功（警告あり）
-	const PUBLISH_STATUS_ALERT = 2;
-	// 失敗
-	const PUBLISH_STATUS_FAILED = 3;
-	// スキップ
-	const PUBLISH_STATUS_SKIP = 4;
-	
 	
 	/**
 	 * コンストラクタ
@@ -58,7 +29,7 @@ class cron
 		$this->common->debug_echo('■ [cron] __construct start');
 
 		$this->options = json_decode(json_encode($options));
-		$this->main = new main($this);
+
 		$this->fileManager = new fileManager($this);
 		$this->pdoManager = new pdoManager($this);
 		$this->tsReserve = new tsReserve($this);
@@ -115,7 +86,7 @@ class cron
 				$this->common->debug_echo('　□公開取得データ[配列]');
 				$this->common->debug_var_dump($data);
 
-				$dirname = $this->common->format_datetime($data[self::TS_RESERVE_COLUMN_RESERVE], self::DATETIME_FORMAT_SAVE);
+				$dirname = $this->common->format_datetime($data[tsReserve::TS_RESERVE_COLUMN_RESERVE], define::DATETIME_FORMAT_SAVE);
 		
 				$this->common->debug_echo('　□公開ディレクトリ名');
 				$this->common->debug_var_dump($dirname);
@@ -126,13 +97,13 @@ class cron
 			//============================================================
 
 			// waitingディレクトリの絶対パスを取得。
-			$waiting_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_WAITING));
+			$waiting_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . define::PATH_WAITING));
 
 			// runningディレクトリの絶対パスを取得。
-			$running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_RUNNING));
+			$running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . define::PATH_RUNNING));
 
 			// logディレクトリの絶対パスを取得。
-			$log_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_LOG));
+			$log_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . define::PATH_LOG));
 
 			if ( file_exists($waiting_real_path) && file_exists($running_real_path) ) {
 
@@ -173,7 +144,7 @@ class cron
 			//============================================================
 			// 公開処理結果テーブルの登録処理
 			//============================================================
-			$ret = json_decode($this->tsOutput->insert_ts_output($this->dbh, $this->main->options, $start_datetime, self::PUBLISH_TYPE_RESERVE));
+			$ret = json_decode($this->tsOutput->insert_ts_output($this->dbh, $this->main->options, $start_datetime, define::PUBLISH_TYPE_RESERVE));
 			if ( !$ret->status) {
 				throw new \Exception("TS_OUTPUT insert failed. " . $ret->message);
 			}
@@ -194,9 +165,9 @@ class cron
 			// 公開ステータスの設定
 			$publish_status;
 			if ( $ret->status) {
-				$publish_status = self::PUBLISH_STATUS_SUCCESS;
+				$publish_status = define::PUBLISH_STATUS_SUCCESS;
 			} else {
-				$publish_status = self::PUBLISH_STATUS_FAILED;
+				$publish_status = define::PUBLISH_STATUS_FAILED;
 			}
 
 

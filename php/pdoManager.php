@@ -16,21 +16,6 @@ class pdoManager
 	const SQLITE_DB_NAME = 'indigo.db';
 
 	/**
-	 * 公開ステータス
-	 */
-	// 処理中
-	const PUBLISH_STATUS_RUNNING = 0;
-	// 成功
-	const PUBLISH_STATUS_SUCCESS = 1;
-	// 成功（警告あり）
-	const PUBLISH_STATUS_ALERT = 2;
-	// 失敗
-	const PUBLISH_STATUS_FAILED = 3;
-	// スキップ
-	const PUBLISH_STATUS_SKIP = 4;
-
-
-	/**
 	 * Constructor
 	 *
 	 * @param object $px Picklesオブジェクト

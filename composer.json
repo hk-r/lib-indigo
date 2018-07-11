@@ -26,9 +26,12 @@
             "php/cron.php",
             "php/publish.php",
             "php/fileManager.php",
-            "php/db/pdoManager.php",
+            "php/pdoManager.php",
             "php/db/tsReserve.php",
             "php/db/tsOutput.php",
+            "php/screen/initScreen.php",
+            "php/screen/historyScreen.php",
+            "php/screen/backupScreen.php",
             "php/check.php",
             "php/common.php"
         ]

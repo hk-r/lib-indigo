@@ -14,17 +14,7 @@ class tsReserve
 	const DATE_FORMAT_YMD = "Y-m-d";
 	// 時間フォーマット（H:i）
 	const TIME_FORMAT_HI = "H:i";
-	
-	// 日時フォーマット_表示用（Y-m-d H:i）
-	const DATETIME_FORMAT_DISPLAY = "Y-m-d H:i";
 
-	/**
-	 * 削除フラグ
-	 */
-	// 削除済み
-	const DELETE_FLG_ON = 1;
-	// 未削除
-	const DELETE_FLG_OFF = 0;
 
 	/**
 	 * 公開予約テーブルのカラム定義
@@ -84,7 +74,7 @@ class tsReserve
 
 			// SELECT文作成（削除フラグ = 0、ソート順：公開予約日時の昇順）
 			$select_sql = "
-					SELECT * FROM TS_RESERVE WHERE delete_flg = " . self::DELETE_FLG_OFF . " ORDER BY reserve_datetime";
+					SELECT * FROM TS_RESERVE WHERE delete_flg = " . define::DELETE_FLG_OFF . " ORDER BY reserve_datetime";
 
 			// SELECT実行
 			$ret_array = $this->pdoManager->select($dbh, $select_sql);
@@ -133,7 +123,7 @@ class tsReserve
 
 			// SELECT文作成（削除フラグ = 0、公開予約日時>=現在日時、ソート順：公開予約日時の降順）
 			$select_sql = "
-					SELECT * FROM TS_RESERVE WHERE delete_flg = " . self::DELETE_FLG_OFF . $option_param . " ORDER BY reserve_datetime DESC;";
+					SELECT * FROM TS_RESERVE WHERE delete_flg = " . define::DELETE_FLG_OFF . $option_param . " ORDER BY reserve_datetime DESC;";
 
 			$this->common->debug_echo('　□ select_sql');
 			$this->common->debug_echo($select_sql);
@@ -270,7 +260,7 @@ class tsReserve
 				":" . self::TS_RESERVE_BRANCH => $options->_POST->branch_select_value,
 				":" . self::TS_RESERVE_COMMIT => $commit_hash,
 				":" . self::TS_RESERVE_COMMENT => $options->_POST->comment,
-				":" . self::TS_RESERVE_DELETE_FLG => self::DELETE_FLG_OFF,
+				":" . self::TS_RESERVE_DELETE_FLG => define::DELETE_FLG_OFF,
 				":" . self::TS_RESERVE_INSERT_DATETIME => $now,
 				":" . self::TS_RESERVE_INSERT_USER_ID => "dummy_insert_user",
 				":" . self::TS_RESERVE_UPDATE_DATETIME => null,
@@ -395,7 +385,7 @@ class tsReserve
 
 				// パラメータ作成
 				$params = array(
-					':delete_flg' => self::DELETE_FLG_ON,
+					':delete_flg' => define::DELETE_FLG_ON,
 					':update_datetime' => $now,
 					':update_user_id' => "dummy_delete_user",
 					':reserve_id_seq' => $selected_id
@@ -441,7 +431,7 @@ class tsReserve
 		// タイムゾーンの時刻へ変換
 		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_RESERVE_RESERVE]);
 		$entity[self::RESERVE_ENTITY_RESERVE] = $tz_datetime;
-		$entity[self::RESERVE_ENTITY_RESERVE_DISPLAY] = $this->common->format_datetime($tz_datetime, self::DATETIME_FORMAT_DISPLAY);
+		$entity[self::RESERVE_ENTITY_RESERVE_DISPLAY] = $this->common->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISPLAY);
 		$entity[self::RESERVE_ENTITY_RESERVE_DATE] = $this->common->format_datetime($tz_datetime, self::DATE_FORMAT_YMD);
 		$entity[self::RESERVE_ENTITY_RESERVE_TIME] = $this->common->format_datetime($tz_datetime, self::TIME_FORMAT_HI);
 		// ブランチ
