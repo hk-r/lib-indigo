@@ -2,7 +2,7 @@
 
 namespace indigo;
 
-class main
+class define
 {
 	public $options;
 	
