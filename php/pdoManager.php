@@ -9,11 +9,7 @@ class pdoManager
 
 	private $fileManager;
 	private $common;
-	/**
-	 * PDOインスタンス
-	 */
-	private $dbh;
-	
+
 	// DBディレクトリパス
 	const SQLITE_DB_PATH = '/sqlite/';
 	// DBディレクトリパス
@@ -62,8 +58,8 @@ class pdoManager
 
 		$db_type = $this->main->options->db_type;
 
-		$this->common->debug_echo('　□ db_type');
-		$this->common->debug_echo($db_type);
+		// $this->common->debug_echo('　□ db_type');
+		// $this->common->debug_echo($db_type);
 
 		if ($db_type && $db_type == 'mysql') {
 
@@ -87,9 +83,9 @@ class pdoManager
 	
 		} else {
 
-			$this->common->debug_echo('　□ sqlite');
+			// $this->common->debug_echo('　□ sqlite');
 
-			$this->common->debug_echo($this->main->options->indigo_workdir_path . self::SQLITE_DB_PATH);
+			// $this->common->debug_echo($this->main->options->indigo_workdir_path . self::SQLITE_DB_PATH);
 
 			/**
 			 * sqliteの場合 
@@ -143,14 +139,14 @@ class pdoManager
 	 * データベースの接続を閉じる
 	 *	 
 	 */
-	public function close($dbh) {
+	public function close() {
 	
 		$this->common->debug_echo('■ close start');
 
 		try {
 
 			// データベースの接続を閉じる
-			$dbh = null;
+			$this->main->dbh = null;
 
 
 		} catch (\PDOException $e) {
@@ -168,7 +164,7 @@ class pdoManager
 	 * CREATE処理関数
 	 *	 
 	 */
-	public function create_table($dbh) {
+	public function create_table() {
 
 		$this->common->debug_echo('■ create_table start');
 
@@ -189,11 +185,11 @@ class pdoManager
 		)';
 
 		// SQL実行
-		$stmt = $dbh->query($create_sql);
+		$stmt = $this->main->dbh->query($create_sql);
 
 		if (!$stmt) {
 			// エラー情報表示
-			throw new \Exception($dbh->errorInfo());
+			throw new \Exception($this->main->dbh->errorInfo());
 		}
 
 		$this->common->debug_echo('　□ 公開予約テーブル作成完了');
@@ -225,11 +221,11 @@ class pdoManager
 		)';
 
 		// SQL実行
-		$stmt = $dbh->query($create_sql);
+		$stmt = $this->main->dbh->query($create_sql);
 
 		if (!$stmt) {
 			// エラー情報表示
-			throw new \Exception($dbh->errorInfo());
+			throw new \Exception($this->main->dbh->errorInfo());
 		}
 
 		$this->common->debug_echo('　□ 公開処理結果テーブル作成完了');
@@ -250,11 +246,11 @@ class pdoManager
 		)';
 
 		// SQL実行
-		$stmt = $dbh->query($create_sql);
+		$stmt = $this->main->dbh->query($create_sql);
 
 		if (!$stmt) {
 			// エラー情報表示
-			throw new \Exception($dbh->errorInfo());
+			throw new \Exception($this->main->dbh->errorInfo());
 		}
 
 		$this->common->debug_echo('　□ バックアップテーブル作成完了');

@@ -32,21 +32,20 @@ class historyScreen
 	 *	 
 	 * @return 履歴表示の出力内容
 	 */
-	public function disp_history_screen($dbh) {
+	public function disp_history_screen() {
 		
 		$this->common->debug_echo('■ disp_history_screen start');
 
 		$ret = "";
 
 		// 公開処理結果一覧を取得
-		$data_list = $this->tsOutput->get_ts_output_list($dbh, null);
+		$data_list = $this->tsOutput->get_ts_output_list($this->main->dbh, null);
 
 		$ret .= '<div style="overflow:hidden">'
 			. '<form method="post">'
 			. '<div class="button_contents" style="float:right;">'
 			. '<ul>'
 			. '<li><input type="submit" name="log" class="px2-btn px2-btn--primary" value="ログ"/></li>'
-			. '<li><input type="submit" name="recovory" class="px2-btn px2-btn--primary" value="復元"/></li>'
 			. '</div>'
 			. '</div>';
 

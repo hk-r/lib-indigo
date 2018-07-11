@@ -8,14 +8,12 @@ class initScreen
 	
 	private $tsReserve;
 
+	private $fileManager;
+
 	private $check;
 	private $publish;
 	private $common;
 
-	/**
-	 * PDOインスタンス
-	 */
-	private $dbh;
 
 	/**
 	 * 入力画面のエラーメッセージ
@@ -55,11 +53,12 @@ class initScreen
 	 * コンストラクタ
 	 * @param $options = オプション
 	 */
-	public function __construct($options) {
+	public function __construct($main) {
 
 		$this->main = $main;
 
 		$this->tsReserve = new tsReserve($this);
+		$this->fileManager = new fileManager($this);
 		$this->check = new check($this);
 		$this->publish = new publish($this);
 		$this->common = new common($this);
@@ -72,14 +71,14 @@ class initScreen
 	 *	 
 	 * @return 初期表示の出力内容
 	 */
-	public function disp_init_screen($dbh) {
+	public function do_disp_init_screen() {
 		
 		$this->common->debug_echo('■ disp_init_screen start');
 
 		$ret = "";
 
 		// 公開予約一覧を取得
-		$data_list = $this->tsReserve->get_ts_reserve_list($dbh);
+		$data_list = $this->tsReserve->get_ts_reserve_list($this->main->dbh);
 
 		// // お知らせリストの取得
 		// $alert_list = $this->get_csv_alert_list();
@@ -166,7 +165,7 @@ class initScreen
 	 *	 
 	 * @return 新規ダイアログの出力内容
 	 */
-	public function disp_add_dialog() {
+	public function do_disp_add_dialog() {
 		
 		$this->common->debug_echo('■ disp_add_dialog start');
 
@@ -191,7 +190,7 @@ class initScreen
 	 *
 	 * @return 新規ダイアログの出力内容
 	 */
-	private function disp_back_add_dialog() {
+	public function do_back_add_dialog() {
 		
 		$this->common->debug_echo('■ disp_back_add_dialog start');
 
@@ -201,17 +200,17 @@ class initScreen
 		$comment = "";
 
 		// フォームパラメタが設定されている場合変数へ設定
-		if (isset($this->options->_POST->branch_select_value)) {
-			$branch_select_value = $this->options->_POST->branch_select_value;
+		if (isset($this->main->options->_POST->branch_select_value)) {
+			$branch_select_value = $this->main->options->_POST->branch_select_value;
 		}
-		if (isset($this->options->_POST->reserve_date)) {
-			$reserve_date = $this->options->_POST->reserve_date;
+		if (isset($this->main->options->_POST->reserve_date)) {
+			$reserve_date = $this->main->options->_POST->reserve_date;
 		}
-		if (isset($this->options->_POST->reserve_time)) {
-			$reserve_time = $this->options->_POST->reserve_time;
+		if (isset($this->main->options->_POST->reserve_time)) {
+			$reserve_time = $this->main->options->_POST->reserve_time;
 		}
-		if (isset($this->options->_POST->comment)) {
-			$comment = $this->options->_POST->comment;
+		if (isset($this->main->options->_POST->comment)) {
+			$comment = $this->main->options->_POST->comment;
 		}
 
 		// 入力ダイアログHTMLの作成
@@ -228,7 +227,7 @@ class initScreen
 	 *
 	 * @return 変更ダイアログの出力内容
 	 */
-	public function disp_update_dialog() {
+	public function do_disp_update_dialog() {
 		
 		$this->common->debug_echo('■ disp_update_dialog start');
 
@@ -238,9 +237,9 @@ class initScreen
 		$comment = "";
 
 		// 画面選択された公開予約情報を取得
-		$selected_id =  $this->options->_POST->selected_id;
+		$selected_id =  $this->main->options->_POST->selected_id;
 
-		$selected_data = $this->tsReserve->get_selected_ts_reserve($this->dbh, $selected_id);
+		$selected_data = $this->tsReserve->get_selected_ts_reserve($this->main->dbh, $selected_id);
 		
 		$this->common->debug_echo('　□ 公開予約データ');
 		$this->common->debug_var_dump($selected_data);
@@ -271,9 +270,9 @@ class initScreen
 	 *
 	 * @return 変更ダイアログの出力内容
 	 */
-	public function disp_back_update_dialog() {
+	public function do_back_update_dialog() {
 		
-		$this->common->debug_echo('■ disp_back_update_dialog start');
+		$this->common->debug_echo('■ do_back_update_dialog start');
 
 		$branch_select_value = "";
 		$reserve_date = "";
@@ -281,23 +280,23 @@ class initScreen
 		$comment = "";
 
 		// フォームパラメタが設定されている場合変数へ設定
-		if (isset($this->options->_POST->branch_select_value)) {
-			$branch_select_value = $this->options->_POST->branch_select_value;
+		if (isset($this->main->options->_POST->branch_select_value)) {
+			$branch_select_value = $this->main->options->_POST->branch_select_value;
 		}
-		if (isset($this->options->_POST->reserve_date)) {
-			$reserve_date = $this->options->_POST->reserve_date;
+		if (isset($this->main->options->_POST->reserve_date)) {
+			$reserve_date = $this->main->options->_POST->reserve_date;
 		}
-		if (isset($this->options->_POST->reserve_time)) {
-			$reserve_time = $this->options->_POST->reserve_time;
+		if (isset($this->main->options->_POST->reserve_time)) {
+			$reserve_time = $this->main->options->_POST->reserve_time;
 		}
-		if (isset($this->options->_POST->comment)) {
-			$comment = $this->options->_POST->comment;
+		if (isset($this->main->options->_POST->comment)) {
+			$comment = $this->main->options->_POST->comment;
 		}
 	
 		// ダイアログHTMLの作成
 		$ret = $this->create_dialog_html(self::INPUT_MODE_UPDATE_BACK, $branch_select_value, $reserve_date, $reserve_time, $comment);
 
-		$this->common->debug_echo('■ disp_back_update_dialog end');
+		$this->common->debug_echo('■ do_back_update_dialog end');
 
 		return $ret;
 	}
@@ -307,9 +306,9 @@ class initScreen
 	 *	 
 	 * @return 即時公開ダイアログの出力内容
 	 */
-	public function disp_immediate_dialog() {
+	public function do_disp_immediate_dialog() {
 		
-		$this->common->debug_echo('■ disp_immediate_dialog start');
+		$this->common->debug_echo('■ do_disp_immediate_dialog start');
 
 		$branch_select_value = "";
 		$reserve_date = "";
@@ -319,7 +318,7 @@ class initScreen
 		// ダイアログHTMLの作成
 		$ret = $this->create_dialog_html(self::INPUT_MODE_IMMEDIATE, $branch_select_value, $reserve_date, $reserve_time, $comment);
 
-		$this->common->debug_echo('■ disp_immediate_dialog end');
+		$this->common->debug_echo('■ do_disp_immediate_dialog end');
 
 		return $ret;
 	}
@@ -332,7 +331,7 @@ class initScreen
 	 *
 	 * @return 新規ダイアログの出力内容
 	 */
-	public function disp_back_immediate_dialog() {
+	public function do_back_immediate_dialog() {
 		
 		$this->common->debug_echo('■ disp_back_immediate_dialog start');
 
@@ -342,17 +341,17 @@ class initScreen
 		$comment = "";
 
 		// フォームパラメタが設定されている場合変数へ設定
-		if (isset($this->options->_POST->branch_select_value)) {
-			$branch_select_value = $this->options->_POST->branch_select_value;
+		if (isset($this->main->options->_POST->branch_select_value)) {
+			$branch_select_value = $this->main->options->_POST->branch_select_value;
 		}
-		if (isset($this->options->_POST->reserve_date)) {
-			$reserve_date = $this->options->_POST->reserve_date;
+		if (isset($this->main->options->_POST->reserve_date)) {
+			$reserve_date = $this->main->options->_POST->reserve_date;
 		}
-		if (isset($this->options->_POST->reserve_time)) {
-			$reserve_time = $this->options->_POST->reserve_time;
+		if (isset($this->main->options->_POST->reserve_time)) {
+			$reserve_time = $this->main->options->_POST->reserve_time;
 		}
-		if (isset($this->options->_POST->comment)) {
-			$comment = $this->options->_POST->comment;
+		if (isset($this->main->options->_POST->comment)) {
+			$comment = $this->main->options->_POST->comment;
 		}
 
 		// 入力ダイアログHTMLの作成
@@ -419,7 +418,7 @@ class initScreen
 		//   	$ret .= $this->create_change_before_hidden_html($init_trans_flg)
 		// }
 
-		$ret .= '<input type="hidden" name="selected_id" value="' . $this->options->_POST->selected_id . '"/>';
+		$ret .= '<input type="hidden" name="selected_id" value="' . $this->main->options->_POST->selected_id . '"/>';
 
 		$ret .= '<table class="table table-striped">'
 			  . '<tr>';
@@ -526,17 +525,17 @@ class initScreen
 		$comment = "";
 
 		// フォームパラメタが設定されている場合変数へ設定
-		if (isset($this->options->_POST->branch_select_value)) {
-			$branch_select_value = $this->options->_POST->branch_select_value;
+		if (isset($this->main->options->_POST->branch_select_value)) {
+			$branch_select_value = $this->main->options->_POST->branch_select_value;
 		}
-		if (isset($this->options->_POST->reserve_date)) {
-			$reserve_date = $this->options->_POST->reserve_date;
+		if (isset($this->main->options->_POST->reserve_date)) {
+			$reserve_date = $this->main->options->_POST->reserve_date;
 		}
-		if (isset($this->options->_POST->reserve_time)) {
-			$reserve_time = $this->options->_POST->reserve_time;
+		if (isset($this->main->options->_POST->reserve_time)) {
+			$reserve_time = $this->main->options->_POST->reserve_time;
 		}
-		if (isset($this->options->_POST->comment)) {
-			$comment = $this->options->_POST->comment;
+		if (isset($this->main->options->_POST->comment)) {
+			$comment = $this->main->options->_POST->comment;
 		}
 
 		// 画面入力された日時を結合し、GMTへ変換する
@@ -632,17 +631,17 @@ class initScreen
 		$comment = "";
 
 		// フォームパラメタが設定されている場合変数へ設定
-		if (isset($this->options->_POST->branch_select_value)) {
-			$branch_select_value = $this->options->_POST->branch_select_value;
+		if (isset($this->main->options->_POST->branch_select_value)) {
+			$branch_select_value = $this->main->options->_POST->branch_select_value;
 		}
-		if (isset($this->options->_POST->reserve_date)) {
-			$reserve_date = $this->options->_POST->reserve_date;
+		if (isset($this->main->options->_POST->reserve_date)) {
+			$reserve_date = $this->main->options->_POST->reserve_date;
 		}
-		if (isset($this->options->_POST->reserve_time)) {
-			$reserve_time = $this->options->_POST->reserve_time;
+		if (isset($this->main->options->_POST->reserve_time)) {
+			$reserve_time = $this->main->options->_POST->reserve_time;
 		}
-		if (isset($this->options->_POST->comment)) {
-			$comment = $this->options->_POST->comment;
+		if (isset($this->main->options->_POST->comment)) {
+			$comment = $this->main->options->_POST->comment;
 		}
 
 		// 画面入力された日時を結合し、GMTへ変換する
@@ -655,8 +654,8 @@ class initScreen
 		$before_gmt_reserve_datetime = "";
 
 		// 画面選択された変更前の公開予約情報を取得
-		$selected_id =  $this->options->_POST->selected_id;
-		$selected_data = $this->tsReserve->get_selected_ts_reserve($this->dbh, $selected_id);
+		$selected_id =  $this->main->options->_POST->selected_id;
+		$selected_data = $this->tsReserve->get_selected_ts_reserve($this->main->dbh, $selected_id);
 
 		if ($selected_data) {
 
@@ -670,7 +669,7 @@ class initScreen
 		
 		}
 
-		$img_filename = $this->options->indigo_workdir_path . self::IMG_ARROW_RIGHT;
+		$img_filename = $this->main->options->indigo_workdir_path . self::IMG_ARROW_RIGHT;
 
 		$ret = '<div class="dialog" id="modal_dialog">'
 			. '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
@@ -719,12 +718,12 @@ class initScreen
 
             . '<div class="right_box">'
 			. '<table class="table table-striped" style="width: 100%">'
-		    . '<input type="hidden" name="selected_id" value="' . $this->options->_POST->selected_id . '"/>'
+		    . '<input type="hidden" name="selected_id" value="' . $this->main->options->_POST->selected_id . '"/>'
 
 			// 「ブランチ」項目（変更後）
 			. '<tr>'
 			. '<td class="dialog_thead">' . 'ブランチ' . '</td>'
-			. '<td>' . $this->options->_POST->branch_select_value . '</td>'
+			. '<td>' . $this->main->options->_POST->branch_select_value . '</td>'
 			. '<input type="hidden" name="branch_select_value" value="' . $branch_select_value . '"/>'
 			. '</tr>'
 
@@ -799,17 +798,17 @@ class initScreen
 		$comment = "";
 
 		// フォームパラメタが設定されている場合変数へ設定
-		if (isset($this->options->_POST->branch_select_value)) {
-			$branch_select_value = $this->options->_POST->branch_select_value;
+		if (isset($this->main->options->_POST->branch_select_value)) {
+			$branch_select_value = $this->main->options->_POST->branch_select_value;
 		}
-		if (isset($this->options->_POST->reserve_date)) {
-			$reserve_date = $this->options->_POST->reserve_date;
+		if (isset($this->main->options->_POST->reserve_date)) {
+			$reserve_date = $this->main->options->_POST->reserve_date;
 		}
-		if (isset($this->options->_POST->reserve_time)) {
-			$reserve_time = $this->options->_POST->reserve_time;
+		if (isset($this->main->options->_POST->reserve_time)) {
+			$reserve_time = $this->main->options->_POST->reserve_time;
 		}
-		if (isset($this->options->_POST->comment)) {
-			$comment = $this->options->_POST->comment;
+		if (isset($this->main->options->_POST->comment)) {
+			$comment = $this->main->options->_POST->comment;
 		}
 
 		$ret .= '<div class="dialog" id="modal_dialog">'
@@ -895,9 +894,9 @@ class initScreen
 		// // 入力チェック処理（一時的にコメント）
 		// $this->input_error_message = $this->do_validation_check(self::INPUT_MODE_ADD);
 
-		if ($this->$input_error_message) {
+		if ($this->input_error_message) {
 			// エラーがあるので入力ダイアログのまま
-			$ret = $this->disp_back_add_dialog();
+			$ret = $this->do_disp_add_dialog();
 		} else {
 			// エラーがないので確認ダイアログへ遷移
 			$ret = $this->disp_check_add_dialog();
@@ -922,9 +921,9 @@ class initScreen
 		// // 入力チェック処理（一時的にコメント）
 		// $this->input_error_message = $this->do_validation_check(self::INPUT_MODE_UPDATE);
 
-		if ($this->$input_error_message) {
+		if ($this->input_error_message) {
 			// エラーがあるので入力ダイアログのまま
-			$ret = $this->disp_update_dialog();
+			$ret = $this->do_disp_update_dialog();
 		} else {
 			// エラーがないので確認ダイアログへ遷移
 			$ret = $this->disp_check_update_dialog();
@@ -949,7 +948,7 @@ class initScreen
 		// // 入力チェック処理（一時的にコメント）
 		// $this->input_error_message = $this->do_validation_check(self::INPUT_MODE_IMMEDIATE);
 
-		if ($this->$input_error_message) {
+		if ($this->input_error_message) {
 			// エラーがあるので入力ダイアログのまま
 			$ret = $this->disp_immediate_dialog();
 		} else {
@@ -986,13 +985,13 @@ class initScreen
 	 		$this->common->debug_echo('　□ -----Gitのファイルコピー処理-----');
 			
 			// waitingディレクトリの絶対パスを取得。
-			$waiting_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . define::PATH_WAITING));
+			$waiting_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_WAITING));
 
 			$this->common->debug_echo('　□ waiting_real_path');
 			$this->common->debug_echo($waiting_real_path);
 
 			// 公開予約ディレクトリ名の取得
-			$dirname = $this->common->format_gmt_datetime($this->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE) . '_reserve';
+			$dirname = $this->common->format_gmt_datetime($this->main->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE) . '_reserve';
 
 			$this->common->debug_echo('　□ 公開予約ディレクトリ：');
 			$this->common->debug_echo($dirname);
@@ -1009,7 +1008,7 @@ class initScreen
 			//============================================================
 			// 入力情報を公開予約テーブルへ登録
 			//============================================================
-			$this->tsReserve->insert_ts_reserve($this->dbh, $this->options, $this->commit_hash);
+			$this->tsReserve->insert_ts_reserve($this->main->dbh, $this->main->options, $this->commit_hash);
 			
 		} catch (\Exception $e) {
 
@@ -1050,13 +1049,13 @@ class initScreen
 		try {
 
 			// waitingディレクトリの絶対パスを取得。
-			$waiting_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . define::PATH_WAITING));
+			$waiting_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_WAITING));
 
 			//============================================================
 			// 「waiting」ディレクトリの変更前の公開ソースディレクトリを削除
 			//============================================================
 			// 変更前の公開予約ディレクトリ名の取得
-			$before_dirname = $this->common->format_gmt_datetime($this->options->_POST->before_gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE) . '_reserve';
+			$before_dirname = $this->common->format_gmt_datetime($this->main->options->_POST->before_gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE) . '_reserve';
 
 			$this->common->debug_echo('　□ 変更前の公開予約ディレクトリ：');
 			$this->common->debug_echo($before_dirname);
@@ -1072,7 +1071,7 @@ class initScreen
 			// 変更後ブランチのGit情報を「waiting」ディレクトリへコピー
 			//============================================================
 			// 公開予約ディレクトリ名の取得
-			$dirname = $this->common->format_gmt_datetime($this->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE) . '_reserve';
+			$dirname = $this->common->format_gmt_datetime($this->main->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE) . '_reserve';
 
 			$this->common->debug_echo('　□ 変更後の公開予約ディレクトリ：');
 			$this->common->debug_echo($dirname);
@@ -1089,9 +1088,9 @@ class initScreen
 			//============================================================
 			// 入力情報を公開予約テーブルへ更新
 			//============================================================
-			$selected_id =  $this->options->_POST->selected_id;
+			$selected_id =  $this->main->options->_POST->selected_id;
 
-			$this->tsReserve->update_reserve_table($this->dbh, $this->options, $selected_id, $this->commit_hash);
+			$this->tsReserve->update_reserve_table($this->main->dbh, $this->main->options, $selected_id, $this->commit_hash);
 			
 		} catch (\Exception $e) {
 
@@ -1131,14 +1130,14 @@ class initScreen
 		try {
 
 			// waitingディレクトリの絶対パスを取得。
-			$waiting_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . define::PATH_WAITING));
+			$waiting_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_WAITING));
 
 			//============================================================
 			// 「waiting」ディレクトリの変更前の公開ソースディレクトリを削除
 			//============================================================
 			// 公開予約ディレクトリ名の取得
-			$selected_id =  $this->options->_POST->selected_id;
-			$selected_ret = $this->tsReserve->get_selected_ts_reserve($this->dbh, $selected_id);
+			$selected_id =  $this->main->options->_POST->selected_id;
+			$selected_ret = $this->tsReserve->get_selected_ts_reserve($this->main->dbh, $selected_id);
 			$dirname = $this->common->format_gmt_datetime($selected_ret[tsReserve::RESERVE_ENTITY_RESERVE], define::DATETIME_FORMAT_SAVE) . '_reserve';
 
 			$this->common->debug_echo('　□ 公開予約ディレクトリ：');
@@ -1155,7 +1154,7 @@ class initScreen
 			//============================================================
 			// 入力情報を公開予約テーブルへ更新
 			//============================================================
-			$this->tsReserve->delete_reserve_table($this->dbh, $selected_id);
+			$this->tsReserve->delete_reserve_table($this->main->dbh, $selected_id);
 			
 		} catch (\Exception $e) {
 
@@ -1204,7 +1203,7 @@ class initScreen
 			// ============================================================
 
 			// runningディレクトリの絶対パスを取得。
-			$running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . define::PATH_RUNNING));
+			$running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_RUNNING));
 
 			// 公開予約ディレクトリ名の取得
 			$dirname = $this->common->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
@@ -1225,16 +1224,74 @@ class initScreen
 			//============================================================
 			// 公開処理結果テーブルの登録処理
 			//============================================================
-			$ret = json_decode($this->tsOutput->insert_ts_output($this->dbh, $this->main->options, $start_datetime, self::PUBLISH_TYPE_IMMEDIATE));
+			$ret = json_decode($this->tsOutput->insert_ts_output($this->main->dbh, $this->main->options, $start_datetime, self::PUBLISH_TYPE_IMMEDIATE));
 			if ( !$ret->status) {
 				throw new \Exception("TS_OUTPUT insert failed.");
 			}
 
 			// インサートしたシーケンスIDを取得（処理終了時の更新処理にて使用）
-			$insert_id = $this->dbh->lastInsertId();
+			$insert_id = $this->main->dbh->lastInsertId();
 
 			$this->common->debug_echo('　□ $insert_id：');
 			$this->common->debug_echo($insert_id);
+
+
+			//============================================================
+			// 本番ソースを「backup」ディレクトリへコピー
+			//============================================================
+
+	 		$this->common->debug_echo('　□ -----本番ソースを「backup」ディレクトリへコピー-----');
+			
+			// 本番環境ディレクトリの絶対パスを取得。
+			$project_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->project_real_path . "/"));
+
+			// backupディレクトリの絶対パスを取得。
+			$backup_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_BACKUP));
+
+			// logディレクトリの絶対パスを取得。
+			$log_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_LOG));
+
+
+			// GMTの現在日時
+			$backup_datetime = $this->common->get_current_datetime_of_gmt();
+			$backup_dirname = $this->common->format_gmt_datetime($backup_datetime, define::DATETIME_FORMAT_SAVE);
+
+			if ( file_exists($backup_real_path) && file_exists($project_real_path) ) {
+
+				// TODO:ログフォルダに出力する
+				$command = 'rsync -rtvzP' . ' ' . $project_real_path . ' ' . $backup_real_path . $backup_dirname . '/' . ' --log-file=' . $log_real_path . '/rsync_' . $dirname . '.log' ;
+
+				$this->common->debug_echo('　□ $command：');
+				$this->common->debug_echo($command);
+
+				$ret = $this->common->command_execute($command, true);
+
+				$this->common->debug_echo('　▼ 本番バックアップの公開処理結果');
+
+				foreach ( (array)$ret['output'] as $element ) {
+					$this->common->debug_echo($element);
+				}
+
+			} else {
+					// エラー処理
+					throw new \Exception('Backup or project directory not found.');
+			}
+
+
+			//============================================================
+			// バックアップテーブルの登録処理
+			//============================================================
+			$ret = json_decode($this->tsBackup->insert_ts_backup($this->main->dbh, $this->main->options, $backup_datetime, define::PUBLISH_TYPE_IMMEDIATE));
+			if ( !$ret->status) {
+				throw new \Exception("TS_OUTPUT insert failed.");
+			}
+
+			// インサートしたシーケンスIDを取得（処理終了時の更新処理にて使用）
+			$insert_id = $this->main->dbh->lastInsertId();
+
+			$this->common->debug_echo('　□ $insert_id：');
+			$this->common->debug_echo($insert_id);
+
 
 
 			//============================================================
@@ -1257,7 +1314,7 @@ class initScreen
 			// GMTの現在日時
 			$end_datetime = $this->common->get_current_datetime_of_gmt();
 
-	 		$ret = $this->tsOutput->update_ts_output($this->dbh, $insert_id, $end_datetime, $publish_status);
+	 		$ret = $this->tsOutput->update_ts_output($this->main->dbh, $insert_id, $end_datetime, $publish_status);
 
 			if ( !$ret->status) {
 				throw new \Exception("TS_OUTPUT update failed. " . $ret->message);
@@ -1306,31 +1363,31 @@ class initScreen
 		$selected_id = "";
 
 		// フォームパラメタが設定されている場合変数へ設定
-		if (isset($this->options->_POST->branch_select_value)) {
-			$branch_select_value = $this->options->_POST->branch_select_value;
+		if (isset($this->main->options->_POST->branch_select_value)) {
+			$branch_select_value = $this->main->options->_POST->branch_select_value;
 		}
 
-		if (isset($this->options->_POST->reserve_date)) {
-			$reserve_date = $this->options->_POST->reserve_date;
+		if (isset($this->main->options->_POST->reserve_date)) {
+			$reserve_date = $this->main->options->_POST->reserve_date;
 		}
 
-		if (isset($this->options->_POST->reserve_time)) {
-			$reserve_time = $this->options->_POST->reserve_time;
+		if (isset($this->main->options->_POST->reserve_time)) {
+			$reserve_time = $this->main->options->_POST->reserve_time;
 		}
 		
-		if (isset($this->options->_POST->comment)) {
-			$comment = $this->options->_POST->comment;
+		if (isset($this->main->options->_POST->comment)) {
+			$comment = $this->main->options->_POST->comment;
 		}
 
-		if (isset($this->options->_POST->selected_id)) {
-			$selected_id = $this->options->_POST->selected_id;
+		if (isset($this->main->options->_POST->selected_id)) {
+			$selected_id = $this->main->options->_POST->selected_id;
 		}
 
 		
 		/**
  		* 公開予約一覧を取得
 		*/ 
-		$data_list = $this->tsReserve->get_ts_reserve_list($this->dbh);
+		$data_list = $this->tsReserve->get_ts_reserve_list($this->main->dbh);
 	
 		// 画面入力された日時を結合し、GMTへ変換する
 		$gmt_reserve_datetime = $this->combine_to_gmt_date_and_time($reserve_date, $reserve_time);
@@ -1387,7 +1444,7 @@ class initScreen
 		try {
 
 			// masterディレクトリの絶対パス
-			$master_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . define::PATH_MASTER));
+			$master_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_MASTER));
 
 			$this->common->debug_echo('　□ master_real_path：');
 			$this->common->debug_echo($master_real_path);
@@ -1528,14 +1585,14 @@ class initScreen
 		try {
 
 			// 指定ブランチ
-			$branch_name = trim(str_replace("origin/", "", $this->options->_POST->branch_select_value));
+			$branch_name = trim(str_replace("origin/", "", $this->main->options->_POST->branch_select_value));
 
 			// git init
 			$command = 'git init';
 			$this->common->command_execute($command, false);
 
 			// git urlのセット
-			$url = $this->options->git->protocol . "://" . urlencode($this->options->git->username) . ":" . urlencode($this->options->git->password) . "@" . $this->options->git->url;
+			$url = $this->main->options->git->protocol . "://" . urlencode($this->main->options->git->username) . ":" . urlencode($this->main->options->git->password) . "@" . $this->main->options->git->url;
 			
 			// initしたリポジトリに名前を付ける
 			$command = 'git remote add origin ' . $url;

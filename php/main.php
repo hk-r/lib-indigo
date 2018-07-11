@@ -16,7 +16,7 @@ class main
 	/**
 	 * PDOインスタンス
 	 */
-	private $dbh;
+	public $dbh;
 
 	/**
 	 * コミットハッシュ値
@@ -85,7 +85,7 @@ class main
 			//============================================================
 			// テーブル作成（既にある場合は作成しない）
 			//============================================================
-			$this->pdoManager->create_table($this->dbh);
+			$this->pdoManager->create_table();
 
 
 			//============================================================
@@ -111,7 +111,7 @@ class main
 				if (isset($this->options->_POST->add)) {
 					// 初期表示画面の「新規」ボタン押下
 					
-					$dialog_disp = $this->initScreen->disp_add_dialog();
+					$dialog_disp = $this->initScreen->do_disp_add_dialog();
 
 				} elseif (isset($this->options->_POST->add_check)) {
 					// 新規ダイアログの「確認」ボタン押下
@@ -129,7 +129,7 @@ class main
 				} elseif (isset($this->options->_POST->add_back)) {
 					// 新規確認ダイアログの「戻る」ボタン押下
 
-					$dialog_disp = $this->initScreen->disp_back_add_dialog();
+					$dialog_disp = $this->initScreen->do_back_add_dialog();
 
 				//============================================================
 				// 変更関連処理
@@ -137,7 +137,7 @@ class main
 				} elseif (isset($this->options->_POST->update)) {
 					// 初期表示画面の「変更」ボタン押下
 					
-					$dialog_disp = $this->initScreen->disp_update_dialog();
+					$dialog_disp = $this->initScreen->do_disp_update_dialog();
 
 
 				} elseif (isset($this->options->_POST->update_check)) {
@@ -156,7 +156,7 @@ class main
 				} elseif (isset($this->options->_POST->update_back)) {
 					// 変更確認ダイアログの「戻る」ボタン押下	
 
-					$dialog_disp = $this->initScreen->disp_back_update_dialog();
+					$dialog_disp = $this->initScreen->do_back_update_dialog();
 
 
 				//============================================================
@@ -171,13 +171,26 @@ class main
 						$alert_message = 'delete faild';
 					}
 
+
+				//============================================================
+				// 復元処理
+				//============================================================
+				} elseif (isset($this->options->_POST->restore)) {
+					// バックアップ一覧画面の「復元ボタン押下				
+
+					// Gitファイルの削除
+					$ret = json_decode($this->backupScreen->do_restore_publish());
+					if ( !$ret->status ) {				
+						$alert_message = 'delete faild';
+					}
+
 				//============================================================
 				// 即時公開処理
 				//============================================================
 				} elseif (isset($this->options->_POST->immediate)) {
 					// 初期表示画面の「即時公開」ボタン押下				
 
-					$dialog_disp = $this->initScreen->disp_immediate_dialog();
+					$dialog_disp = $this->initScreen->do_disp_immediate_dialog();
 
 				} elseif (isset($this->options->_POST->immediate_check)) {
 					// 即時公開ダイアログの「確認」ボタン押下
@@ -194,7 +207,7 @@ class main
 
 				} elseif (isset($this->options->_POST->immediate_back)) {
 					// 即時公開確認ダイアログの「戻る」ボタン押下					
-					$dialog_disp = $this->initScreen->disp_back_immediate_dialog();
+					$dialog_disp = $this->initScreen->do_back_immediate_dialog();
 				}
 			}
 
@@ -212,16 +225,16 @@ class main
 			if (isset($this->options->_POST->history)) {
 				// 初期表示画面の「履歴」ボタン押下
 
-				$disp = $this->historyScreen->disp_history_screen($this->dbh);
+				$disp = $this->historyScreen->disp_history_screen();
 
 			} elseif (isset($this->options->_POST->backup)) {
 				// 初期表示画面の「バックアップ一覧」ボタン押下
 
-				$disp = $this->backupScreen->disp_backup_screen($this->dbh);
+				$disp = $this->backupScreen->disp_backup_screen();
 			} else {
 				// 初期表示画面の表示
 
-				$disp = $this->initScreen->disp_init_screen($this->dbh);
+				$disp = $this->initScreen->do_disp_init_screen();
 
 			}
 

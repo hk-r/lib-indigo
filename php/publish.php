@@ -6,6 +6,8 @@ class publish
 {
 	private $main;
 
+	private $tsBackup;
+	private $fileManager;
 	private $pdoManager;
 	private $common;
 
@@ -35,6 +37,8 @@ class publish
 	public function __construct($main) {
 
 		$this->main = $main;
+
+		$this->tsBackup = new tsBackup($this);
 		$this->fileManager = new fileManager($this);
 		$this->pdoManager = new pdoManager($this);
 		$this->common = new common($this);
@@ -44,7 +48,7 @@ class publish
 	/**
 	 * 公開処理
 	 */
-	public function do_publish($dirname) {
+	public function do_publish($running_dirname) {
 
 		$this->common->debug_echo('■ do_publish start');
 
@@ -55,7 +59,7 @@ class publish
 						'message' => '');
 
 		$this->common->debug_echo('　□ 公開ファイル日時：');
-		$this->common->debug_echo($dirname);
+		$this->common->debug_echo($running_dirname);
 
 		try {
 
@@ -63,11 +67,6 @@ class publish
 			$project_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->project_real_path . "/"));
 
 			$this->common->debug_echo('　□ project_real_path' . $project_real_path);
-
-			// backupディレクトリの絶対パスを取得。
-			$backup_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_BACKUP));
-
-			$this->common->debug_echo('　□ backup_real_path' . $backup_real_path);
 
 			// runningディレクトリの絶対パスを取得。
 			$running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_RUNNING));
@@ -77,44 +76,6 @@ class publish
 
 			// logディレクトリの絶対パスを取得。
 			$log_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_LOG));
-
-
-			//============================================================
-			// 本番ソースを「backup」ディレクトリへコピー
-			//============================================================
-
-	 		$this->common->debug_echo('　□ -----本番ソースを「backup」ディレクトリへコピー-----');
-			
-			// // 公開ソースディレクトリの絶対パスを取得。すでに存在している場合は削除して再作成する。
-			// $backup_dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($backup_real_path . $dirname . "/"));
-
-			// $this->common->debug_echo('　□ backup_dir_real_path' . $backup_dir_real_path);
-			
-			// if ( !$this->fileManager->is_exists_remkdir($backup_dir_real_path) ) {
-			// 	throw new \Exception('Creation of Backup publish directory failed.');
-			// }
-
-			if ( file_exists($backup_real_path) && file_exists($project_real_path) ) {
-
-				// TODO:ログフォルダに出力する
-				$command = 'rsync -rtvzP' . ' ' . $project_real_path . ' ' . $backup_real_path . $dirname . '/' . ' --log-file=' . $log_real_path . '/rsync_' . $dirname . '.log' ;
-
-				$this->common->debug_echo('　□ $command：');
-				$this->common->debug_echo($command);
-
-				$ret = $this->common->command_execute($command, true);
-
-				$this->common->debug_echo('　▼ 本番バックアップの公開処理結果');
-
-				foreach ( (array)$ret['output'] as $element ) {
-					$this->common->debug_echo($element);
-				}
-
-			} else {
-					// エラー処理
-					throw new \Exception('Backup or project directory not found.');
-			}
-
 
 
 			//============================================================
@@ -155,8 +116,6 @@ class publish
 					// エラー処理
 					throw new \Exception('Running or project directory not found.');
 			}
-
-
 
 			//============================================================
 			// 公開済みのソースを「running」ディレクトリから「released」ディレクトリへ移動

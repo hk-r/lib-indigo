@@ -63,12 +63,6 @@ class cron
 
 
 			//============================================================
-			// 作業用ディレクトリの作成（既にある場合は作成しない）
-			//============================================================
-			$this->main->create_work_dir();
-
-
-			//============================================================
 			// 公開予約テーブルより、公開対象データの取得
 			//============================================================
 			// GMTの現在日時
@@ -144,9 +138,66 @@ class cron
 			//============================================================
 			// 公開処理結果テーブルの登録処理
 			//============================================================
-			$ret = json_decode($this->tsOutput->insert_ts_output($this->dbh, $this->main->options, $start_datetime, define::PUBLISH_TYPE_RESERVE));
+			$ret = json_decode($this->tsOutput->insert_ts_output($this->dbh, $this->options, $start_datetime, define::PUBLISH_TYPE_RESERVE));
 			if ( !$ret->status) {
 				throw new \Exception("TS_OUTPUT insert failed. " . $ret->message);
+			}
+
+			// インサートしたシーケンスIDを取得（処理終了時の更新処理にて使用）
+			$insert_id = $this->dbh->lastInsertId();
+
+			$this->common->debug_echo('　□ $insert_id：');
+			$this->common->debug_echo($insert_id);
+
+
+			//============================================================
+			// 本番ソースを「backup」ディレクトリへコピー
+			//============================================================
+
+	 		$this->common->debug_echo('　□ -----本番ソースを「backup」ディレクトリへコピー-----');
+			
+			// 本番環境ディレクトリの絶対パスを取得。
+			$project_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->project_real_path . "/"));
+
+			// backupディレクトリの絶対パスを取得。
+			$backup_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_BACKUP));
+
+			// logディレクトリの絶対パスを取得。
+			$log_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_LOG));
+
+
+			// GMTの現在日時
+			$backup_datetime = $this->common->get_current_datetime_of_gmt();
+			$backup_dirname = $this->common->format_gmt_datetime($backup_datetime, define::DATETIME_FORMAT_SAVE);
+
+			if ( file_exists($backup_real_path) && file_exists($project_real_path) ) {
+
+				// TODO:ログフォルダに出力する
+				$command = 'rsync -rtvzP' . ' ' . $project_real_path . ' ' . $backup_real_path . $backup_dirname . '/' . ' --log-file=' . $log_real_path . '/rsync_' . $dirname . '.log' ;
+
+				$this->common->debug_echo('　□ $command：');
+				$this->common->debug_echo($command);
+
+				$ret = $this->common->command_execute($command, true);
+
+				$this->common->debug_echo('　▼ 本番バックアップの公開処理結果');
+
+				foreach ( (array)$ret['output'] as $element ) {
+					$this->common->debug_echo($element);
+				}
+
+			} else {
+					// エラー処理
+					throw new \Exception('Backup or project directory not found.');
+			}
+
+
+			//============================================================
+			// バックアップテーブルの登録処理
+			//============================================================
+			$ret = json_decode($this->tsBackup->insert_ts_backup($this->dbh, $this->options, $backup_datetime, define::PUBLISH_TYPE_RESERVE));
+			if ( !$ret->status) {
+				throw new \Exception("TS_OUTPUT insert failed.");
 			}
 
 			// インサートしたシーケンスIDを取得（処理終了時の更新処理にて使用）
