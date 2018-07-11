@@ -70,4 +70,10 @@ class define
 	// 未削除
 	const DELETE_FLG_OFF = 0;
 
+	/**
+	 * 削除フラグ
+	 */
+	// 公開予約フォルダの
+	const DIR_NAME_RESERVE = '_reserve';
+
 }

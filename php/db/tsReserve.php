@@ -429,7 +429,7 @@ class tsReserve
 		// ID
 		$entity[self::RESERVE_ENTITY_ID_SEQ] = $array[self::TS_RESERVE_RESERVE_ID_SEQ];
 		// 公開予約日時
-		$entity[self::RESERVE_ENTITY_RESERVE_GMT] = $this->common->format_gmt_datetime($array[self::TS_RESERVE_RESERVE], define::DATETIME_FORMAT);
+		$entity[self::RESERVE_ENTITY_RESERVE_GMT] = $array[self::TS_RESERVE_RESERVE];
 		// タイムゾーンの時刻へ変換
 		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_RESERVE_RESERVE]);
 		$entity[self::RESERVE_ENTITY_RESERVE] = $tz_datetime;

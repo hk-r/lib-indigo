@@ -996,7 +996,7 @@ class initScreen
 			$this->common->debug_echo($waiting_real_path);
 
 			// 公開予約ディレクトリ名の取得
-			$dirname = $this->common->format_gmt_datetime($this->main->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE) . '_reserve';
+			$dirname = $this->common->format_gmt_datetime($this->main->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE) . define::DIR_NAME_RESERVE;
 
 			$this->common->debug_echo('　□ 公開予約ディレクトリ：');
 			$this->common->debug_echo($dirname);
@@ -1060,7 +1060,7 @@ class initScreen
 			// 「waiting」ディレクトリの変更前の公開ソースディレクトリを削除
 			//============================================================
 			// 変更前の公開予約ディレクトリ名の取得
-			$before_dirname = $this->common->format_gmt_datetime($this->main->options->_POST->before_gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE) . '_reserve';
+			$before_dirname = $this->common->format_gmt_datetime($this->main->options->_POST->before_gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE) . define::DIR_NAME_RESERVE;
 
 			$this->common->debug_echo('　□ 変更前の公開予約ディレクトリ：');
 			$this->common->debug_echo($before_dirname);
@@ -1143,7 +1143,7 @@ class initScreen
 			// 公開予約ディレクトリ名の取得
 			$selected_id =  $this->main->options->_POST->selected_id;
 			$selected_ret = $this->tsReserve->get_selected_ts_reserve($this->main->dbh, $selected_id);
-			$dirname = $this->common->format_gmt_datetime($selected_ret[tsReserve::RESERVE_ENTITY_RESERVE], define::DATETIME_FORMAT_SAVE) . '_reserve';
+			$dirname = $this->common->format_gmt_datetime($selected_ret[tsReserve::RESERVE_ENTITY_RESERVE], define::DATETIME_FORMAT_SAVE) . define::DIR_NAME_RESERVE;
 
 			$this->common->debug_echo('　□ 公開予約ディレクトリ：');
 			$this->common->debug_echo($dirname);
