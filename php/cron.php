@@ -10,14 +10,14 @@ class cron
 	private $pdoManager;
 	private $tsReserve;
 	private $tsOutput;
-	public $publish;
+	private $publish;
 	private $common;
 
 
 	/**
 	 * PDOインスタンス
 	 */
-	private $dbh;
+	public $dbh;
 
 	
 	/**
@@ -72,7 +72,7 @@ class cron
 			$this->common->debug_echo($start_datetime);
 
 			// 公開予約の一覧を取得
-			$data_list = json_decode($this->tsReserve->get_ts_reserve_publish_list($this->dbh, $start_datetime));
+			$data_list = $this->tsReserve->get_ts_reserve_publish_list($this->dbh, $start_datetime);
 
 			// TODO:ここで複数件取れてきた場合は、最新データ以外はスキップデータとして公開処理結果テーブルへ登録する
 			foreach ( (array)$data_list as $data ) {
@@ -80,7 +80,7 @@ class cron
 				$this->common->debug_echo('　□公開取得データ[配列]');
 				$this->common->debug_var_dump($data);
 
-				$dirname = $this->common->format_datetime($data[tsReserve::TS_RESERVE_COLUMN_RESERVE], define::DATETIME_FORMAT_SAVE);
+				$dirname = $this->common->format_datetime($data[tsReserve::RESERVE_ENTITY_RESERVE], define::DATETIME_FORMAT_SAVE);
 		
 				$this->common->debug_echo('　□公開ディレクトリ名');
 				$this->common->debug_var_dump($dirname);
@@ -165,15 +165,15 @@ class cron
 			$project_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->project_real_path . "/"));
 
 			// backupディレクトリの絶対パスを取得。
-			$backup_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_BACKUP));
-
-			// logディレクトリの絶対パスを取得。
-			$log_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::PATH_LOG));
-
+			$backup_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . define::PATH_BACKUP));
 
 			// GMTの現在日時
 			$backup_datetime = $this->common->get_current_datetime_of_gmt();
 			$backup_dirname = $this->common->format_gmt_datetime($backup_datetime, define::DATETIME_FORMAT_SAVE);
+
+			$this->common->debug_echo('　□ バックアップ日時：');
+			$this->common->debug_echo($backup_datetime);
+
 
 			if ( file_exists($backup_real_path) && file_exists($project_real_path) ) {
 
@@ -253,7 +253,7 @@ class cron
 		}
 
 		// データベース接続を閉じる
-		$this->pdo->close();
+		$this->pdoManager->close();
 
 		$this->common->debug_echo('■ [cron] run end');
 

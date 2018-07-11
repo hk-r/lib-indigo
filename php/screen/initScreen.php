@@ -7,6 +7,7 @@ class initScreen
 	private $main;
 	
 	private $tsReserve;
+	private $tsOutput;
 
 	private $fileManager;
 
@@ -58,6 +59,7 @@ class initScreen
 		$this->main = $main;
 
 		$this->tsReserve = new tsReserve($this);
+		$this->tsOutput = new tsOutput($this);
 		$this->fileManager = new fileManager($this);
 		$this->check = new check($this);
 		$this->publish = new publish($this);
@@ -73,12 +75,15 @@ class initScreen
 	 */
 	public function do_disp_init_screen() {
 		
-		$this->common->debug_echo('■ disp_init_screen start');
+		$this->common->debug_echo('■ do_disp_init_screen start');
 
 		$ret = "";
 
 		// 公開予約一覧を取得
 		$data_list = $this->tsReserve->get_ts_reserve_list($this->main->dbh);
+
+			$this->common->debug_echo('　□ data_list');
+			$this->common->debug_var_dump($data_list);
 
 		// // お知らせリストの取得
 		// $alert_list = $this->get_csv_alert_list();
@@ -155,7 +160,7 @@ class initScreen
 			. '</form>'
 			. '</div>';
 
-		$this->common->debug_echo('■ disp_init_screen end');
+		$this->common->debug_echo('■ do_disp_init_screen end');
 
 		return $ret;
 	}
@@ -1003,12 +1008,12 @@ class initScreen
 				throw new \Exception('Git file copy failed.');
 			}
 
-	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの登録処理-----');
+	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの登録処理！-----');
 			
 			//============================================================
 			// 入力情報を公開予約テーブルへ登録
 			//============================================================
-			$this->tsReserve->insert_ts_reserve($this->main->dbh, $this->main->options, $this->commit_hash);
+			$this->tsReserve->insert_ts_reserve($this->main->dbh, $this->main->options, 'commit_hash_dummy');
 			
 		} catch (\Exception $e) {
 
@@ -1218,13 +1223,14 @@ class initScreen
 				throw new \Exception('Git file copy failed.');
 			}
 
-	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの登録処理-----');
+	 		$this->common->debug_echo('　□ -----[即時公開]公開処理結果テーブルの登録処理-----');
 			
 
 			//============================================================
 			// 公開処理結果テーブルの登録処理
 			//============================================================
-			$ret = json_decode($this->tsOutput->insert_ts_output($this->main->dbh, $this->main->options, $start_datetime, self::PUBLISH_TYPE_IMMEDIATE));
+			$ret = $this->tsOutput->insert_ts_output($this->main->dbh, $this->main->options, $start_datetime, define::PUBLISH_TYPE_IMMEDIATE);
+
 			if ( !$ret->status) {
 				throw new \Exception("TS_OUTPUT insert failed.");
 			}

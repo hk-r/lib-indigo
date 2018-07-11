@@ -125,7 +125,7 @@ class backupScreen
 			// 公開予約ディレクトリを「backup」から「running」ディレクトリへ移動
 			//============================================================
 
-			// waitingディレクトリの絶対パスを取得。
+			// backupディレクトリの絶対パスを取得。
 			$backup_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . define::PATH_BACKUP));
 
 			// runningディレクトリの絶対パスを取得。
@@ -195,12 +195,6 @@ class backupScreen
 			
 			// 本番環境ディレクトリの絶対パスを取得。
 			$project_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->project_real_path . "/"));
-
-			// backupディレクトリの絶対パスを取得。
-			$backup_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_BACKUP));
-
-			// logディレクトリの絶対パスを取得。
-			$log_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_LOG));
 
 
 			// GMTの現在日時
