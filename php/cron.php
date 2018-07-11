@@ -10,6 +10,7 @@ class cron
 	private $pdoManager;
 	private $tsReserve;
 	private $tsOutput;
+	private $tsBackup;
 	private $publish;
 	private $common;
 
@@ -32,6 +33,7 @@ class cron
 		$this->pdoManager = new pdoManager($this);
 		$this->tsReserve = new tsReserve($this);
 		$this->tsOutput = new tsOutput($this);
+		$this->tsBackup = new tsBackup($this);
 		$this->publish = new publish($this);
 		$this->common = new common($this);
 
@@ -200,6 +202,11 @@ class cron
 			//============================================================
 			// バックアップテーブルの登録処理
 			//============================================================
+
+			
+			$this->common->debug_echo('　▼ バックアップテーブルの登録処理');
+
+
 			$ret = json_decode($this->tsBackup->insert_ts_backup($this->dbh, $this->options, $backup_datetime, define::PUBLISH_TYPE_RESERVE));
 			if ( !$ret->status) {
 				throw new \Exception("TS_OUTPUT insert failed.");
