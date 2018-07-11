@@ -92,18 +92,21 @@ class common
 	 */
 	public function format_gmt_datetime($datetime, $format) {
 	
-		$this->debug_echo('■ format_datetime start');
+		$this->debug_echo('■ format_gmt_datetime start');
 
 		$ret = '';
 
 		if ($datetime) {
-			$ret = gmdate($format, strtotime($datetime));
+			
+			$t = new \DateTime($datetime, new \DateTimeZone('GMT'));
+
+			$ret = $t->format($format);
 		}
 		
 		$this->debug_echo('　★変換前の時刻：' . $datetime);
 		$this->debug_echo('　★変換後の時刻：'. $ret);
 
-		$this->debug_echo('■ format_datetime end');
+		$this->debug_echo('■ format_gmt_datetime end');
 
 	    return $ret;
 	}
@@ -166,6 +169,7 @@ class common
 
 		return $ret;
 	}
+			
 
 	/**
 	 * ※デバッグ関数（エラー調査用）
