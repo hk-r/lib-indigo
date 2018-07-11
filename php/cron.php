@@ -46,6 +46,7 @@ class cron
 
 		// 処理実行結果格納
 		$ret = '';
+		$dirname =  '';
 
 		try {
 
@@ -63,6 +64,9 @@ class cron
 			//============================================================
 			// GMTの現在日時
 			$start_datetime = $this->common->get_current_datetime_of_gmt();
+
+			// 公開予約ディレクトリ名の取得
+			$running_dirname = $this->common->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
 
 			$this->common->debug_echo('　□ 現在日時：');
 			$this->common->debug_echo($start_datetime);
@@ -82,6 +86,11 @@ class cron
 				$this->common->debug_var_dump($dirname);
 			}
 
+			if (!$dirname) {
+				// エラー処理
+				throw new \Exception('Publish target not found.');
+			}
+
 			//============================================================
 			// 公開予約ディレクトリを「waiting」から「running」ディレクトリへ移動
 			//============================================================
@@ -98,7 +107,7 @@ class cron
 			if ( file_exists($waiting_real_path) && file_exists($running_real_path) ) {
 
 				// TODO:ログフォルダに出力する
-				$command = 'rsync -rtvzP --remove-source-files ' . $waiting_real_path . $dirname . '/ ' . $running_real_path . $dirname . '/' . ' --log-file=' . $log_real_path . $dirname . '/rsync_' . $dirname . '.log' ;
+				$command = 'rsync -rtvzP --remove-source-files ' . $waiting_real_path . $dirname . '/ ' . $running_real_path . $running_dirname . '/' . ' --log-file=' . $log_real_path . $dirname . '/rsync_' . $dirname . '.log' ;
 
 				$this->common->debug_echo('　□ $command：');
 				$this->common->debug_echo($command);

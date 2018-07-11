@@ -8,6 +8,7 @@ class backupScreen
 
 	private $check;
 	private $tsBackup;
+	private $fileManager;
 	private $common;
 
 	/**
@@ -31,6 +32,7 @@ class backupScreen
 
 		$this->check = new check($this);
 		$this->tsBackup = new tsBackup($this);
+		$this->fileManager = new fileManager($this);
 		$this->common = new common($this);
 
 	}
