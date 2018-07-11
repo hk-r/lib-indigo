@@ -80,7 +80,7 @@ class cron
 				$this->common->debug_echo('　□公開取得データ[配列]');
 				$this->common->debug_var_dump($data);
 
-				$dirname = $this->common->format_datetime($data[tsReserve::RESERVE_ENTITY_RESERVE], define::DATETIME_FORMAT_SAVE);
+				$dirname = $this->common->format_gmt_datetime($data[tsReserve::RESERVE_ENTITY_RESERVE_GMT], define::DATETIME_FORMAT_SAVE);
 		
 				$this->common->debug_echo('　□公開ディレクトリ名');
 				$this->common->debug_var_dump($dirname);

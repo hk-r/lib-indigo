@@ -34,6 +34,7 @@ class tsReserve
 	 * 公開予約エンティティのカラム定義
 	 */
 	const RESERVE_ENTITY_ID_SEQ = 'reserve_id_seq';		// ID
+	const RESERVE_ENTITY_RESERVE_GMT = 'reserve_datetime_gmt';	// 公開予約日時
 	const RESERVE_ENTITY_RESERVE = 'reserve_datetime';	// 公開予約日時
 	const RESERVE_ENTITY_RESERVE_DISPLAY = 'reserve_datetime_display';	// 公開予約日時
 	const RESERVE_ENTITY_RESERVE_DATE = 'reserve_date';	// 公開予約日時
@@ -428,6 +429,7 @@ class tsReserve
 		// ID
 		$entity[self::RESERVE_ENTITY_ID_SEQ] = $array[self::TS_RESERVE_RESERVE_ID_SEQ];
 		// 公開予約日時
+		$entity[self::RESERVE_ENTITY_RESERVE_GMT] = $this->common->format_gmt_datetime($array[self::TS_RESERVE_RESERVE], define::DATETIME_FORMAT);
 		// タイムゾーンの時刻へ変換
 		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_RESERVE_RESERVE]);
 		$entity[self::RESERVE_ENTITY_RESERVE] = $tz_datetime;
