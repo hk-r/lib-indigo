@@ -810,7 +810,7 @@ class main
 		
 		}
 
-		$img_filename = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . self::IMG_ARROW_RIGHT));
+		$img_filename = $this->options->indigo_workdir_path . self::IMG_ARROW_RIGHT;
 
 		$ret = '<div class="dialog" id="modal_dialog">'
 			. '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'

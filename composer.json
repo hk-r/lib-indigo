@@ -25,10 +25,10 @@
             "php/main.php",
             "php/cron.php",
             "php/publish.php",
-            "php/pdoManager.php",
             "php/fileManager.php",
-            "php/tsReserve.php",
-            "php/tsOutput.php",
+            "php/db/pdoManager.php",
+            "php/db/tsReserve.php",
+            "php/db/tsOutput.php",
             "php/check.php",
             "php/common.php"
         ]
