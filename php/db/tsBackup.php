@@ -72,8 +72,8 @@ class tsBackup
 					SELECT * FROM TS_BACKUP 
 					LEFT OUTER JOIN TS_OUTPUT
 						ON TS_BACKUP.output_id = TS_OUTPUT.output_id
-					WHERE " . self::TS_BACKUP_GEN_DELETE_FLG . " = " . define::DELETE_FLG_OFF
-					. " ORDER BY backup_datetime DESC";
+					WHERE TS_BACKUP." . self::TS_BACKUP_GEN_DELETE_FLG . " = " . define::DELETE_FLG_OFF
+					. " ORDER BY TS_BACKUP.backup_datetime DESC";
 
 			$this->common->debug_echo('　□ select_sql');
 			$this->common->debug_echo($select_sql);
