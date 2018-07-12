@@ -69,7 +69,13 @@ class tsBackup
 
 			// SELECT文作成（削除フラグ = 0、ソート順：公開予約日時の昇順）
 			$select_sql = "
-					SELECT * FROM TS_BACKUP 
+					SELECT 
+					  TS_BACKUP.backup_id_seq    as backup_id_seq,
+					  TS_BACKUP.backup_datetime  as backup_datetime,
+					  TS_OUTPUT.publish_type     as publish_type,
+					  TS_OUTPUT.reserve_datetime as reserve_datetime
+
+					 FROM TS_BACKUP 
 					LEFT OUTER JOIN TS_OUTPUT
 						ON TS_BACKUP.output_id = TS_OUTPUT.output_id_seq
 					WHERE TS_BACKUP." . self::TS_BACKUP_GEN_DELETE_FLG . " = " . define::DELETE_FLG_OFF
@@ -127,8 +133,8 @@ class tsBackup
 		$entity[self::BACKUP_ENTITY_DATETIME] = $tz_datetime;
 		$entity[self::BACKUP_ENTITY_DATETIME_DISPLAY] = $this->common->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISPLAY);
 
-		// // 公開種別
-		// $entity[self::BACKUP_ENTITY_PUBLISH_TYPE] = $this->common->convert_publish_type($array[self::TS_OUTPUT_PUBLISH_TYPE]);
+		// 公開種別
+		$entity[self::BACKUP_ENTITY_PUBLISH_TYPE] = $this->common->convert_publish_type($array[self::TS_OUTPUT_PUBLISH_TYPE]);
 
 
 		$this->common->debug_echo('■ convert_ts_backup_entity end');
