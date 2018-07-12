@@ -10,7 +10,7 @@ class define
 	 * 公開用の操作ディレクトリパス定義
 	 */
 	// backupディレクトリパス
-	const PATH_BACKUP = '/backup';
+	const PATH_BACKUP = '/backup/';
 	// waitingディレクトリパス
 	const PATH_WAITING = '/waiting/';
 	// runnningディレクトリパス
