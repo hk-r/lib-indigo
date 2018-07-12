@@ -75,7 +75,11 @@ class tsReserve
 
 			// SELECT文作成（削除フラグ = 0、ソート順：公開予約日時の昇順）
 			$select_sql = "
-					SELECT * FROM TS_RESERVE WHERE delete_flg = " . define::DELETE_FLG_OFF . " ORDER BY reserve_datetime";
+					SELECT * FROM TS_RESERVE 
+					WHERE NOT EXISTS (SELECT *
+              						FROM TS_OUTPUT
+              						WHERE TS_RESERVE.reserve_id_seq = TS_OUTPUT.reserve_id)
+					       and delete_flg = " . define::DELETE_FLG_OFF . " ORDER BY reserve_datetime;";
 
 			// SELECT実行
 			$ret_array = $this->pdoManager->select($dbh, $select_sql);
