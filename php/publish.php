@@ -6,42 +6,15 @@ class publish
 {
 	private $main;
 
+	private $tsBackup;
+	private $fileManager;
 	private $pdoManager;
+	private $common;
 
 	/**
 	 * PDOインスタンス
 	 */
 	private $dbh;
-
-	// // 日時フォーマット（Y-m-d H:i:s）
-	// const DATETIME_FORMAT = "Y-m-d H:i:s";
-	// // 日時フォーマット_保存用（YmdHis）
-	// const DATETIME_FORMAT_SAVE = "YmdHis";
-
-	// /**
-	//  * 公開種別
-	//  */
-	// // 予約公開
-	// const PUBLISH_TYPE_RESERVE = 1;
-	// // 復元公開
-	// const PUBLISH_TYPE_RESTORE = 2;
-	// // 即時公開
-	// const PUBLISH_TYPE_SOKUJI = 3;
-
-
-	/**
-	 * 公開ステータス
-	 */
-	// 処理中
-	const PUBLISH_STATUS_RUNNING = 0;
-	// 成功
-	const PUBLISH_STATUS_SUCCESS = 1;
-	// 成功（警告あり）
-	const PUBLISH_STATUS_ALERT = 2;
-	// 失敗
-	const PUBLISH_STATUS_FAILED = 3;
-	// スキップ
-	const PUBLISH_STATUS_SKIP = 4;
 
 	/**
 	 * 公開用の操作ディレクトリパス定義
@@ -57,11 +30,6 @@ class publish
 	// logディレクトリパス
 	const PATH_LOG = '/log/';
 
-	// 削除済み
-	const DELETE_FLG_ON = 1;
-	// 未削除
-	const DELETE_FLG_OFF = 0;
-
 	/**
 	 * コンストラクタ
 	 * @param $options = オプション
@@ -69,17 +37,20 @@ class publish
 	public function __construct($main) {
 
 		$this->main = $main;
+
+		$this->tsBackup = new tsBackup($this);
 		$this->fileManager = new fileManager($this);
 		$this->pdoManager = new pdoManager($this);
+		$this->common = new common($this);
 	}
 
 
 	/**
 	 * 公開処理
 	 */
-	public function do_publish($dirname) {
+	public function do_publish($running_dirname, $options) {
 
-		$this->debug_echo('■ do_publish start');
+		$this->common->debug_echo('■ do_publish start');
 
 		$current_dir = realpath('.');
 
@@ -87,149 +58,125 @@ class publish
 		$result = array('status' => true,
 						'message' => '');
 
-		// // GMTの現在日時
-		// $start_datetime = gmdate(self::DATETIME_FORMAT);
-		// $start_datetime_dir = gmdate(self::DATETIME_FORMAT_SAVE);
-
-		$this->debug_echo('　□ 公開ファイル日時：');
-		$this->debug_echo($dirname);
+		$this->common->debug_echo('　□ 公開ファイル日時：');
+		$this->common->debug_echo($running_dirname);
 
 		try {
 
 			// 本番環境ディレクトリの絶対パスを取得。
-			$project_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->project_real_path . "/"));
+			$project_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->project_real_path . "/"));
 
-			$this->debug_echo('　□ project_real_path' . $project_real_path);
-
-			// backupディレクトリの絶対パスを取得。
-			$backup_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_BACKUP));
-
-			$this->debug_echo('　□ backup_real_path' . $backup_real_path);
+			$this->common->debug_echo('　□ project_real_path' . $project_real_path);
 
 			// runningディレクトリの絶対パスを取得。
-			$running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_RUNNING));
+			$running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . self::PATH_RUNNING));
 
 			// releasedディレクトリの絶対パスを取得。
-			$released_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_RELEASED));
+			$released_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . self::PATH_RELEASED));
 
 			// logディレクトリの絶対パスを取得。
-			$log_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_LOG));
-
-
-			//============================================================
-			// 本番ソースを「backup」ディレクトリへコピー
-			//============================================================
-
-	 		$this->debug_echo('　□ -----本番ソースを「backup」ディレクトリへコピー-----');
-			
-			// // 公開ソースディレクトリの絶対パスを取得。すでに存在している場合は削除して再作成する。
-			// $backup_dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($backup_real_path . $dirname . "/"));
-
-			// $this->debug_echo('　□ backup_dir_real_path' . $backup_dir_real_path);
-			
-			// if ( !$this->fileManager->is_exists_remkdir($backup_dir_real_path) ) {
-			// 	throw new \Exception('Creation of Backup publish directory failed.');
-			// }
-
-			if ( file_exists($backup_real_path) && file_exists($project_real_path) ) {
-
-				// TODO:ログフォルダに出力する
-				$command = 'rsync -avzP' . ' ' . $project_real_path . ' ' . $backup_real_path . $dirname . '/' . ' --log-file=' . $log_real_path . '/rsync_' . $dirname . '.log' ;
-
-				$this->debug_echo('　□ $command：');
-				$this->debug_echo($command);
-
-				$ret = $this->main->command_execute($command, true);
-
-				$this->debug_echo('　▼ 本番バックアップの公開処理結果');
-
-				foreach ( (array)$ret['output'] as $element ) {
-					$this->debug_echo($element);
-				}
-
-			} else {
-					// エラー処理
-					throw new \Exception('Backup or project directory not found.');
-			}
-
+			$log_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . self::PATH_LOG));
 
 
 			//============================================================
 			// 「running」ディレクトリのソースを本番環境へ同期
 			//============================================================
 
-	 		$this->debug_echo('　□ -----「running」ディレクトリのソースを本番環境へ同期ー-----');
+	 		$this->common->debug_echo('　□ -----「running」ディレクトリのソースを本番環境へ同期ー-----');
 			
 			if ( file_exists($running_real_path) && file_exists($project_real_path) ) {
 
 				// 以下のコマンド（-a）だと、パーミッションまで変えようとするためエラーが発生する。
 				// $command = 'rsync -avzP ' . $running_real_path . $dirname . '/' . ' ' . $project_real_path . ' --log-file=' . $log_real_path . $dirname . '/rsync_' . $dirname . '.log' ;
 
-				// r ディレクトリを再帰的に調べる。
-				// -l シンボリックリンクをリンクとして扱う
-				// -p パーミッションも含める
+				// -r ディレクトリを再帰的に調べる。
+				// -l シンボリックリンクをリンクとして扱う（？）
+				// -p パーミッションも含める（除外）
 				// -t 更新時刻などの時刻情報も含める
-				// -o 所有者情報も含める
-				// -g ファイルのグループ情報も含める
-				// -D デバイスファイルはそのままデバイスとして扱う
-				$command = 'rsync -rtvzP --delete ' . $running_real_path . $dirname . '/' . ' ' . $project_real_path . '/' . ' ' . '--log-file=' . $log_real_path . $dirname . '/rsync_' . $dirname . '.log' ;
+				// -o 所有者情報も含める（除外）
+				// -g ファイルのグループ情報も含める（除外）
+				// -D デバイスファイルはそのままデバイスとして扱う（？）
 
-				$this->debug_echo('　□ $command：');
-				$this->debug_echo($command);
+				// -v 進捗を表示
+				// -P ファイル転送中の場合、途中から再開するように
 
-				$ret = $this->main->command_execute($command, true);
+				// ※runningディレクトリパスの後ろにはスラッシュは付けない（スラッシュを付けると日付ディレクトリも含めて同期してしまう）
+				$command = 'rsync -rtvzP --delete ' . $running_real_path . $running_dirname . '/' . ' ' . $project_real_path . '/' . ' ' . '--log-file=' . $log_real_path . $running_dirname . '/rsync_' . $running_dirname . '.log' ;
 
-				$this->debug_echo('　▼本番反映の公開処理結果');
+				$this->common->debug_echo('　□ $command：');
+				$this->common->debug_echo($command);
 
-				foreach ( (array)$ret['output'] as $element ) {
-					$this->debug_echo($element);
-				}
+				$ret = $this->common->command_execute($command, true);
+
+				// $this->common->debug_echo('　▼本番反映の公開処理結果');
+
+				// foreach ( (array)$ret['output'] as $element ) {
+				// 	$this->common->debug_echo($element);
+				// }
 
 			} else {
 					// エラー処理
 					throw new \Exception('Running or project directory not found.');
 			}
 
-
-
 			//============================================================
 			// 公開済みのソースを「running」ディレクトリから「released」ディレクトリへ移動
 			//============================================================
 
-			if ( file_exists($running_real_path) && file_exists($released_real_path)  ) {
+	 		$this->common->debug_echo('　□ -----公開済みのソースを「running」ディレクトリから「released」ディレクトリへ移動-----');
 
-				// TODO:ログフォルダに出力する
-				$command = 'rsync -avzP --remove-source-files ' . $running_real_path . $dirname . '/' . ' ' . $released_real_path . $dirname . '/' . ' --log-file=' . $log_real_path . $dirname . '/rsync_' . $dirname . '.log' ;
+			$ret = json_decode($this->move_dir($running_real_path, $running_dirname, $released_real_path, $running_dirname));
 
-				$this->debug_echo('　□ $command：');
-				$this->debug_echo($command);
+			if ( !$ret->status) {
+				throw new \Exception($ret->message);
+			}
 
-				$ret = $this->main->command_execute($command, true);
+		} catch (\Exception $e) {
 
-				$this->debug_echo('　▼REALEASEDへの移動の公開処理結果');
+			$result['status'] = false;
+			$result['message'] = $e->getMessage();
 
-				foreach ( (array)$ret['output'] as $element ) {
-					$this->debug_echo($element);
-				}
+			echo "例外キャッチ：", $e->getMessage() . "<br>";
 
+			chdir($current_dir);
+			return json_encode($result);
+		}
 
-				// runningの空ディレクトリを削除する
-				$command = 'find ' .  $running_real_path . $dirname . '/ -type d -empty -delete' ;
+		$result['status'] = true;
 
-				$this->debug_echo('　□ $command：');
-				$this->debug_echo($command);
+		chdir($current_dir);
 
-				$ret = $this->main->command_execute($command, true);
+		$this->common->debug_echo('■ immediate_release end');
 
-				$this->debug_echo('　▼Runningディレクトリの削除');
+		return json_encode($result);
+	}
 
-				foreach ( (array)$ret['output'] as $element ) {
-					$this->debug_echo($element);
+	/**
+	 * バックアップファイルの作成（コマンド実行）
+	 */
+	public function create_backup($project_real_path, $backup_real_path, $backup_dirname) {
+
+		$this->common->debug_echo('■ create_backup start');
+
+		try{
+
+			if ( file_exists($backup_real_path) && file_exists($project_real_path) ) {
+
+				$command = 'rsync -rtvzP' . ' ' . $project_real_path . ' ' . $backup_real_path . $backup_dirname . '/' . ' --log-file=' . $log_real_path . '/rsync_' . $backup_dirname . '.log' ;
+
+				$this->common->debug_echo('　□ $command：' . $command);
+
+				$ret = $this->common->command_execute($command, true);
+
+				$this->common->debug_echo('　★ バックアップ作成の処理結果');
+
+				foreach ( (array) $ret['output'] as $element ) {
+					$this->common->debug_echo($element);
 				}
 
 			} else {
 					// エラー処理
-					throw new \Exception('Running or released directory not found.');
+					throw new \Exception('Backup or project directory not found.');
 			}
 		
 		} catch (\Exception $e) {
@@ -239,7 +186,7 @@ class publish
 			$result['status'] = false;
 			$result['message'] = $e->getMessage();
 
-			$this->debug_echo('■ immediate_release error end');
+			$this->common->debug_echo('■ immediate_release error end');
 
 			chdir($current_dir);
 			return json_encode($result);
@@ -251,37 +198,71 @@ class publish
 
 		chdir($current_dir);
 
-		$this->debug_echo('■ immediate_release end');
+		$this->common->debug_echo('■ immediate_release end');
 
 		return json_encode($result);
 	}
 
-
-
-
 	/**
-	 * ※デバッグ関数（エラー調査用）
-	 *	 
+	 * ディレクトリの移動（コマンド実行）
 	 */
-	function debug_echo($text) {
-	
-		// echo strval($text);
-		// echo "<br>";
+	public function move_dir($from_real_path, $from_dirname, $to_real_path, $to_dirname) {
 
-		return;
+		$this->common->debug_echo('■ move_running_dir start');
+
+		try{
+
+			if ( file_exists($from_real_path) && file_exists($to_real_path) ) {
+
+				//============================================================
+				// runningディレクトリへファイルを移動する
+				//============================================================
+				$command = 'rsync -rtvzP --remove-source-files ' . $from_real_path . $from_dirname . '/ ' . $to_real_path . $to_dirname . '/' . ' --log-file=' . $log_real_path . $from_dirname . '/rsync_' . $to_dirname . '.log' ;
+
+				$ret = $this->common->command_execute($command, true);
+
+				$this->common->debug_echo('　★ ファイル移動結果');
+
+				// foreach ( (array)$ret['output'] as $element ) {
+				// 	$this->common->debug_echo($element);
+				// }
+
+				//============================================================
+				// 移動元のディレクトリを削除する
+				//============================================================
+				$command = 'find ' .  $from_real_path . $from_dirname . '/ -type d -empty -delete' ;
+
+				$ret = $this->common->command_execute($command, true);
+
+				$this->common->debug_echo('　★ 移動元のディレクトリ削除結果');
+
+				// foreach ( (array)$ret['output'] as $element ) {
+				// 	$this->common->debug_echo($element);
+				// }
+
+			} else {
+					// エラー処理
+					throw new \Exception('Base or running directory not found.');
+			}
+		
+		} catch (\Exception $e) {
+
+			$result['status'] = false;
+			$result['message'] = $e->getMessage();
+
+			$this->common->debug_echo('■ move_running_dir error end');
+
+			chdir($current_dir);
+			return json_encode($result);
+		}
+
+		$result['status'] = true;
+
+		chdir($current_dir);
+
+		$this->common->debug_echo('■ move_running_dir end');
+
+		return json_encode($result);
 	}
-
-	/**
-	 * ※デバッグ関数（エラー調査用）
-	 *	 
-	 */
-	function debug_var_dump($text) {
-	
-		// var_dump($text);
-		// echo "<br>";
-
-		return;
-	}
-
 }
 
