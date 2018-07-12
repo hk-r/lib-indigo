@@ -197,8 +197,8 @@ class cron
 		// バックアップテーブルの登録処理
 		//============================================================
 		
-		$this->common->debug_echo('　▼ バックアップテーブルの登録処理');
-
+ 		$this->common->debug_echo('　□ -----バックアップテーブルの登録処理-----');
+		
 
 		$ret = json_decode($this->tsBackup->insert_ts_backup($this->dbh, $this->options, $backup_datetime, define::PUBLISH_TYPE_RESERVE));
 		if ( !$ret->status) {
@@ -223,6 +223,9 @@ class cron
 		//============================================================
 		// 公開処理結果テーブルの更新処理
 		//============================================================
+
+ 		$this->common->debug_echo('　□ -----公開処理結果テーブルの更新処理-----');
+
 		// GMTの現在日時
 		$end_datetime = $this->common->get_current_datetime_of_gmt();
 
