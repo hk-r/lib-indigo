@@ -246,7 +246,7 @@ class cron
  		$this->common->debug_echo('　□ -----公開処理-----');
 			
 
-		$ret = json_decode($this->publish->do_publish($dirname, $this->options));
+		$ret = json_decode($this->publish->do_publish($running_dirname, $this->options));
 
 		// 公開ステータスの設定
 		$publish_status;
