@@ -71,7 +71,7 @@ class tsBackup
 			$select_sql = "
 					SELECT * FROM TS_BACKUP 
 					LEFT OUTER JOIN TS_OUTPUT
-						ON TS_BACKUP.output_id = TS_OUTPUT.output_id
+						ON TS_BACKUP.output_id = TS_OUTPUT.output_id_seq
 					WHERE TS_BACKUP." . self::TS_BACKUP_GEN_DELETE_FLG . " = " . define::DELETE_FLG_OFF
 					. " ORDER BY TS_BACKUP.backup_datetime DESC";
 
