@@ -8,6 +8,7 @@ class initScreen
 	
 	private $tsReserve;
 	private $tsOutput;
+	private $tsBackup;
 
 	private $fileManager;
 
@@ -60,6 +61,7 @@ class initScreen
 
 		$this->tsReserve = new tsReserve($this);
 		$this->tsOutput = new tsOutput($this);
+		$this->tsBackup = new tsBackup($this);
 		$this->fileManager = new fileManager($this);
 		$this->check = new check($this);
 		$this->publish = new publish($this);

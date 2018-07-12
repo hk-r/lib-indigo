@@ -233,7 +233,7 @@ class cron
  		$this->common->debug_echo('　□ -----バックアップテーブルの登録処理-----');
 		
 
-		$ret = json_decode($this->tsBackup->insert_ts_backup($this->dbh, $this->options, $backup_datetime, define::PUBLISH_TYPE_RESERVE));
+		$ret = json_decode($this->tsBackup->insert_ts_backup($this->dbh, $this->options, $backup_datetime, $insert_id));
 		if ( !$ret->status) {
 			throw new \Exception("TS_OUTPUT insert failed." . $ret->status);
 		}
