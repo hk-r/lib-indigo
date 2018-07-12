@@ -122,7 +122,7 @@ class cron
 		// 公開予約の一覧を取得
 		$data_list = $this->tsReserve->get_ts_reserve_publish_list($this->dbh, $start_datetime);
 
-		if ($data_list) {
+		if (!$data_list) {
 			$this->common->debug_echo('　□ 公開対象のデータが存在しない');
 			return $ret_flg;
 		}
