@@ -164,7 +164,7 @@ class tsOutput
 	 *
 	 * @return なし
 	 */
-	public function insert_ts_output($dbh, $options, $start_datetime, $type, $entityArray) {
+	public function insert_ts_output($dbh, $dataArray) {
 
 		$this->common->debug_echo('■ insert_ts_output start');
 
