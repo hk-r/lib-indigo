@@ -117,8 +117,8 @@ class tsBackup
 		$entity[self::BACKUP_ENTITY_DATETIME] = $tz_datetime;
 		$entity[self::BACKUP_ENTITY_DATETIME_DISPLAY] = $this->common->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISPLAY);
 
-		// 公開種別
-		$entity[self::BACKUP_ENTITY_PUBLISH_TYPE] = $this->common->convert_publish_type($array[self::TS_OUTPUT_PUBLISH_TYPE]);
+		// // 公開種別
+		// $entity[self::BACKUP_ENTITY_PUBLISH_TYPE] = $this->common->convert_publish_type($array[self::TS_OUTPUT_PUBLISH_TYPE]);
 
 
 		$this->common->debug_echo('■ convert_ts_backup_entity end');
