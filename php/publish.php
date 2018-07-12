@@ -101,7 +101,7 @@ class publish
 				// -P ファイル転送中の場合、途中から再開するように
 
 				// ※runningディレクトリパスの後ろにはスラッシュは付けない（スラッシュを付けると日付ディレクトリも含めて同期してしまう）
-				$command = 'rsync -rtvzP --delete ' . $running_real_path . $dirname . ' ' . $project_real_path . '/' . ' ' . '--log-file=' . $log_real_path . $dirname . '/rsync_' . $dirname . '.log' ;
+				$command = 'rsync -rtvzP --delete ' . $running_real_path . $dirname . '/' . ' ' . $project_real_path . '/' . ' ' . '--log-file=' . $log_real_path . $dirname . '/rsync_' . $dirname . '.log' ;
 
 				$this->common->debug_echo('　□ $command：');
 				$this->common->debug_echo($command);
