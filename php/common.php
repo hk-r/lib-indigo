@@ -29,6 +29,7 @@ class common
 
 		// return gmdate(DATE_ATOM, time());
 		return gmdate(define::DATETIME_FORMAT, time());
+		
 	}
 
 	/**
@@ -40,7 +41,7 @@ class common
 	 */
 	public function command_execute($command, $captureStderr) {
 	
-		$this->debug_echo('■ execute start');
+		// $this->debug_echo('■ execute start');
 
 	    $output = array();
 	    $return = 0;
@@ -52,7 +53,7 @@ class common
 
 	    exec($command, $output, $return);
 
-		$this->debug_echo('■ execute end');
+		// $this->debug_echo('■ execute end');
 
 	    return array('output' => $output, 'return' => $return);
 	}

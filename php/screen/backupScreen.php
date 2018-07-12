@@ -121,9 +121,8 @@ class backupScreen
 			$this->common->debug_echo('　□ 現在日時：');
 			$this->common->debug_echo($start_datetime);
 
-			//============================================================
-			// 公開予約ディレクトリを「backup」から「running」ディレクトリへ移動
-			//============================================================
+			// 本番環境ディレクトリの絶対パスを取得。
+			$project_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->project_real_path . "/"));
 
 			// backupディレクトリの絶対パスを取得。
 			$backup_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . define::PATH_BACKUP));
@@ -134,57 +133,33 @@ class backupScreen
 			// logディレクトリの絶対パスを取得。
 			$log_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . define::PATH_LOG));
 
-			if ( file_exists($backup_real_path) && file_exists($running_real_path) ) {
+			//============================================================
+			// 公開予約ディレクトリを「backup」から「running」ディレクトリへ移動
+			//============================================================
 
-				// TODO:ログフォルダに出力する
-				$command = 'rsync -rtvzP --remove-source-files ' . $backup_real_path . $dirname . '/ ' . $running_real_path . $dirname . '/' . ' --log-file=' . $log_real_path . $dirname . '/rsync_' . $dirname . '.log' ;
+	 		$this->common->debug_echo('　□ -----公開予約ディレクトリを「backup」から「running」ディレクトリへ移動-----');
 
-				$this->common->debug_echo('　□ $command：');
-				$this->common->debug_echo($command);
+			$ret = json_decode($this->publish->move_dir($backup_real_path, $dirname, $running_real_path, $dirname));
 
-				$ret = $this->common->command_execute($command, true);
-
-				$this->common->debug_echo('　▼ backup⇒runningのファイル移動結果');
-
-				foreach ( (array)$ret['output'] as $element ) {
-					$this->common->debug_echo($element);
-				}
-
-				// backupの空ディレクトリを削除する
-				$command = 'find ' .  $backup_real_path . $dirname . '/ -type d -empty -delete' ;
-
-				$this->common->debug_echo('　□ $command：');
-				$this->common->debug_echo($command);
-
-				$ret = $this->common->command_execute($command, true);
-
-				$this->common->debug_echo('　▼ backupディレクトリの削除');
-
-				foreach ( (array)$ret['output'] as $element ) {
-					$this->common->debug_echo($element);
-				}
-
-			} else {
-					// エラー処理
-					throw new \Exception('Backup or running directory not found.');
+			if ( !$ret->status) {
+				throw new \Exception($ret->message);
 			}
-
-	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの登録処理-----');
-			
 
 			//============================================================
 			// 公開処理結果テーブルの登録処理
 			//============================================================
+
+	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの登録処理-----');
+
 			$ret = json_decode($this->tsOutput->insert_ts_output($this->main->dbh, $this->main->options, $start_datetime, self::PUBLISH_TYPE_RESTORE));
 			if ( !$ret->status) {
 				throw new \Exception("TS_OUTPUT insert failed.");
 			}
 
 			// インサートしたシーケンスIDを取得（処理終了時の更新処理にて使用）
-			$insert_id = $this->main->dbh->lastInsertId();
+			$insert_id = $ret->insert_id;
 
-			$this->common->debug_echo('　□ $insert_id：');
-			$this->common->debug_echo($insert_id);
+			$this->common->debug_echo('　□ $insert_id：' . $insert_id);
 
 
 			//============================================================
@@ -192,34 +167,18 @@ class backupScreen
 			//============================================================
 
 	 		$this->common->debug_echo('　□ -----本番ソースを「backup」ディレクトリへコピー-----');
-			
-			// 本番環境ディレクトリの絶対パスを取得。
-			$project_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->project_real_path . "/"));
-
 
 			// GMTの現在日時
 			$backup_datetime = $this->common->get_current_datetime_of_gmt();
 			$backup_dirname = $this->common->format_gmt_datetime($backup_datetime, define::DATETIME_FORMAT_SAVE);
 
-			if ( file_exists($backup_real_path) && file_exists($project_real_path) ) {
+			$this->common->debug_echo('　□ バックアップ日時：' . $backup_datetime);
 
-				// TODO:ログフォルダに出力する
-				$command = 'rsync -rtvzP' . ' ' . $project_real_path . ' ' . $backup_real_path . $backup_dirname . '/' . ' --log-file=' . $log_real_path . '/rsync_' . $dirname . '.log' ;
-
-				$this->common->debug_echo('　□ $command：');
-				$this->common->debug_echo($command);
-
-				$ret = $this->common->command_execute($command, true);
-
-				$this->common->debug_echo('　▼ 本番バックアップの公開処理結果');
-
-				foreach ( (array)$ret['output'] as $element ) {
-					$this->common->debug_echo($element);
-				}
-
-			} else {
-					// エラー処理
-					throw new \Exception('Backup or project directory not found.');
+			// バックアップファイル作成
+			$ret = json_decode($this->publish->create_backup($project_real_path, $backup_real_path, $log_real_path, $backup_dirname));
+		
+			if ( !$ret->status) {
+				throw new \Exception($ret->message);
 			}
 
 
@@ -230,13 +189,6 @@ class backupScreen
 			if ( !$ret->status) {
 				throw new \Exception("TS_OUTPUT insert failed.");
 			}
-
-			// インサートしたシーケンスIDを取得（処理終了時の更新処理にて使用）
-			$insert_id = $this->main->dbh->lastInsertId();
-
-			$this->common->debug_echo('　□ $insert_id：');
-			$this->common->debug_echo($insert_id);
-
 
 
 			//============================================================
@@ -259,7 +211,7 @@ class backupScreen
 			// GMTの現在日時
 			$end_datetime = $this->common->get_current_datetime_of_gmt();
 
-	 		$ret = $this->tsOutput->update_ts_output($this->main->dbh, $insert_id, $end_datetime, $publish_status);
+	 		$ret = json_decode($this->tsOutput->update_ts_output($this->main->dbh, $insert_id, $end_datetime, $publish_status));
 
 			if ( !$ret->status) {
 				throw new \Exception("TS_OUTPUT update failed. " . $ret->message);

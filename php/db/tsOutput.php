@@ -94,7 +94,7 @@ class tsOutput
 
 		} catch (\Exception $e) {
 
-			echo "例外キャッチ：", $e->getMessage(), "\n";
+			echo "例外キャッチ：", $e->getMessage() . "<br>";
 
 			return $conv_ret_array;
 		}
@@ -111,8 +111,7 @@ class tsOutput
 	 */
 	public function get_selected_ts_output($dbh, $selected_id) {
 
-
-		$this->common->debug_echo('■ get_selected_ts_output start');
+		// $this->common->debug_echo('■ get_selected_ts_output start');
 
 		$ret_array = array();
 
@@ -150,12 +149,12 @@ class tsOutput
 
 		} catch (\Exception $e) {
 
-			echo "例外キャッチ：", $e->getMessage(), "\n";
+			echo "例外キャッチ：", $e->getMessage() . "<br>";
 
 			return $conv_ret_array;
 		}
 		
-		$this->common->debug_echo('■ get_selected_ts_output end');
+		// $this->common->debug_echo('■ get_selected_ts_output end');
 
 		return $conv_ret_array;
 	}
@@ -170,7 +169,8 @@ class tsOutput
 		$this->common->debug_echo('■ insert_ts_output start');
 
 		$result = array('status' => true,
-						'message' => '');
+						'message' => '',
+						'insert_id' => '');
 
 		try {
 
@@ -233,9 +233,9 @@ class tsOutput
 				":" . self::TS_OUTPUT_RESERVE_ID => null,
 				":" . self::TS_OUTPUT_BACKUP_ID => null,
 				":" . self::TS_OUTPUT_RESERVE => null,
-				":" . self::TS_OUTPUT_BRANCH => "ブランチ名",
+				":" . self::TS_OUTPUT_BRANCH => $options->_POST->branch_select_value,
 				":" . self::TS_OUTPUT_COMMIT => "dummy_commit_hash",
-				":" . self::TS_OUTPUT_COMMENT => "コメント",
+				":" . self::TS_OUTPUT_COMMENT => $options->_POST->comment,
 				":" . self::TS_OUTPUT_PUBLISH_TYPE => $type,
 				":" . self::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_RUNNING,
 				":" . self::TS_OUTPUT_DIFF_FLG1 => null,
@@ -253,6 +253,11 @@ class tsOutput
 
 			// INSERT実行
 			$stmt = $this->pdoManager->execute($dbh, $insert_sql, $params);
+
+			// 登録したシーケンスIDをセット
+			$insert_id = $result['insert_id'] = $dbh->lastInsertId();
+			
+			$this->common->debug_echo('　□ insert_id：' . $insert_id);
 
 		} catch (\Exception $e) {
 

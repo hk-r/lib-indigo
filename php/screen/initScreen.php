@@ -1002,7 +1002,7 @@ class initScreen
 			$this->common->debug_echo($dirname);
 
 			// コピー処理
-			$ret = json_decode($this->file_copy($waiting_real_path, $dirname));
+			$ret = json_decode($this->git_file_copy($waiting_real_path, $dirname));
 
 			if ( !$ret->status ) {
 				throw new \Exception('Git file copy failed.');
@@ -1082,7 +1082,7 @@ class initScreen
 			$this->common->debug_echo($dirname);
 
 			// コピー処理
-			$ret = json_decode($this->file_copy($waiting_real_path, $dirname));
+			$ret = json_decode($this->git_file_copy($waiting_real_path, $dirname));
 
 			if ( !$ret->status ) {
 				throw new \Exception('Git file copy failed.');
@@ -1152,13 +1152,15 @@ class initScreen
 			$ret = json_decode($this->file_delete($waiting_real_path, $dirname));
 
 			if ( !$ret->status ) {
-				throw new \Exception('Git file delete failed.');
+				throw new \Exception('Git file delete failed.' . $ret->status);
 			}
-			$this->common->debug_echo('　□ -----公開処理結果テーブルの削除処理-----');
-			
+
 			//============================================================
 			// 入力情報を公開予約テーブルへ更新
 			//============================================================
+
+			$this->common->debug_echo('　□ -----公開処理結果テーブルの削除処理-----');
+
 			$this->tsReserve->delete_reserve_table($this->main->dbh, $selected_id);
 			
 		} catch (\Exception $e) {
@@ -1195,51 +1197,65 @@ class initScreen
 		$result = array('status' => true,
 						'message' => '');
 
+		$insert_id;
+
 		try {
 
 			// GMTの現在日時
 			$start_datetime = $this->common->get_current_datetime_of_gmt();
 
-			$this->common->debug_echo('　□ 現在日時：');
-			$this->common->debug_echo($start_datetime);
+			$this->common->debug_echo('　□ 公開処理開始日時：' . $start_datetime);
+
+
+			// 本番環境ディレクトリの絶対パスを取得。
+			$project_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->project_real_path . "/"));
+
+			// backupディレクトリの絶対パスを取得。
+			$backup_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_BACKUP));
+
+			// logディレクトリの絶対パスを取得。
+			$log_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_LOG));
+
 
 			// ============================================================
 			// 指定ブランチのGit情報を「running」ディレクトリへコピー
 			// ============================================================
 
+	 		$this->common->debug_echo('　□ -----[即時公開]指定ブランチのGit情報を「running」ディレクトリへコピー-----');
+			
 			// runningディレクトリの絶対パスを取得。
 			$running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_RUNNING));
 
 			// 公開予約ディレクトリ名の取得
 			$dirname = $this->common->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
 
-			$this->common->debug_echo('　□ 公開予約ディレクトリ：');
-			$this->common->debug_echo($dirname);
+			$this->common->debug_echo('　□ 公開予約ディレクトリ：' . $dirname);
 
-			// コピー処理
-			$ret = json_decode($this->file_copy($running_real_path, $dirname));
+			// Git情報のコピー処理
+			$ret = json_decode($this->git_file_copy($running_real_path, $dirname));
 
 			if ( !$ret->status ) {
 				throw new \Exception('Git file copy failed.');
 			}
 
-	 		$this->common->debug_echo('　□ -----[即時公開]公開処理結果テーブルの登録処理-----');
-			
 
 			//============================================================
 			// 公開処理結果テーブルの登録処理
 			//============================================================
-			$ret = $this->tsOutput->insert_ts_output($this->main->dbh, $this->main->options, $start_datetime, define::PUBLISH_TYPE_IMMEDIATE);
+
+	 		$this->common->debug_echo('　□ -----[即時公開]公開処理結果テーブルの登録処理-----');
+			
+			// 公開処理結果テーブルの登録
+			$ret = json_decode($this->tsOutput->insert_ts_output($this->main->dbh, $this->main->options, $start_datetime, define::PUBLISH_TYPE_IMMEDIATE));
 
 			if ( !$ret->status) {
 				throw new \Exception("TS_OUTPUT insert failed.");
 			}
 
 			// インサートしたシーケンスIDを取得（処理終了時の更新処理にて使用）
-			$insert_id = $this->main->dbh->lastInsertId();
+			$insert_id = $ret->insert_id;
 
-			$this->common->debug_echo('　□ $insert_id：');
-			$this->common->debug_echo($insert_id);
+			$this->common->debug_echo('　□ $insert_id：' . $insert_id);
 
 
 			//============================================================
@@ -1248,41 +1264,18 @@ class initScreen
 
 	 		$this->common->debug_echo('　□ -----本番ソースを「backup」ディレクトリへコピー-----');
 			
-			// 本番環境ディレクトリの絶対パスを取得。
-			$project_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->project_real_path . "/"));
-
-			// backupディレクトリの絶対パスを取得。
-			$backup_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_BACKUP));
-
-			// logディレクトリの絶対パスを取得。
-			$log_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_LOG));
-
-
 			// GMTの現在日時
 			$backup_datetime = $this->common->get_current_datetime_of_gmt();
 			$backup_dirname = $this->common->format_gmt_datetime($backup_datetime, define::DATETIME_FORMAT_SAVE);
 
-			if ( file_exists($backup_real_path) && file_exists($project_real_path) ) {
+			$this->common->debug_echo('　□ バックアップ日時：' . $backup_datetime);
 
-				// TODO:ログフォルダに出力する
-				$command = 'rsync -rtvzP' . ' ' . $project_real_path . ' ' . $backup_real_path . $backup_dirname . '/' . ' --log-file=' . $log_real_path . '/rsync_' . $dirname . '.log' ;
-
-				$this->common->debug_echo('　□ $command：');
-				$this->common->debug_echo($command);
-
-				$ret = $this->common->command_execute($command, true);
-
-				$this->common->debug_echo('　▼ 本番バックアップの公開処理結果');
-
-				foreach ( (array)$ret['output'] as $element ) {
-					$this->common->debug_echo($element);
-				}
-
-			} else {
-					// エラー処理
-					throw new \Exception('Backup or project directory not found.');
+			// バックアップファイル作成
+			$ret = json_decode($this->publish->create_backup($project_real_path, $backup_real_path, $log_real_path, $backup_dirname));
+		
+			if ( !$ret->status) {
+				throw new \Exception($ret->message);
 			}
-
 
 			//============================================================
 			// バックアップテーブルの登録処理
@@ -1294,13 +1287,6 @@ class initScreen
 			if ( !$ret->status) {
 				throw new \Exception("TS_OUTPUT insert failed.");
 			}
-
-			// インサートしたシーケンスIDを取得（処理終了時の更新処理にて使用）
-			$insert_id = $this->main->dbh->lastInsertId();
-
-			$this->common->debug_echo('　□ $insert_id：');
-			$this->common->debug_echo($insert_id);
-
 
 
 			//============================================================
@@ -1322,15 +1308,15 @@ class initScreen
 
 
 			//============================================================
-			// 公開処理結果テーブルの更新処理
+			// 公開処理結果テーブルの更新処理（成功）
 			//============================================================
 
-	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの更新処理-----');
+	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの更新処理（成功）-----');
 			
 			// GMTの現在日時
 			$end_datetime = $this->common->get_current_datetime_of_gmt();
 
-	 		$ret = $this->tsOutput->update_ts_output($this->main->dbh, $insert_id, $end_datetime, $publish_status);
+	 		$ret = json_decode($this->tsOutput->update_ts_output($this->main->dbh, $insert_id, $end_datetime, $publish_status));
 
 			if ( !$ret->status) {
 				throw new \Exception("TS_OUTPUT update failed. " . $ret->message);
@@ -1339,6 +1325,15 @@ class initScreen
 		} catch (\Exception $e) {
 
 			// set_time_limit(30);
+
+			//============================================================
+			// 公開処理結果テーブルの更新処理（失敗）
+			//============================================================
+
+	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの更新処理（失敗）-----');
+			// GMTの現在日時
+			$end_datetime = $this->common->get_current_datetime_of_gmt();
+	 		$this->tsOutput->update_ts_output($this->main->dbh, $insert_id, $end_datetime, define::PUBLISH_STATUS_FAILED);
 
 			$result['status'] = false;
 			$result['message'] = $e->getMessage();
@@ -1536,9 +1531,9 @@ class initScreen
 	 *
 	 * @return なし
 	 */
-	private function file_copy($path, $dirname) {
+	private function git_file_copy($path, $dirname) {
 
-		$this->common->debug_echo('■ file_copy start');
+		$this->common->debug_echo('■ git_file_copy start');
 
 		$current_dir = realpath('.');
 
@@ -1548,17 +1543,15 @@ class initScreen
 
 		try {
 
-			// 公開ソースディレクトリの絶対パスを取得。すでに存在している場合は削除して再作成する。
+			// 公開日時ディレクトリの絶対パスを取得。
+			// すでに存在している場合は削除して再作成する。
 			$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($path . $dirname));
-
-			$this->common->debug_echo('　□ $dir_real_path' . $dir_real_path);
-
 			if ( !$this->fileManager->is_exists_remkdir($dir_real_path) ) {
 				throw new \Exception('Creation of Waiting publish directory failed.');
 			}
 
 			//============================================================
-			// 対象ディレクトリに移動し、指定ブランチのGit情報を取得する
+			// 作成ディレクトリに移動し、指定ブランチのGit情報をコピーする
 			//============================================================
 			if ( chdir($dir_real_path) ) {
 				$this->git_pull();
@@ -1568,8 +1561,6 @@ class initScreen
 
 		} catch (\Exception $e) {
 
-			set_time_limit(30);
-
 			$result['status'] = false;
 			$result['message'] = $e->getMessage();
 
@@ -1577,13 +1568,10 @@ class initScreen
 			return json_encode($result);
 		}
 
-		set_time_limit(30);
-
 		$result['status'] = true;
-		
 		chdir($current_dir);
 
-		$this->common->debug_echo('■ file_copy end');
+		$this->common->debug_echo('■ git_file_copy end');
 
 		return json_encode($result);
 
@@ -1672,15 +1660,11 @@ class initScreen
 				if ( $ret['return'] !== 0 ) {
 					throw new \Exception('Delete directory failed.');
 				}
-			} 
-
-			// else {
-			// 	throw new \Exception('Delete directory not found.');
-			// }
+			} else {
+				throw new \Exception('Delete directory not found.');
+			}
 		
 		} catch (\Exception $e) {
-
-			set_time_limit(30);
 
 			$result['status'] = false;
 			$result['message'] = $e->getMessage();
@@ -1689,7 +1673,6 @@ class initScreen
 			return json_encode($result);
 		}
 
-		set_time_limit(30);
 		$result['status'] = true;
 		chdir($current_dir);
 

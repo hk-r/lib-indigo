@@ -84,7 +84,7 @@ class tsBackup
 
 		} catch (\Exception $e) {
 
-			echo "例外キャッチ：", $e->getMessage(), "\n";
+			echo "例外キャッチ：", $e->getMessage() . "<br>";
 
 			return $conv_ret_array;
 		}
@@ -185,6 +185,7 @@ class tsBackup
 		
 			// INSERT実行
 			$stmt = $this->pdoManager->execute($dbh, $insert_sql, $params);
+
 
 		} catch (Exception $e) {
 

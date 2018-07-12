@@ -123,7 +123,7 @@ class main
 
 					$ret = json_decode($this->initScreen->do_add_confirm());	
 					if ( !$ret->status ) {
-						$alert_message = 'add confirm faild';
+						$alert_message = 'Add confirm faild. ' . $ret->message;
 					}
 
 				} elseif (isset($this->options->_POST->add_back)) {
@@ -150,7 +150,7 @@ class main
 					
 					$ret = json_decode($this->initScreen->do_update_confirm());	
 					if ( !$ret->status ) {
-						$alert_message = 'update confirm faild';
+						$alert_message = 'Update confirm faild. ' . $ret->message;
 					}
 
 				} elseif (isset($this->options->_POST->update_back)) {
@@ -168,7 +168,7 @@ class main
 					// Gitファイルの削除
 					$ret = json_decode($this->initScreen->do_delete());
 					if ( !$ret->status ) {				
-						$alert_message = 'delete faild';
+						$alert_message = 'Delete faild. ' . $ret->message;
 					}
 
 
@@ -181,7 +181,7 @@ class main
 					// Gitファイルの削除
 					$ret = json_decode($this->backupScreen->do_restore_publish());
 					if ( !$ret->status ) {				
-						$alert_message = 'delete faild';
+						$alert_message = 'Delete faild. ' . $ret->message;
 					}
 
 				//============================================================
@@ -202,7 +202,7 @@ class main
 					
 					$ret = json_decode($this->initScreen->do_immediate_publish());
 					if ( !$ret->status ) {
-						$alert_message = 'Immediate publish faild';
+						$alert_message = 'Immediate publish faild. ' . $ret->message;
 					}
 
 				} elseif (isset($this->options->_POST->immediate_back)) {

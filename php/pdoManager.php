@@ -192,7 +192,7 @@ class pdoManager
 			throw new \Exception($this->main->dbh->errorInfo());
 		}
 
-		$this->common->debug_echo('　□ 公開予約テーブル作成完了');
+		// $this->common->debug_echo('　□ 公開予約テーブル作成完了');
 
 		//============================================================
 		// 公開処理結果テーブル作成
@@ -228,7 +228,7 @@ class pdoManager
 			throw new \Exception($this->main->dbh->errorInfo());
 		}
 
-		$this->common->debug_echo('　□ 公開処理結果テーブル作成完了');
+		// $this->common->debug_echo('　□ 公開処理結果テーブル作成完了');
 
 		//============================================================
 		// バックアップテーブル作成
@@ -253,7 +253,7 @@ class pdoManager
 			throw new \Exception($this->main->dbh->errorInfo());
 		}
 
-		$this->common->debug_echo('　□ バックアップテーブル作成完了');
+		// $this->common->debug_echo('　□ バックアップテーブル作成完了');
 
 		$this->common->debug_echo('■ create_table end');
 
