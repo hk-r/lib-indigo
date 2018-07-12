@@ -48,7 +48,7 @@ class publish
 	/**
 	 * 公開処理
 	 */
-	public function do_publish($running_dirname) {
+	public function do_publish($running_dirname, $options) {
 
 		$this->common->debug_echo('■ do_publish start');
 
@@ -64,18 +64,18 @@ class publish
 		try {
 
 			// 本番環境ディレクトリの絶対パスを取得。
-			$project_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->project_real_path . "/"));
+			$project_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->project_real_path . "/"));
 
 			$this->common->debug_echo('　□ project_real_path' . $project_real_path);
 
 			// runningディレクトリの絶対パスを取得。
-			$running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_RUNNING));
+			$running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . self::PATH_RUNNING));
 
 			// releasedディレクトリの絶対パスを取得。
-			$released_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_RELEASED));
+			$released_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . self::PATH_RELEASED));
 
 			// logディレクトリの絶対パスを取得。
-			$log_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::PATH_LOG));
+			$log_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . self::PATH_LOG));
 
 
 			//============================================================

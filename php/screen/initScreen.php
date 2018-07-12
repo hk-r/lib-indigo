@@ -1322,7 +1322,7 @@ class initScreen
 	 		$this->common->debug_echo('　□ -----公開処理-----');
 			
 
-			$ret = json_decode($this->publish->do_publish($dirname));
+			$ret = json_decode($this->publish->do_publish($dirname, $this->main->options));
 		
 			// 公開ステータスの設定
 			$publish_status;
