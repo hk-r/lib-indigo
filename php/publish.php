@@ -136,7 +136,7 @@ class publish
 			$result['status'] = false;
 			$result['message'] = $e->getMessage();
 
-			$this->common->debug_echo('■ immediate_release error end');
+			echo "例外キャッチ：", $e->getMessage() . "<br>";
 
 			chdir($current_dir);
 			return json_encode($result);
