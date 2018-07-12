@@ -69,12 +69,22 @@ class tsBackup
 
 			// SELECT文作成（削除フラグ = 0、ソート順：公開予約日時の昇順）
 			$select_sql = "
-					SELECT * FROM TS_BACKUP WHERE " . self::TS_BACKUP_GEN_DELETE_FLG . " = " . define::DELETE_FLG_OFF . " ORDER BY backup_datetime DESC";
+					SELECT * FROM TS_BACKUP 
+					LEFT OUTER JOIN TS_OUTPUT
+						ON TS_BACKUP.output_id = TS_OUTPUT.output_id
+					WHERE " . self::TS_BACKUP_GEN_DELETE_FLG . " = " . define::DELETE_FLG_OFF
+					. " ORDER BY backup_datetime DESC";
+
+			$this->common->debug_echo('　□ select_sql');
+			$this->common->debug_echo($select_sql);
 
 			// SELECT実行
 			$ret_array = $this->pdoManager->select($dbh, $select_sql);
 
 			foreach ((array)$ret_array as $array) {
+
+				$this->common->debug_echo('　□ array');
+				$this->common->debug_var_dump($array);
 
 				$conv_ret_array[] = $this->convert_ts_backup_entity($array);
 			}
