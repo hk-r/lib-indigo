@@ -142,7 +142,7 @@ class tsBackup
 		try {
 
 			// INSERT文作成
-			$insert_sql = "INSERT INTO TS_RESERVE ("
+			$insert_sql = "INSERT INTO TS_BACKUP ("
 			. self::TS_BACKUP_OUTPUT_ID . ","
 			. self::TS_BACKUP_DATETIME . ","
 			. self::TS_BACKUP_GEN_DELETE_FLG . ","
