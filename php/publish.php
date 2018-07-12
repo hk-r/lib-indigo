@@ -125,7 +125,7 @@ class publish
 
 	 		$this->common->debug_echo('　□ -----公開済みのソースを「running」ディレクトリから「released」ディレクトリへ移動-----');
 
-			$ret = $this->move_dir($running_real_path, $dirname, $released_real_path, $dirname);
+			$ret = json_decode($this->move_dir($running_real_path, $dirname, $released_real_path, $dirname));
 
 			if ( !$ret->status) {
 				throw new \Exception($ret->message);
