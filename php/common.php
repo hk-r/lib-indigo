@@ -178,8 +178,8 @@ class common
 	 */
 	public function debug_echo($text) {
 	
-		echo strval($text);
-		echo "<br>";
+		// echo strval($text);
+		// echo "<br>";
 
 		return;
 	}
@@ -190,8 +190,8 @@ class common
 	 */
 	public function debug_var_dump($text) {
 	
-		var_dump($text);
-		echo "<br>";
+		// var_dump($text);
+		// echo "<br>";
 
 		return;
 	}
