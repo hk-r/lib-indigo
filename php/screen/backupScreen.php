@@ -174,7 +174,7 @@ class backupScreen
 				// . tsOutput::TS_OUTPUT_UPDATE_USER_ID => null
 			);
 
-			$ret = json_decode($this->tsOutput->insert_ts_output($this->main->dbh, $dataArray);
+			$ret = json_decode($this->tsOutput->insert_ts_output($this->main->dbh, $dataArray));
 
 			if ( !$ret->status) {
 				throw new \Exception("TS_OUTPUT insert failed.");
