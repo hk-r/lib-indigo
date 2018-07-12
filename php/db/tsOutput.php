@@ -164,7 +164,7 @@ class tsOutput
 	 *
 	 * @return なし
 	 */
-	public function insert_ts_output($dbh, $options, $start_datetime, $type) {
+	public function insert_ts_output($dbh, $options, $start_datetime, $type, $entityArray) {
 
 		$this->common->debug_echo('■ insert_ts_output start');
 
@@ -230,21 +230,21 @@ class tsOutput
 
 			// パラメータ作成
 			$params = array(
-				":" . self::TS_OUTPUT_RESERVE_ID => null,
-				":" . self::TS_OUTPUT_BACKUP_ID => null,
-				":" . self::TS_OUTPUT_RESERVE => null,
-				":" . self::TS_OUTPUT_BRANCH => $options->_POST->branch_select_value,
-				":" . self::TS_OUTPUT_COMMIT => "dummy_commit_hash",
-				":" . self::TS_OUTPUT_COMMENT => $options->_POST->comment,
-				":" . self::TS_OUTPUT_PUBLISH_TYPE => $type,
-				":" . self::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_RUNNING,
-				":" . self::TS_OUTPUT_DIFF_FLG1 => null,
-				":" . self::TS_OUTPUT_DIFF_FLG2 => null,
-				":" . self::TS_OUTPUT_DIFF_FLG3 => null,
-				":" . self::TS_OUTPUT_START => $start_datetime,
-				":" . self::TS_OUTPUT_END => null,
-				":" . self::TS_OUTPUT_DELETE_FLG => define::DELETE_FLG_OFF,
-				":" . self::TS_OUTPUT_DELETE => null,
+				":" . self::TS_OUTPUT_RESERVE_ID => $entityArray[self::TS_OUTPUT_RESERVE_ID],
+				":" . self::TS_OUTPUT_BACKUP_ID => $entityArray[self::TS_OUTPUT_BACKUP_ID],
+				":" . self::TS_OUTPUT_RESERVE => $entityArray[self::TS_OUTPUT_RESERVE],
+				":" . self::TS_OUTPUT_BRANCH => $entityArray[self::TS_OUTPUT_BRANCH],
+				":" . self::TS_OUTPUT_COMMIT => $entityArray[self::TS_OUTPUT_COMMIT],
+				":" . self::TS_OUTPUT_COMMENT => $entityArray[self::TS_OUTPUT_COMMENT],
+				":" . self::TS_OUTPUT_PUBLISH_TYPE => $entityArray[self::TS_OUTPUT_PUBLISH_TYPE],
+				":" . self::TS_OUTPUT_STATUS => $entityArray[self::TS_OUTPUT_STATUS],
+				":" . self::TS_OUTPUT_DIFF_FLG1 => $entityArray[self::TS_OUTPUT_DIFF_FLG1],
+				":" . self::TS_OUTPUT_DIFF_FLG2 => $entityArray[self::TS_OUTPUT_DIFF_FLG2],
+				":" . self::TS_OUTPUT_DIFF_FLG3 => $entityArray[self::TS_OUTPUT_DIFF_FLG3],
+				":" . self::TS_OUTPUT_START => $entityArray[self::TS_OUTPUT_START],
+				":" . self::TS_OUTPUT_END => $entityArray[self::TS_OUTPUT_END],
+				":" . self::TS_OUTPUT_DELETE_FLG => $entityArray[self::TS_OUTPUT_DELETE_FLG],
+				":" . self::TS_OUTPUT_DELETE => $entityArray[self::TS_OUTPUT_DELETE],
 				":" . self::TS_OUTPUT_INSERT_DATETIME => $now,
 				":" . self::TS_OUTPUT_INSERT_USER_ID => "dummy_insert_user",
 				":" . self::TS_OUTPUT_UPDATE_DATETIME => null,

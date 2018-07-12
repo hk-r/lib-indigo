@@ -151,7 +151,31 @@ class backupScreen
 
 	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの登録処理-----');
 
-			$ret = json_decode($this->tsOutput->insert_ts_output($this->main->dbh, $this->main->options, $start_datetime, self::PUBLISH_TYPE_RESTORE));
+
+			$dataArray = array(
+				tsOutput::TS_OUTPUT_RESERVE_ID => null,
+				tsOutput::TS_OUTPUT_BACKUP_ID => null,
+				tsOutput::TS_OUTPUT_RESERVE => null,
+				tsOutput::TS_OUTPUT_BRANCH => null,
+				tsOutput::TS_OUTPUT_COMMIT => null,
+				tsOutput::TS_OUTPUT_COMMENT => null,
+				tsOutput::TS_OUTPUT_PUBLISH_TYPE => define::PUBLISH_TYPE_RESTORE,
+				tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_RUNNING,
+				tsOutput::TS_OUTPUT_DIFF_FLG1 => null,
+				tsOutput::TS_OUTPUT_DIFF_FLG2 => null,
+				tsOutput::TS_OUTPUT_DIFF_FLG3 => null,
+				tsOutput::TS_OUTPUT_START => $start_datetime,
+				tsOutput::TS_OUTPUT_END => null,
+				tsOutput::TS_OUTPUT_DELETE_FLG => define::DELETE_FLG_OFF,
+				tsOutput::TS_OUTPUT_DELETE => null
+				// . tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
+				// . tsOutput::TS_OUTPUT_INSERT_USER_ID => "dummy_insert_user",
+				// . tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
+				// . tsOutput::TS_OUTPUT_UPDATE_USER_ID => null
+			);
+
+			$ret = json_decode($this->tsOutput->insert_ts_output($this->main->dbh, $dataArray);
+
 			if ( !$ret->status) {
 				throw new \Exception("TS_OUTPUT insert failed.");
 			}

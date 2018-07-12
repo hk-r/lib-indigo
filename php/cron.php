@@ -95,6 +95,8 @@ class cron
 
 		$ret_flg = true;
 
+		$publish_data = array();
+
 		// GMTの現在日時
 		$start_datetime = $this->common->get_current_datetime_of_gmt();
 
@@ -134,7 +136,9 @@ class cron
 			$this->common->debug_var_dump($data);
 
 			$dirname = $this->common->format_gmt_datetime($data[tsReserve::RESERVE_ENTITY_RESERVE_GMT], define::DATETIME_FORMAT_SAVE) . define::DIR_NAME_RESERVE;
-	
+		
+			$publish_data = $data;
+
 			$this->common->debug_echo('　□ 公開ディレクトリ名');
 			$this->common->debug_var_dump($dirname);
 		}
@@ -161,10 +165,39 @@ class cron
 		//============================================================
 		// 公開処理結果テーブルの登録処理
 		//============================================================
-		$ret = json_decode($this->tsOutput->insert_ts_output($this->dbh, $this->options, $start_datetime, define::PUBLISH_TYPE_RESERVE));
+
+		$dataArray = array(
+			tsOutput::TS_OUTPUT_RESERVE_ID => $publish_data[tsReserve::RESERVE_ENTITY_ID_SEQ],
+			tsOutput::TS_OUTPUT_BACKUP_ID => null,
+			tsOutput::TS_OUTPUT_RESERVE => $publish_data[tsReserve::RESERVE_ENTITY_RESERVE_GMT],
+			tsOutput::TS_OUTPUT_BRANCH => $publish_data[tsReserve::RESERVE_ENTITY_BRANCH],
+			tsOutput::TS_OUTPUT_COMMIT => "dummy_commit_hash",
+			tsOutput::TS_OUTPUT_COMMENT => $publish_data[tsReserve::RESERVE_ENTITY_COMMENT],
+			tsOutput::TS_OUTPUT_PUBLISH_TYPE => define::PUBLISH_TYPE_RESERVE,
+			tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_RUNNING,
+			tsOutput::TS_OUTPUT_DIFF_FLG1 => null,
+			tsOutput::TS_OUTPUT_DIFF_FLG2 => null,
+			tsOutput::TS_OUTPUT_DIFF_FLG3 => null,
+			tsOutput::TS_OUTPUT_START => $start_datetime,
+			tsOutput::TS_OUTPUT_END => null,
+			tsOutput::TS_OUTPUT_DELETE_FLG => define::DELETE_FLG_OFF,
+			tsOutput::TS_OUTPUT_DELETE => null
+			// . tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
+			// . tsOutput::TS_OUTPUT_INSERT_USER_ID => "dummy_insert_user",
+			// . tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
+			// . tsOutput::TS_OUTPUT_UPDATE_USER_ID => null
+		);
+
+
+		$ret = json_decode($this->tsOutput->insert_ts_output($this->dbh, $dataArray));
+
 		if ( !$ret->status) {
 			throw new \Exception("TS_OUTPUT insert failed. " . $ret->message);
 		}
+ // array( 'cell'	=> $this->_topLeftCellRef,
+	// 				  'xOffset'	=> $this->_topLeftXOffset,
+	// 				  'yOffset'	=> $this->_topLeftYOffset
+	// 				);
 
 		// インサートしたシーケンスIDを取得（処理終了時の更新処理にて使用）
 		$insert_id = $ret->insert_id;
