@@ -36,7 +36,10 @@ class tsBackup
 	const BACKUP_ENTITY_PUBLISH_TYPE = 'publish_type';	// 公開種別
 	const BACKUP_ENTITY_DATETIME = 'backup_datetime';	// 公開予約日時
 	const BACKUP_ENTITY_DATETIME_DISPLAY = 'backup_datetime_display';	// 公開予約日時
-	// const BACKUP_ENTITY_INSERT_DATETIME = 'insert_datetime';	// 設定日時
+	const BACKUP_ENTITY_INSERT_DATETIME = 'insert_datetime';	// 登録日時
+	const BACKUP_ENTITY_INSERT_USER_ID = 'insert_user_id';	// 登録ユーザID
+	const BACKUP_ENTITY_UPDATE_DATETIME = 'update_datetime';	// 更新日時
+	const BACKUP_ENTITY_UPDATE_USER_ID = 'update_user_id';	// 更新ユーザID
 
 
 	/**
@@ -194,7 +197,7 @@ class tsBackup
 				":" . self::TS_BACKUP_GEN_DELETE_FLG => define::DELETE_FLG_OFF,
 				":" . self::TS_BACKUP_GEN_DELETE_DATETIME => null, 
 				":" . self::TS_BACKUP_INSERT_DATETIME => $now,
-				":" . self::TS_BACKUP_INSERT_USER_ID => "dummy_insert_user",
+				":" . self::TS_BACKUP_INSERT_USER_ID => $options->user_id,
 				":" . self::TS_BACKUP_UPDATE_DATETIME => null,
 				":" . self::TS_BACKUP_UPDATE_DATETIME => null
 			);

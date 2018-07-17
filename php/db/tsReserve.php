@@ -43,7 +43,9 @@ class tsReserve
 	const RESERVE_ENTITY_COMMIT = 'commit_hash';	// コミットハッシュ値（短縮）
 	const RESERVE_ENTITY_COMMENT = 'comment';	// コメント
 	const RESERVE_ENTITY_INSERT_DATETIME = 'insert_datetime';	// 設定日時
-
+	const RESERVE_ENTITY_INSERT_USER_ID = 'insert_user_id';	// 設定日時
+	const RESERVE_ENTITY_UPDATE_DATETIME = 'update_datetime';	// 設定日時
+	const RESERVE_ENTITY_UPDATE_USER_ID = 'update_user_id';	// 設定日時
 
 	/**
 	 * Constructor
@@ -271,11 +273,11 @@ class tsReserve
 				":" . self::TS_RESERVE_COMMENT => $options->_POST->comment,
 				":" . self::TS_RESERVE_DELETE_FLG => define::DELETE_FLG_OFF,
 				":" . self::TS_RESERVE_INSERT_DATETIME => $now,
-				":" . self::TS_RESERVE_INSERT_USER_ID => "dummy_insert_user",
+				":" . self::TS_RESERVE_INSERT_USER_ID => $options->user_id,
 				":" . self::TS_RESERVE_UPDATE_DATETIME => null,
 				":" . self::TS_RESERVE_UPDATE_USER_ID => null
 			);
-		
+
 			// INSERT実行
 			$stmt = $this->pdoManager->execute($dbh, $insert_sql, $params);
 
@@ -336,7 +338,7 @@ class tsReserve
 					':commit_hash' => $commit_hash,
 					':comment' => $options->_POST->comment,
 					':update_datetime' => $now,
-					':update_user_id' => "dummy_update_user",
+					':update_user_id' => $options->user_id,
 					':reserve_id_seq' => $selected_id
 				);
 
@@ -366,7 +368,7 @@ class tsReserve
 	 *
 	 * @return なし
 	 */
-	public function delete_reserve_table($dbh, $selected_id) {
+	public function delete_reserve_table($dbh, $options, $selected_id) {
 
 		$this->common->debug_echo('■ delete_reserve_table start');
 
@@ -396,7 +398,7 @@ class tsReserve
 				$params = array(
 					':delete_flg' => define::DELETE_FLG_ON,
 					':update_datetime' => $now,
-					':update_user_id' => "dummy_delete_user",
+					':update_user_id' => $options->user_id,
 					':reserve_id_seq' => $selected_id
 				);
 
@@ -450,7 +452,11 @@ class tsReserve
 		$entity[self::RESERVE_ENTITY_COMMIT] = $array[self::TS_RESERVE_COMMIT];
 		// コメント
 		$entity[self::RESERVE_ENTITY_COMMENT] = $array[self::TS_RESERVE_COMMENT];
-	
+			// コミット
+		$entity[self::RESERVE_ENTITY_INSERT_USER_ID] = $array[self::TS_RESERVE_INSERT_USER_ID];
+		// コメント
+		$entity[self::RESERVE_ENTITY_UPDATE_USER_ID] = $array[self::TS_RESERVE_UPDATE_USER_ID];
+		
 		$this->common->debug_echo('■ convert_ts_reserve_entity end');
 
 	    return $entity;

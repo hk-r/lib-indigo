@@ -51,7 +51,10 @@ class tsOutput
 	const OUTPUT_ENTITY_START_DISPLAY = 'start_datetime_display';	// 公開処理開始日時
 	const OUTPUT_ENTITY_END = 'end_datetime';			// 公開処理終了日時
 	const OUTPUT_ENTITY_END_DISPLAY = 'end_datetime_display';	// 公開処理終了日時
-
+	const OUTPUT_ENTITY_INSERT_DATETIME = 'insert_datetime';	// 登録日時
+	const OUTPUT_ENTITY_INSERT_USER_ID = 'insert_user_id';		// 登録ユーザID
+	const OUTPUT_ENTITY_UPDATE_DATETIME = 'update_datetime';	// 更新日時
+	const OUTPUT_ENTITY_UPDATE_USER_ID = 'update_user_id';		// 更新ユーザID
 	/**
 	 * Constructor
 	 *
@@ -246,7 +249,7 @@ class tsOutput
 				":" . self::TS_OUTPUT_DELETE_FLG => $dataArray[self::TS_OUTPUT_DELETE_FLG],
 				":" . self::TS_OUTPUT_DELETE => $dataArray[self::TS_OUTPUT_DELETE],
 				":" . self::TS_OUTPUT_INSERT_DATETIME => $now,
-				":" . self::TS_OUTPUT_INSERT_USER_ID => "dummy_insert_user",
+				":" . self::TS_OUTPUT_INSERT_USER_ID => $dataArray[self::TS_OUTPUT_INSERT_USER_ID],
 				":" . self::TS_OUTPUT_UPDATE_DATETIME => null,
 				":" . self::TS_OUTPUT_UPDATE_USER_ID => null
 			);
@@ -281,7 +284,7 @@ class tsOutput
 	 *
 	 * @return なし
 	 */
-	public function update_ts_output($dbh, $id, $end_datetime, $status) {
+	public function update_ts_output($dbh, $id, $dataArray) {
 
 		$this->common->debug_echo('■ update_ts_output start');
 
@@ -316,13 +319,13 @@ class tsOutput
 
 				// パラメータ作成
 				$params = array(
-					':status' => $status,
-					':change_check_flg' => "0",
-					':publish_honban_diff_flg' => "1",
-					':publish_pre_diff_flg' => "1",
-					':end_datetime' => $end_datetime,
+					':status' => $dataArray[self::TS_OUTPUT_STATUS],
+					':change_check_flg' => $dataArray[self::TS_OUTPUT_DIFF_FLG1],
+					':publish_honban_diff_flg' => $dataArray[self::TS_OUTPUT_DIFF_FLG2],
+					':publish_pre_diff_flg' => $dataArray[self::TS_OUTPUT_DIFF_FLG3],
+					':end_datetime' => $dataArray[self::TS_OUTPUT_END],
 					':update_datetime' => $now,
-					':update_user_id' => "dummy_update_user",
+					':update_user_id' => $dataArray[self::TS_OUTPUT_UPDATE_USER_ID],
 
 					':output_id_seq' => $id
 				);

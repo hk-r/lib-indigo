@@ -11,6 +11,7 @@ class initScreen
 	private $tsBackup;
 
 	private $fileManager;
+	private $gitManager;
 
 	private $check;
 	private $publish;
@@ -63,6 +64,7 @@ class initScreen
 		$this->tsOutput = new tsOutput($this);
 		$this->tsBackup = new tsBackup($this);
 		$this->fileManager = new fileManager($this);
+		$this->gitManager = new gitManager($this);
 		$this->check = new check($this);
 		$this->publish = new publish($this);
 		$this->common = new common($this);
@@ -138,6 +140,8 @@ class initScreen
 			. '<th scope="row">コミット</th>'
 			. '<th scope="row">ブランチ</th>'
 			. '<th scope="row">コメント</th>'
+			. '<th scope="row">登録ユーザ</th>'
+			. '<th scope="row">更新ユーザ</th>'
 			. '</tr>'
 			. '</thead>'
 			. '<tbody>';
@@ -153,7 +157,9 @@ class initScreen
 				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_RESERVE_DISPLAY] . '</td>'
 				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_COMMIT] . '</td>'
 				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_BRANCH] . '</td>'
-				. '<td>' . $array[tsReserve::RESERVE_ENTITY_COMMENT] . '</td>'
+				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_COMMENT] . '</td>'
+				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_INSERT_USER_ID] . '</td>'
+				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_UPDATE_USER_ID] . '</td>'
 				. '</tr>';
 		}
 
@@ -435,7 +441,7 @@ class initScreen
 			  . '<td><select id="branch_list" class="form-control" name="branch_select_value">';
 
 				// ブランチリストを取得
-				$get_branch_ret = json_decode($this->get_branch_list());
+				$get_branch_ret = json_decode($this->git->get_branch_list());
 				$branch_list = $get_branch_ret->branch_list;
 
 				foreach ((array)$branch_list as $branch) {
@@ -1004,10 +1010,10 @@ class initScreen
 			$this->common->debug_echo($dirname);
 
 			// コピー処理
-			$ret = json_decode($this->git_file_copy($waiting_real_path, $dirname));
+			$ret = json_decode($this->git->git_file_copy($waiting_real_path, $dirname));
 
 			if ( !$ret->status ) {
-				throw new \Exception('Git file copy failed.');
+				throw new \Exception('Git file copy failed. ' . $ret->message);
 			}
 
 	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの登録処理！-----');
@@ -1068,7 +1074,7 @@ class initScreen
 			$this->common->debug_echo($before_dirname);
 
 			// コピー処理
-			$ret = json_decode($this->file_delete($waiting_real_path, $before_dirname));
+			$ret = json_decode($this->git->file_delete($waiting_real_path, $before_dirname));
 
 			if ( !$ret->status ) {
 				throw new \Exception('Git file delete failed.');
@@ -1084,7 +1090,7 @@ class initScreen
 			$this->common->debug_echo($dirname);
 
 			// コピー処理
-			$ret = json_decode($this->git_file_copy($waiting_real_path, $dirname));
+			$ret = json_decode($this->git->git_file_copy($waiting_real_path, $dirname));
 
 			if ( !$ret->status ) {
 				throw new \Exception('Git file copy failed.');
@@ -1151,7 +1157,7 @@ class initScreen
 			$this->common->debug_echo($dirname);
 
 			// コピー処理
-			$ret = json_decode($this->file_delete($waiting_real_path, $dirname));
+			$ret = json_decode($this->git->file_delete($waiting_real_path, $dirname));
 
 			if ( !$ret->status ) {
 				throw new \Exception('Git file delete failed.' . $ret->status);
@@ -1163,7 +1169,7 @@ class initScreen
 
 			$this->common->debug_echo('　□ -----公開処理結果テーブルの削除処理-----');
 
-			$this->tsReserve->delete_reserve_table($this->main->dbh, $selected_id);
+			$this->tsReserve->delete_reserve_table($this->main->dbh, $this->main->options, $selected_id);
 			
 		} catch (\Exception $e) {
 
@@ -1234,7 +1240,7 @@ class initScreen
 			$this->common->debug_echo('　□ 公開予約ディレクトリ：' . $dirname);
 
 			// Git情報のコピー処理
-			$ret = json_decode($this->git_file_copy($running_real_path, $dirname));
+			$ret = json_decode($this->git->git_file_copy($running_real_path, $dirname));
 
 			if ( !$ret->status ) {
 				throw new \Exception('Git file copy failed.');
@@ -1263,9 +1269,9 @@ class initScreen
 				tsOutput::TS_OUTPUT_START => $start_datetime,
 				tsOutput::TS_OUTPUT_END => null,
 				tsOutput::TS_OUTPUT_DELETE_FLG => define::DELETE_FLG_OFF,
-				tsOutput::TS_OUTPUT_DELETE => null
+				tsOutput::TS_OUTPUT_DELETE => null,
 				// . tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
-				// . tsOutput::TS_OUTPUT_INSERT_USER_ID => "dummy_insert_user",
+				tsOutput::TS_OUTPUT_INSERT_USER_ID => $this->main->options->user_id
 				// . tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
 				// . tsOutput::TS_OUTPUT_UPDATE_USER_ID => null
 			);
@@ -1342,7 +1348,16 @@ class initScreen
 			// GMTの現在日時
 			$end_datetime = $this->common->get_current_datetime_of_gmt();
 
-	 		$ret = json_decode($this->tsOutput->update_ts_output($this->main->dbh, $insert_id, $end_datetime, $publish_status));
+			$dataArray = array(
+				tsOutput::TS_OUTPUT_STATUS => $publish_status,
+				tsOutput::TS_OUTPUT_DIFF_FLG1 => "0",
+				tsOutput::TS_OUTPUT_DIFF_FLG2 => "0",
+				tsOutput::TS_OUTPUT_DIFF_FLG3 => "0",
+				tsOutput::TS_OUTPUT_END => $end_datetime,
+				tsOutput::TS_OUTPUT_UPDATE_USER_ID => $this->main->options->user_id
+			);
+
+	 		$ret = json_decode($this->tsOutput->update_ts_output($this->main->dbh, $insert_id, $dataArray));
 
 			if ( !$ret->status) {
 				throw new \Exception("TS_OUTPUT update failed. " . $ret->message);
@@ -1359,7 +1374,19 @@ class initScreen
 	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの更新処理（失敗）-----');
 			// GMTの現在日時
 			$end_datetime = $this->common->get_current_datetime_of_gmt();
-	 		$this->tsOutput->update_ts_output($this->main->dbh, $insert_id, $end_datetime, define::PUBLISH_STATUS_FAILED);
+
+
+			$dataArray = array(
+				tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_FAILED,
+				tsOutput::TS_OUTPUT_DIFF_FLG1 => "0",
+				tsOutput::TS_OUTPUT_DIFF_FLG2 => "0",
+				tsOutput::TS_OUTPUT_DIFF_FLG3 => "0",
+				tsOutput::TS_OUTPUT_END => $end_datetime,
+				tsOutput::TS_OUTPUT_UPDATE_USER_ID => $this->main->options->user_id
+			);
+
+
+	 		$this->tsOutput->update_ts_output($this->main->dbh, $insert_id, $dataArray );
 
 			$result['status'] = false;
 			$result['message'] = $e->getMessage();
@@ -1461,75 +1488,6 @@ class initScreen
 		return $ret;
 	}
 
-
-	/**
-	 * ブランチリストを取得
-	 *	 
-	 * @return 指定リポジトリ内のブランチリストを返す
-	 */
-	private function get_branch_list() {
-
-
-		$this->common->debug_echo('■ get_branch_list start');
-
-		$current_dir = realpath('.');
-
-		$output_array = array();
-		$result = array('status' => true,
-						'message' => '');
-
-		try {
-
-			// masterディレクトリの絶対パス
-			$master_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_MASTER));
-
-			$this->common->debug_echo('　□ master_real_path：');
-			$this->common->debug_echo($master_real_path);
-
-			if ( chdir( $master_real_path )) {
-
-				// fetch
-				$command = 'git fetch';
-				$this->common->command_execute($command, false);
-
-				// ブランチの一覧取得
-				$command = 'git branch -r';
-				$ret = $this->common->command_execute($command, false);
-
-				foreach ((array)$ret['output'] as $key => $value) {
-					if( strpos($value, '/HEAD') !== false ){
-						continue;
-					}
-					$output_array[] = trim($value);
-				}
-
-				$result['branch_list'] = $output_array;
-
-			} else {
-				// ディレクトリ移動に失敗
-				throw new \Exception('Move to master directory failed.');
-			}
-
-		} catch (\Exception $e) {
-
-			$result['status'] = false;
-			$result['message'] = $e->getMessage();
-
-			chdir($current_dir);
-
-			$this->common->debug_echo('■ get_branch_list error end');
-			return json_encode($result);
-		}
-
-		$result['status'] = true;
-
-		chdir($current_dir);
-
-		$this->common->debug_echo('■ get_branch_list end');
-		return json_encode($result);
-
-	}
-
 	/**
 	 * プルダウンで選択状態とさせる値であるか比較する
 	 *	 
@@ -1551,163 +1509,6 @@ class initScreen
 
 		return $ret;
 	}
-
-	/**
-	 * 公開ソースディレクトリを作成し、Gitファイルのコピー
-	 *
-	 * @return なし
-	 */
-	private function git_file_copy($path, $dirname) {
-
-		$this->common->debug_echo('■ git_file_copy start');
-
-		$current_dir = realpath('.');
-
-		$output = "";
-		$result = array('status' => true,
-						'message' => '');
-
-		try {
-
-			// 公開日時ディレクトリの絶対パスを取得。
-			// すでに存在している場合は削除して再作成する。
-			$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($path . $dirname));
-			if ( !$this->fileManager->is_exists_remkdir($dir_real_path) ) {
-				throw new \Exception('Creation of Waiting publish directory failed.');
-			}
-
-			//============================================================
-			// 作成ディレクトリに移動し、指定ブランチのGit情報をコピーする
-			//============================================================
-			if ( chdir($dir_real_path) ) {
-				$this->git_pull();
-			} else {
-				throw new \Exception('Publish directory not found.');
-			}
-
-		} catch (\Exception $e) {
-
-			$result['status'] = false;
-			$result['message'] = $e->getMessage();
-
-			chdir($current_dir);
-			return json_encode($result);
-		}
-
-		$result['status'] = true;
-		chdir($current_dir);
-
-		$this->common->debug_echo('■ git_file_copy end');
-
-		return json_encode($result);
-
-	}
-
-	/**
-	 * 新規追加時のGitファイルのコピー
-	 *
-	 * @return なし
-	 */
-	private function git_pull() {
-
-		$this->common->debug_echo('■ git_pull start');
-
-		try {
-
-			// 指定ブランチ
-			$branch_name = trim(str_replace("origin/", "", $this->main->options->_POST->branch_select_value));
-
-			// git init
-			$command = 'git init';
-			$this->common->command_execute($command, false);
-
-			// git urlのセット
-			$url = $this->main->options->git->protocol . "://" . urlencode($this->main->options->git->username) . ":" . urlencode($this->main->options->git->password) . "@" . $this->main->options->git->url;
-			
-			// initしたリポジトリに名前を付ける
-			$command = 'git remote add origin ' . $url;
-			$this->common->command_execute($command, false);
-
-			// git fetch（リモートリポジトリの指定ブランチの情報をローカルブランチへ反映）
-			$command = 'git fetch origin' . ' ' . $branch_name;
-			$this->common->command_execute($command, false);
-
-			// git pull（リモート取得ブランチを任意のローカルブランチにマージするコマンド）
-			$command = 'git pull origin' . ' ' . $branch_name;
-			$this->common->command_execute($command, false);
-	
-		} catch (\Exception $e) {
-
-			set_time_limit(30);
-
-			$result['status'] = false;
-			$result['message'] = $e->getMessage();
-
-			return json_encode($result);
-		}
-
-		set_time_limit(30);
-
-		$result['status'] = true;
-		
-		$this->common->debug_echo('■ git_pull end');
-
-		return json_encode($result);
-
-	}
-
-	/**
-	 * 公開ソースディレクトリをGitファイルごと削除
-	 *
-	 * @return なし
-	 */
-	private function file_delete($path, $dirname) {
-		
-		$this->common->debug_echo('■ file_delete start');
-
-		$current_dir = realpath('.');
-
-		$output = "";
-		$result = array('status' => true,
-						'message' => '');
-
-		try {
-
-			// 公開ソースディレクトリの絶対パスを取得
-			$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($path . $dirname));
-
-			$this->common->debug_echo('　□ $dir_real_path' . $dir_real_path);
-
-			if( $dir_real_path && file_exists( $dir_real_path )) {
-				// ディレクトリが存在する場合、削除コマンド実行
-				$command = 'rm -rf --preserve-root '. $dir_real_path;
-				$ret = $this->common->command_execute($command, true);
-
-				if ( $ret['return'] !== 0 ) {
-					throw new \Exception('Delete directory failed.');
-				}
-			} else {
-				throw new \Exception('Delete directory not found.');
-			}
-		
-		} catch (\Exception $e) {
-
-			$result['status'] = false;
-			$result['message'] = $e->getMessage();
-
-			chdir($current_dir);
-			return json_encode($result);
-		}
-
-		$result['status'] = true;
-		chdir($current_dir);
-
-		$this->common->debug_echo('■ file_delete end');
-
-		return json_encode($result);
-
-	}
-
 
 	/**
 	 * 引数の日付と日時を結合し、GMTの日時へ変換する
