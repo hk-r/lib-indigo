@@ -93,7 +93,7 @@ class common
 	 */
 	public function format_gmt_datetime($datetime, $format) {
 	
-		$this->debug_echo('■ format_gmt_datetime start');
+		// $this->debug_echo('■ format_gmt_datetime start');
 
 		$ret = '';
 
@@ -104,10 +104,10 @@ class common
 			$ret = $t->format($format);
 		}
 		
-		$this->debug_echo('　★変換前の時刻：' . $datetime);
-		$this->debug_echo('　★変換後の時刻：'. $ret);
+		// $this->debug_echo('　★変換前の時刻：' . $datetime);
+		// $this->debug_echo('　★変換後の時刻：'. $ret);
 
-		$this->debug_echo('■ format_gmt_datetime end');
+		// $this->debug_echo('■ format_gmt_datetime end');
 
 	    return $ret;
 	}

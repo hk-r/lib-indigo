@@ -105,7 +105,7 @@ class backupScreen
 	 */
 	public function do_restore_publish() {
 
-		$this->common->debug_echo('■ do_backup_publish start');
+		$this->common->debug_echo('■ do_restore_publish start');
 
 		$current_dir = realpath('.');
 
@@ -174,14 +174,8 @@ class backupScreen
 				// . tsOutput::TS_OUTPUT_UPDATE_USER_ID => null
 			);
 
-			$ret = json_decode($this->tsOutput->insert_ts_output($this->main->dbh, $dataArray));
-
-			if ( !$ret->status) {
-				throw new \Exception("TS_OUTPUT insert failed.");
-			}
-
-			// インサートしたシーケンスIDを取得（処理終了時の更新処理にて使用）
-			$insert_id = $ret->insert_id;
+			// 公開処理結果テーブルの登録（インサートしたシーケンスIDをリターン値で取得）
+			$insert_id = $this->tsOutput->insert_ts_output($this->main->dbh, $dataArray);
 
 			$this->common->debug_echo('　□ $insert_id：' . $insert_id);
 
@@ -199,68 +193,56 @@ class backupScreen
 			$this->common->debug_echo('　□ バックアップ日時：' . $backup_datetime);
 
 			// バックアップファイル作成
-			$ret = json_decode($this->publish->create_backup($project_real_path, $backup_real_path, $log_real_path, $backup_dirname));
+			$this->publish->create_backup($project_real_path, $backup_real_path, $log_real_path, $backup_dirname);
 		
-			if ( !$ret->status) {
-				throw new \Exception($ret->message);
-			}
-
 
 			//============================================================
 			// バックアップテーブルの登録処理
 			//============================================================
-			$ret = json_decode($this->tsBackup->insert_ts_backup($this->main->dbh, $this->main->options, $backup_datetime, define::PUBLISH_TYPE_RESTORE));
-			if ( !$ret->status) {
-				throw new \Exception("TS_OUTPUT insert failed.");
-			}
+			$this->tsBackup->insert_ts_backup($this->main->dbh, $this->main->options, $backup_datetime, define::PUBLISH_TYPE_RESTORE);
 
 
 			//============================================================
 			// ※公開処理※
 			//============================================================
-			$ret = json_decode($this->publish->do_publish($dirname));
+			$this->publish->do_publish($dirname);
 		
-			// 公開ステータスの設定
-			$publish_status;
-			if ( $ret->status) {
-				$publish_status = define::PUBLISH_STATUS_SUCCESS;
-			} else {
-				$publish_status = define::PUBLISH_STATUS_FAILED;
-			}
 
+		
+			//============================================================
+			// 公開処理結果テーブルの更新処理（成功）
+			//============================================================
 
-			//============================================================
-			// 公開処理結果テーブルの更新処理
-			//============================================================
+	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの更新処理（成功）-----');
+			
 			// GMTの現在日時
 			$end_datetime = $this->common->get_current_datetime_of_gmt();
 
-	 		$ret = json_decode($this->tsOutput->update_ts_output($this->main->dbh, $insert_id, $end_datetime, $publish_status));
+			$dataArray = array(
+				tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_SUCCESS,
+				tsOutput::TS_OUTPUT_DIFF_FLG1 => "0",
+				tsOutput::TS_OUTPUT_DIFF_FLG2 => "0",
+				tsOutput::TS_OUTPUT_DIFF_FLG3 => "0",
+				tsOutput::TS_OUTPUT_END => $end_datetime,
+				tsOutput::TS_OUTPUT_UPDATE_USER_ID => $this->main->options->user_id
+			);
 
-			if ( !$ret->status) {
-				throw new \Exception("TS_OUTPUT update failed. " . $ret->message);
-			}
+	 		$this->tsOutput->update_ts_output($this->main->dbh, $insert_id, $dataArray);
 
 		} catch (\Exception $e) {
 
-			// set_time_limit(30);
-
 			$result['status'] = false;
-			$result['message'] = $e->getMessage();
+			$result['message'] = 'Restore publish faild. ' . $e->getMessage();
 
-			$this->common->debug_echo('■ immediate_publish error end');
+			$this->common->debug_echo('■ do_restore_publish error end');
 
 			chdir($current_dir);
 			return json_encode($result);
 		}
 
-		// set_time_limit(30);
-
 		$result['status'] = true;
 
-		chdir($current_dir);
-
-		$this->common->debug_echo('■ immediate_publish end');
+		$this->common->debug_echo('■ do_restore_publish end');
 
 		return json_encode($result);
 	}

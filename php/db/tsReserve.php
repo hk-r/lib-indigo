@@ -307,60 +307,38 @@ class tsReserve
 
 		$this->common->debug_echo('■ update_reserve_table start');
 
-		$result = array('status' => true,
-						'message' => '');
-
-		try {
-
-			$this->common->debug_echo('　□ selected_id：' . $selected_id);
-
-			if (!$selected_id) {
-				$this->common->debug_echo('選択IDが取得できませんでした。');
-			} else {
-
-				// UPDATE文作成
-				$update_sql = "UPDATE TS_RESERVE SET 
-					reserve_datetime = :reserve_datetime,
-					branch_name = :branch_name,
-					commit_hash = :commit_hash,
-					comment = :comment,
-					update_datetime = :update_datetime,
-					update_user_id = :update_user_id 
-					WHERE reserve_id_seq = :reserve_id_seq";
-
-				// 現在時刻
-				$now = $this->common->get_current_datetime_of_gmt();
-
-				// パラメータ作成
-				$params = array(
-					':reserve_datetime' => $options->_POST->gmt_reserve_datetime,
-					':branch_name' => $options->_POST->branch_select_value,
-					':commit_hash' => $commit_hash,
-					':comment' => $options->_POST->comment,
-					':update_datetime' => $now,
-					':update_user_id' => $options->user_id,
-					':reserve_id_seq' => $selected_id
-				);
-
-				// UPDATE実行
-				$stmt = $this->pdoManager->execute($dbh, $update_sql, $params);
-			}
-
-		} catch (Exception $e) {
-
-	  		echo '公開予約テーブルの更新処理に失敗しました。' . $e->getMesseage();
-	  		
-	  		$result['status'] = false;
-			$result['message'] = $e->getMessage();
-
-			return json_encode($result);
+		if (!$selected_id) {
+			throw new \Exception('選択ID「' . $selected_id . '」が取得できませんでした。 ');
 		}
 
-		$result['status'] = true;
+		// UPDATE文作成
+		$update_sql = "UPDATE TS_RESERVE SET 
+			reserve_datetime = :reserve_datetime,
+			branch_name = :branch_name,
+			commit_hash = :commit_hash,
+			comment = :comment,
+			update_datetime = :update_datetime,
+			update_user_id = :update_user_id 
+			WHERE reserve_id_seq = :reserve_id_seq";
+
+		// 現在時刻
+		$now = $this->common->get_current_datetime_of_gmt();
+
+		// パラメータ作成
+		$params = array(
+			':reserve_datetime' => $options->_POST->gmt_reserve_datetime,
+			':branch_name' => $options->_POST->branch_select_value,
+			':commit_hash' => $commit_hash,
+			':comment' => $options->_POST->comment,
+			':update_datetime' => $now,
+			':update_user_id' => $options->user_id,
+			':reserve_id_seq' => $selected_id
+		);
+
+		// UPDATE実行
+		$this->pdoManager->execute($dbh, $update_sql, $params);
 
 		$this->common->debug_echo('■ update_reserve_table end');
-
-		return json_encode($result);
 	}
 
 	/**
@@ -372,55 +350,35 @@ class tsReserve
 
 		$this->common->debug_echo('■ delete_reserve_table start');
 
-		$result = array('status' => true,
-						'message' => '');
+		$this->common->debug_echo('　□ selected_id：' . $selected_id);
 
-		try {
-
-			$this->common->debug_echo('　□ selected_id：' . $selected_id);
-
-			if (!$selected_id) {
-				$this->common->debug_echo('選択IDが取得できませんでした。');
-			} else {
-
-				// UPDATE文作成（論理削除）
-				$update_sql = "UPDATE TS_RESERVE SET 
-					delete_flg = :delete_flg,
-					update_datetime = :update_datetime,
-					update_user_id = :update_user_id 
-					WHERE reserve_id_seq = :reserve_id_seq";
-
-				// 現在時刻
-				// $now = date(self::DATETIME_FORMAT);
-				$now = $this->common->get_current_datetime_of_gmt();
-
-				// パラメータ作成
-				$params = array(
-					':delete_flg' => define::DELETE_FLG_ON,
-					':update_datetime' => $now,
-					':update_user_id' => $options->user_id,
-					':reserve_id_seq' => $selected_id
-				);
-
-				// UPDATE実行
-				$stmt = $this->pdoManager->execute($dbh, $update_sql, $params);
-			}
-
-		} catch (Exception $e) {
-
-	  		echo '公開予約テーブルの論理削除処理に失敗しました。' . $e->getMesseage();
-	  		
-	  		$result['status'] = false;
-			$result['message'] = $e->getMessage();
-
-			return json_encode($result);
+		if (!$selected_id) {
+			throw new \Exception('選択ID「' . $selected_id . '」が取得できませんでした。 ');
 		}
 
-		$result['status'] = true;
+		// UPDATE文作成（論理削除）
+		$update_sql = "UPDATE TS_RESERVE SET 
+			delete_flg = :delete_flg,
+			update_datetime = :update_datetime,
+			update_user_id = :update_user_id 
+			WHERE reserve_id_seq = :reserve_id_seq";
+
+		// 現在時刻
+		// $now = date(self::DATETIME_FORMAT);
+		$now = $this->common->get_current_datetime_of_gmt();
+
+		// パラメータ作成
+		$params = array(
+			':delete_flg' => define::DELETE_FLG_ON,
+			':update_datetime' => $now,
+			':update_user_id' => $options->user_id,
+			':reserve_id_seq' => $selected_id
+		);
+
+		// UPDATE実行
+		$this->pdoManager->execute($dbh, $update_sql, $params);
 
 		$this->common->debug_echo('■ delete_reserve_table end');
-
-		return json_encode($result);
 	}
 
 	/**

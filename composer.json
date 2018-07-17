@@ -36,7 +36,8 @@
             "php/screen/backupScreen.php",
             "php/check.php",
             "php/define.php",
-            "php/common.php"
+            "php/common.php",
+            "php/ajax.php"
         ]
     },
     "extra": {

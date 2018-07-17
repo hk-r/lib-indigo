@@ -171,112 +171,92 @@ class tsOutput
 
 		$this->common->debug_echo('■ insert_ts_output start');
 
-		$result = array('status' => true,
-						'message' => '',
-						'insert_id' => '');
+		// INSERT文作成
+		$insert_sql = "INSERT INTO TS_OUTPUT ("
+		. self::TS_OUTPUT_RESERVE_ID . ","
+		. self::TS_OUTPUT_BACKUP_ID . ","
+		. self::TS_OUTPUT_RESERVE . ","
+		. self::TS_OUTPUT_BRANCH . ","
+		. self::TS_OUTPUT_COMMIT . ","
+		. self::TS_OUTPUT_COMMENT . ","
+		. self::TS_OUTPUT_PUBLISH_TYPE . ","
+		. self::TS_OUTPUT_STATUS . ","
+		. self::TS_OUTPUT_DIFF_FLG1 . ","
+		. self::TS_OUTPUT_DIFF_FLG2 . ","
+		. self::TS_OUTPUT_DIFF_FLG3 . ","
+		. self::TS_OUTPUT_START . ","
+		. self::TS_OUTPUT_END . ","
+		. self::TS_OUTPUT_DELETE_FLG . ","
+		. self::TS_OUTPUT_DELETE . ","
+		. self::TS_OUTPUT_INSERT_DATETIME . ","
+		. self::TS_OUTPUT_INSERT_USER_ID . ","
+		. self::TS_OUTPUT_UPDATE_DATETIME . ","
+		. self::TS_OUTPUT_UPDATE_USER_ID
 
-		try {
+		. ") VALUES (" .
 
-		$this->common->debug_echo('　□ 1');
+		 ":" . self::TS_OUTPUT_RESERVE_ID . "," .
+		 ":" . self::TS_OUTPUT_BACKUP_ID . "," .
+		 ":" . self::TS_OUTPUT_RESERVE . "," .
+		 ":" . self::TS_OUTPUT_BRANCH . "," .
+		 ":" . self::TS_OUTPUT_COMMIT . "," .
+		 ":" . self::TS_OUTPUT_COMMENT . "," .
+		 ":" . self::TS_OUTPUT_PUBLISH_TYPE . "," .
+		 ":" . self::TS_OUTPUT_STATUS . "," .
+		 ":" . self::TS_OUTPUT_DIFF_FLG1 . "," .
+		 ":" . self::TS_OUTPUT_DIFF_FLG2 . "," .
+		 ":" . self::TS_OUTPUT_DIFF_FLG3 . "," .
+		 ":" . self::TS_OUTPUT_START . "," .
+		 ":" . self::TS_OUTPUT_END . "," .
+		 ":" . self::TS_OUTPUT_DELETE_FLG . "," .
+		 ":" . self::TS_OUTPUT_DELETE . "," .
+		 ":" . self::TS_OUTPUT_INSERT_DATETIME . "," .
+		 ":" . self::TS_OUTPUT_INSERT_USER_ID . "," .
+		 ":" . self::TS_OUTPUT_UPDATE_DATETIME . "," .
+		 ":" . self::TS_OUTPUT_UPDATE_USER_ID
 
-			// INSERT文作成
-			$insert_sql = "INSERT INTO TS_OUTPUT ("
-			. self::TS_OUTPUT_RESERVE_ID . ","
-			. self::TS_OUTPUT_BACKUP_ID . ","
-			. self::TS_OUTPUT_RESERVE . ","
-			. self::TS_OUTPUT_BRANCH . ","
-			. self::TS_OUTPUT_COMMIT . ","
-			. self::TS_OUTPUT_COMMENT . ","
-			. self::TS_OUTPUT_PUBLISH_TYPE . ","
-			. self::TS_OUTPUT_STATUS . ","
-			. self::TS_OUTPUT_DIFF_FLG1 . ","
-			. self::TS_OUTPUT_DIFF_FLG2 . ","
-			. self::TS_OUTPUT_DIFF_FLG3 . ","
-			. self::TS_OUTPUT_START . ","
-			. self::TS_OUTPUT_END . ","
-			. self::TS_OUTPUT_DELETE_FLG . ","
-			. self::TS_OUTPUT_DELETE . ","
-			. self::TS_OUTPUT_INSERT_DATETIME . ","
-			. self::TS_OUTPUT_INSERT_USER_ID . ","
-			. self::TS_OUTPUT_UPDATE_DATETIME . ","
-			. self::TS_OUTPUT_UPDATE_USER_ID
+		. ");";
 
-			. ") VALUES (" .
+		// $this->common->debug_echo('　□ insert_sql');
+		// $this->common->debug_echo($insert_sql);
 
-			 ":" . self::TS_OUTPUT_RESERVE_ID . "," .
-			 ":" . self::TS_OUTPUT_BACKUP_ID . "," .
-			 ":" . self::TS_OUTPUT_RESERVE . "," .
-			 ":" . self::TS_OUTPUT_BRANCH . "," .
-			 ":" . self::TS_OUTPUT_COMMIT . "," .
-			 ":" . self::TS_OUTPUT_COMMENT . "," .
-			 ":" . self::TS_OUTPUT_PUBLISH_TYPE . "," .
-			 ":" . self::TS_OUTPUT_STATUS . "," .
-			 ":" . self::TS_OUTPUT_DIFF_FLG1 . "," .
-			 ":" . self::TS_OUTPUT_DIFF_FLG2 . "," .
-			 ":" . self::TS_OUTPUT_DIFF_FLG3 . "," .
-			 ":" . self::TS_OUTPUT_START . "," .
-			 ":" . self::TS_OUTPUT_END . "," .
-			 ":" . self::TS_OUTPUT_DELETE_FLG . "," .
-			 ":" . self::TS_OUTPUT_DELETE . "," .
-			 ":" . self::TS_OUTPUT_INSERT_DATETIME . "," .
-			 ":" . self::TS_OUTPUT_INSERT_USER_ID . "," .
-			 ":" . self::TS_OUTPUT_UPDATE_DATETIME . "," .
-			 ":" . self::TS_OUTPUT_UPDATE_USER_ID
+		// 現在時刻
+		$now = $this->common->get_current_datetime_of_gmt();
 
-			. ");";
+		// パラメータ作成
+		$params = array(
+			":" . self::TS_OUTPUT_RESERVE_ID => $dataArray[self::TS_OUTPUT_RESERVE_ID],
+			":" . self::TS_OUTPUT_BACKUP_ID => $dataArray[self::TS_OUTPUT_BACKUP_ID],
+			":" . self::TS_OUTPUT_RESERVE => $dataArray[self::TS_OUTPUT_RESERVE],
+			":" . self::TS_OUTPUT_BRANCH => $dataArray[self::TS_OUTPUT_BRANCH],
+			":" . self::TS_OUTPUT_COMMIT => $dataArray[self::TS_OUTPUT_COMMIT],
+			":" . self::TS_OUTPUT_COMMENT => $dataArray[self::TS_OUTPUT_COMMENT],
+			":" . self::TS_OUTPUT_PUBLISH_TYPE => $dataArray[self::TS_OUTPUT_PUBLISH_TYPE],
+			":" . self::TS_OUTPUT_STATUS => $dataArray[self::TS_OUTPUT_STATUS],
+			":" . self::TS_OUTPUT_DIFF_FLG1 => $dataArray[self::TS_OUTPUT_DIFF_FLG1],
+			":" . self::TS_OUTPUT_DIFF_FLG2 => $dataArray[self::TS_OUTPUT_DIFF_FLG2],
+			":" . self::TS_OUTPUT_DIFF_FLG3 => $dataArray[self::TS_OUTPUT_DIFF_FLG3],
+			":" . self::TS_OUTPUT_START => $dataArray[self::TS_OUTPUT_START],
+			":" . self::TS_OUTPUT_END => $dataArray[self::TS_OUTPUT_END],
+			":" . self::TS_OUTPUT_DELETE_FLG => $dataArray[self::TS_OUTPUT_DELETE_FLG],
+			":" . self::TS_OUTPUT_DELETE => $dataArray[self::TS_OUTPUT_DELETE],
+			":" . self::TS_OUTPUT_INSERT_DATETIME => $now,
+			":" . self::TS_OUTPUT_INSERT_USER_ID => $dataArray[self::TS_OUTPUT_INSERT_USER_ID],
+			":" . self::TS_OUTPUT_UPDATE_DATETIME => null,
+			":" . self::TS_OUTPUT_UPDATE_USER_ID => null
+		);
 
-			$this->common->debug_echo('　□ insert_sql');
-			$this->common->debug_echo($insert_sql);
+		// INSERT実行
+		$this->pdoManager->execute($dbh, $insert_sql, $params);
 
-			// 現在時刻
-			$now = $this->common->get_current_datetime_of_gmt();
-
-			// パラメータ作成
-			$params = array(
-				":" . self::TS_OUTPUT_RESERVE_ID => $dataArray[self::TS_OUTPUT_RESERVE_ID],
-				":" . self::TS_OUTPUT_BACKUP_ID => $dataArray[self::TS_OUTPUT_BACKUP_ID],
-				":" . self::TS_OUTPUT_RESERVE => $dataArray[self::TS_OUTPUT_RESERVE],
-				":" . self::TS_OUTPUT_BRANCH => $dataArray[self::TS_OUTPUT_BRANCH],
-				":" . self::TS_OUTPUT_COMMIT => $dataArray[self::TS_OUTPUT_COMMIT],
-				":" . self::TS_OUTPUT_COMMENT => $dataArray[self::TS_OUTPUT_COMMENT],
-				":" . self::TS_OUTPUT_PUBLISH_TYPE => $dataArray[self::TS_OUTPUT_PUBLISH_TYPE],
-				":" . self::TS_OUTPUT_STATUS => $dataArray[self::TS_OUTPUT_STATUS],
-				":" . self::TS_OUTPUT_DIFF_FLG1 => $dataArray[self::TS_OUTPUT_DIFF_FLG1],
-				":" . self::TS_OUTPUT_DIFF_FLG2 => $dataArray[self::TS_OUTPUT_DIFF_FLG2],
-				":" . self::TS_OUTPUT_DIFF_FLG3 => $dataArray[self::TS_OUTPUT_DIFF_FLG3],
-				":" . self::TS_OUTPUT_START => $dataArray[self::TS_OUTPUT_START],
-				":" . self::TS_OUTPUT_END => $dataArray[self::TS_OUTPUT_END],
-				":" . self::TS_OUTPUT_DELETE_FLG => $dataArray[self::TS_OUTPUT_DELETE_FLG],
-				":" . self::TS_OUTPUT_DELETE => $dataArray[self::TS_OUTPUT_DELETE],
-				":" . self::TS_OUTPUT_INSERT_DATETIME => $now,
-				":" . self::TS_OUTPUT_INSERT_USER_ID => $dataArray[self::TS_OUTPUT_INSERT_USER_ID],
-				":" . self::TS_OUTPUT_UPDATE_DATETIME => null,
-				":" . self::TS_OUTPUT_UPDATE_USER_ID => null
-			);
-
-			// INSERT実行
-			$stmt = $this->pdoManager->execute($dbh, $insert_sql, $params);
-
-			// 登録したシーケンスIDをセット
-			$insert_id = $result['insert_id'] = $dbh->lastInsertId();
-			
-			$this->common->debug_echo('　□ insert_id：' . $insert_id);
-
-		} catch (\Exception $e) {
-
-	  		echo '公開処理結果テーブル登録処理に失敗しました。' . $e->getMesseage();
-	  		
-	  		$result['status'] = false;
-			$result['message'] = $e->getMessage();
-
-			return json_encode($result);
-		}
-
-		$result['status'] = true;
+		// 登録したシーケンスIDを取得
+		$insert_id = $dbh->lastInsertId();
+		
+		$this->common->debug_echo('　□ insert_id：' . $insert_id);
 
 		$this->common->debug_echo('■ insert_ts_output end');
 
-		return json_encode($result);
+		return $insert_id;
 	}
 
 	/**
@@ -288,67 +268,45 @@ class tsOutput
 
 		$this->common->debug_echo('■ update_ts_output start');
 
-		$result = array('status' => true,
-						'message' => '');
-
-		try {
-
-			$this->common->debug_echo('id：' . $id);
-
-			if (!$id) {
-				$this->common->debug_echo('公開処理結果テーブルの更新対象のIDが取得できませんでした。');
-			} else {
-
-				// UPDATE文作成
-				$update_sql = "UPDATE TS_OUTPUT SET 
-					status = :status,
-					change_check_flg = :change_check_flg,
-					publish_honban_diff_flg = :publish_honban_diff_flg,
-					publish_pre_diff_flg = :publish_pre_diff_flg,
-					end_datetime = :end_datetime,
-					update_datetime = :update_datetime,
-					update_user_id = :update_user_id 		
-
-					WHERE output_id_seq = :output_id_seq";
-
-				$this->common->debug_echo('　□ update_sql');
-				$this->common->debug_echo($update_sql);
-
-				// 現在時刻
-				$now = $this->common->get_current_datetime_of_gmt();
-
-				// パラメータ作成
-				$params = array(
-					':status' => $dataArray[self::TS_OUTPUT_STATUS],
-					':change_check_flg' => $dataArray[self::TS_OUTPUT_DIFF_FLG1],
-					':publish_honban_diff_flg' => $dataArray[self::TS_OUTPUT_DIFF_FLG2],
-					':publish_pre_diff_flg' => $dataArray[self::TS_OUTPUT_DIFF_FLG3],
-					':end_datetime' => $dataArray[self::TS_OUTPUT_END],
-					':update_datetime' => $now,
-					':update_user_id' => $dataArray[self::TS_OUTPUT_UPDATE_USER_ID],
-
-					':output_id_seq' => $id
-				);
-
-				// UPDATE実行
-				$stmt = $this->pdoManager->execute($dbh, $update_sql, $params);
-			}
-
-		} catch (\Exception $e) {
-
-	  		echo '公開処理結果テーブルの更新処理に失敗しました。' . $e->getMesseage();
-	  		
-	  		$result['status'] = false;
-			$result['message'] = $e->getMessage();
-
-			return json_encode($result);
+		if (!$id) {
+			throw new \Exception('更新対象のID「' . $id . '」が取得できませんでした。 ');
 		}
 
-		$result['status'] = true;
+		// UPDATE文作成
+		$update_sql = "UPDATE TS_OUTPUT SET 
+			status = :status,
+			change_check_flg = :change_check_flg,
+			publish_honban_diff_flg = :publish_honban_diff_flg,
+			publish_pre_diff_flg = :publish_pre_diff_flg,
+			end_datetime = :end_datetime,
+			update_datetime = :update_datetime,
+			update_user_id = :update_user_id 		
+
+			WHERE output_id_seq = :output_id_seq";
+
+		$this->common->debug_echo('　□ update_sql');
+		$this->common->debug_echo($update_sql);
+
+		// 現在時刻
+		$now = $this->common->get_current_datetime_of_gmt();
+
+		// パラメータ作成
+		$params = array(
+			':status' => $dataArray[self::TS_OUTPUT_STATUS],
+			':change_check_flg' => $dataArray[self::TS_OUTPUT_DIFF_FLG1],
+			':publish_honban_diff_flg' => $dataArray[self::TS_OUTPUT_DIFF_FLG2],
+			':publish_pre_diff_flg' => $dataArray[self::TS_OUTPUT_DIFF_FLG3],
+			':end_datetime' => $dataArray[self::TS_OUTPUT_END],
+			':update_datetime' => $now,
+			':update_user_id' => $dataArray[self::TS_OUTPUT_UPDATE_USER_ID],
+
+			':output_id_seq' => $id
+		);
+
+		// UPDATE実行
+		$this->pdoManager->execute($dbh, $update_sql, $params);
 
 		$this->common->debug_echo('■ update_ts_output end');
-
-		return json_encode($result);
 	}
 
 

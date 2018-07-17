@@ -10,6 +10,12 @@ class gitManager
 
 	private $common;
 
+	private $name = 'テスト！！！';
+	
+
+	// git一時ディレクトリパス
+	const PATH_GIT_WORK = '/work_repository/';
+
 	/**
 	 * コンストラクタ
 	 * @param $options = オプション
@@ -27,17 +33,14 @@ class gitManager
 	 *	 
 	 * @return 指定リポジトリ内のブランチリストを返す
 	 */
-	public function get_branch_list() {
+	public function get_branch_list($options) {
 
 		$this->common->debug_echo('■ get_branch_list start');
 
 		$current_dir = realpath('.');
 
 		// masterディレクトリの絶対パス
-		$master_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_MASTER));
-
-		$this->common->debug_echo('　□ master_real_path：');
-		$this->common->debug_echo($master_real_path);
+		$master_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . define::PATH_MASTER));
 
 		if ( chdir( $master_real_path )) {
 
@@ -60,6 +63,7 @@ class gitManager
 
 		} else {
 			// ディレクトリ移動に失敗
+
 			throw new \Exception('Move to master directory failed.');
 		}
 
@@ -84,7 +88,7 @@ class gitManager
 		// すでに存在している場合は削除して再作成する。
 		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($path . $dirname));
 		if ( !$this->fileManager->is_exists_remkdir($dir_real_path) ) {
-			throw new \Exception('Creation of Waiting publish directory failed.');
+			throw new \Exception('Git file copy failed. Creation of directory failed. ' . $dir_real_path);
 		}
 
 		//============================================================
@@ -93,7 +97,7 @@ class gitManager
 		if ( chdir($dir_real_path) ) {
 			$this->git_pull();
 		} else {
-			throw new \Exception('Publish directory not found.');
+			throw new \Exception('Git file copy failed. Move directory not found. ' . $dir_real_path);
 		}
 
 		chdir($current_dir);
@@ -147,19 +151,17 @@ class gitManager
 		// 公開ソースディレクトリの絶対パスを取得
 		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($path . $dirname));
 
-		$this->common->debug_echo('　□ $dir_real_path' . $dir_real_path);
-
 		if( $dir_real_path && file_exists( $dir_real_path )) {
 			// ディレクトリが存在する場合、削除コマンド実行
 			$command = 'rm -rf --preserve-root '. $dir_real_path;
 			$ret = $this->common->command_execute($command, true);
 
 			if ( $ret['return'] !== 0 ) {
-				throw new \Exception('Delete directory failed.');
+				throw new \Exception('Delete directory failed. ' . $dir_real_path);
 			}
 
 		} else {
-			throw new \Exception('Delete directory not found.');
+			throw new \Exception('Delete directory not found. ' . $dir_real_path);
 		}
 
 		$this->common->debug_echo('■ file_delete end');
@@ -169,17 +171,14 @@ class gitManager
 	/**
 	 * Gitのmaster情報を取得
 	 */
-	public function get_git_master() {
+	public function get_git_master($options) {
 
 		$this->common->debug_echo('■ get_git_master start');
 
 		$current_dir = realpath('.');
 
 		// masterディレクトリの絶対パス
-		$master_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . define::PATH_MASTER));
-
-		$this->common->debug_echo('　□ master_real_path：');
-		$this->common->debug_echo($master_real_path);
+		$master_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . define::PATH_MASTER));
 
 		if ( $master_real_path ) {
 
@@ -201,7 +200,7 @@ class gitManager
 					$this->common->command_execute($command, false);
 
 					// git urlのセット
-					$url = $this->options->git->protocol . "://" . urlencode($this->options->git->username) . ":" . urlencode($this->options->git->password) . "@" . $this->options->git->url;
+					$url = $options->git->protocol . "://" . urlencode($options->git->username) . ":" . urlencode($options->git->password) . "@" . $options->git->url;
 
 					$command = 'git remote add origin ' . $url;
 					$this->common->command_execute($command, false);
@@ -215,6 +214,7 @@ class gitManager
 					$this->common->command_execute($command, false);
 
 				} else {
+
 					// ディレクトリ移動に失敗
 					throw new \Exception('Failed to get git master. Move to master directory failed.');
 				}
@@ -224,8 +224,55 @@ class gitManager
 		chdir($current_dir);
 
 		$this->common->debug_echo('■ get_git_master end');
+	}
 
-		return json_encode($result);
+	/**
+	 * Gitブランチのコミットハッシュ値を取得
+	 */
+	public function get_git_commit_hash($options) {
+
+		$this->common->debug_echo('■ get_git_commit_hash start');
+
+		$commit_hash;
+
+		$current_dir = realpath('.');
+
+		// 指定ブランチ
+		$branch_name = trim(str_replace("origin/", "", $options->_POST->branch_select_value));
+
+		if (!$branch_name) {
+			// ディレクトリ移動に失敗
+			throw new \Exception('Failed to get git commitHash. Get branch name failed.');
+		}
+		
+		// masterディレクトリの絶対パス
+		$master_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . define::PATH_MASTER));
+
+		if ( $master_real_path ) {
+
+			// ディレクトリ移動
+			if ( chdir( $master_real_path ) ) {
+
+				// コミットハッシュ値取得
+				$command = 'git log --pretty=%h ' . $branch_name . ' -1';
+				$ret = $this->command_execute($command, false);
+
+				foreach ( (array)$ret['output'] as $data ) {
+					$commit_hash = $data;
+				}
+
+			} else {
+
+				// ディレクトリ移動に失敗
+				throw new \Exception('Failed to get git commitHash. Move to work directory failed.');
+			}
+		}
+
+		chdir($current_dir);
+
+		$this->common->debug_echo('■ get_git_commit_hash end');
+
+		return $commit_hash;
 	}
 
 }

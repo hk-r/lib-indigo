@@ -24,9 +24,6 @@ class main
 	 */
 	public $commit_hash = '';
 
-	// git一時ディレクトリパス
-	const PATH_GIT_WORK = '/work_repository/';
-
 	/**
 	 * コンストラクタ
 	 * @param $options = オプション
@@ -64,7 +61,10 @@ class main
 		$disp_lock = '';
 
 		// 処理実行結果格納
-		$ret = '';
+		$result = json_decode(json_encode(
+					array('status' => true,
+					      'message' => '')
+				  ));
 
 		// 入力画面へ表示させるエラーメッセージ
 		// $error_message = '';
@@ -102,8 +102,9 @@ class main
 			//============================================================
 			// Gitのmaster情報取得
 			//============================================================
-			$this->git->get_git_master();
+			$this->gitManager->get_git_master($this->options);
 			
+
 			//============================================================
 			// 新規関連処理
 			//============================================================
@@ -120,10 +121,7 @@ class main
 			} elseif (isset($this->options->_POST->add_confirm)) {
 				// 新規確認ダイアログの「確定」ボタン押下
 
-				$ret = json_decode($this->initScreen->do_add_confirm());	
-				if ( !$ret->status ) {
-					$alert_message = 'Add confirm faild. ' . $ret->message;
-				}
+				$result = json_decode($this->initScreen->do_add_confirm());	
 
 			} elseif (isset($this->options->_POST->add_back)) {
 				// 新規確認ダイアログの「戻る」ボタン押下
@@ -147,10 +145,7 @@ class main
 			} elseif (isset($this->options->_POST->update_confirm)) {
 				// 変更確認ダイアログの「確定」ボタン押下
 				
-				$ret = json_decode($this->initScreen->do_update_confirm());	
-				if ( !$ret->status ) {
-					$alert_message = 'Update confirm faild. ' . $ret->message;
-				}
+				$result = json_decode($this->initScreen->do_update_confirm());	
 
 			} elseif (isset($this->options->_POST->update_back)) {
 				// 変更確認ダイアログの「戻る」ボタン押下	
@@ -165,10 +160,7 @@ class main
 				// 初期表示画面の「削除」ボタン押下				
 
 				// Gitファイルの削除
-				$ret = json_decode($this->initScreen->do_delete());
-				if ( !$ret->status ) {				
-					$alert_message = 'Delete faild. ' . $ret->message;
-				}
+				$result = json_decode($this->initScreen->do_delete());
 
 
 			//============================================================
@@ -178,10 +170,8 @@ class main
 				// バックアップ一覧画面の「復元ボタン押下				
 
 				// Gitファイルの削除
-				$ret = json_decode($this->backupScreen->do_restore_publish());
-				if ( !$ret->status ) {				
-					$alert_message = 'Delete faild. ' . $ret->message;
-				}
+				$result = json_decode($this->backupScreen->do_restore_publish());
+
 
 			//============================================================
 			// 即時公開処理
@@ -199,24 +189,22 @@ class main
 			} elseif (isset($this->options->_POST->immediate_confirm)) {
 				// 即時公開確認ダイアログの「確定」ボタン押下	
 				
-				$ret = json_decode($this->initScreen->do_immediate_publish());
-				if ( !$ret->status ) {
-					$alert_message = 'Immediate publish faild. ' . $ret->message;
-				}
+				$result = json_decode($this->initScreen->do_immediate_publish());
 
 			} elseif (isset($this->options->_POST->immediate_back)) {
-				// 即時公開確認ダイアログの「戻る」ボタン押下					
+				// 即時公開確認ダイアログの「戻る」ボタン押下			
+
 				$dialog_disp = $this->initScreen->do_back_immediate_dialog();
 			}
 
-			if ( !$ret->status ) {
+			if ( !$result->status ) {
 				// 処理失敗の場合
 
 				// エラーメッセージ表示
 				$dialog_disp = '
 				<script type="text/javascript">
-					console.error(' . "'" . $ret->message. "'" . ');
-					alert("' . $alert_message .'");
+					console.error(' . "'" . $result->message. "'" . ');
+					alert("' . $result->message .'");
 				</script>';
 			}
 
@@ -229,6 +217,7 @@ class main
 				// 初期表示画面の「バックアップ一覧」ボタン押下
 
 				$disp = $this->backupScreen->disp_backup_screen();
+				
 			} else {
 				// 初期表示画面の表示
 
@@ -248,14 +237,12 @@ class main
 			$dialog_disp = '
 			<script type="text/javascript">
 				console.error(' . "'" . $e->getMessage() . "'" . ');
-				alert("' . $alert_message .'");
+				alert("' . $e->getMessage() .'");
 			</script>';
 
-			echo $e->getMessage();
+			// $this->common->debug_echo('■ run error end');
 
-			$this->common->debug_echo('■ run error end');
-
-			return;
+			return $dialog_disp;
 		}
 		
 		// データベース接続を閉じる
@@ -316,90 +303,6 @@ class main
 		$this->common->debug_echo('■ create_work_dir end');
 
 		return $ret;
-	}
-
-
-	/**
-	 * Gitよりコミットハッシュ値の取得
-	 */
-	private function get_commit_hash() {
-
-		$this->common->debug_echo('■ get_commit_hash start');
-
-		$current_dir = realpath('.');
-
-		$output = "";
-		$result = array('status' => true,
-						'message' => '');
-
-		// git一時ディレクトリの絶対パス
-		$work_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . define::PATH_GIT_WORK));
-
-		$this->common->debug_echo('　□ work_real_path：');
-		$this->common->debug_echo($work_real_path);
-
-
-		try {
-
-			if ( $work_real_path ) {
-
-				// デプロイ先のディレクトリが無い場合は作成
-				if ( !$this->fileManager->is_exists_mkdir( $work_real_path ) ) {
-					// ディレクトリ作成に失敗
-					throw new \Exception('Creation of master directory failed.');
-				}
-
-				// 「.git」フォルダが存在すれば初期化済みと判定
-				if ( !file_exists( $work_real_path . "/.git") ) {
-					// 存在しない場合
-
-					// ディレクトリ移動
-					if ( chdir( $work_real_path ) ) {
-
-						// git セットアップ
-						$command = 'git init';
-						$this->common->command_execute($command, false);
-
-						// git urlのセット
-						$url = $this->options->git->protocol . "://" . urlencode($this->options->git->username) . ":" . urlencode($this->options->git->password) . "@" . $this->options->git->url;
-
-						$command = 'git remote add origin ' . $url;
-						$this->common->command_execute($command, false);
-
-						// git fetch
-						$command = 'git fetch origin';
-						$this->common->command_execute($command, false);
-
-						// git pull
-						$command = 'git pull origin master';
-						$this->common->command_execute($command, false);
-
-					} else {
-						// ディレクトリ移動に失敗
-						throw new \Exception('Move to master directory failed.');
-					}
-				}
-			}
-
-		} catch (\Exception $e) {
-
-			$result['status'] = false;
-			$result['message'] = $e->getMessage();
-
-			chdir($current_dir);
-
-			$this->common->debug_echo('■ get_commit_hash error end');
-
-			return json_encode($result);
-		}
-
-		$result['status'] = true;
-
-		chdir($current_dir);
-
-		$this->common->debug_echo('■ get_commit_hash end');
-
-		return json_encode($result);
 	}
 
 

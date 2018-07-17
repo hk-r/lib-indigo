@@ -322,8 +322,6 @@ class pdoManager
 
 		if (!$stmt) {
 			
-			$this->common->debug_echo('　□ execute error');
-
 			// エラー情報表示
 			throw new \Exception($dbh->errorInfo());
 		}

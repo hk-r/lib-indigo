@@ -155,72 +155,52 @@ class tsBackup
 
 		$this->common->debug_echo('■ insert_ts_backup start');
 
-		$result = array('status' => true,
-						'message' => '');
+		// INSERT文作成
+		$insert_sql = "INSERT INTO TS_BACKUP ("
+		. self::TS_BACKUP_OUTPUT_ID . ","
+		. self::TS_BACKUP_DATETIME . ","
+		. self::TS_BACKUP_GEN_DELETE_FLG . ","
+		. self::TS_BACKUP_GEN_DELETE_DATETIME . ","
+		. self::TS_BACKUP_INSERT_DATETIME . ","
+		. self::TS_BACKUP_INSERT_USER_ID . ","
+		. self::TS_BACKUP_UPDATE_DATETIME . ","
+		. self::TS_BACKUP_UPDATE_USER_ID
 
-		try {
+		. ") VALUES (" .
 
-			// INSERT文作成
-			$insert_sql = "INSERT INTO TS_BACKUP ("
-			. self::TS_BACKUP_OUTPUT_ID . ","
-			. self::TS_BACKUP_DATETIME . ","
-			. self::TS_BACKUP_GEN_DELETE_FLG . ","
-			. self::TS_BACKUP_GEN_DELETE_DATETIME . ","
-			. self::TS_BACKUP_INSERT_DATETIME . ","
-			. self::TS_BACKUP_INSERT_USER_ID . ","
-			. self::TS_BACKUP_UPDATE_DATETIME . ","
-			. self::TS_BACKUP_UPDATE_USER_ID
+		 ":" . self::TS_BACKUP_OUTPUT_ID . "," .
+		 ":" . self::TS_BACKUP_DATETIME . "," .
+		 ":" . self::TS_BACKUP_GEN_DELETE_FLG . "," .
+		 ":" . self::TS_BACKUP_GEN_DELETE_DATETIME . "," .
+		 ":" . self::TS_BACKUP_INSERT_DATETIME . "," .
+		 ":" . self::TS_BACKUP_INSERT_USER_ID . "," .
+		 ":" . self::TS_BACKUP_UPDATE_DATETIME . "," .
+		 ":" . self::TS_BACKUP_UPDATE_USER_ID
 
-			. ") VALUES (" .
+		. ");";
 
-			 ":" . self::TS_BACKUP_OUTPUT_ID . "," .
-			 ":" . self::TS_BACKUP_DATETIME . "," .
-			 ":" . self::TS_BACKUP_GEN_DELETE_FLG . "," .
-			 ":" . self::TS_BACKUP_GEN_DELETE_DATETIME . "," .
-			 ":" . self::TS_BACKUP_INSERT_DATETIME . "," .
-			 ":" . self::TS_BACKUP_INSERT_USER_ID . "," .
-			 ":" . self::TS_BACKUP_UPDATE_DATETIME . "," .
-			 ":" . self::TS_BACKUP_UPDATE_USER_ID
+		$this->common->debug_echo('　□ insert_sql');
+		$this->common->debug_echo($insert_sql);
 
-			. ");";
-
-			$this->common->debug_echo('　□ insert_sql');
-			$this->common->debug_echo($insert_sql);
-
-			// 現在時刻
-			$now = $this->common->get_current_datetime_of_gmt();
-			
-			// パラメータ作成
-			$params = array(
-				":" . self::TS_BACKUP_OUTPUT_ID => $output_id,
-				":" . self::TS_BACKUP_DATETIME => $backup_datetime,
-				":" . self::TS_BACKUP_GEN_DELETE_FLG => define::DELETE_FLG_OFF,
-				":" . self::TS_BACKUP_GEN_DELETE_DATETIME => null, 
-				":" . self::TS_BACKUP_INSERT_DATETIME => $now,
-				":" . self::TS_BACKUP_INSERT_USER_ID => $options->user_id,
-				":" . self::TS_BACKUP_UPDATE_DATETIME => null,
-				":" . self::TS_BACKUP_UPDATE_DATETIME => null
-			);
+		// 現在時刻
+		$now = $this->common->get_current_datetime_of_gmt();
 		
-			// INSERT実行
-			$stmt = $this->pdoManager->execute($dbh, $insert_sql, $params);
-
-
-		} catch (Exception $e) {
-
-	  		echo 'バックアップテーブルの登録処理に失敗しました。' . $e->getMesseage();
-	  		
-	  		$result['status'] = false;
-			$result['message'] = $e->getMessage();
-
-			return json_encode($result);
-		}
-
-		$result['status'] = true;
+		// パラメータ作成
+		$params = array(
+			":" . self::TS_BACKUP_OUTPUT_ID => $output_id,
+			":" . self::TS_BACKUP_DATETIME => $backup_datetime,
+			":" . self::TS_BACKUP_GEN_DELETE_FLG => define::DELETE_FLG_OFF,
+			":" . self::TS_BACKUP_GEN_DELETE_DATETIME => null, 
+			":" . self::TS_BACKUP_INSERT_DATETIME => $now,
+			":" . self::TS_BACKUP_INSERT_USER_ID => $options->user_id,
+			":" . self::TS_BACKUP_UPDATE_DATETIME => null,
+			":" . self::TS_BACKUP_UPDATE_DATETIME => null
+		);
+	
+		// INSERT実行
+		$this->pdoManager->execute($dbh, $insert_sql, $params);
 
 		$this->common->debug_echo('■ insert_ts_backup end');
-
-		return json_encode($result);
 	}
 
 }
