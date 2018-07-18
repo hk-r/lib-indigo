@@ -275,7 +275,7 @@ class tsOutput
 			self::TS_OUTPUT_END .		"= :" . self::TS_OUTPUT_END . "," .
 			self::TS_OUTPUT_UPDATE_DATETIME .	"= :" . self::TS_OUTPUT_UPDATE_DATETIME . "," .
 			self::TS_OUTPUT_UPDATE_USER_ID .	"= :" . self::TS_OUTPUT_UPDATE_USER_ID .
-			"WHERE " . self::TS_OUTPUT_ID_SEQ . "= :" . self::TS_OUTPUT_ID_SEQ . ";";
+			" WHERE " . self::TS_OUTPUT_ID_SEQ . "= :" . self::TS_OUTPUT_ID_SEQ . ";";
 
 		$this->common->debug_echo('　□ update_sql');
 		$this->common->debug_echo($update_sql);
