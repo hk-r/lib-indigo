@@ -272,6 +272,9 @@ class common
 			// runningディレクトリの絶対パスを取得。
 			$result['running_real_path'] = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . define::PATH_RUNNING));
 
+			// runningディレクトリの絶対パスを取得。
+			$result['released_real_path'] = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . define::PATH_RELEASED));
+
 			// logディレクトリの絶対パスを取得。
 			$result['log_real_path'] = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . define::PATH_LOG));
 

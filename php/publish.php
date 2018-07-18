@@ -177,31 +177,31 @@ class publish
 
 			if ( file_exists($to_real_path) ) {
 
-			//============================================================
-			// runningディレクトリへファイルを移動する
-			//============================================================
-			$command = 'rsync -rtvzP --remove-source-files ' . $from_real_path . $from_dirname . '/ ' . $to_real_path . $to_dirname . '/' . ' --log-file=' . $log_real_path . $from_dirname . '/rsync_' . $to_dirname . '.log' ;
+				//============================================================
+				// runningディレクトリへファイルを移動する
+				//============================================================
+				$command = 'rsync -rtvzP --remove-source-files ' . $from_real_path . $from_dirname . '/ ' . $to_real_path . $to_dirname . '/' . ' --log-file=' . $log_real_path . $from_dirname . '/rsync_' . $to_dirname . '.log' ;
 
-			$ret = $this->common->command_execute($command, true);
+				$ret = $this->common->command_execute($command, true);
 
-			$this->common->debug_echo('　★ ファイル移動結果');
+				$this->common->debug_echo('　★ ファイル移動結果');
 
-			// foreach ( (array)$ret['output'] as $element ) {
-			// 	$this->common->debug_echo($element);
-			// }
+				// foreach ( (array)$ret['output'] as $element ) {
+				// 	$this->common->debug_echo($element);
+				// }
 
-			//============================================================
-			// 移動元のディレクトリを削除する
-			//============================================================
-			$command = 'find ' .  $from_real_path . $from_dirname . '/ -type d -empty -delete' ;
+				//============================================================
+				// 移動元のディレクトリを削除する
+				//============================================================
+				$command = 'find ' .  $from_real_path . $from_dirname . '/ -type d -empty -delete' ;
 
-			$ret = $this->common->command_execute($command, true);
+				$ret = $this->common->command_execute($command, true);
 
-			$this->common->debug_echo('　★ 移動元のディレクトリ削除結果');
+				$this->common->debug_echo('　★ 移動元のディレクトリ削除結果');
 
-			// foreach ( (array)$ret['output'] as $element ) {
-			// 	$this->common->debug_echo($element);
-			// }
+				// foreach ( (array)$ret['output'] as $element ) {
+				// 	$this->common->debug_echo($element);
+				// }
 
 			} else {
 				// エラー処理
