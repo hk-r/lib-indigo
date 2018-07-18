@@ -46,7 +46,7 @@ class main
 	 */
 	public function run() {
 	
-		// $this->common->debug_echo('■ run start');
+		$this->common->debug_echo('■ run start');
 
 		// 画面表示
 		$disp = '';  
@@ -96,7 +96,7 @@ class main
 			//============================================================
 			// 作業用ディレクトリの作成（既にある場合は作成しない）
 			//============================================================
-			$this->create_work_dir();
+			$this->create_indigo_work_dir();
 
 
 			//============================================================
@@ -230,17 +230,17 @@ class main
 
 		} catch (\Exception $e) {
 
-			// データベース接続を閉じる
-			$this->pdoManager->close($this->dbh);
-
 			// エラーメッセージ表示
 			$dialog_disp = '
 			<script type="text/javascript">
 				console.error(' . "'" . $e->getMessage() . "'" . ');
-				alert("' . $e->getMessage() .'");
+				alert(' . "'" . $e->getMessage() . "'" . ');
 			</script>';
 
-			// $this->common->debug_echo('■ run error end');
+			// データベース接続を閉じる
+			$this->pdoManager->close($this->dbh);
+
+			$this->common->debug_echo('■ run error end');
 
 			return $dialog_disp;
 		}
@@ -259,48 +259,42 @@ class main
 	 *	
 	 * @return ソート後の配列
 	 */
-	function create_work_dir() {
+	function create_indigo_work_dir() {
 	
-		$this->common->debug_echo('■ create_work_dir start');
+		$this->common->debug_echo('■ create_indigo_work_dir start');
 
 		$ret = true;
 
-		// logファイルディレクトリが存在しない場合は作成
-		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . define::PATH_LOG));
+		// 作業用ディレクトリの絶対パスを取得
+		$result = json_decode($this->common->get_workdir_real_path($this->options));
 
-		if ( !$this->fileManager->is_exists_mkdir($dir_real_path) ) {
+
+		// logファイルディレクトリが存在しない場合は作成
+		if ( !$this->common->is_exists_mkdir($result->log_real_path) ) {
 			$ret = false;
 		}
 
 		// backupディレクトリが存在しない場合は作成
-		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . define::PATH_BACKUP));
-
-		if ( !$this->fileManager->is_exists_mkdir($dir_real_path) ) {
+		if ( !$this->common->is_exists_mkdir($result->backup_real_path) ) {
 			$ret = false;
 		}
 
 		// waitingディレクトリが存在しない場合は作成
-		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . define::PATH_WAITING));
-
-		if ( !$this->fileManager->is_exists_mkdir($dir_real_path) ) {
+		if ( !$this->common->is_exists_mkdir($result->waiting_real_path) ) {
 			$ret = false;
 		}
 
 		// runningディレクトリが存在しない場合は作成
-		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . define::PATH_RUNNING));
-
-		if ( !$this->fileManager->is_exists_mkdir($dir_real_path) ) {
+		if ( !$this->common->is_exists_mkdir($result->running_real_path) ) {
 			$ret = false;
 		}
 
 		// releasedディレクトリが存在しない場合は作成
-		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . define::PATH_RELEASED));
-
-		if ( !$this->fileManager->is_exists_mkdir($dir_real_path) ) {
+		if ( !$this->common->is_exists_mkdir() ) {
 			$ret = false;
 		}
 
-		$this->common->debug_echo('■ create_work_dir end');
+		$this->common->debug_echo('■ create_indigo_work_dir end');
 
 		return $ret;
 	}

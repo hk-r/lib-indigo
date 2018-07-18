@@ -10,8 +10,6 @@ class gitManager
 
 	private $common;
 
-	private $name = 'テスト！！！';
-	
 
 	// git一時ディレクトリパス
 	const PATH_GIT_WORK = '/work_repository/';
@@ -52,6 +50,9 @@ class gitManager
 			$command = 'git branch -r';
 			$ret = $this->common->command_execute($command, false);
 
+			// リストの先頭を空にする
+			$output_array[] = "";
+
 			foreach ((array)$ret['output'] as $key => $value) {
 				if( strpos($value, '/HEAD') !== false ){
 					continue;
@@ -87,7 +88,7 @@ class gitManager
 		// 公開日時ディレクトリの絶対パスを取得。
 		// すでに存在している場合は削除して再作成する。
 		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($path . $dirname));
-		if ( !$this->fileManager->is_exists_remkdir($dir_real_path) ) {
+		if ( !$this->common->is_exists_remkdir($dir_real_path) ) {
 			throw new \Exception('Git file copy failed. Creation of directory failed. ' . $dir_real_path);
 		}
 
@@ -183,7 +184,7 @@ class gitManager
 		if ( $master_real_path ) {
 
 			// デプロイ先のディレクトリが無い場合は作成
-			if ( !$this->fileManager->is_exists_mkdir( $master_real_path ) ) {
+			if ( !$this->common->is_exists_mkdir( $master_real_path ) ) {
 				// ディレクトリ作成に失敗
 				throw new \Exception('Failed to get git master. Creation of master directory failed.');
 			}

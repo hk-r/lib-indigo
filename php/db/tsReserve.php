@@ -22,7 +22,7 @@ class tsReserve
 	const TS_RESERVE_RESERVE_ID_SEQ = 'reserve_id_seq';		// ID
 	const TS_RESERVE_RESERVE = 'reserve_datetime';	// 公開予約日時
 	const TS_RESERVE_BRANCH = 'branch_name';	// ブランチ名
-	const TS_RESERVE_COMMIT = 'commit_hash';	// コミットハッシュ値（短縮）
+	const TS_RESERVE_COMMIT_HASH = 'commit_hash';	// コミットハッシュ値（短縮）
 	const TS_RESERVE_COMMENT = 'comment';	// コメント
 	const TS_RESERVE_DELETE_FLG = 'delete_flg';	// 削除フラグ
 	const TS_RESERVE_INSERT_DATETIME = 'insert_datetime';	// 登録日時
@@ -40,7 +40,7 @@ class tsReserve
 	const RESERVE_ENTITY_RESERVE_DATE = 'reserve_date';	// 公開予約日時
 	const RESERVE_ENTITY_RESERVE_TIME = 'reserve_time';	// 公開予約日時
 	const RESERVE_ENTITY_BRANCH = 'branch_name';	// ブランチ名
-	const RESERVE_ENTITY_COMMIT = 'commit_hash';	// コミットハッシュ値（短縮）
+	const RESERVE_ENTITY_COMMIT_HASH = 'commit_hash';	// コミットハッシュ値（短縮）
 	const RESERVE_ENTITY_COMMENT = 'comment';	// コメント
 	const RESERVE_ENTITY_INSERT_DATETIME = 'insert_datetime';	// 設定日時
 	const RESERVE_ENTITY_INSERT_USER_ID = 'insert_user_id';	// 設定日時
@@ -133,8 +133,11 @@ class tsReserve
 					SELECT * FROM TS_RESERVE
 					WHERE NOT EXISTS (SELECT *
               						FROM TS_OUTPUT
-              						WHERE TS_RESERVE.reserve_id_seq = TS_OUTPUT.reserve_id)
-					       and delete_flg = " . define::DELETE_FLG_OFF . $option_param . " ORDER BY reserve_datetime DESC;";
+              						WHERE TS_RESERVE." . tsReserve::TS_RESERVE_RESERVE_ID_SEQ . " = TS_OUTPUT." . tsOutput::TS_OUTPUT_RESERVE_ID .
+              			")
+					    and " . tsReserve::TS_RESERVE_DELETE_FLG . " = " . define::DELETE_FLG_OFF .
+					    $option_param .
+					" ORDER BY reserve_datetime DESC;";
 
 			$this->common->debug_echo('　□ select_sql');
 			$this->common->debug_echo($select_sql);
@@ -190,8 +193,8 @@ class tsReserve
 			} else {
 
 				// SELECT文作成
-				$select_sql = "SELECT * from TS_RESERVE
-					WHERE reserve_id_seq = ". $selected_id;
+				$select_sql = "SELECT * from TS_RESERVE 
+				WHERE " . self::TS_RESERVE_RESERVE_ID_SEQ . " = " . $selected_id . ";";
 
 				// // パラメータ作成
 				// $params = array(
@@ -224,7 +227,7 @@ class tsReserve
 	 *
 	 * @return なし
 	 */
-	public function insert_ts_reserve($dbh, $options, $commit_hash) {
+	public function insert_ts_reserve($dbh, $options) {
 
 		$this->common->debug_echo('■ insert_ts_reserve start');
 
@@ -237,7 +240,7 @@ class tsReserve
 			$insert_sql = "INSERT INTO TS_RESERVE ("
 			. self::TS_RESERVE_RESERVE . ","
 			. self::TS_RESERVE_BRANCH . ","
-			. self::TS_RESERVE_COMMIT . ","
+			. self::TS_RESERVE_COMMIT_HASH . ","
 			. self::TS_RESERVE_COMMENT . ","
 			. self::TS_RESERVE_DELETE_FLG . ","
 			. self::TS_RESERVE_INSERT_DATETIME . ","
@@ -249,7 +252,7 @@ class tsReserve
 
 			 ":" . self::TS_RESERVE_RESERVE . "," .
 			 ":" . self::TS_RESERVE_BRANCH . "," .
-			 ":" . self::TS_RESERVE_COMMIT . "," .
+			 ":" . self::TS_RESERVE_COMMIT_HASH . "," .
 			 ":" . self::TS_RESERVE_COMMENT . "," .
 			 ":" . self::TS_RESERVE_DELETE_FLG . "," .
 			 ":" . self::TS_RESERVE_INSERT_DATETIME . "," .
@@ -269,7 +272,7 @@ class tsReserve
 			$params = array(
 				":" . self::TS_RESERVE_RESERVE => $options->_POST->gmt_reserve_datetime,
 				":" . self::TS_RESERVE_BRANCH => $options->_POST->branch_select_value,
-				":" . self::TS_RESERVE_COMMIT => $commit_hash,
+				":" . self::TS_RESERVE_COMMIT_HASH => $options->_POST->commit_hash,
 				":" . self::TS_RESERVE_COMMENT => $options->_POST->comment,
 				":" . self::TS_RESERVE_DELETE_FLG => define::DELETE_FLG_OFF,
 				":" . self::TS_RESERVE_INSERT_DATETIME => $now,
@@ -303,7 +306,7 @@ class tsReserve
 	 *
 	 * @return なし
 	 */
-	public function update_reserve_table($dbh, $options, $selected_id, $commit_hash) {
+	public function update_reserve_table($dbh, $options, $selected_id) {
 
 		$this->common->debug_echo('■ update_reserve_table start');
 
@@ -312,27 +315,37 @@ class tsReserve
 		}
 
 		// UPDATE文作成
-		$update_sql = "UPDATE TS_RESERVE SET 
-			reserve_datetime = :reserve_datetime,
-			branch_name = :branch_name,
-			commit_hash = :commit_hash,
-			comment = :comment,
-			update_datetime = :update_datetime,
-			update_user_id = :update_user_id 
-			WHERE reserve_id_seq = :reserve_id_seq";
+		$update_sql = "UPDATE TS_RESERVE SET " .
+			self::TS_RESERVE_RESERVE .		"= :" . self::TS_RESERVE_RESERVE . "," .
+			self::TS_RESERVE_BRANCH .		"= :" . self::TS_RESERVE_BRANCH . "," .
+			self::TS_RESERVE_COMMIT_HASH .	"= :" . self::TS_RESERVE_COMMIT_HASH . "," .
+			self::TS_RESERVE_COMMENT .		"= :" . self::TS_RESERVE_COMMENT . "," .
+			self::TS_RESERVE_UPDATE_DATETIME .	"= :" . self::TS_RESERVE_UPDATE_DATETIME . "," .
+			self::TS_RESERVE_UPDATE_USER_ID .	"= :" . self::TS_RESERVE_UPDATE_USER_ID .
+			" WHERE " . self::TS_RESERVE_RESERVE_ID_SEQ . "= :" . self::TS_RESERVE_RESERVE_ID_SEQ . ";";
+
+
+		// $update_sql = "UPDATE TS_RESERVE SET 
+		// 	reserve_datetime = :reserve_datetime,
+		// 	branch_name = :branch_name,
+		// 	commit_hash = :commit_hash,
+		// 	comment = :comment,
+		// 	update_datetime = :update_datetime,
+		// 	update_user_id = :update_user_id 
+		// 	WHERE reserve_id_seq = :reserve_id_seq";
 
 		// 現在時刻
 		$now = $this->common->get_current_datetime_of_gmt();
 
 		// パラメータ作成
 		$params = array(
-			':reserve_datetime' => $options->_POST->gmt_reserve_datetime,
-			':branch_name' => $options->_POST->branch_select_value,
-			':commit_hash' => $commit_hash,
-			':comment' => $options->_POST->comment,
-			':update_datetime' => $now,
-			':update_user_id' => $options->user_id,
-			':reserve_id_seq' => $selected_id
+			":" . self::TS_RESERVE_RESERVE 			=> $options->_POST->gmt_reserve_datetime,
+			":" . self::TS_RESERVE_BRANCH 			=> $options->_POST->branch_select_value,
+			":" . self::TS_RESERVE_COMMIT_HASH 		=> $options->_POST->commit_hash,
+			":" . self::TS_RESERVE_COMMENT	 		=> $options->_POST->comment,
+			":" . self::TS_RESERVE_UPDATE_DATETIME 	=> $now,
+			":" . self::TS_RESERVE_UPDATE_USER_ID	=> $options->user_id,
+			":" . self::TS_RESERVE_RESERVE_ID_SEQ	=> $selected_id
 		);
 
 		// UPDATE実行
@@ -356,23 +369,39 @@ class tsReserve
 			throw new \Exception('選択ID「' . $selected_id . '」が取得できませんでした。 ');
 		}
 
-		// UPDATE文作成（論理削除）
-		$update_sql = "UPDATE TS_RESERVE SET 
-			delete_flg = :delete_flg,
-			update_datetime = :update_datetime,
-			update_user_id = :update_user_id 
-			WHERE reserve_id_seq = :reserve_id_seq";
+		// UPDATE文作成
+		$update_sql = "UPDATE TS_RESERVE SET " .
+			self::TS_RESERVE_DELETE_FLG .		"= :" . define::DELETE_FLG_ON . "," .
+			self::TS_RESERVE_UPDATE_DATETIME .	"= :" . self::TS_RESERVE_UPDATE_DATETIME . "," .
+			self::TS_RESERVE_UPDATE_USER_ID .	"= :" . self::TS_RESERVE_UPDATE_USER_ID .
+			" WHERE " . self::TS_RESERVE_RESERVE_ID_SEQ . "= :" . self::TS_RESERVE_RESERVE_ID_SEQ . ";";
+
+
+		// // UPDATE文作成（論理削除）
+		// $update_sql = "UPDATE TS_RESERVE SET 
+		// 	delete_flg = :delete_flg,
+		// 	update_datetime = :update_datetime,
+		// 	update_user_id = :update_user_id 
+		// 	WHERE reserve_id_seq = :reserve_id_seq";
 
 		// 現在時刻
 		// $now = date(self::DATETIME_FORMAT);
 		$now = $this->common->get_current_datetime_of_gmt();
 
+		// // パラメータ作成
+		// $params = array(
+		// 	':delete_flg' => define::DELETE_FLG_ON,
+		// 	':update_datetime' => $now,
+		// 	':update_user_id' => $options->user_id,
+		// 	':reserve_id_seq' => $selected_id
+		// );
+
 		// パラメータ作成
 		$params = array(
-			':delete_flg' => define::DELETE_FLG_ON,
-			':update_datetime' => $now,
-			':update_user_id' => $options->user_id,
-			':reserve_id_seq' => $selected_id
+			":" . self::TS_RESERVE_DELETE_FLG 		=> define::DELETE_FLG_ON,
+			":" . self::TS_RESERVE_UPDATE_DATETIME 	=> $now,
+			":" . self::TS_RESERVE_UPDATE_USER_ID	=> $options->user_id,
+			":" . self::TS_RESERVE_RESERVE_ID_SEQ	=> $selected_id
 		);
 
 		// UPDATE実行
@@ -407,13 +436,16 @@ class tsReserve
 		// ブランチ
 		$entity[self::RESERVE_ENTITY_BRANCH] = $array[self::TS_RESERVE_BRANCH];
 		// コミット
-		$entity[self::RESERVE_ENTITY_COMMIT] = $array[self::TS_RESERVE_COMMIT];
+		$entity[self::RESERVE_ENTITY_COMMIT_HASH] = $array[self::TS_RESERVE_COMMIT_HASH];
 		// コメント
 		$entity[self::RESERVE_ENTITY_COMMENT] = $array[self::TS_RESERVE_COMMENT];
-			// コミット
+		// 登録ユーザID
 		$entity[self::RESERVE_ENTITY_INSERT_USER_ID] = $array[self::TS_RESERVE_INSERT_USER_ID];
-		// コメント
-		$entity[self::RESERVE_ENTITY_UPDATE_USER_ID] = $array[self::TS_RESERVE_UPDATE_USER_ID];
+		// 登録日時
+		// タイムゾーンの時刻へ変換
+		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_RESERVE_INSERT_DATETIME]);
+
+		$entity[self::RESERVE_ENTITY_INSERT_DATETIME] = $tz_datetime;
 		
 		$this->common->debug_echo('■ convert_ts_reserve_entity end');
 

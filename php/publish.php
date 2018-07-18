@@ -57,19 +57,8 @@ class publish
 		$this->common->debug_echo('　□ 公開ファイル日時：');
 		$this->common->debug_echo($running_dirname);
 
-		// 本番環境ディレクトリの絶対パスを取得。
-		$project_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->project_real_path . "/"));
-
-		$this->common->debug_echo('　□ project_real_path' . $project_real_path);
-
-		// runningディレクトリの絶対パスを取得。
-		$running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . self::PATH_RUNNING));
-
-		// releasedディレクトリの絶対パスを取得。
-		$released_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . self::PATH_RELEASED));
-
-		// logディレクトリの絶対パスを取得。
-		$log_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . self::PATH_LOG));
+		// 作業用ディレクトリの絶対パスを取得
+		$result = json_decode($this->common->get_workdir_real_path($options));
 
 
 		//============================================================
@@ -78,9 +67,9 @@ class publish
 
  		$this->common->debug_echo('　□ -----「running」ディレクトリのソースを本番環境へ同期ー-----');
 		
-		if ( file_exists($running_real_path) ) {
+		if ( file_exists($result->running_real_path) ) {
 
-			if ( file_exists($project_real_path) ) {
+			if ( file_exists($result->project_real_path) ) {
 
 			// 以下のコマンド（-a）だと、パーミッションまで変えようとするためエラーが発生する。
 			// $command = 'rsync -avzP ' . $running_real_path . $dirname . '/' . ' ' . $project_real_path . ' --log-file=' . $log_real_path . $dirname . '/rsync_' . $dirname . '.log' ;
@@ -97,7 +86,7 @@ class publish
 			// -P ファイル転送中の場合、途中から再開するように
 
 			// ※runningディレクトリパスの後ろにはスラッシュは付けない（スラッシュを付けると日付ディレクトリも含めて同期してしまう）
-			$command = 'rsync -rtvzP --delete ' . $running_real_path . $running_dirname . '/' . ' ' . $project_real_path . ' ' . '--log-file=' . $log_real_path . $running_dirname . '/rsync_' . $running_dirname . '.log' ;
+			$command = 'rsync -rtvzP --delete ' . $result->running_real_path . $running_dirname . '/' . ' ' . $result->project_real_path . ' ' . '--log-file=' . $result->log_real_path . $running_dirname . '/rsync_' . $running_dirname . '.log' ;
 
 			$this->common->debug_echo('　□ $command：');
 			$this->common->debug_echo($command);
@@ -112,12 +101,12 @@ class publish
 
 			} else {
 				// エラー処理
-				throw new \Exception('Project directory not found. ' . $project_real_path);
+				throw new \Exception('Project directory not found. ' . $result->project_real_path);
 			}
 
 		} else {
 			// エラー処理
-			throw new \Exception('Running directory not found .' . $running_real_path);
+			throw new \Exception('Running directory not found .' . $result->running_real_path);
 		}
 		//============================================================
 		// 公開済みのソースを「running」ディレクトリから「released」ディレクトリへ移動
@@ -125,7 +114,7 @@ class publish
 
  		$this->common->debug_echo('　□ -----公開済みのソースを「running」ディレクトリから「released」ディレクトリへ移動-----');
 
-		$this->move_dir($running_real_path, $running_dirname, $released_real_path, $running_dirname);
+		$this->move_dir($result->running_real_path, $running_dirname, $result->released_real_path, $running_dirname);
 
 		$this->common->debug_echo('■ do_publish end');
 	}
@@ -133,15 +122,22 @@ class publish
 	/**
 	 * バックアップファイルの作成（コマンド実行）
 	 */
-	public function create_backup($project_real_path, $backup_real_path, $backup_dirname) {
+	public function create_backup($backup_dirname, $real_path) {
 
 		$this->common->debug_echo('■ create_backup start');
 
-		if ( file_exists($backup_real_path) ) {
+		// // 作業用ディレクトリの絶対パスを取得
+		// $result = json_decode($this->common->get_workdir_real_path($options));
 
-			if ( file_exists($project_real_path) ) {
+		if ( file_exists($real_path->backup_real_path) ) {
 
-				$command = 'rsync -rtvzP' . ' ' . $project_real_path . ' ' . $backup_real_path . $backup_dirname . '/' . ' --log-file=' . $log_real_path . '/rsync_' . $backup_dirname . '.log' ;
+		$this->common->debug_echo('■ 1');
+
+			if ( file_exists($real_path->project_real_path) ) {
+
+		$this->common->debug_echo('■ 2');
+
+				$command = 'rsync -rtvzP' . ' ' . $real_path->project_real_path . ' ' . $real_path->backup_real_path . $backup_dirname . '/' . ' --log-file=' . $real_path->log_real_path . '/rsync_' . $backup_dirname . '.log' ;
 
 				$this->common->debug_echo('　□ $command：' . $command);
 
@@ -155,11 +151,11 @@ class publish
 
 			} else {
 				// エラー処理
-				throw new \Exception('Project directory not found. ' . $project_real_path);
+				throw new \Exception('Project directory not found. ' . $real_path->project_real_path);
 			}
 		} else {
 			// エラー処理
-			throw new \Exception('Backup directory not found. ' . $backup_real_path);
+			throw new \Exception('Backup directory not found. ' . $real_path->backup_real_path);
 		}
 
 		$this->common->debug_echo('■ create_backup end');
@@ -171,7 +167,11 @@ class publish
 	 */
 	public function move_dir($from_real_path, $from_dirname, $to_real_path, $to_dirname) {
 
-		$this->common->debug_echo('■ move_running_dir start');
+		$this->common->debug_echo('■ move_dir start');
+
+			$this->common->debug_echo($from_real_path);
+
+			$this->common->debug_echo($to_real_path);
 
 		if ( file_exists($from_real_path)  ) {
 
@@ -215,7 +215,7 @@ class publish
 
 		chdir($current_dir);
 
-		$this->common->debug_echo('■ move_running_dir end');
+		$this->common->debug_echo('■ move_dir end');
 	}
 }
 

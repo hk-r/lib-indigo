@@ -1,6 +1,48 @@
 $(function($){
 	$(window).load(function(){
 
+
+		$('#branch_list').change(function() {
+			
+			// var str = $(this).val();
+			// alert('セレクトボックスチェンジ');
+
+			// var site_id1 = document.getElementsByName('branch_select_value');
+			var branch_name = $(this).val();
+
+			if (!branch_name) {
+
+	    		$('#result').text("");
+	    		$('#commit_hash').val("");
+
+			} else {
+
+				var path = document.getElementById('master_real_path').value;
+				
+				$.ajax ({
+					type: 'GET',
+					// "url": "./../vendor/pickles2/lib-indigo/php/jquery.php",
+					url: "./../vendor/pickles2/lib-indigo/php/ajax.php",
+					
+					data: { 'branch_name': branch_name, 'path': path },
+					dataType: 'json',
+				    success: function(data, dataType) {
+				    	if (data) {
+				    		$('#result').text(data.commit_hash);
+				    		$('#commit_hash').val(data.commit_hash);
+				    	}					
+			    	},
+			    	error: function(XMLHttpRequest, textStatus, errorThrown) {
+				        // エラーメッセージの表示
+				        alert('コミット取得に失敗しました。');
+				        console.log(errorThrown);
+		      		}
+				});
+			}
+
+	      	return false;
+		});
+
 		/*
 		 * 削除ボタン
 		 */
@@ -88,23 +130,51 @@ $(function($){
 		});	
 
 		/*
-		 * 新規変更ダイアログ[確認]ボタン
+		 * 新規、変更ダイアログの[確認][確定]ボタン
 		 */
-		$('#add_check_btn, #update_check_btn').on('click', function() {
+		$('#add_check_btn, #update_check_btn, #add_confirm_btn, #update_confirm_btn').on('click', function() {
 
-			/// 入力チェック
-			if (!check_validation()) {
+			/// ブランチ入力チェック
+			if (!check_branch_validation()) {
 				return false;
 			}
-
+			/// コミット取得チェック
+			if (!check_commit_validation()) {
+				return false;
+			}
+			/// 日付入力チェック
+			if (!check_date_validation()) {
+				return false;
+			}
 			// ダイアログ画面ロック
 			display_lock();
 		});	
 
 		/*
+		 * 即時公開ダイアログの[確認][確定]ボタン
+		 */
+		$('#immediate_check_btn, #immediate_confirm_btn').on('click', function() {
+
+			/// ブランチ入力チェック
+			if (!check_branch_validation()) {
+				return false;
+			}
+			/// コミット取得チェック
+			if (!check_commit_validation()) {
+				return false;
+			}
+			// /// 日付入力チェック
+			// if (!check_date_validation()) {
+			// 	return false;
+			// }
+			// ダイアログ画面ロック
+			display_lock();
+		});	
+		/*
+		 * 入力チェック不要
 		 * [新規][履歴][戻る][確定][即時公開][バックアップ一覧]ボタン
 		 */
-		$('#add_btn, #confirm_btn, #back_btn, #history_btn, #backup_btn, #sokuji_btn').on('click', function() {
+		$('#add_btn, #back_btn, #history_btn, #backup_btn, #sokuji_btn').on('click', function() {
 
 			// ダイアログ画面ロック
 			display_lock();
@@ -124,27 +194,58 @@ $(function($){
 	});
 
 	/*
-	 * 入力チェック
+	 * ブランチ設定チェック
 	 */
-	function check_validation () {
+	function check_branch_validation () {
+
+		var branch_select_value = document.getElementsByName('branch_select_value').item(0).value;
+
+		if(branch_select_value === ""){
+		  
+			alert("ブランチを選択して下さい。");
+			return false;
+		}
+
+		return true;
+	}
+
+	/*
+	 * コミット設定チェック
+	 */
+	function check_commit_validation () {
+
+		var commit_hash = document.getElementById('commit_hash').value;
+
+		if(commit_hash === ""){
+		  
+			alert("選択ブランチに紐づくコミットハッシュ値が取得されておりません。");
+			return false;
+		}
+
+		return true;
+	}
+
+	/*
+	 * 日付入力チェック
+	 */
+	function check_date_validation () {
 
 		var date = document.getElementById('datepicker').value;
 		var time = document.getElementById('reserve_time').value;
 
-	    if(date === "" || time === ""){
-	      
-	        alert("日付と時間を入力して下さい。");
-
+		if(date === "" || time === ""){
+		  
+			alert("日付と時間を入力して下さい。");
 			return false;
-	    }
+		}
 
 		if(!date.match(/^[0-9]{4}\-[0-9]{2}\-[0-9]{2}$/)){
 
-		    alert("日付の形式が正しくありません。YYYY-MM-DDの形式で入力してください。");
+			alert("日付の形式が正しくありません。YYYY-MM-DDの形式で入力してください。");
+			return false;
+		}
 
-		    return false;
-		 }
-		 return true;
+		return true;
 	}
 
 	/*

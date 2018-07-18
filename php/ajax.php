@@ -1,67 +1,42 @@
 <?php
 
-    echo '★1';
-    echo __DIR__;
+    require_once( __DIR__ . '/fileManager.php' );
+    require_once( __DIR__ . '/common.php' );
     
-    $gitManager = new gitManager();
-    echo $gitManager -> name;//佐藤
-    echo '★2';
-    function __autoload($className){
+    $fileManager = new indigo\fileManager(null);
+    $common = new indigo\common(null);
 
-      //$className（インスタンス生成時に読み込まれていないクラス名）
-      $file = './' . $className . '.php';
-      require $file;
-    }
-    echo '★3';
-    if (isset($_POST['branch_name']) && isset($_POST['path'])) {
+    $commit_hash = '';
+
+    if (isset($_GET['branch_name']) && isset($_GET['path'])) {
     
-        // $this->common->debug_echo('■ jquery.php start');
-
-        $commit_hash;
-
         $current_dir = realpath('.');
 
-        // 指定ブランチ
-        $branch_name = trim(str_replace("origin/", "", $_POST['branch_name']));
-    echo '★4';
-        if (!$branch_name) {
-            // ディレクトリ移動に失敗
-            throw new \Exception('Failed to get git commitHash. Get branch name failed.');
-        }
-        
         // masterディレクトリの絶対パス
-        $master_real_path = isset($_POST['path']);
+        $master_real_path = $fileManager->normalize_path($fileManager->get_realpath($_GET['path']));
+        // $master_real_path = 'error test';
 
         if ( $master_real_path ) {
 
-            // ディレクトリ移動
             if ( chdir( $master_real_path ) ) {
 
                 // コミットハッシュ値取得
-                $command = 'git log --pretty=%h ' . $branch_name . ' -1';
-                $ret = $this->command_execute($command, false);
-
+                $command = 'git log --pretty=%h ' . $_GET['branch_name'] . ' -1';
+                $ret = $common->command_execute($command, false);
                 foreach ( (array)$ret['output'] as $data ) {
                     $commit_hash = $data;
                 }
 
-            } else {
-
-                chdir($current_dir);
-
-                // ディレクトリ移動に失敗
-                throw new \Exception('Failed to get git commitHash. Move to work directory failed.');
-            }
+            } 
         }
-
+        
+        $data = array( 'commit_hash' => $commit_hash );
         chdir($current_dir);
 
-        // $this->common->debug_echo('■ jquery.php');
+        header("Content-type: application/javascript; charset=UTF-8");
+        
+        echo json_encode($data);
 
-        echo $commit_hash;
-
-    } else {
-        echo 'Ajax error! The parameter of "id" is not found.';
     }
 
 ?>

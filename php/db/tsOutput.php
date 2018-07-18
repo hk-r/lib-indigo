@@ -19,7 +19,7 @@ class tsOutput
 	const TS_OUTPUT_BACKUP_ID = 'backup_id';			// バックアップID
 	const TS_OUTPUT_RESERVE = 'reserve_datetime';		// 公開予約日時
 	const TS_OUTPUT_BRANCH = 'branch_name';		// ブランチ名
-	const TS_OUTPUT_COMMIT = 'commit_hash';		// コミットハッシュ値（短縮）
+	const TS_OUTPUT_COMMIT_HASH = 'commit_hash';		// コミットハッシュ値（短縮）
 	const TS_OUTPUT_COMMENT = 'comment';		// コメント
 	const TS_OUTPUT_PUBLISH_TYPE = 'publish_type';	// 公開種別
 	const TS_OUTPUT_STATUS = 'status';				// 状態
@@ -43,7 +43,7 @@ class tsOutput
 	const OUTPUT_ENTITY_RESERVE = 'reserve_datetime';		// 公開予約日時
 	const OUTPUT_ENTITY_RESERVE_DISPLAY = 'reserve_datetime_display';	// 公開予約日時
 	const OUTPUT_ENTITY_BRANCH = 'branch_name';		// ブランチ名
-	const OUTPUT_ENTITY_COMMIT = 'commit_hash';		// コミットハッシュ値（短縮）
+	const OUTPUT_ENTITY_COMMIT_HASH = 'commit_hash';		// コミットハッシュ値（短縮）
 	const OUTPUT_ENTITY_COMMENT = 'comment';		// コメント
 	const OUTPUT_ENTITY_STATUS = 'status';		// 状態
 	const OUTPUT_ENTITY_TYPE = 'publish_type';		// 公開種別
@@ -80,87 +80,81 @@ class tsOutput
 		$ret_array = array();
 		$conv_ret_array = array();
 
-		try {
+		// SELECT文作成（世代削除フラグ = 0、ソート順：IDの降順）
+		$select_sql = "
+				SELECT * FROM TS_OUTPUT
+				WHERE " . self::TS_OUTPUT_DELETE_FLG . " = " . define::DELETE_FLG_OFF .
+				" ORDER BY " . self::TS_OUTPUT_ID_SEQ . " DESC";
 
-			// SELECT文作成（世代削除フラグ = 0、ソート順：IDの降順）
-			$select_sql = "
-					SELECT * FROM TS_OUTPUT WHERE gen_delete_flg = " . define::DELETE_FLG_OFF . " ORDER BY output_id_seq DESC";
-			// SELECT実行
-			$ret_array = $this->pdoManager->select($dbh, $select_sql);
+		// SELECT実行
+		$ret_array = $this->pdoManager->select($dbh, $select_sql);
 
-			foreach ((array)$ret_array as $array) {
-				$conv_ret_array[] = $this->convert_ts_output_entity($array);
-			}
-
-			// $this->common->debug_echo('　□ SELECTリストデータ：');
-			// $this->common->debug_var_dump($ret_array);
-
-		} catch (\Exception $e) {
-
-			echo "例外キャッチ：", $e->getMessage() . "<br>";
-
-			return $conv_ret_array;
+		foreach ((array)$ret_array as $array) {
+			$conv_ret_array[] = $this->convert_ts_output_entity($array);
 		}
-		
+
+		// $this->common->debug_echo('　□ SELECTリストデータ：');
+		// $this->common->debug_var_dump($ret_array);
+
 		$this->common->debug_echo('■ get_ts_output_list end');
 
 		return $conv_ret_array;
 	}
 
-	/**
-	 * 選択された公開処理結果情報を取得する
-	 *
-	 * @return 選択行の情報
-	 */
-	public function get_selected_ts_output($dbh, $selected_id) {
+	// /**
+	//  * 選択された公開処理結果情報を取得する
+	//  *
+	//  * @return 選択行の情報
+	//  */
+	// public function get_selected_ts_output($dbh, $selected_id) {
 
-		// $this->common->debug_echo('■ get_selected_ts_output start');
+	// 	// $this->common->debug_echo('■ get_selected_ts_output start');
 
-		$ret_array = array();
+	// 	$ret_array = array();
 
-		$conv_ret_array = array();
+	// 	$conv_ret_array = array();
 
-		try {
+	// 	try {
 
-			$this->common->debug_echo('　□ selected_id：' . $selected_id);
+	// 		$this->common->debug_echo('　□ selected_id：' . $selected_id);
 
-			if (!$selected_id) {
-				$this->common->debug_echo('選択値が取得できませんでした。');
-			} else {
+	// 		if (!$selected_id) {
+	// 			$this->common->debug_echo('選択値が取得できませんでした。');
+	// 		} else {
 
-				// SELECT文作成
-				$select_sql = "SELECT * from TS_OUTPUT 
-					WHERE output_id_seq = ". $selected_id;
+	// 			// SELECT文作成
+	// 			$select_sql = "SELECT * from TS_OUTPUT 
+	// 				WHERE output_id_seq = ". $selected_id;
 
-				$this->common->debug_echo('　□ select_sql');
-				$this->common->debug_echo($select_sql);
+	// 			$this->common->debug_echo('　□ select_sql');
+	// 			$this->common->debug_echo($select_sql);
 
-				// // パラメータ作成
-				// $params = array(
-				// 	':id' => $selected_id
-				// );
+	// 			// // パラメータ作成
+	// 			// $params = array(
+	// 			// 	':id' => $selected_id
+	// 			// );
 
-				// SELECT実行
-				$ret_array = array_shift($this->pdoManager->select($dbh, $select_sql));
+	// 			// SELECT実行
+	// 			$ret_array = array_shift($this->pdoManager->select($dbh, $select_sql));
 
-				$conv_ret_array = $this->convert_ts_output_entity($ret_array);
+	// 			$conv_ret_array = $this->convert_ts_output_entity($ret_array);
 
 
-				// $this->common->debug_echo('　□ SELECTデータ：');
-				// $this->common->debug_var_dump($ret_array);
-			}
+	// 			// $this->common->debug_echo('　□ SELECTデータ：');
+	// 			// $this->common->debug_var_dump($ret_array);
+	// 		}
 
-		} catch (\Exception $e) {
+	// 	} catch (\Exception $e) {
 
-			echo "例外キャッチ：", $e->getMessage() . "<br>";
+	// 		echo "例外キャッチ：", $e->getMessage() . "<br>";
 
-			return $conv_ret_array;
-		}
+	// 		return $conv_ret_array;
+	// 	}
 		
-		// $this->common->debug_echo('■ get_selected_ts_output end');
+	// 	// $this->common->debug_echo('■ get_selected_ts_output end');
 
-		return $conv_ret_array;
-	}
+	// 	return $conv_ret_array;
+	// }
 	
 	/**
 	 * 公開処理結果一覧テーブルの登録処理
@@ -177,7 +171,7 @@ class tsOutput
 		. self::TS_OUTPUT_BACKUP_ID . ","
 		. self::TS_OUTPUT_RESERVE . ","
 		. self::TS_OUTPUT_BRANCH . ","
-		. self::TS_OUTPUT_COMMIT . ","
+		. self::TS_OUTPUT_COMMIT_HASH . ","
 		. self::TS_OUTPUT_COMMENT . ","
 		. self::TS_OUTPUT_PUBLISH_TYPE . ","
 		. self::TS_OUTPUT_STATUS . ","
@@ -199,7 +193,7 @@ class tsOutput
 		 ":" . self::TS_OUTPUT_BACKUP_ID . "," .
 		 ":" . self::TS_OUTPUT_RESERVE . "," .
 		 ":" . self::TS_OUTPUT_BRANCH . "," .
-		 ":" . self::TS_OUTPUT_COMMIT . "," .
+		 ":" . self::TS_OUTPUT_COMMIT_HASH . "," .
 		 ":" . self::TS_OUTPUT_COMMENT . "," .
 		 ":" . self::TS_OUTPUT_PUBLISH_TYPE . "," .
 		 ":" . self::TS_OUTPUT_STATUS . "," .
@@ -225,25 +219,25 @@ class tsOutput
 
 		// パラメータ作成
 		$params = array(
-			":" . self::TS_OUTPUT_RESERVE_ID => $dataArray[self::TS_OUTPUT_RESERVE_ID],
-			":" . self::TS_OUTPUT_BACKUP_ID => $dataArray[self::TS_OUTPUT_BACKUP_ID],
-			":" . self::TS_OUTPUT_RESERVE => $dataArray[self::TS_OUTPUT_RESERVE],
-			":" . self::TS_OUTPUT_BRANCH => $dataArray[self::TS_OUTPUT_BRANCH],
-			":" . self::TS_OUTPUT_COMMIT => $dataArray[self::TS_OUTPUT_COMMIT],
-			":" . self::TS_OUTPUT_COMMENT => $dataArray[self::TS_OUTPUT_COMMENT],
-			":" . self::TS_OUTPUT_PUBLISH_TYPE => $dataArray[self::TS_OUTPUT_PUBLISH_TYPE],
-			":" . self::TS_OUTPUT_STATUS => $dataArray[self::TS_OUTPUT_STATUS],
-			":" . self::TS_OUTPUT_DIFF_FLG1 => $dataArray[self::TS_OUTPUT_DIFF_FLG1],
-			":" . self::TS_OUTPUT_DIFF_FLG2 => $dataArray[self::TS_OUTPUT_DIFF_FLG2],
-			":" . self::TS_OUTPUT_DIFF_FLG3 => $dataArray[self::TS_OUTPUT_DIFF_FLG3],
-			":" . self::TS_OUTPUT_START => $dataArray[self::TS_OUTPUT_START],
-			":" . self::TS_OUTPUT_END => $dataArray[self::TS_OUTPUT_END],
-			":" . self::TS_OUTPUT_DELETE_FLG => $dataArray[self::TS_OUTPUT_DELETE_FLG],
-			":" . self::TS_OUTPUT_DELETE => $dataArray[self::TS_OUTPUT_DELETE],
-			":" . self::TS_OUTPUT_INSERT_DATETIME => $now,
-			":" . self::TS_OUTPUT_INSERT_USER_ID => $dataArray[self::TS_OUTPUT_INSERT_USER_ID],
-			":" . self::TS_OUTPUT_UPDATE_DATETIME => null,
-			":" . self::TS_OUTPUT_UPDATE_USER_ID => null
+			":" . self::TS_OUTPUT_RESERVE_ID	=> $dataArray[self::TS_OUTPUT_RESERVE_ID],
+			":" . self::TS_OUTPUT_BACKUP_ID	 	=> $dataArray[self::TS_OUTPUT_BACKUP_ID],
+			":" . self::TS_OUTPUT_RESERVE 		=> $dataArray[self::TS_OUTPUT_RESERVE],
+			":" . self::TS_OUTPUT_BRANCH 		=> $dataArray[self::TS_OUTPUT_BRANCH],
+			":" . self::TS_OUTPUT_COMMIT_HASH 	=> $dataArray[self::TS_OUTPUT_COMMIT_HASH],
+			":" . self::TS_OUTPUT_COMMENT 		=> $dataArray[self::TS_OUTPUT_COMMENT],
+			":" . self::TS_OUTPUT_PUBLISH_TYPE 	=> $dataArray[self::TS_OUTPUT_PUBLISH_TYPE],
+			":" . self::TS_OUTPUT_STATUS 		=> $dataArray[self::TS_OUTPUT_STATUS],
+			":" . self::TS_OUTPUT_DIFF_FLG1 	=> $dataArray[self::TS_OUTPUT_DIFF_FLG1],
+			":" . self::TS_OUTPUT_DIFF_FLG2 	=> $dataArray[self::TS_OUTPUT_DIFF_FLG2],
+			":" . self::TS_OUTPUT_DIFF_FLG3 	=> $dataArray[self::TS_OUTPUT_DIFF_FLG3],
+			":" . self::TS_OUTPUT_START 		=> $dataArray[self::TS_OUTPUT_START],
+			":" . self::TS_OUTPUT_END 			=> $dataArray[self::TS_OUTPUT_END],
+			":" . self::TS_OUTPUT_DELETE_FLG 	=> $dataArray[self::TS_OUTPUT_DELETE_FLG],
+			":" . self::TS_OUTPUT_DELETE 		=> $dataArray[self::TS_OUTPUT_DELETE],
+			":" . self::TS_OUTPUT_INSERT_DATETIME	=> $now,
+			":" . self::TS_OUTPUT_INSERT_USER_ID	=> $dataArray[self::TS_OUTPUT_INSERT_USER_ID],
+			":" . self::TS_OUTPUT_UPDATE_DATETIME	=> null,
+			":" . self::TS_OUTPUT_UPDATE_USER_ID	=> null
 		);
 
 		// INSERT実行
@@ -273,16 +267,15 @@ class tsOutput
 		}
 
 		// UPDATE文作成
-		$update_sql = "UPDATE TS_OUTPUT SET 
-			status = :status,
-			change_check_flg = :change_check_flg,
-			publish_honban_diff_flg = :publish_honban_diff_flg,
-			publish_pre_diff_flg = :publish_pre_diff_flg,
-			end_datetime = :end_datetime,
-			update_datetime = :update_datetime,
-			update_user_id = :update_user_id 		
-
-			WHERE output_id_seq = :output_id_seq";
+		$update_sql = "UPDATE TS_OUTPUT SET " .
+			self::TS_OUTPUT_STATUS .	"= :" . self::TS_OUTPUT_STATUS . "," .
+			self::TS_OUTPUT_DIFF_FLG1 .	"= :" . self::TS_OUTPUT_DIFF_FLG1 . "," .
+			self::TS_OUTPUT_DIFF_FLG2 .	"= :" . self::TS_OUTPUT_DIFF_FLG2 . "," .
+			self::TS_OUTPUT_DIFF_FLG3 .	"= :" . self::TS_OUTPUT_DIFF_FLG3 . "," .
+			self::TS_OUTPUT_END .		"= :" . self::TS_OUTPUT_END . "," .
+			self::TS_OUTPUT_UPDATE_DATETIME .	"= :" . self::TS_OUTPUT_UPDATE_DATETIME . "," .
+			self::TS_OUTPUT_UPDATE_USER_ID .	"= :" . self::TS_OUTPUT_UPDATE_USER_ID .
+			"WHERE " . self::TS_OUTPUT_ID_SEQ . "= :" . self::TS_OUTPUT_ID_SEQ . ";";
 
 		$this->common->debug_echo('　□ update_sql');
 		$this->common->debug_echo($update_sql);
@@ -292,15 +285,14 @@ class tsOutput
 
 		// パラメータ作成
 		$params = array(
-			':status' => $dataArray[self::TS_OUTPUT_STATUS],
-			':change_check_flg' => $dataArray[self::TS_OUTPUT_DIFF_FLG1],
-			':publish_honban_diff_flg' => $dataArray[self::TS_OUTPUT_DIFF_FLG2],
-			':publish_pre_diff_flg' => $dataArray[self::TS_OUTPUT_DIFF_FLG3],
-			':end_datetime' => $dataArray[self::TS_OUTPUT_END],
-			':update_datetime' => $now,
-			':update_user_id' => $dataArray[self::TS_OUTPUT_UPDATE_USER_ID],
-
-			':output_id_seq' => $id
+			":" . self::TS_OUTPUT_STATUS 		=> $dataArray[self::TS_OUTPUT_STATUS],
+			":" . self::TS_OUTPUT_DIFF_FLG1 	=> $dataArray[self::TS_OUTPUT_DIFF_FLG1],
+			":" . self::TS_OUTPUT_DIFF_FLG2 	=> $dataArray[self::TS_OUTPUT_DIFF_FLG2],
+			":" . self::TS_OUTPUT_DIFF_FLG3 	=> $dataArray[self::TS_OUTPUT_DIFF_FLG3],
+			":" . self::TS_OUTPUT_END 			=> $dataArray[self::TS_OUTPUT_END],
+			":" . self::TS_OUTPUT_UPDATE_DATETIME	=> $now,
+			":" . self::TS_OUTPUT_UPDATE_USER_ID	=> $dataArray[self::TS_OUTPUT_UPDATE_USER_ID],
+			":" . self::TS_OUTPUT_ID_SEQ			=> $id
 		);
 
 		// UPDATE実行
@@ -330,27 +322,27 @@ class tsOutput
 		// タイムゾーンの時刻へ変換
 		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_OUTPUT_RESERVE]);
 
-		$entity[self::OUTPUT_ENTITY_RESERVE] = $tz_datetime;
+		$entity[self::OUTPUT_ENTITY_RESERVE] 		 = $tz_datetime;
 		$entity[self::OUTPUT_ENTITY_RESERVE_DISPLAY] = $this->common->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISPLAY);
 
 		// 処理開始日時
 		// タイムゾーンの時刻へ変換
 		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_OUTPUT_START]);
 
-		$entity[self::OUTPUT_ENTITY_START] = $tz_datetime;
+		$entity[self::OUTPUT_ENTITY_START]		   = $tz_datetime;
 		$entity[self::OUTPUT_ENTITY_START_DISPLAY] = $this->common->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISPLAY);
 
 		// 処理終了日時
 		// タイムゾーンの時刻へ変換
 		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_OUTPUT_END]);
 		
-		$entity[self::OUTPUT_ENTITY_END] = $tz_datetime;
+		$entity[self::OUTPUT_ENTITY_END]	     = $tz_datetime;
 		$entity[self::OUTPUT_ENTITY_END_DISPLAY] = $this->common->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISPLAY);
 
 		// ブランチ
 		$entity[self::OUTPUT_ENTITY_BRANCH] = $array[self::TS_OUTPUT_BRANCH];
 		// コミット
-		$entity[self::OUTPUT_ENTITY_COMMIT] = $array[self::TS_OUTPUT_COMMIT];
+		$entity[self::OUTPUT_ENTITY_COMMIT_HASH] = $array[self::TS_OUTPUT_COMMIT_HASH];
 		// コメント
 		$entity[self::OUTPUT_ENTITY_COMMENT] = $array[self::TS_OUTPUT_COMMENT];
 	

@@ -6,6 +6,9 @@ class common
 {
 
 	private $main;
+	private $fileManager;
+
+	const DIR_PERMISSION_0757 = 0757;
 
 
 	/**
@@ -16,6 +19,7 @@ class common
 	public function __construct ($main){
 
 		$this->main = $main;
+		$this->fileManager = new fileManager($this);
 	}
 
 	/**
@@ -170,7 +174,111 @@ class common
 
 		return $ret;
 	}
-			
+
+
+	/**
+	 * ディレクトリが存在しない場合はディレクトリを作成する
+	 *	 
+	 * @param $dirpath = ディレクトリパス
+	 *	 
+	 * @return true:成功、false：失敗
+	 */
+	public function is_exists_mkdir($dirpath) {
+
+		// $this->debug_echo('■ is_exists_mkdir start');
+
+		$ret = true;
+
+		if ($dirpath) {
+			if ( !file_exists($dirpath) ) {
+				// ディレクトリ作成
+				if ( !mkdir($dirpath, self::DIR_PERMISSION_0757)) {
+					$ret = false;
+				}
+			}
+		} else {
+			$ret = false;
+		}
+
+		// $this->debug_echo('　□ return：' . $ret);
+		// $this->debug_echo('■ is_exists_mkdir end');
+
+		return $ret;
+	}
+
+	/**
+	 * ディレクトリの存在有無にかかわらず、ディレクトリを再作成する（存在しているものは削除する）
+	 *	 
+	 * @param $dirpath = ディレクトリパス
+	 *	 
+	 * @return true:成功、false：失敗
+	 */
+	public function is_exists_remkdir($dirpath) {
+		
+		$this->debug_echo('■ is_exists_remkdir start');
+
+		if ( file_exists($dirpath) ) {
+			// 削除
+			$command = 'rm -rf --preserve-root '. $dirpath;
+			$ret = $this->command_execute($command, true);
+
+			if ( $ret['return'] !== 0 ) {
+				return false;
+			}
+		}
+
+		// デプロイ先のディレクトリを作成
+		if ( !file_exists($dirpath)) {
+			if ( !mkdir($dirpath, self::DIR_PERMISSION_0757) ) {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	
+		$this->debug_echo('■ is_exists_remkdir end');
+
+		return true;
+	}
+
+
+	/**
+	 * 作業用ディレクトリの絶対パス取得
+	 *	 
+	 * @param $path = 作成ディレクトリ名
+	 *	 
+	 * @return ソート後の配列
+	 */
+	public function get_workdir_real_path($options) {
+	
+		$this->debug_echo('■ get_indigo_work_dir start');
+
+		$result = array('project_real_path' => '',
+						'backup_real_path' => '',
+						'waiting_real_path' => '',
+						'running_real_path' => '',
+						'released_real_path' => '',
+						'log_real_path' => '');
+
+			// 本番環境ディレクトリの絶対パスを取得。
+			$result['project_real_path'] = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->project_real_path . "/"));
+
+			// backupディレクトリの絶対パスを取得。
+			$result['backup_real_path'] = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . define::PATH_BACKUP));
+
+			// waitingディレクトリの絶対パスを取得。
+			$result['waiting_real_path'] = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . define::PATH_WAITING));
+
+			// runningディレクトリの絶対パスを取得。
+			$result['running_real_path'] = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . define::PATH_RUNNING));
+
+			// logディレクトリの絶対パスを取得。
+			$result['log_real_path'] = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . define::PATH_LOG));
+
+		$this->debug_echo('■ get_indigo_work_dir end');
+
+	    return json_encode($result);
+	}
 
 	/**
 	 * ※デバッグ関数（エラー調査用）

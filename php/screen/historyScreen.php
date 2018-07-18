@@ -76,7 +76,7 @@ class historyScreen
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_RESERVE_DISPLAY] . '</td>'
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_START_DISPLAY] . '</td>'
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_END_DISPLAY] . '</td>'
-				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_COMMIT] . '</td>'
+				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_COMMIT_HASH] . '</td>'
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_BRANCH] . '</td>'
 				. '<td>' . $array[tsOutput::OUTPUT_ENTITY_COMMENT] . '</td>'
 				. '</tr>';

@@ -141,7 +141,7 @@ class initScreen
 			. '<th scope="row">ブランチ</th>'
 			. '<th scope="row">コメント</th>'
 			. '<th scope="row">登録ユーザ</th>'
-			. '<th scope="row">更新ユーザ</th>'
+			. '<th scope="row">登録日時</th>'
 			. '</tr>'
 			. '</thead>'
 			. '<tbody>';
@@ -155,11 +155,11 @@ class initScreen
 			$ret .= '<tr>'
 				. '<td class="p-center"><input type="radio" name="target" value="' . $array[tsReserve::RESERVE_ENTITY_ID_SEQ] . '"/></td>'
 				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_RESERVE_DISPLAY] . '</td>'
-				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_COMMIT] . '</td>'
+				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_COMMIT_HASH] . '</td>'
 				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_BRANCH] . '</td>'
 				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_COMMENT] . '</td>'
 				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_INSERT_USER_ID] . '</td>'
-				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_UPDATE_USER_ID] . '</td>'
+				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_INSERT_DATETIME] . '</td>'
 				. '</tr>';
 		}
 
@@ -210,6 +210,7 @@ class initScreen
 		$branch_select_value = "";
 		$reserve_date = "";
 		$reserve_time = "";
+		$commit_hash = "";
 		$comment = "";
 
 		// フォームパラメタが設定されている場合変数へ設定
@@ -222,12 +223,15 @@ class initScreen
 		if (isset($this->main->options->_POST->reserve_time)) {
 			$reserve_time = $this->main->options->_POST->reserve_time;
 		}
+		if (isset($this->main->options->_POST->commit_hash)) {
+			$commit_hash = $this->main->options->_POST->commit_hash;
+		}
 		if (isset($this->main->options->_POST->comment)) {
 			$comment = $this->main->options->_POST->comment;
 		}
 
 		// 入力ダイアログHTMLの作成
-		$ret = $this->create_dialog_html(self::INPUT_MODE_ADD_BACK, $branch_select_value, $reserve_date, $reserve_time, $comment);
+		$ret = $this->create_dialog_html(self::INPUT_MODE_ADD_BACK, $branch_select_value, $reserve_date, $reserve_time, $commit_hash, $comment);
 
 		$this->common->debug_echo('■ disp_back_add_dialog end');
 
@@ -247,6 +251,7 @@ class initScreen
 		$branch_select_value = "";
 		$reserve_date = "";
 		$reserve_time = "";
+		$commit_hash = "";
 		$comment = "";
 
 		// 画面選択された公開予約情報を取得
@@ -264,12 +269,12 @@ class initScreen
 
 			$reserve_date = $selected_data[tsReserve::RESERVE_ENTITY_RESERVE_DATE];
 			$reserve_time = $selected_data[tsReserve::RESERVE_ENTITY_RESERVE_TIME];
-
+			$commit_hash = $selected_data[tsReserve::RESERVE_ENTITY_COMMIT_HASH];
 			$comment = $selected_data[tsReserve::RESERVE_ENTITY_COMMENT];
 		}
 
 		// ダイアログHTMLの作成
-		$ret = $this->create_dialog_html(self::INPUT_MODE_UPDATE, $branch_select_value, $reserve_date, $reserve_time, $comment);
+		$ret = $this->create_dialog_html(self::INPUT_MODE_UPDATE, $branch_select_value, $reserve_date, $reserve_time, $commit_hash, $comment);
 
 		$this->common->debug_echo('■ disp_update_dialog end');
 
@@ -290,6 +295,7 @@ class initScreen
 		$branch_select_value = "";
 		$reserve_date = "";
 		$reserve_time = "";
+		$commit_hash = "";
 		$comment = "";
 
 		// フォームパラメタが設定されている場合変数へ設定
@@ -302,12 +308,15 @@ class initScreen
 		if (isset($this->main->options->_POST->reserve_time)) {
 			$reserve_time = $this->main->options->_POST->reserve_time;
 		}
+		if (isset($this->main->options->_POST->commit_hash)) {
+			$commit_hash = $this->main->options->_POST->commit_hash;
+		}
 		if (isset($this->main->options->_POST->comment)) {
 			$comment = $this->main->options->_POST->comment;
 		}
 	
 		// ダイアログHTMLの作成
-		$ret = $this->create_dialog_html(self::INPUT_MODE_UPDATE_BACK, $branch_select_value, $reserve_date, $reserve_time, $comment);
+		$ret = $this->create_dialog_html(self::INPUT_MODE_UPDATE_BACK, $branch_select_value, $reserve_date, $reserve_time, $commit_hash, $comment);
 
 		$this->common->debug_echo('■ do_back_update_dialog end');
 
@@ -351,6 +360,7 @@ class initScreen
 		$branch_select_value = "";
 		$reserve_date = "";
 		$reserve_time = "";
+		$commit_hash = "";
 		$comment = "";
 
 		// フォームパラメタが設定されている場合変数へ設定
@@ -363,12 +373,15 @@ class initScreen
 		if (isset($this->main->options->_POST->reserve_time)) {
 			$reserve_time = $this->main->options->_POST->reserve_time;
 		}
+		if (isset($this->main->options->_POST->commit_hash)) {
+			$commit_hash = $this->main->options->_POST->commit_hash;
+		}
 		if (isset($this->main->options->_POST->comment)) {
 			$comment = $this->main->options->_POST->comment;
 		}
 
 		// 入力ダイアログHTMLの作成
-		$ret = $this->create_dialog_html(self::INPUT_MODE_IMMEDIATE_BACK, $branch_select_value, $reserve_date, $reserve_time, $comment);
+		$ret = $this->create_dialog_html(self::INPUT_MODE_IMMEDIATE_BACK, $branch_select_value, $reserve_date, $reserve_time, $commit_hash, $comment);
 
 		$this->common->debug_echo('■ disp_back_immediate_dialog end');
 
@@ -391,7 +404,7 @@ class initScreen
 	 * @return 
 	 *  入力ダイアログ出力内容
 	 */
-	private function create_dialog_html($input_mode, $branch_select_value, $reserve_date, $reserve_time, $comment) {
+	private function create_dialog_html($input_mode, $branch_select_value, $reserve_date, $reserve_time, $commit_hash, $comment) {
 		
 		$this->common->debug_echo('■ create_dialog_html start');
 
@@ -458,7 +471,8 @@ class initScreen
 		// 「コミット」項目
 		$ret .= '<tr>'
 			  . '<td class="dialog_thead">コミット</td>'
-			  . '<td id="result"></td>'
+			  . '<td id="result">' . $commit_hash . '</td>'
+			  . '<input type="hidden" id="commit_hash" name="commit_hash" value="' . $commit_hash . '"/>'
 			  . '</tr>';
 
 		// 「公開予約日時」項目
@@ -539,6 +553,7 @@ class initScreen
 		$branch_select_value = "";
 		$reserve_date = "";
 		$reserve_time = "";
+		$commit_hash = "";
 		$comment = "";
 
 		// フォームパラメタが設定されている場合変数へ設定
@@ -550,6 +565,9 @@ class initScreen
 		}
 		if (isset($this->main->options->_POST->reserve_time)) {
 			$reserve_time = $this->main->options->_POST->reserve_time;
+		}
+		if (isset($this->main->options->_POST->commit_hash)) {
+			$commit_hash = $this->main->options->_POST->commit_hash;
 		}
 		if (isset($this->main->options->_POST->comment)) {
 			$comment = $this->main->options->_POST->comment;
@@ -578,10 +596,11 @@ class initScreen
 			. '</tr>';
 
 		// 「コミット」項目
-		// $ret .= '<tr>'
-			// . '<td class="dialog_thead">' . 'コミット' . '</td>'
-			// . '<td>' . 'dummy' . '</td>'
-			// . '</tr>'
+		$ret .= '<tr>'
+			. '<td class="dialog_thead">' . 'コミット' . '</td>'
+			. '<td>' . $commit_hash . '</td>'
+			. '<input type="hidden" name="commit_hash" value="' . $commit_hash . '"/>'
+			. '</tr>';
 
 		// 「公開予約日時」項目
 		$ret .= '<tr>'
@@ -610,7 +629,7 @@ class initScreen
 			. '<ul>';
 
 		// 「確定」ボタン
-		$ret .= '<li><input type="submit" id="confirm_btn" name="add_confirm" class="px2-btn px2-btn--primary" value="確定"/></li>';
+		$ret .= '<li><input type="submit" id="add_confirm_btn" name="add_confirm" class="px2-btn px2-btn--primary" value="確定"/></li>';
 		
 		// 「キャンセル」ボタン
 		$ret .= '<li><input type="submit" id="back_btn" name="add_back" class="px2-btn" value="戻る"/></li>';
@@ -645,6 +664,7 @@ class initScreen
 		$branch_select_value = "";
 		$reserve_date = "";
 		$reserve_time = "";
+		$commit_hash = "";
 		$comment = "";
 
 		// フォームパラメタが設定されている場合変数へ設定
@@ -657,6 +677,9 @@ class initScreen
 		if (isset($this->main->options->_POST->reserve_time)) {
 			$reserve_time = $this->main->options->_POST->reserve_time;
 		}
+		if (isset($this->main->options->_POST->commit_hash)) {
+			$commit_hash = $this->main->options->_POST->commit_hash;
+		}
 		if (isset($this->main->options->_POST->comment)) {
 			$comment = $this->main->options->_POST->comment;
 		}
@@ -667,6 +690,7 @@ class initScreen
 		$before_branch_select_value = "";
 		$before_reserve_date = "";
 		$before_reserve_time = "";
+		$before_commit_hash = "";
 		$before_comment = "";
 		$before_gmt_reserve_datetime = "";
 
@@ -679,6 +703,7 @@ class initScreen
 			$before_branch_select_value = $selected_data[tsReserve::RESERVE_ENTITY_BRANCH];
 			$before_reserve_date = $selected_data[tsReserve::RESERVE_ENTITY_RESERVE_DATE];
 			$before_reserve_time = $selected_data[tsReserve::RESERVE_ENTITY_RESERVE_TIME];
+			$before_commit_hash = $selected_data[tsReserve::RESERVE_ENTITY_COMMIT_HASH];
 			$before_comment = $selected_data[tsReserve::RESERVE_ENTITY_COMMENT];
 	
 			// 画面入力された日時を結合し、GMTへ変換する
@@ -708,10 +733,10 @@ class initScreen
 			. '</tr>';
 		
 		// 「コミット」項目（変更前）
-		// $ret .= '<tr>'
-			// . '<td class="dialog_thead">' . 'コミット' . '</td>'
-			// . '<td>' . 'dummy' . '</td>'
-			// . '</tr>'
+		$ret .= '<tr>'
+			. '<td class="dialog_thead">' . 'コミット' . '</td>'
+			. '<td>' . $before_commit_hash . '</td>'
+			. '</tr>';
 		
 		// 「公開予約日時」項目（変更前）
 		$ret .= '<tr>'
@@ -740,15 +765,16 @@ class initScreen
 			// 「ブランチ」項目（変更後）
 			. '<tr>'
 			. '<td class="dialog_thead">' . 'ブランチ' . '</td>'
-			. '<td>' . $this->main->options->_POST->branch_select_value . '</td>'
+			. '<td>' . $branch_select_value . '</td>'
 			. '<input type="hidden" name="branch_select_value" value="' . $branch_select_value . '"/>'
 			. '</tr>'
 
 			// 「コミット」項目（変更後）			
-			// . '<tr>'
-			// . '<td class="dialog_thead">' . 'コミット' . '</td>'
-			// . '<td>' . 'dummy' . '</td>'
-			// . '</tr>'
+			. '<tr>'
+			. '<td class="dialog_thead">' . 'コミット' . '</td>'
+			. '<td>' . $commit_hash . '</td>'
+			. '<input type="hidden" name="commit_hash" value="' . $commit_hash . '"/>'	
+			. '</tr>'
 
 			// 「公開日時」項目（変更後）
 			. '<tr>'
@@ -774,7 +800,7 @@ class initScreen
 			. '<div class="button_contents">'
 			. '<ul>';
 
-		$ret .= '<li><input type="submit" id="confirm_btn" name="update_confirm" class="px2-btn px2-btn--primary" value="確定"/></li>'
+		$ret .= '<li><input type="submit" id="update_confirm_btn" name="update_confirm" class="px2-btn px2-btn--primary" value="確定"/></li>'
 			. '<li><input type="submit" id="back_btn" name="update_back" class="px2-btn" value="戻る"/></li>';
 
 		$ret .= '</ul>'
@@ -812,6 +838,7 @@ class initScreen
 		$branch_select_value = "";
 		$reserve_date = "";
 		$reserve_time = "";
+		$commit_hash = "";
 		$comment = "";
 
 		// フォームパラメタが設定されている場合変数へ設定
@@ -823,6 +850,9 @@ class initScreen
 		}
 		if (isset($this->main->options->_POST->reserve_time)) {
 			$reserve_time = $this->main->options->_POST->reserve_time;
+		}
+		if (isset($this->main->options->_POST->commit_hash)) {
+			$commit_hash = $this->main->options->_POST->commit_hash;
 		}
 		if (isset($this->main->options->_POST->comment)) {
 			$comment = $this->main->options->_POST->comment;
@@ -848,10 +878,11 @@ class initScreen
 			. '</tr>';
 
 		// 「コミット」項目
-		// $ret .= '<tr>'
-			// . '<td class="dialog_thead">' . 'コミット' . '</td>'
-			// . '<td>' . 'dummy' . '</td>'
-			// . '</tr>'
+		$ret .= '<tr>'
+			. '<td class="dialog_thead">' . 'コミット' . '</td>'
+			. '<td>' . $commit_hash . '</td>'
+			. '<input type="hidden" name="commit_hash" value="' . $commit_hash . '"/>'
+			. '</tr>';
 
 		// 「公開予約日時」項目
 		$ret .= '<tr>'
@@ -876,7 +907,7 @@ class initScreen
 			. '<ul>';
 
 		// 「確定」ボタン
-		$ret .= '<li><input type="submit" id="confirm_btn" name="immediate_confirm" class="px2-btn px2-btn--danger" value="確定（注意：本番環境への公開処理が開始されます）"/></li>';
+		$ret .= '<li><input type="submit" id="immediate_confirm_btn" name="immediate_confirm" class="px2-btn px2-btn--danger" value="確定（注意：本番環境への公開処理が開始されます）"/></li>';
 		
 		// 「キャンセル」ボタン
 		$ret .= '<li><input type="submit" id="back_btn" name="immediate_back" class="px2-btn" value="戻る"/></li>';
@@ -1002,14 +1033,8 @@ class initScreen
 			// waitingディレクトリの絶対パスを取得。
 			$waiting_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_WAITING));
 
-			$this->common->debug_echo('　□ waiting_real_path');
-			$this->common->debug_echo($waiting_real_path);
-
 			// 公開予約ディレクトリ名の取得
 			$dirname = $this->common->format_gmt_datetime($this->main->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE) . define::DIR_NAME_RESERVE;
-
-			$this->common->debug_echo('　□ 公開予約ディレクトリ：');
-			$this->common->debug_echo($dirname);
 
 			// コピー処理
 			$this->gitManager->git_file_copy($waiting_real_path, $dirname);
@@ -1019,7 +1044,7 @@ class initScreen
 			//============================================================
 			// 入力情報を公開予約テーブルへ登録
 			//============================================================
-			$this->tsReserve->insert_ts_reserve($this->main->dbh, $this->main->options, 'commit_hash_dummy');
+			$this->tsReserve->insert_ts_reserve($this->main->dbh, $this->main->options);
 			
 		} catch (\Exception $e) {
 
@@ -1087,7 +1112,7 @@ class initScreen
 			//============================================================
 			$selected_id =  $this->main->options->_POST->selected_id;
 
-			$this->tsReserve->update_reserve_table($this->main->dbh, $this->main->options, $selected_id, $this->commit_hash);
+			$this->tsReserve->update_reserve_table($this->main->dbh, $this->main->options, $selected_id);
 			
 		} catch (\Exception $e) {
 
@@ -1168,8 +1193,6 @@ class initScreen
 
 		$this->common->debug_echo('■ do_immediate_publish start');
 
-		$current_dir = realpath('.');
-
 		$output = "";
 		$result = array('status' => true,
 						'message' => '');
@@ -1183,15 +1206,8 @@ class initScreen
 
 			$this->common->debug_echo('　□ 公開処理開始日時：' . $start_datetime);
 
-
-			// 本番環境ディレクトリの絶対パスを取得。
-			$project_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->project_real_path . "/"));
-
-			// backupディレクトリの絶対パスを取得。
-			$backup_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_BACKUP));
-
-			// logディレクトリの絶対パスを取得。
-			$log_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_LOG));
+			// 作業用ディレクトリの絶対パスを取得
+			$real_path = json_decode($this->common->get_workdir_real_path($this->main->options));
 
 
 			// ============================================================
@@ -1200,16 +1216,13 @@ class initScreen
 
 	 		$this->common->debug_echo('　□ -----[即時公開]指定ブランチのGit情報を「running」ディレクトリへコピー-----');
 			
-			// runningディレクトリの絶対パスを取得。
-			$running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_RUNNING));
-
 			// 公開予約ディレクトリ名の取得
 			$dirname = $this->common->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
 
 			$this->common->debug_echo('　□ 公開予約ディレクトリ：' . $dirname);
 
 			// Git情報のコピー処理
-			$this->gitManager->git_file_copy($running_real_path, $dirname);
+			$this->gitManager->git_file_copy($real_path->running_real_path, $dirname);
 
 
 			//============================================================
@@ -1218,13 +1231,15 @@ class initScreen
 
 	 		$this->common->debug_echo('　□ -----[即時公開]公開処理結果テーブルの登録処理-----');
 
+			// 現在時刻
+			$now = $this->common->get_current_datetime_of_gmt();
 
 			$dataArray = array(
 				tsOutput::TS_OUTPUT_RESERVE_ID => null,
 				tsOutput::TS_OUTPUT_BACKUP_ID => null,
 				tsOutput::TS_OUTPUT_RESERVE => null,
 				tsOutput::TS_OUTPUT_BRANCH => $this->main->options->_POST->branch_select_value,
-				tsOutput::TS_OUTPUT_COMMIT => "dummy_commit_hash",
+				tsOutput::TS_OUTPUT_COMMIT_HASH => $this->main->options->_POST->commit_hash,
 				tsOutput::TS_OUTPUT_COMMENT => $this->main->options->_POST->comment,
 				tsOutput::TS_OUTPUT_PUBLISH_TYPE => define::PUBLISH_TYPE_IMMEDIATE,
 				tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_RUNNING,
@@ -1235,10 +1250,10 @@ class initScreen
 				tsOutput::TS_OUTPUT_END => null,
 				tsOutput::TS_OUTPUT_DELETE_FLG => define::DELETE_FLG_OFF,
 				tsOutput::TS_OUTPUT_DELETE => null,
-				// . tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
-				tsOutput::TS_OUTPUT_INSERT_USER_ID => $this->main->options->user_id
-				// . tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
-				// . tsOutput::TS_OUTPUT_UPDATE_USER_ID => null
+				tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
+				tsOutput::TS_OUTPUT_INSERT_USER_ID => $this->main->options->user_id,
+				tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
+				tsOutput::TS_OUTPUT_UPDATE_USER_ID => null
 			);
 
 
@@ -1258,7 +1273,7 @@ class initScreen
 			$this->common->debug_echo('　□ バックアップ日時：' . $backup_datetime);
 
 			// バックアップファイル作成
-			$this->publish->create_backup($project_real_path, $backup_real_path, $log_real_path, $backup_dirname);
+			$this->publish->create_backup($backup_dirname, $real_path);
 			
 			//============================================================
 			// バックアップテーブルの登録処理
@@ -1298,6 +1313,8 @@ class initScreen
 
 		} catch (\Exception $e) {
 
+		$this->common->debug_echo('■ 3');
+
 			$result['status'] = false;
 			$result['message'] = 'Immediate publish faild. ' . $e->getMessage();
 
@@ -1305,9 +1322,13 @@ class initScreen
 			// 公開処理結果テーブルの更新処理（失敗）
 			//============================================================
 
+		$this->common->debug_echo('■ 4');
+
 	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの更新処理（失敗）-----');
 			// GMTの現在日時
 			$end_datetime = $this->common->get_current_datetime_of_gmt();
+
+		$this->common->debug_echo('■ 5');
 
 			$dataArray = array(
 				tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_FAILED,

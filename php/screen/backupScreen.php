@@ -67,6 +67,10 @@ class backupScreen
 				. '<th scope="row"></th>'
 				. '<th scope="row">バックアップ日時</th>'
 				. '<th scope="row">公開種別</th>'
+				. '<th scope="row">公開予約日時</th>'
+				. '<th scope="row">ブランチ</th>'
+				. '<th scope="row">コミット</th>'
+				. '<th scope="row">コメント</th>'
 				. '</tr>'
 				. '</thead>'
 				. '<tbody>';
@@ -78,6 +82,10 @@ class backupScreen
 				. '<td class="p-center"><input type="radio" name="target" value="' . $array[tsBackup::BACKUP_ENTITY_ID_SEQ] . '"/></td>'
 				. '<td class="p-center">' . $array[tsBackup::BACKUP_ENTITY_DATETIME_DISPLAY] . '</td>'
 				. '<td class="p-center">' . $array[tsBackup::BACKUP_ENTITY_PUBLISH_TYPE] . '</td>'
+				. '<td class="p-center">' . $array[tsBackup::BACKUP_ENTITY_RESERVE_DISPLAY] . '</td>'
+				. '<td class="p-center">' . $array[tsBackup::BACKUP_ENTITY_BRANCH] . '</td>'
+				. '<td class="p-center">' . $array[tsBackup::BACKUP_ENTITY_COMMIT_HASH] . '</td>'
+				. '<td class="p-center">' . $array[tsBackup::BACKUP_ENTITY_COMMENT] . '</td>'
 				. '</tr>';
 		}
 		
@@ -107,39 +115,32 @@ class backupScreen
 
 		$this->common->debug_echo('■ do_restore_publish start');
 
-		$current_dir = realpath('.');
-
 		$output = "";
 		$result = array('status' => true,
 						'message' => '');
+
+		$insert_id;
 
 		try {
 
 			// GMTの現在日時
 			$start_datetime = $this->common->get_current_datetime_of_gmt();
 
-			$this->common->debug_echo('　□ 現在日時：');
-			$this->common->debug_echo($start_datetime);
+			$this->common->debug_echo('　□ 公開処理開始日時：' . $start_datetime);
 
-			// 本番環境ディレクトリの絶対パスを取得。
-			$project_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->project_real_path . "/"));
+			// 作業用ディレクトリの絶対パスを取得
+			$real_path = json_decode($this->common->get_workdir_real_path($this->main->options));
 
-			// backupディレクトリの絶対パスを取得。
-			$backup_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . define::PATH_BACKUP));
+			//============================================================
+			// バックアップディレクトリを「backup」から「running」ディレクトリへ移動
+			//============================================================
+
+	 		$this->common->debug_echo('　□ -----バックアップディレクトリを「backup」から「running」ディレクトリへ移動-----');
 
 			// runningディレクトリの絶対パスを取得。
-			$running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . define::PATH_RUNNING));
+			$running_dirname = $this->common->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
 
-			// logディレクトリの絶対パスを取得。
-			$log_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->options->indigo_workdir_path . define::PATH_LOG));
-
-			//============================================================
-			// 公開予約ディレクトリを「backup」から「running」ディレクトリへ移動
-			//============================================================
-
-	 		$this->common->debug_echo('　□ -----公開予約ディレクトリを「backup」から「running」ディレクトリへ移動-----');
-
-			$ret = json_decode($this->publish->move_dir($backup_real_path, $dirname, $running_real_path, $dirname));
+			$ret = json_decode($this->publish->move_dir($real_path->backup_real_path, $dirname, $real_path->running_real_path, $running_dirname));
 
 			if ( !$ret->status) {
 				throw new \Exception($ret->message);
@@ -149,15 +150,17 @@ class backupScreen
 			// 公開処理結果テーブルの登録処理
 			//============================================================
 
-	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの登録処理-----');
+	 		$this->common->debug_echo('　□ -----[復元公開]公開処理結果テーブルの登録処理-----');
 
+			// 現在時刻
+			$now = $this->common->get_current_datetime_of_gmt();
 
 			$dataArray = array(
 				tsOutput::TS_OUTPUT_RESERVE_ID => null,
 				tsOutput::TS_OUTPUT_BACKUP_ID => null,
 				tsOutput::TS_OUTPUT_RESERVE => null,
 				tsOutput::TS_OUTPUT_BRANCH => null,
-				tsOutput::TS_OUTPUT_COMMIT => null,
+				tsOutput::TS_OUTPUT_COMMIT_HASH => null,
 				tsOutput::TS_OUTPUT_COMMENT => null,
 				tsOutput::TS_OUTPUT_PUBLISH_TYPE => define::PUBLISH_TYPE_RESTORE,
 				tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_RUNNING,
@@ -167,11 +170,11 @@ class backupScreen
 				tsOutput::TS_OUTPUT_START => $start_datetime,
 				tsOutput::TS_OUTPUT_END => null,
 				tsOutput::TS_OUTPUT_DELETE_FLG => define::DELETE_FLG_OFF,
-				tsOutput::TS_OUTPUT_DELETE => null
-				// . tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
-				// . tsOutput::TS_OUTPUT_INSERT_USER_ID => "dummy_insert_user",
-				// . tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
-				// . tsOutput::TS_OUTPUT_UPDATE_USER_ID => null
+				tsOutput::TS_OUTPUT_DELETE => null,
+				tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
+				tsOutput::TS_OUTPUT_INSERT_USER_ID => $this->main->options->user_id,
+				tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
+				tsOutput::TS_OUTPUT_UPDATE_USER_ID => null
 			);
 
 			// 公開処理結果テーブルの登録（インサートしたシーケンスIDをリターン値で取得）
@@ -193,22 +196,27 @@ class backupScreen
 			$this->common->debug_echo('　□ バックアップ日時：' . $backup_datetime);
 
 			// バックアップファイル作成
-			$this->publish->create_backup($project_real_path, $backup_real_path, $log_real_path, $backup_dirname);
+			$this->publish->create_backup($backup_dirname, $real_path);
 		
 
 			//============================================================
 			// バックアップテーブルの登録処理
 			//============================================================
-			$this->tsBackup->insert_ts_backup($this->main->dbh, $this->main->options, $backup_datetime, define::PUBLISH_TYPE_RESTORE);
+
+	 		$this->common->debug_echo('　□ -----バックアップテーブルの登録処理-----');
+			
+			$this->tsBackup->insert_ts_backup($this->main->dbh, $this->main->options, $backup_datetime, $insert_id);
 
 
 			//============================================================
 			// ※公開処理※
 			//============================================================
-			$this->publish->do_publish($dirname);
+			
+	 		$this->common->debug_echo('　□ -----公開処理-----');
+			
+			$this->publish->do_publish($dirname, $this->main->options);
 		
 
-		
 			//============================================================
 			// 公開処理結果テーブルの更新処理（成功）
 			//============================================================
