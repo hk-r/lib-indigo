@@ -70,6 +70,7 @@ class cron
 				// 処理失敗の場合
 
 				// TODO:エラーログ出力
+				echo '例外キャッチ：' . $result->message;
 			}
 
 		} catch (\Exception $e) {
