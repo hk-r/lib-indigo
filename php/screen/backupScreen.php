@@ -322,7 +322,7 @@ class backupScreen
 				tsOutput::TS_OUTPUT_UPDATE_USER_ID => $this->options->user_id
 			);
 
-	 		$this->tsOutput->update_ts_output($this->dbh, $insert_id, $dataArray);
+	 		$this->tsOutput->update_ts_output($this->main->dbh, $insert_id, $dataArray);
 
 			$this->common->debug_echo('■ do_restore_publish error end');
 
