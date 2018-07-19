@@ -1181,10 +1181,10 @@ class initScreen
 				$this->main->dbh->commit();
 				/* データベース接続はオートコミットモードに戻る */
 
-		    } catch (\PDOException $e) {
+		    } catch (\Exception $e) {
 		    
 		      /* 変更をロールバックする */
-		      $this->dbh->rollBack();
+		      $this->main->dbh->rollBack();
 		 
 		      throw $e;
 		    }
