@@ -129,19 +129,19 @@ class gitManager
 		$command = 'git remote add origin ' . $url;
 		$ret = $this->common->command_execute($command, false);
 
-		$this->common->debug_echo('　□ コマンド実行結果1：' + $ret['return']);
+		$this->common->debug_echo('　□ コマンド実行結果1：' . $ret['return']);
 
 		// git fetch（リモートリポジトリの指定ブランチの情報をローカルブランチへ反映）
 		$command = 'git fetch origin' . ' ' . $branch_name;
 		$ret = $this->common->command_execute($command, false);
 
-		$this->common->debug_echo('　□ コマンド実行結果2：' + $ret['return']);
+		$this->common->debug_echo('　□ コマンド実行結果2：' . $ret['return']);
 
 		// git pull（リモート取得ブランチを任意のローカルブランチにマージするコマンド）
 		$command = 'git pull origin' . ' ' . $branch_name;
 		$ret = $this->common->command_execute($command, false);
 
-		$this->common->debug_echo('　□ コマンド実行結果3：' + $ret['return']);
+		$this->common->debug_echo('　□ コマンド実行結果3：' . $ret['return']);
 
 		$this->common->debug_echo('■ git_pull end');
 	}
