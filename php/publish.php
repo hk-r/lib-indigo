@@ -170,7 +170,6 @@ class publish
 		$this->common->debug_echo('■ move_dir start');
 
 			$this->common->debug_echo($from_real_path);
-
 			$this->common->debug_echo($to_real_path);
 
 		if ( file_exists($from_real_path)  ) {
@@ -185,7 +184,7 @@ class publish
 				$ret = $this->common->command_execute($command, true);
 				if ($ret['return']) {
 					// 戻り値が0以外の場合
-					throw new \Exception('Command error.');
+					throw new \Exception('Command error. command:' . $command);
 				}
 				$this->common->debug_echo('　★ ファイル移動結果');
 
@@ -201,7 +200,7 @@ class publish
 				$ret = $this->common->command_execute($command, true);
 				if ($ret['return']) {
 					// 戻り値が0以外の場合
-					throw new \Exception('Command error.');
+					throw new \Exception('Command error. command:' . $command);
 				}
 				$this->common->debug_echo('　★ 移動元のディレクトリ削除結果');
 
