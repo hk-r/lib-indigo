@@ -1285,6 +1285,11 @@ class initScreen
 
 		 		$this->common->debug_echo('　□ -----バックアップテーブルの登録処理-----');
 				
+				// GMTの現在日時
+				$backup_datetime = $this->common->get_current_datetime_of_gmt();
+
+				$this->common->debug_echo('　□ バックアップ日時：' . $backup_datetime);
+
 				$this->tsBackup->insert_ts_backup($this->main->dbh, $this->main->options, $backup_datetime, $insert_id);
 
 
@@ -1294,12 +1299,8 @@ class initScreen
 
 		 		$this->common->debug_echo('　□ -----本番ソースを「backup」ディレクトリへコピー-----');
 				
-				// GMTの現在日時
-				$backup_datetime = $this->common->get_current_datetime_of_gmt();
 				$backup_dirname = $this->common->format_gmt_datetime($backup_datetime, define::DATETIME_FORMAT_SAVE);
-
-				$this->common->debug_echo('　□ バックアップ日時：' . $backup_datetime);
-
+				
 				// バックアップファイル作成
 				$this->publish->create_backup($backup_dirname, $real_path);
 

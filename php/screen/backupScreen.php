@@ -131,20 +131,6 @@ class backupScreen
 			// 作業用ディレクトリの絶対パスを取得
 			$real_path = json_decode($this->common->get_workdir_real_path($this->main->options));
 
-			//============================================================
-			// バックアップディレクトリを「backup」から「running」ディレクトリへ移動
-			//============================================================
-
-	 		$this->common->debug_echo('　□ -----バックアップディレクトリを「backup」から「running」ディレクトリへ移動-----');
-
-			// runningディレクトリの絶対パスを取得。
-			$running_dirname = $this->common->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
-
-			$ret = json_decode($this->publish->move_dir($real_path->backup_real_path, $dirname, $real_path->running_real_path, $running_dirname));
-
-			if ( !$ret->status) {
-				throw new \Exception($ret->message);
-			}
 
 			//============================================================
 			// 公開処理結果テーブルの登録処理
@@ -183,64 +169,154 @@ class backupScreen
 			$this->common->debug_echo('　□ $insert_id：' . $insert_id);
 
 
+
+
 			//============================================================
-			// 本番ソースを「backup」ディレクトリへコピー
+			// バックアップテーブルより、公開対象データの取得
 			//============================================================
 
-	 		$this->common->debug_echo('　□ -----本番ソースを「backup」ディレクトリへコピー-----');
+			$selected_id =  $this->main->options->_POST->selected_id;
 
-			// GMTの現在日時
-			$backup_datetime = $this->common->get_current_datetime_of_gmt();
-			$backup_dirname = $this->common->format_gmt_datetime($backup_datetime, define::DATETIME_FORMAT_SAVE);
-
-			$this->common->debug_echo('　□ バックアップ日時：' . $backup_datetime);
-
-			// バックアップファイル作成
-			$this->publish->create_backup($backup_dirname, $real_path);
+			$selected_data = $this->tsReserve->get_selected_ts_backup($this->main->dbh, $selected_id);
 		
+			if (!$selected_data) {
+				throw new \Exception('Target data not found.');
+			}
 
-			//============================================================
-			// バックアップテーブルの登録処理
-			//============================================================
-
-	 		$this->common->debug_echo('　□ -----バックアップテーブルの登録処理-----');
-			
-			$this->tsBackup->insert_ts_backup($this->main->dbh, $this->main->options, $backup_datetime, $insert_id);
-
-
-			//============================================================
-			// ※公開処理※
-			//============================================================
-			
-	 		$this->common->debug_echo('　□ -----公開処理-----');
-			
-			$this->publish->do_publish($dirname, $this->main->options);
+			$dirname = $this->common->format_gmt_datetime($data[tsBackup::BACKUP_ENTITY_DATETIME_GMT], define::DATETIME_FORMAT_SAVE) . define::DIR_NAME_RESERVE;
 		
+			if (!$dirname) {
+				// エラー処理
+				throw new \Exception('Publish dirname create failed.');
+			}
 
 			//============================================================
-			// 公開処理結果テーブルの更新処理（成功）
+			// バックアップディレクトリを「backup」から「running」ディレクトリへ移動
 			//============================================================
 
-	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの更新処理（成功）-----');
+	 		$this->common->debug_echo('　□ -----バックアップディレクトリを「backup」から「running」ディレクトリへ移動-----');
+
+			// runningディレクトリの絶対パスを取得。
+			$running_dirname = $this->common->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
+
+			$ret = json_decode($this->publish->move_dir($real_path->backup_real_path, $dirname, $real_path->running_real_path, $running_dirname));
+
+			if ( !$ret->status) {
+				throw new \Exception($ret->message);
+			}
+
+
+
+			try {
+
+				/* トランザクションを開始する。オートコミットがオフになる */
+				$this->main->dbh->beginTransaction();
+
+				//============================================================
+				// バックアップテーブルの登録処理
+				//============================================================
+
+		 		$this->common->debug_echo('　□ -----バックアップテーブルの登録処理-----');
+				
+				$this->tsBackup->insert_ts_backup($this->main->dbh, $this->main->options, $backup_datetime, $insert_id);
+
+
+				//============================================================
+				// 本番ソースを「backup」ディレクトリへコピー
+				//============================================================
+
+		 		$this->common->debug_echo('　□ -----本番ソースを「backup」ディレクトリへコピー-----');
+
+				// GMTの現在日時
+				$backup_datetime = $this->common->get_current_datetime_of_gmt();
+				$backup_dirname = $this->common->format_gmt_datetime($backup_datetime, define::DATETIME_FORMAT_SAVE);
+
+				$this->common->debug_echo('　□ バックアップ日時：' . $backup_datetime);
+
+				// バックアップファイル作成
+				$this->publish->create_backup($backup_dirname, $real_path);
 			
-			// GMTの現在日時
-			$end_datetime = $this->common->get_current_datetime_of_gmt();
+		 		/* 変更をコミットする */
+				$this->main->dbh->commit();
+				/* データベース接続はオートコミットモードに戻る */
 
-			$dataArray = array(
-				tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_SUCCESS,
-				tsOutput::TS_OUTPUT_DIFF_FLG1 => "0",
-				tsOutput::TS_OUTPUT_DIFF_FLG2 => "0",
-				tsOutput::TS_OUTPUT_DIFF_FLG3 => "0",
-				tsOutput::TS_OUTPUT_END => $end_datetime,
-				tsOutput::TS_OUTPUT_UPDATE_USER_ID => $this->main->options->user_id
-			);
+		    } catch (\Exception $e) {
+		    
+		      /* 変更をロールバックする */
+		      $this->main->dbh->rollBack();
+		 
+		      throw $e;
+		    }
 
-	 		$this->tsOutput->update_ts_output($this->main->dbh, $insert_id, $dataArray);
+			try {
+
+				/* トランザクションを開始する。オートコミットがオフになる */
+				$this->main->dbh->beginTransaction();
+
+
+				//============================================================
+				// 公開処理結果テーブルの更新処理（成功）
+				//============================================================
+
+		 		$this->common->debug_echo('　□ -----公開処理結果テーブルの更新処理（成功）-----');
+				
+				// GMTの現在日時
+				$end_datetime = $this->common->get_current_datetime_of_gmt();
+
+				$dataArray = array(
+					tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_SUCCESS,
+					tsOutput::TS_OUTPUT_DIFF_FLG1 => "0",
+					tsOutput::TS_OUTPUT_DIFF_FLG2 => "0",
+					tsOutput::TS_OUTPUT_DIFF_FLG3 => "0",
+					tsOutput::TS_OUTPUT_END => $end_datetime,
+					tsOutput::TS_OUTPUT_UPDATE_USER_ID => $this->main->options->user_id
+				);
+
+		 		$this->tsOutput->update_ts_output($this->main->dbh, $insert_id, $dataArray);
+
+				//============================================================
+				// ※公開処理※
+				//============================================================
+				
+		 		$this->common->debug_echo('　□ -----公開処理-----');
+				
+				$this->publish->do_publish($dirname, $this->main->options);
+			
+		 		/* 変更をコミットする */
+				$this->main->dbh->commit();
+				/* データベース接続はオートコミットモードに戻る */
+
+		    } catch (\Exception $e) {
+		    
+		      /* 変更をロールバックする */
+		      $this->main->dbh->rollBack();
+		 
+		      throw $e;
+		    }
 
 		} catch (\Exception $e) {
 
 			$result['status'] = false;
 			$result['message'] = 'Restore publish faild. ' . $e->getMessage();
+
+			//============================================================
+			// 公開処理結果テーブルの更新処理（失敗）
+			//============================================================
+
+	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの更新処理（失敗）-----');
+			// GMTの現在日時
+			$end_datetime = $this->common->get_current_datetime_of_gmt();
+
+			$dataArray = array(
+				tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_FAILED,
+				tsOutput::TS_OUTPUT_DIFF_FLG1 => "0",
+				tsOutput::TS_OUTPUT_DIFF_FLG2 => "0",
+				tsOutput::TS_OUTPUT_DIFF_FLG3 => "0",
+				tsOutput::TS_OUTPUT_END => $end_datetime,
+				tsOutput::TS_OUTPUT_UPDATE_USER_ID => $this->options->user_id
+			);
+
+	 		$this->tsOutput->update_ts_output($this->dbh, $insert_id, $dataArray);
 
 			$this->common->debug_echo('■ do_restore_publish error end');
 

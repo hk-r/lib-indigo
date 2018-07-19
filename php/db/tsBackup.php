@@ -35,7 +35,8 @@ class tsBackup
 	 * 公開予約エンティティのカラム定義
 	 */
 	const BACKUP_ENTITY_ID_SEQ = 'backup_id_seq';		// ID
-	const BACKUP_ENTITY_DATETIME = 'backup_datetime';	// バックアップ日時
+	const BACKUP_ENTITY_DATETIME_GMT = 'backup_datetime_gmt';	// バックアップ日時（GMT日時）
+	const BACKUP_ENTITY_DATETIME = 'backup_datetime';	// バックアップ日時（タイムゾーン日時）
 	const BACKUP_ENTITY_DATETIME_DISPLAY = 'backup_datetime_display';	// バックアップ日時（表示用）
 	const BACKUP_ENTITY_INSERT_DATETIME = 'insert_datetime';	// 登録日時
 	const BACKUP_ENTITY_INSERT_USER_ID = 'insert_user_id';	// 登録ユーザID
@@ -115,67 +116,44 @@ class tsBackup
 		return $conv_ret_array;
 	}
 
+
 	/**
-	 * バックアップ一覧テーブルの情報を変換する
-	 *	 
-	 * @param $path = 作成ディレクトリ名
-	 *	 
-	 * @return ソート後の配列
+	 * バックアップテーブルから、選択されたバックアップ情報を取得する
+	 *
+	 * @return 選択行の情報
 	 */
-	private function convert_ts_backup_entity($array) {
-	
-		$this->common->debug_echo('■ convert_ts_backup_entity start');
-
-		$entity = array();
-
-		// ID
-		$entity[self::BACKUP_ENTITY_ID_SEQ] = $array[self::BACKUP_ENTITY_ID_SEQ];
-		
-		// バックアップ日時
-		// タイムゾーンの時刻へ変換
-		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::BACKUP_ENTITY_DATETIME]);
-		
-		$entity[self::BACKUP_ENTITY_DATETIME] = $tz_datetime;
-		$entity[self::BACKUP_ENTITY_DATETIME_DISPLAY] = $this->common->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISPLAY);
-
-		// 公開種別
-		$entity[self::BACKUP_ENTITY_PUBLISH_TYPE] = $this->common->convert_publish_type($array[self::BACKUP_ENTITY_PUBLISH_TYPE]);
+	public function get_selected_ts_backup($dbh, $selected_id) {
 
 
-		// 公開予約日時
-		// タイムゾーンの時刻へ変換
-		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::BACKUP_ENTITY_RESERVE]);
+		$this->common->debug_echo('■ get_selected_ts_backup start');
 
-		$entity[self::BACKUP_ENTITY_RESERVE] = $tz_datetime;
-		$entity[self::BACKUP_ENTITY_RESERVE_DISPLAY] = $this->common->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISPLAY);
+		$this->common->debug_echo('　□ selected_id：' . $selected_id);
 
-		// // 処理開始日時
-		// // タイムゾーンの時刻へ変換
-		// $tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_OUTPUT_START]);
+		$ret_array = array();
 
-		// $entity[self::OUTPUT_ENTITY_START] = $tz_datetime;
-		// $entity[self::OUTPUT_ENTITY_START_DISPLAY] = $this->common->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISPLAY);
+		$conv_ret_array = array();
 
-		// // 処理終了日時
-		// // タイムゾーンの時刻へ変換
-		// $tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_OUTPUT_END]);
-		
-		// $entity[self::OUTPUT_ENTITY_END] = $tz_datetime;
-		// $entity[self::OUTPUT_ENTITY_END_DISPLAY] = $this->common->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISPLAY);
+		if (!$selected_id) {
+			throw new \Exception('更新対象のID「' . $id . '」が取得できませんでした。 ');
+		}
 
-		// ブランチ
-		$entity[self::BACKUP_ENTITY_BRANCH] = $array[self::BACKUP_ENTITY_BRANCH];
-		// コミット
-		$entity[self::BACKUP_ENTITY_COMMIT_HASH] = $array[self::BACKUP_ENTITY_COMMIT_HASH];
-		// コメント
-		$entity[self::BACKUP_ENTITY_COMMENT] = $array[self::BACKUP_ENTITY_COMMENT];
-	
+			// SELECT文作成
+			$select_sql = "SELECT * from TS_BACKUP 
+			WHERE " . self::TS_BACKUP_BACKUP_ID_SEQ . " = " . $selected_id . ";";
 
-		$this->common->debug_echo('■ convert_ts_backup_entity end');
+			// SELECT実行
+			$ret_array = array_shift($this->pdoManager->select($dbh, $select_sql));
 
-	    return $entity;
+			$conv_ret_array = $this->convert_ts_backup_entity($ret_array);
+
+			// $this->common->debug_echo('　□ SELECTデータ：');
+			// $this->common->debug_var_dump($ret_array);
+		}
+
+		$this->common->debug_echo('■ get_selected_ts_backup end');
+
+		return $conv_ret_array;
 	}
-
 
 	/**
 	 * バックアップテーブル登録処理
@@ -233,5 +211,69 @@ class tsBackup
 
 		$this->common->debug_echo('■ insert_ts_backup end');
 	}
+
+	/**
+	 * バックアップ一覧テーブルの情報を変換する
+	 *	 
+	 * @param $path = 作成ディレクトリ名
+	 *	 
+	 * @return ソート後の配列
+	 */
+	private function convert_ts_backup_entity($array) {
+	
+		$this->common->debug_echo('■ convert_ts_backup_entity start');
+
+		$entity = array();
+
+		// ID
+		$entity[self::BACKUP_ENTITY_ID_SEQ] = $array[self::BACKUP_ENTITY_ID_SEQ];
+		
+		// バックアップ日時
+		$entity[self::RESERVE_ENTITY_DATETIME_GMT] = $array[self::BACKUP_ENTITY_DATETIME];
+		// タイムゾーンの時刻へ変換
+		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::BACKUP_ENTITY_DATETIME]);
+		
+		$entity[self::BACKUP_ENTITY_DATETIME] = $tz_datetime;
+		$entity[self::BACKUP_ENTITY_DATETIME_DISPLAY] = $this->common->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISPLAY);
+
+		// 公開種別
+		$entity[self::BACKUP_ENTITY_PUBLISH_TYPE] = $this->common->convert_publish_type($array[self::BACKUP_ENTITY_PUBLISH_TYPE]);
+
+
+		// 公開予約日時
+		// タイムゾーンの時刻へ変換
+		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::BACKUP_ENTITY_RESERVE]);
+
+		$entity[self::BACKUP_ENTITY_RESERVE] = $tz_datetime;
+		$entity[self::BACKUP_ENTITY_RESERVE_DISPLAY] = $this->common->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISPLAY);
+
+		// // 処理開始日時
+		// // タイムゾーンの時刻へ変換
+		// $tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_OUTPUT_START]);
+
+		// $entity[self::OUTPUT_ENTITY_START] = $tz_datetime;
+		// $entity[self::OUTPUT_ENTITY_START_DISPLAY] = $this->common->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISPLAY);
+
+		// // 処理終了日時
+		// // タイムゾーンの時刻へ変換
+		// $tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_OUTPUT_END]);
+		
+		// $entity[self::OUTPUT_ENTITY_END] = $tz_datetime;
+		// $entity[self::OUTPUT_ENTITY_END_DISPLAY] = $this->common->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISPLAY);
+
+		// ブランチ
+		$entity[self::BACKUP_ENTITY_BRANCH] = $array[self::BACKUP_ENTITY_BRANCH];
+		// コミット
+		$entity[self::BACKUP_ENTITY_COMMIT_HASH] = $array[self::BACKUP_ENTITY_COMMIT_HASH];
+		// コメント
+		$entity[self::BACKUP_ENTITY_COMMENT] = $array[self::BACKUP_ENTITY_COMMENT];
+	
+
+		$this->common->debug_echo('■ convert_ts_backup_entity end');
+
+	    return $entity;
+	}
+
+
 
 }
