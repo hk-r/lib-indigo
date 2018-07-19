@@ -128,20 +128,27 @@ class gitManager
 		// initしたリポジトリに名前を付ける
 		$command = 'git remote add origin ' . $url;
 		$ret = $this->common->command_execute($command, false);
-
+		if ($ret['return']) {
+			// 戻り値が0以外の場合
+			throw new \Exception('Git pull command error. url:' . $url);
+		}
 		$this->common->debug_echo('　□ コマンド実行結果1：' . $ret['return']);
 
 		// git fetch（リモートリポジトリの指定ブランチの情報をローカルブランチへ反映）
 		$command = 'git fetch origin' . ' ' . $branch_name;
 		$ret = $this->common->command_execute($command, false);
-
-		$this->common->debug_echo('　□ コマンド実行結果2：' . $ret['return']);
+		if ($ret['return']) {
+			// 戻り値が0以外の場合
+			throw new \Exception('Git pull command error. branch_name:' . $branch_name);
+		}
 
 		// git pull（リモート取得ブランチを任意のローカルブランチにマージするコマンド）
 		$command = 'git pull origin' . ' ' . $branch_name;
 		$ret = $this->common->command_execute($command, false);
-
-		$this->common->debug_echo('　□ コマンド実行結果3：' . $ret['return']);
+		if ($ret['return']) {
+			// 戻り値が0以外の場合
+			throw new \Exception('Git pull command error. branch_name:' . $branch_name);
+		}
 
 		$this->common->debug_echo('■ git_pull end');
 	}
