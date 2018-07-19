@@ -1147,6 +1147,18 @@ class initScreen
 			// waitingディレクトリの絶対パスを取得。
 			$waiting_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_WAITING));
 
+
+			//============================================================
+			// 公開予約情報の論理削除
+			//============================================================
+
+			$this->common->debug_echo('　□ -----公開予約情報の論理削除処理-----');
+
+			/* トランザクションを開始する。オートコミットがオフになる */
+			$this->main->dbh->beginTransaction();
+
+			$this->tsReserve->delete_reserve_table($this->main->dbh, $this->main->options, $selected_id);
+
 			//============================================================
 			// 「waiting」ディレクトリの変更前の公開ソースディレクトリを削除
 			//============================================================
@@ -1162,15 +1174,15 @@ class initScreen
 			$this->gitManager->file_delete($waiting_real_path, $dirname);
 
 
-			//============================================================
-			// 公開予約情報の論理削除
-			//============================================================
+			/* 変更をコミットする */
+			$this->main->dbh->commit();
+			/* データベース接続はオートコミットモードに戻る */
 
-			$this->common->debug_echo('　□ -----公開処理結果テーブルへの論理削除処理-----');
-
-			$this->tsReserve->delete_reserve_table($this->main->dbh, $this->main->options, $selected_id);
-			
 		} catch (\Exception $e) {
+
+			/* 変更をロールバックする */
+			$dbh->rollBack();
+			/* データベース接続はオートコミットモードに戻る */
 
 			$result['status'] = false;
 			$result['message'] = 'Delete faild. ' . $e->getMessage();

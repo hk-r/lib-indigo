@@ -290,7 +290,7 @@ class main
 		}
 
 		// releasedディレクトリが存在しない場合は作成
-		if ( !$this->common->is_exists_mkdir() ) {
+		if ( !$this->common->is_exists_mkdir($result->released_real_path) ) {
 			$ret = false;
 		}
 
