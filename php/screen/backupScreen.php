@@ -76,6 +76,7 @@ class backupScreen
 				. '<th scope="row">ブランチ</th>'
 				. '<th scope="row">コミット</th>'
 				. '<th scope="row">コメント</th>'
+				. '<th scope="row">登録ユーザ</th>'
 				. '</tr>'
 				. '</thead>'
 				. '<tbody>';
@@ -91,6 +92,7 @@ class backupScreen
 				. '<td class="p-center">' . $array[tsBackup::BACKUP_ENTITY_BRANCH] . '</td>'
 				. '<td class="p-center">' . $array[tsBackup::BACKUP_ENTITY_COMMIT_HASH] . '</td>'
 				. '<td class="p-center">' . $array[tsBackup::BACKUP_ENTITY_COMMENT] . '</td>'
+				. '<td class="p-center">' . $array[tsBackup::BACKUP_ENTITY_INSERT_USER_ID] . '</td>'
 				. '</tr>';
 		}
 		

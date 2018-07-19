@@ -80,13 +80,14 @@ class tsBackup
 		// SELECT文作成（削除フラグ = 0、ソート順：公開予約日時の昇順）
 		$select_sql = "
 				SELECT 
-				  TS_BACKUP." . self::TS_BACKUP_BACKUP_ID_SEQ . "		as " . self::BACKUP_ENTITY_ID_SEQ .  ",
-				  TS_BACKUP." . self::TS_BACKUP_DATETIME . "			as " . self::BACKUP_ENTITY_DATETIME .  ",
-				  TS_OUTPUT." . tsOutput::TS_OUTPUT_RESERVE . "			as " . self::BACKUP_ENTITY_RESERVE .  ",
-				  TS_OUTPUT." . tsOutput::TS_OUTPUT_BRANCH . "			as " . self::BACKUP_ENTITY_BRANCH .  ",
-				  TS_OUTPUT." . tsOutput::TS_OUTPUT_COMMIT_HASH . "		as " . self::BACKUP_ENTITY_COMMIT_HASH .  ",
-				  TS_OUTPUT." . tsOutput::TS_OUTPUT_COMMENT . "			as " . self::BACKUP_ENTITY_COMMENT .  ",
-				  TS_OUTPUT." . tsOutput::TS_OUTPUT_PUBLISH_TYPE . "	as " . self::BACKUP_ENTITY_PUBLISH_TYPE .  ",
+				  TS_BACKUP." . self::TS_BACKUP_BACKUP_ID_SEQ . "		as " . self::BACKUP_ENTITY_ID_SEQ . ",
+				  TS_BACKUP." . self::TS_BACKUP_DATETIME . "			as " . self::BACKUP_ENTITY_DATETIME . ",
+				  TS_BACKUP." . self::TS_BACKUP_INSERT_USER_ID . "		as " . self::BACKUP_ENTITY_INSERT_USER_ID . ",
+				  TS_OUTPUT." . tsOutput::TS_OUTPUT_RESERVE . "			as " . self::BACKUP_ENTITY_RESERVE . ",
+				  TS_OUTPUT." . tsOutput::TS_OUTPUT_BRANCH . "			as " . self::BACKUP_ENTITY_BRANCH . ",
+				  TS_OUTPUT." . tsOutput::TS_OUTPUT_COMMIT_HASH . "		as " . self::BACKUP_ENTITY_COMMIT_HASH . ",
+				  TS_OUTPUT." . tsOutput::TS_OUTPUT_COMMENT . "			as " . self::BACKUP_ENTITY_COMMENT . ",
+				  TS_OUTPUT." . tsOutput::TS_OUTPUT_PUBLISH_TYPE . "	as " . self::BACKUP_ENTITY_PUBLISH_TYPE . ",
 				  TS_OUTPUT." . tsOutput::TS_OUTPUT_STATUS . "			as " . self::BACKUP_ENTITY_STATUS .  
 				" FROM TS_BACKUP 
 				LEFT OUTER JOIN TS_OUTPUT
