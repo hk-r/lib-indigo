@@ -249,7 +249,8 @@ class backupScreen
 		      /* 変更をロールバックする */
 		      $this->main->dbh->rollBack();
 		 
-		      throw $e;
+		      // throw $e;
+		      throw new \Exception($e.getMessage());
 		    }
 
 			try {
@@ -294,8 +295,9 @@ class backupScreen
 		    
 		      /* 変更をロールバックする */
 		      $this->main->dbh->rollBack();
-		 
-		      throw $e;
+		      
+		      // throw $e;
+		      throw new \Exception($e.getMessage());
 		    }
 
 		} catch (\Exception $e) {
