@@ -1144,6 +1144,9 @@ class initScreen
 
 		try {
 
+			// 選択ID
+			$selected_id =  $this->main->options->_POST->selected_id;
+
 			// waitingディレクトリの絶対パスを取得。
 			$waiting_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_WAITING));
 
@@ -1157,32 +1160,36 @@ class initScreen
 			/* トランザクションを開始する。オートコミットがオフになる */
 			$this->main->dbh->beginTransaction();
 
-			$this->tsReserve->delete_reserve_table($this->main->dbh, $this->main->options, $selected_id);
+			try {
+				$this->tsReserve->delete_reserve_table($this->main->dbh, $this->main->options, $selected_id);
 
-			//============================================================
-			// 「waiting」ディレクトリの変更前の公開ソースディレクトリを削除
-			//============================================================
-			// 公開予約ディレクトリ名の取得
-			$selected_id =  $this->main->options->_POST->selected_id;
-			$selected_ret = $this->tsReserve->get_selected_ts_reserve($this->main->dbh, $selected_id);
-			$dirname = $this->common->format_gmt_datetime($selected_ret[tsReserve::RESERVE_ENTITY_RESERVE_GMT], define::DATETIME_FORMAT_SAVE) . define::DIR_NAME_RESERVE;
+				//============================================================
+				// 「waiting」ディレクトリの変更前の公開ソースディレクトリを削除
+				//============================================================
+				// 公開予約ディレクトリ名の取得
+				$selected_ret = $this->tsReserve->get_selected_ts_reserve($this->main->dbh, $selected_id);
+				$dirname = $this->common->format_gmt_datetime($selected_ret[tsReserve::RESERVE_ENTITY_RESERVE_GMT], define::DATETIME_FORMAT_SAVE) . define::DIR_NAME_RESERVE;
 
-			$this->common->debug_echo('　□ 公開予約ディレクトリ：');
-			$this->common->debug_echo($dirname);
+				$this->common->debug_echo('　□ 公開予約ディレクトリ：');
+				$this->common->debug_echo($dirname);
 
-			// コピー処理
-			$this->gitManager->file_delete($waiting_real_path, $dirname);
+				// コピー処理
+				$this->gitManager->file_delete($waiting_real_path, $dirname);
 
 
-			/* 変更をコミットする */
-			$this->main->dbh->commit();
-			/* データベース接続はオートコミットモードに戻る */
+				/* 変更をコミットする */
+				$this->main->dbh->commit();
+				/* データベース接続はオートコミットモードに戻る */
+
+		    } catch (\PDOException $e) {
+		    
+		      /* 変更をロールバックする */
+		      $this->main->dbh->rollBack();
+		 
+		      throw $e;
+		    }
 
 		} catch (\Exception $e) {
-
-			/* 変更をロールバックする */
-			$this->main->dbh->rollBack();
-			/* データベース接続はオートコミットモードに戻る */
 
 			$result['status'] = false;
 			$result['message'] = 'Delete faild. ' . $e->getMessage();

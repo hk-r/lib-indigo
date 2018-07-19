@@ -364,7 +364,7 @@ class tsReserve
 		$this->common->debug_echo('■ delete_reserve_table start');
 
 		if (!$selected_id) {
-			throw new \Exception('選択ID「' . $selected_id . '」が取得できませんでした。 ');
+			throw new \Exception('選択情報のIDが取得できませんでした。 ');
 		}
 
 		// UPDATE文作成
