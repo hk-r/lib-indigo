@@ -181,7 +181,7 @@ class backupScreen
 
 			$selected_id =  $this->main->options->_POST->selected_id;
 
-			$selected_data = $this->tsReserve->get_selected_ts_backup($this->main->dbh, $selected_id);
+			$selected_data = $this->tsBackup->get_selected_ts_backup($this->main->dbh, $selected_id);
 		
 			if (!$selected_data) {
 				throw new \Exception('Target data not found.');
