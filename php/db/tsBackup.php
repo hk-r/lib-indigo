@@ -203,7 +203,7 @@ class tsBackup
 			":" . self::TS_BACKUP_INSERT_DATETIME => $now,
 			":" . self::TS_BACKUP_INSERT_USER_ID => $options->user_id,
 			":" . self::TS_BACKUP_UPDATE_DATETIME => null,
-			":" . self::TS_BACKUP_UPDATE_DATETIME => null
+			":" . self::TS_BACKUP_UPDATE_USER_ID => null
 		);
 	
 		// INSERT実行
@@ -268,6 +268,8 @@ class tsBackup
 		// コメント
 		$entity[self::BACKUP_ENTITY_COMMENT] = $array[self::BACKUP_ENTITY_COMMENT];
 	
+		// 登録ユーザ
+		$entity[self::BACKUP_ENTITY_INSERT_USER_ID] = $array[self::BACKUP_ENTITY_INSERT_USER_ID];
 
 		$this->common->debug_echo('■ convert_ts_backup_entity end');
 
