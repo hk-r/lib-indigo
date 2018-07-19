@@ -352,6 +352,9 @@ class tsOutput
 		// 公開種別
 		$entity[self::OUTPUT_ENTITY_TYPE] = $this->common->convert_publish_type($array[self::TS_OUTPUT_PUBLISH_TYPE]);
 
+		// 登録ユーザID
+		$entity[self::OUTPUT_ENTITY_INSERT_USER_ID] = $array[self::TS_OUTPUT_INSERT_USER_ID];
+
 		$this->common->debug_echo('■ convert_ts_output_entity end');
 
 	    return $entity;

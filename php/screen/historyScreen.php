@@ -62,6 +62,7 @@ class historyScreen
 				. '<th scope="row">コミット</th>'
 				. '<th scope="row">ブランチ</th>'
 				. '<th scope="row">コメント</th>'
+				. '<th scope="row">実行ユーザ</th>'
 				. '</tr>'
 				. '</thead>'
 				. '<tbody>';
@@ -79,6 +80,7 @@ class historyScreen
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_COMMIT_HASH] . '</td>'
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_BRANCH] . '</td>'
 				. '<td>' . $array[tsOutput::OUTPUT_ENTITY_COMMENT] . '</td>'
+				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_INSERT_USER_ID] . '</td>'
 				. '</tr>';
 		}
 		
