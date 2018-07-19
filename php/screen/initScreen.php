@@ -1037,7 +1037,7 @@ class initScreen
 			$dirname = $this->common->format_gmt_datetime($this->main->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE) . define::DIR_NAME_RESERVE;
 
 			// コピー処理
-			$this->gitManager->git_file_copy($waiting_real_path, $dirname);
+			$this->gitManager->git_file_copy($this->main->options, $waiting_real_path, $dirname);
 
 	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの登録処理-----');
 			
@@ -1103,7 +1103,7 @@ class initScreen
 			$this->common->debug_echo($dirname);
 
 			// コピー処理
-			$this->gitManager->git_file_copy($waiting_real_path, $dirname);
+			$this->gitManager->git_file_copy($this->main->options, $waiting_real_path, $dirname);
 
 	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの更新処理-----');
 			
@@ -1272,7 +1272,7 @@ class initScreen
 			$this->common->debug_echo('　□ 公開予約ディレクトリ：' . $dirname);
 
 			// Git情報のコピー処理
-			$this->gitManager->git_file_copy($real_path->running_real_path, $dirname);
+			$this->gitManager->git_file_copy($this->main->options, $real_path->running_real_path, $dirname);
 
 			try {
 

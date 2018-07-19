@@ -79,7 +79,7 @@ class gitManager
 	 *
 	 * @return なし
 	 */
-	public function git_file_copy($path, $dirname) {
+	public function git_file_copy($options, $path, $dirname) {
 
 		$this->common->debug_echo('■ git_file_copy start');
 
@@ -96,7 +96,42 @@ class gitManager
 		// 作成ディレクトリに移動し、指定ブランチのGit情報をコピーする
 		//============================================================
 		if ( chdir($dir_real_path) ) {
-			$this->git_pull();
+			
+			// 指定ブランチ
+			$branch_name = trim(str_replace("origin/", "", $options->_POST->branch_select_value));
+
+			// git init
+			$command = 'git init';
+			$this->common->command_execute($command, false);
+
+			// git urlのセット
+			$url = $options->git->protocol . "://" . urlencode($options->git->username) . ":" . urlencode($options->git->password) . "@" . $options->git->url;
+			
+			// initしたリポジトリに名前を付ける
+			$command = 'git remote add origin ' . $url;
+			$ret = $this->common->command_execute($command, false);
+			if ($ret['return']) {
+				// 戻り値が0以外の場合
+				throw new \Exception('Git pull command error. url:' . $url);
+			}
+			$this->common->debug_echo('　□ コマンド実行結果1：' . $ret['return']);
+
+			// git fetch（リモートリポジトリの指定ブランチの情報をローカルブランチへ反映）
+			$command = 'git fetch origin' . ' ' . $branch_name;
+			$ret = $this->common->command_execute($command, false);
+			if ($ret['return']) {
+				// 戻り値が0以外の場合
+				throw new \Exception('Git pull command error. branch_name:' . $branch_name);
+			}
+
+			// git pull（リモート取得ブランチを任意のローカルブランチにマージするコマンド）
+			$command = 'git pull origin' . ' ' . $branch_name;
+			$ret = $this->common->command_execute($command, false);
+			if ($ret['return']) {
+				// 戻り値が0以外の場合
+				throw new \Exception('Git pull command error. branch_name:' . $branch_name);
+			}
+
 		} else {
 			throw new \Exception('Git file copy failed. Move directory not found. ' . $dir_real_path);
 		}
@@ -104,53 +139,6 @@ class gitManager
 		chdir($current_dir);
 			
 		$this->common->debug_echo('■ git_file_copy end');
-	}
-
-	/**
-	 * 新規追加時のGitファイルのコピー
-	 *
-	 * @return なし
-	 */
-	private function git_pull() {
-
-		$this->common->debug_echo('■ git_pull start');
-
-		// 指定ブランチ
-		$branch_name = trim(str_replace("origin/", "", $this->main->options->_POST->branch_select_value));
-
-		// git init
-		$command = 'git init';
-		$this->common->command_execute($command, false);
-
-		// git urlのセット
-		$url = $this->main->options->git->protocol . "://" . urlencode($this->main->options->git->username) . ":" . urlencode($this->main->options->git->password) . "@" . $this->main->options->git->url;
-		
-		// initしたリポジトリに名前を付ける
-		$command = 'git remote add origin ' . $url;
-		$ret = $this->common->command_execute($command, false);
-		if ($ret['return']) {
-			// 戻り値が0以外の場合
-			throw new \Exception('Git pull command error. url:' . $url);
-		}
-		$this->common->debug_echo('　□ コマンド実行結果1：' . $ret['return']);
-
-		// git fetch（リモートリポジトリの指定ブランチの情報をローカルブランチへ反映）
-		$command = 'git fetch origin' . ' ' . $branch_name;
-		$ret = $this->common->command_execute($command, false);
-		if ($ret['return']) {
-			// 戻り値が0以外の場合
-			throw new \Exception('Git pull command error. branch_name:' . $branch_name);
-		}
-
-		// git pull（リモート取得ブランチを任意のローカルブランチにマージするコマンド）
-		$command = 'git pull origin' . ' ' . $branch_name;
-		$ret = $this->common->command_execute($command, false);
-		if ($ret['return']) {
-			// 戻り値が0以外の場合
-			throw new \Exception('Git pull command error. branch_name:' . $branch_name);
-		}
-
-		$this->common->debug_echo('■ git_pull end');
 	}
 
 	/**
