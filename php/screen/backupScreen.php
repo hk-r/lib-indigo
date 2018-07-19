@@ -283,7 +283,7 @@ class backupScreen
 				
 		 		$this->common->debug_echo('　□ -----公開処理-----');
 				
-				$this->publish->do_publish($dirname, $this->main->options);
+				$this->publish->do_publish($running_dirname, $this->main->options);
 			
 		 		/* 変更をコミットする */
 				$this->main->dbh->commit();
