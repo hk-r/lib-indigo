@@ -56,7 +56,7 @@ class backupScreen
 
 		$ret .= '<div style="overflow:hidden">'
 			. '<form method="post">'
-			. '<input type="hidden" name="selected_id" value="' . $this->main->options->_POST->selected_id . '"/>';
+			. '<input type="hidden" name="selected_id" value="' . $this->main->options->_POST->selected_id . '"/>'
 			. '<div class="button_contents" style="float:right;">'
 			. '<ul>'
 			. '<li><input type="submit" id="restore_btn" name="restore" class="px2-btn px2-btn--primary" value="復元"/></li>'
