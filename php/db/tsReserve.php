@@ -369,7 +369,7 @@ class tsReserve
 
 		// UPDATE文作成
 		$update_sql = "UPDATE TS_RESERVE SET " .
-			self::TS_RESERVE_DELETE_FLG .		"= :" . define::DELETE_FLG_ON . "," .
+			self::TS_RESERVE_DELETE_FLG .		"= :" . self::TS_RESERVE_DELETE_FLG . "," .
 			self::TS_RESERVE_UPDATE_DATETIME .	"= :" . self::TS_RESERVE_UPDATE_DATETIME . "," .
 			self::TS_RESERVE_UPDATE_USER_ID .	"= :" . self::TS_RESERVE_UPDATE_USER_ID .
 			" WHERE " . self::TS_RESERVE_RESERVE_ID_SEQ . "= :" . self::TS_RESERVE_RESERVE_ID_SEQ . ";";
