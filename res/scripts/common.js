@@ -130,6 +130,55 @@ $(function($){
 		});	
 
 		/*
+		 * 復元ボタン
+		 */
+		$('#restore_btn').on('click', function() {
+
+			var selected_flg = false;
+				
+			var element = document.getElementsByName('target');
+				
+			var str = "";
+
+			for (var i = 0; i < element.length; i++) {
+
+				if (element[i].checked) {
+					selected_flg = true;
+					str = element[i].value;
+					break;
+				}
+			}
+
+			if (!selected_flg) {
+				
+				alert('選択されていません');
+				return false;
+			}
+
+			// 「OK」時の処理開始 ＋ 確認ダイアログの表示
+			if(window.confirm('本当に復元してよろしいですか？')) {
+
+				$("#form_table").submit(function(){
+					$('<input />').attr('type', 'hidden')
+					 .attr('name', 'selected_id')
+					 .attr('value', str)
+					 .appendTo('#form_table');
+					});
+
+			}
+
+			// 「キャンセル」時の処理開始
+			else {
+				var $dialog = $('.dialog');
+				$dialog.remove();
+				return false;
+			}
+
+			// 画面ロック
+			display_lock();
+		});	
+
+		/*
 		 * 新規、変更ダイアログの[確認][確定]ボタン
 		 */
 		$('#add_check_btn, #update_check_btn, #add_confirm_btn, #update_confirm_btn').on('click', function() {

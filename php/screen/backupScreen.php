@@ -58,7 +58,7 @@ class backupScreen
 			. '<form method="post">'
 			. '<div class="button_contents" style="float:right;">'
 			. '<ul>'
-			. '<li><input type="submit" name="restore" class="px2-btn px2-btn--primary" value="復元"/></li>'
+			. '<li><input type="submit" id="restore_btn" name="restore" class="px2-btn px2-btn--primary" value="復元"/></li>'
 			. '</div>'
 			. '</div>';
 
