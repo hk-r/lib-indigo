@@ -136,8 +136,15 @@ class cron
 				$this->common->debug_echo('　□ 公開取得データ[配列]');
 				$this->common->debug_var_dump($data);
 
-				$dirname = $this->common->format_gmt_datetime($data[tsReserve::RESERVE_ENTITY_RESERVE_GMT], define::DATETIME_FORMAT_SAVE) . define::DIR_NAME_RESERVE;
-			
+				$dirname = $this->common->format_gmt_datetime($data[tsReserve::RESERVE_ENTITY_RESERVE_GMT], define::DATETIME_FORMAT_SAVE);
+
+				if (!$dirname) {
+					// エラー処理
+					throw new \Exception('Dirname create failed.');
+				} else {
+					$dirname .= define::DIR_NAME_RESERVE;
+				}
+
 				$publish_data = $data;
 
 				$this->common->debug_echo('　□ 公開ディレクトリ名');
@@ -272,7 +279,7 @@ class cron
 
 		 		$this->common->debug_echo('　□ -----公開処理-----');
 
-				$this->publish->do_publish($real_path->running_real_path, $this->options);
+				$this->publish->do_publish($running_dirname, $this->options);
 
 		 		/* 変更をコミットする */
 				$this->dbh->commit();
