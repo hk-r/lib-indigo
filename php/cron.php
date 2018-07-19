@@ -199,7 +199,7 @@ class cron
 			try {
 
 				/* トランザクションを開始する。オートコミットがオフになる */
-				$this->main->dbh->beginTransaction();
+				$this->dbh->beginTransaction();
 
 
 				//============================================================
@@ -228,13 +228,13 @@ class cron
 
 
 		 		/* 変更をコミットする */
-				$this->main->dbh->commit();
+				$this->dbh->commit();
 				/* データベース接続はオートコミットモードに戻る */
 
 		    } catch (\Exception $e) {
 		    
 		      /* 変更をロールバックする */
-		      $this->main->dbh->rollBack();
+		      $this->dbh->rollBack();
 		 
 		      throw $e;
 		    }
@@ -242,7 +242,7 @@ class cron
 			try {
 
 				/* トランザクションを開始する。オートコミットがオフになる */
-				$this->main->dbh->beginTransaction();
+				$this->dbh->beginTransaction();
 
 
 				//============================================================
@@ -274,13 +274,13 @@ class cron
 				$this->publish->do_publish($real_path->running_real_path, $this->options);
 
 		 		/* 変更をコミットする */
-				$this->main->dbh->commit();
+				$this->dbh->commit();
 				/* データベース接続はオートコミットモードに戻る */
 
 		    } catch (\Exception $e) {
 		    
 		      /* 変更をロールバックする */
-		      $this->main->dbh->rollBack();
+		      $this->dbh->rollBack();
 		 
 		      throw $e;
 		    }
