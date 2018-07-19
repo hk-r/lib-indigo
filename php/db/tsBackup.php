@@ -137,18 +137,17 @@ class tsBackup
 			throw new \Exception('更新対象のID「' . $id . '」が取得できませんでした。 ');
 		}
 
-			// SELECT文作成
-			$select_sql = "SELECT * from TS_BACKUP 
-			WHERE " . self::TS_BACKUP_BACKUP_ID_SEQ . " = " . $selected_id . ";";
+		// SELECT文作成
+		$select_sql = "SELECT * from TS_BACKUP 
+		WHERE " . self::TS_BACKUP_BACKUP_ID_SEQ . " = " . $selected_id . ";";
 
-			// SELECT実行
-			$ret_array = array_shift($this->pdoManager->select($dbh, $select_sql));
+		// SELECT実行
+		$ret_array = array_shift($this->pdoManager->select($dbh, $select_sql));
 
-			$conv_ret_array = $this->convert_ts_backup_entity($ret_array);
+		$conv_ret_array = $this->convert_ts_backup_entity($ret_array);
 
-			// $this->common->debug_echo('　□ SELECTデータ：');
-			// $this->common->debug_var_dump($ret_array);
-		}
+		// $this->common->debug_echo('　□ SELECTデータ：');
+		// $this->common->debug_var_dump($ret_array);
 
 		$this->common->debug_echo('■ get_selected_ts_backup end');
 
