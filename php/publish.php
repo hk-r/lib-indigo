@@ -114,7 +114,7 @@ class publish
 
  		$this->common->debug_echo('　□ -----公開済みのソースを「running」ディレクトリから「released」ディレクトリへ移動-----');
 
-		$this->move_dir($result->running_real_path, $running_dirname, $result->released_real_path, $running_dirname);
+		$this->move_dir($result->running_real_path, $running_dirname, $result->released_real_path, $running_dirname, $result->log_real_path);
 
 		$this->common->debug_echo('■ do_publish end');
 	}
@@ -165,7 +165,7 @@ class publish
 	/**
 	 * ディレクトリの移動（コマンド実行）
 	 */
-	public function move_dir($from_real_path, $from_dirname, $to_real_path, $to_dirname) {
+	public function move_dir($from_real_path, $from_dirname, $to_real_path, $to_dirname, $log_real_path) {
 
 		$this->common->debug_echo('■ move_dir start');
 

@@ -194,7 +194,7 @@ class cron
 			// runningディレクトリの絶対パスを取得。
 			$running_dirname = $this->common->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
 
-			$ret = json_decode($this->publish->move_dir($real_path->waiting_real_path, $dirname, $real_path->running_real_path, $running_dirname));
+			$ret = json_decode($this->publish->move_dir($real_path->waiting_real_path, $dirname, $real_path->running_real_path, $running_dirname, $real_path->log_real_path));
 
 			if ( !$ret->status) {
 				throw new \Exception($ret->message);
