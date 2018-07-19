@@ -10,6 +10,7 @@ class backupScreen
 	private $tsBackup;
 	private $tsOutput;
 	private $fileManager;
+	private $publish;
 	private $common;
 
 	/**
@@ -35,6 +36,7 @@ class backupScreen
 		$this->tsBackup = new tsBackup($this);
 		$this->tsOutput = new tsOutput($this);
 		$this->fileManager = new fileManager($this);
+		$this->publish = new publish($this);
 		$this->common = new common($this);
 
 	}

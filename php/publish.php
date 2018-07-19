@@ -183,7 +183,10 @@ class publish
 				$command = 'rsync -rtvzP --remove-source-files ' . $from_real_path . $from_dirname . '/ ' . $to_real_path . $to_dirname . '/' . ' --log-file=' . $log_real_path . $from_dirname . '/rsync_' . $to_dirname . '.log' ;
 
 				$ret = $this->common->command_execute($command, true);
-
+				if ($ret['return']) {
+					// 戻り値が0以外の場合
+					throw new \Exception('Command error.');
+				}
 				$this->common->debug_echo('　★ ファイル移動結果');
 
 				// foreach ( (array)$ret['output'] as $element ) {
@@ -196,7 +199,10 @@ class publish
 				$command = 'find ' .  $from_real_path . $from_dirname . '/ -type d -empty -delete' ;
 
 				$ret = $this->common->command_execute($command, true);
-
+				if ($ret['return']) {
+					// 戻り値が0以外の場合
+					throw new \Exception('Command error.');
+				}
 				$this->common->debug_echo('　★ 移動元のディレクトリ削除結果');
 
 				// foreach ( (array)$ret['output'] as $element ) {
