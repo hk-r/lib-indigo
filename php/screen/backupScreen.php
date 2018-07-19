@@ -195,8 +195,6 @@ class backupScreen
 			if (!$dirname) {
 				// エラー処理
 				throw new \Exception('Publish dirname create failed.');
-			} else {
-				$dirname .= define::DIR_NAME_RESERVE;
 			}
 
 			//============================================================
