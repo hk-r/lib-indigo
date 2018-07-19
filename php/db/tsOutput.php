@@ -263,7 +263,7 @@ class tsOutput
 		$this->common->debug_echo('■ update_ts_output start');
 
 		if (!$id) {
-			throw new \Exception('更新対象のID「' . $id . '」が取得できませんでした。 ');
+			throw new \Exception('更新対象のIDが取得できませんでした。 ');
 		}
 
 		// UPDATE文作成

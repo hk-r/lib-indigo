@@ -55,7 +55,7 @@ class backupScreen
 		$data_list = $this->tsBackup->get_ts_backup_list($this->main->dbh, null);
 
 		$ret .= '<div style="overflow:hidden">'
-			. '<form method="post">'
+			. '<form id="form_table" method="post">'
 			. '<input type="hidden" name="selected_id" value="' . $this->main->options->_POST->selected_id . '"/>'
 			. '<div class="button_contents" style="float:right;">'
 			. '<ul>'
