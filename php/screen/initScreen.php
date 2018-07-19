@@ -1151,11 +1151,11 @@ class initScreen
 			$waiting_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_WAITING));
 
 
-			/* トランザクションを開始する。オートコミットがオフになる */
-			$this->main->dbh->beginTransaction();
-
 			try {
 				
+				/* トランザクションを開始する。オートコミットがオフになる */
+				$this->main->dbh->beginTransaction();
+
 				//============================================================
 				// 公開予約情報の論理削除
 				//============================================================
@@ -1226,59 +1226,66 @@ class initScreen
 			// 作業用ディレクトリの絶対パスを取得
 			$real_path = json_decode($this->common->get_workdir_real_path($this->main->options));
 
+			//============================================================
+			// 公開処理結果テーブルの登録処理
+			//============================================================
 
-			/* トランザクションを開始する。オートコミットがオフになる */
-			$this->main->dbh->beginTransaction();
+	 		$this->common->debug_echo('　□ -----[即時公開]公開処理結果テーブルの登録処理-----');
+
+			// 現在時刻
+			$now = $this->common->get_current_datetime_of_gmt();
+
+			$dataArray = array(
+				tsOutput::TS_OUTPUT_RESERVE_ID => null,
+				tsOutput::TS_OUTPUT_BACKUP_ID => null,
+				tsOutput::TS_OUTPUT_RESERVE => null,
+				tsOutput::TS_OUTPUT_BRANCH => $this->main->options->_POST->branch_select_value,
+				tsOutput::TS_OUTPUT_COMMIT_HASH => $this->main->options->_POST->commit_hash,
+				tsOutput::TS_OUTPUT_COMMENT => $this->main->options->_POST->comment,
+				tsOutput::TS_OUTPUT_PUBLISH_TYPE => define::PUBLISH_TYPE_IMMEDIATE,
+				tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_RUNNING,
+				tsOutput::TS_OUTPUT_DIFF_FLG1 => null,
+				tsOutput::TS_OUTPUT_DIFF_FLG2 => null,
+				tsOutput::TS_OUTPUT_DIFF_FLG3 => null,
+				tsOutput::TS_OUTPUT_START => $start_datetime,
+				tsOutput::TS_OUTPUT_END => null,
+				tsOutput::TS_OUTPUT_DELETE_FLG => define::DELETE_FLG_OFF,
+				tsOutput::TS_OUTPUT_DELETE => null,
+				tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
+				tsOutput::TS_OUTPUT_INSERT_USER_ID => $this->main->options->user_id,
+				tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
+				tsOutput::TS_OUTPUT_UPDATE_USER_ID => null
+			);
+
+			// 公開処理結果テーブルの登録（インサートしたシーケンスIDをリターン値で取得）
+			$insert_id = $this->tsOutput->insert_ts_output($this->main->dbh, $dataArray);
+
+			// ============================================================
+			// 指定ブランチのGit情報を「running」ディレクトリへコピー
+			// ============================================================
+
+	 		$this->common->debug_echo('　□ -----[即時公開]指定ブランチのGit情報を「running」ディレクトリへコピー-----');
+			
+			// 公開予約ディレクトリ名の取得
+			$dirname = $this->common->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
+
+			$this->common->debug_echo('　□ 公開予約ディレクトリ：' . $dirname);
+
+			// Git情報のコピー処理
+			$this->gitManager->git_file_copy($real_path->running_real_path, $dirname);
 
 			try {
 
+				/* トランザクションを開始する。オートコミットがオフになる */
+				$this->main->dbh->beginTransaction();
+
 				//============================================================
-				// 公開処理結果テーブルの登録処理
+				// バックアップテーブルの登録処理
 				//============================================================
 
-		 		$this->common->debug_echo('　□ -----[即時公開]公開処理結果テーブルの登録処理-----');
-
-				// 現在時刻
-				$now = $this->common->get_current_datetime_of_gmt();
-
-				$dataArray = array(
-					tsOutput::TS_OUTPUT_RESERVE_ID => null,
-					tsOutput::TS_OUTPUT_BACKUP_ID => null,
-					tsOutput::TS_OUTPUT_RESERVE => null,
-					tsOutput::TS_OUTPUT_BRANCH => $this->main->options->_POST->branch_select_value,
-					tsOutput::TS_OUTPUT_COMMIT_HASH => $this->main->options->_POST->commit_hash,
-					tsOutput::TS_OUTPUT_COMMENT => $this->main->options->_POST->comment,
-					tsOutput::TS_OUTPUT_PUBLISH_TYPE => define::PUBLISH_TYPE_IMMEDIATE,
-					tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_RUNNING,
-					tsOutput::TS_OUTPUT_DIFF_FLG1 => null,
-					tsOutput::TS_OUTPUT_DIFF_FLG2 => null,
-					tsOutput::TS_OUTPUT_DIFF_FLG3 => null,
-					tsOutput::TS_OUTPUT_START => $start_datetime,
-					tsOutput::TS_OUTPUT_END => null,
-					tsOutput::TS_OUTPUT_DELETE_FLG => define::DELETE_FLG_OFF,
-					tsOutput::TS_OUTPUT_DELETE => null,
-					tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
-					tsOutput::TS_OUTPUT_INSERT_USER_ID => $this->main->options->user_id,
-					tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
-					tsOutput::TS_OUTPUT_UPDATE_USER_ID => null
-				);
-
-				// 公開処理結果テーブルの登録（インサートしたシーケンスIDをリターン値で取得）
-				$insert_id = $this->tsOutput->insert_ts_output($this->main->dbh, $dataArray);
-
-				// ============================================================
-				// 指定ブランチのGit情報を「running」ディレクトリへコピー
-				// ============================================================
-
-		 		$this->common->debug_echo('　□ -----[即時公開]指定ブランチのGit情報を「running」ディレクトリへコピー-----');
+		 		$this->common->debug_echo('　□ -----バックアップテーブルの登録処理-----');
 				
-				// 公開予約ディレクトリ名の取得
-				$dirname = $this->common->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
-
-				$this->common->debug_echo('　□ 公開予約ディレクトリ：' . $dirname);
-
-				// Git情報のコピー処理
-				$this->gitManager->git_file_copy($real_path->running_real_path, $dirname);
+				$this->tsBackup->insert_ts_backup($this->main->dbh, $this->main->options, $backup_datetime, $insert_id);
 
 
 				//============================================================
@@ -1295,23 +1302,25 @@ class initScreen
 
 				// バックアップファイル作成
 				$this->publish->create_backup($backup_dirname, $real_path);
-				
-				//============================================================
-				// バックアップテーブルの登録処理
-				//============================================================
 
-		 		$this->common->debug_echo('　□ -----バックアップテーブルの登録処理-----');
-				
-				$this->tsBackup->insert_ts_backup($this->main->dbh, $this->main->options, $backup_datetime, $insert_id);
+		 		/* 変更をコミットする */
+				$this->main->dbh->commit();
+				/* データベース接続はオートコミットモードに戻る */
 
-				//============================================================
-				// ※公開処理※
-				//============================================================
+		    } catch (\Exception $e) {
+		    
+		      /* 変更をロールバックする */
+		      $this->main->dbh->rollBack();
+		 
+		      throw $e;
+		    }
 
-		 		$this->common->debug_echo('　□ -----公開処理-----');
-				
-				$this->publish->do_publish($dirname, $this->main->options);
-				
+
+			try {
+
+				/* トランザクションを開始する。オートコミットがオフになる */
+				$this->main->dbh->beginTransaction();
+
 				//============================================================
 				// 公開処理結果テーブルの更新処理（成功）
 				//============================================================
@@ -1331,6 +1340,16 @@ class initScreen
 				);
 
 		 		$this->tsOutput->update_ts_output($this->main->dbh, $insert_id, $dataArray);
+
+
+				//============================================================
+				// ※公開処理※
+				//============================================================
+
+		 		$this->common->debug_echo('　□ -----公開処理-----');
+				
+				$this->publish->do_publish($dirname, $this->main->options);
+
 
 		 		/* 変更をコミットする */
 				$this->main->dbh->commit();
