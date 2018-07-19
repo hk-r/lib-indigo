@@ -216,6 +216,9 @@ class cron
 				
 		 		$this->common->debug_echo('　□ -----バックアップテーブルの登録処理-----');
 				
+				// GMTの現在日時
+				$backup_datetime = $this->common->get_current_datetime_of_gmt();
+
 				$this->tsBackup->insert_ts_backup($this->dbh, $this->options, $backup_datetime, $insert_id);
 
 
@@ -225,8 +228,7 @@ class cron
 
 		 		$this->common->debug_echo('　□ -----本番ソースを「backup」ディレクトリへコピー-----');
 				
-				// GMTの現在日時
-				$backup_datetime = $this->common->get_current_datetime_of_gmt();
+				// バックアップのディレクトリ名
 				$backup_dirname = $this->common->format_gmt_datetime($backup_datetime, define::DATETIME_FORMAT_SAVE);
 
 				$this->common->debug_echo('　□ バックアップ日時：' . $backup_datetime);
