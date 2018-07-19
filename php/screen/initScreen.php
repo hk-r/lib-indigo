@@ -1093,11 +1093,11 @@ class initScreen
 			// 変更前の公開予約ディレクトリ名の取得
 			$before_dirname = $this->common->format_gmt_datetime($this->main->options->_POST->before_gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE);
 			
-			if (!$dirname) {
+			if (!$before_dirname) {
 				// エラー処理
 				throw new \Exception('Dirname create failed.');
 			} else {
-				$dirname .= define::DIR_NAME_RESERVE;
+				$before_dirname .= define::DIR_NAME_RESERVE;
 			}
 
 			$this->common->debug_echo('　□ 変更前の公開予約ディレクトリ：');
@@ -1111,7 +1111,14 @@ class initScreen
 			// 変更後ブランチのGit情報を「waiting」ディレクトリへコピー
 			//============================================================
 			// 公開予約ディレクトリ名の取得
-			$dirname = $this->common->format_gmt_datetime($this->main->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE) . '_reserve';
+			$dirname = $this->common->format_gmt_datetime($this->main->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE);
+
+			if (!$dirname) {
+				// エラー処理
+				throw new \Exception('Dirname create failed.');
+			} else {
+				$dirname .= define::DIR_NAME_RESERVE;
+			}
 
 			$this->common->debug_echo('　□ 変更後の公開予約ディレクトリ：');
 			$this->common->debug_echo($dirname);
