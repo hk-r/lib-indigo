@@ -201,12 +201,12 @@ class backupScreen
 			// バックアップディレクトリを「backup」から「running」ディレクトリへ移動
 			//============================================================
 
-	 		$this->common->debug_echo('　□ -----バックアップディレクトリを「backup」から「running」ディレクトリへ移動-----');
+	 		$this->common->debug_echo('　□ -----バックアップディレクトリを「backup」から「running」ディレクトリへコピー-----');
 
 			// runningディレクトリの絶対パスを取得。
 			$running_dirname = $this->common->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
 
-			$this->publish->move_dir($real_path->backup_real_path, $dirname, $real_path->running_real_path, $running_dirname, $real_path->log_real_path);
+			$this->publish->copy_dir($real_path->backup_real_path, $dirname, $real_path->running_real_path, $running_dirname, $real_path->log_real_path);
 
 
 			try {

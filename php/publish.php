@@ -222,5 +222,47 @@ class publish
 
 		$this->common->debug_echo('■ move_dir end');
 	}
+
+
+	/**
+	 * ディレクトリのコピー（コマンド実行）
+	 */
+	public function copy_dir($from_real_path, $from_dirname, $to_real_path, $to_dirname, $log_real_path) {
+
+		$this->common->debug_echo('■ copy_dir start');
+
+		if ( file_exists($from_real_path)  ) {
+
+			if ( file_exists($to_real_path) ) {
+
+				//============================================================
+				// runningディレクトリへファイルを移動する
+				//============================================================
+				$command = 'rsync -rtvzP ' . $from_real_path . $from_dirname . '/ ' . $to_real_path . $to_dirname . '/' . ' --log-file=' . $log_real_path . '/rsync_' . $to_dirname . '.log' ;
+
+				$ret = $this->common->command_execute($command, true);
+				if ($ret['return']) {
+					// 戻り値が0以外の場合
+					throw new \Exception('Command error. command:' . $command);
+				}
+				
+				// foreach ( (array)$ret['output'] as $element ) {
+				// 	$this->common->debug_echo($element);
+				// }
+
+			} else {
+				// エラー処理
+				throw new \Exception('Copy to directory not found. ' . $to_real_path);
+			}
+		
+		} else {
+			// エラー処理
+			throw new \Exception('Copy base directory not found. ' . $from_real_path);
+		}
+
+		chdir($current_dir);
+
+		$this->common->debug_echo('■ copy_dir end');
+	}
 }
 
