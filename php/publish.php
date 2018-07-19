@@ -179,7 +179,7 @@ class publish
 				//============================================================
 				// runningディレクトリへファイルを移動する
 				//============================================================
-				$command = 'rsync -rtvzP --remove-source-files ' . $from_real_path . $from_dirname . '/ ' . $to_real_path . $to_dirname . '/' . ' --log-file=' . $log_real_path . $from_dirname . '/rsync_' . $to_dirname . '.log' ;
+				$command = 'rsync -rtvzP --remove-source-files ' . $from_real_path . $from_dirname . '/ ' . $to_real_path . $to_dirname . '/' . ' --log-file=' . $log_real_path . '/rsync_' . $to_dirname . '.log' ;
 
 				$ret = $this->common->command_execute($command, true);
 				if ($ret['return']) {
