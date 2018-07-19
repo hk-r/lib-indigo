@@ -1169,10 +1169,7 @@ class initScreen
 				// 公開予約ディレクトリ名の取得
 				$selected_ret = $this->tsReserve->get_selected_ts_reserve($this->main->dbh, $selected_id);
 				$dirname = $this->common->format_gmt_datetime($selected_ret[tsReserve::RESERVE_ENTITY_RESERVE_GMT], define::DATETIME_FORMAT_SAVE) . define::DIR_NAME_RESERVE;
-				$dirname = 'error_test';
-				$this->common->debug_echo('　□ 公開予約ディレクトリ：');
-				$this->common->debug_echo($dirname);
-
+				
 				// コピー処理
 				$this->gitManager->file_delete($waiting_real_path, $dirname);
 
