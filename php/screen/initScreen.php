@@ -1181,7 +1181,7 @@ class initScreen
 		} catch (\Exception $e) {
 
 			/* 変更をロールバックする */
-			$dbh->rollBack();
+			$this->main->dbh->rollBack();
 			/* データベース接続はオートコミットモードに戻る */
 
 			$result['status'] = false;
