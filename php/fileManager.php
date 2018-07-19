@@ -5,14 +5,11 @@ class fileManager
 {
 	/** indigo\mainのインスタンス */
 	private $main;
-	private $common;
 
 	/**
 	 * ファイルシステムの文字セット
 	 */
 	private $filesystem_encoding = null;
-
-	const DIR_PERMISSION_0757 = 0757;
 
 	/**
 	 * コンストラクタ
@@ -20,7 +17,6 @@ class fileManager
 	 */
 	public function __construct($main) {
 		$this->main = $main;
-		$this->common = new common($this);
 	}
 
 	/**
@@ -241,76 +237,5 @@ class fileManager
 		}
 		return $RTN;
 	}//convert_encoding()
-
-	/**
-	 * ディレクトリが存在しない場合はディレクトリを作成する
-	 *	 
-	 * @param $dirpath = ディレクトリパス
-	 *	 
-	 * @return true:成功、false：失敗
-	 */
-	public function is_exists_mkdir($dirpath) {
-
-		// $this->common->debug_echo('■ is_exists_mkdir start');
-
-		$ret = true;
-
-		if ($dirpath) {
-			if ( !file_exists($dirpath) ) {
-				// ディレクトリ作成
-				if ( !mkdir($dirpath, self::DIR_PERMISSION_0757)) {
-					$ret = false;
-				}
-			}
-		} else {
-			$ret = false;
-		}
-
-		// $this->common->debug_echo('　□ return：' . $ret);
-		// $this->common->debug_echo('■ is_exists_mkdir end');
-
-		return $ret;
-	}
-
-	/**
-	 * ディレクトリの存在有無にかかわらず、ディレクトリを再作成する（存在しているものは削除する）
-	 *	 
-	 * @param $dirpath = ディレクトリパス
-	 *	 
-	 * @return true:成功、false：失敗
-	 */
-	public function is_exists_remkdir($dirpath) {
-		
-		$this->common->debug_echo('■ is_exists_remkdir start');
-		$this->common->debug_echo('　■ $dirpath：' . $dirpath);
-
-		if ( file_exists($dirpath) ) {
-			$this->common->debug_echo('　■ $dirpath2：' . $dirpath);
-
-			// 削除
-			$command = 'rm -rf --preserve-root '. $dirpath;
-			$ret = $this->common->command_execute($command, true);
-
-			if ( $ret['return'] !== 0 ) {
-				$this->common->debug_echo('[既存ディレクトリ削除失敗]');
-				return false;
-			}
-		}
-
-		// デプロイ先のディレクトリを作成
-		if ( !file_exists($dirpath)) {
-			if ( !mkdir($dirpath, self::DIR_PERMISSION_0757) ) {
-				$this->common->debug_echo('　□ [再作成失敗]$dirpath：' . $dirpath);
-				return false;
-			}
-		} else {
-			$this->common->debug_echo('　□ [既存ディレクトリが残っている]$dirpath：' . $dirpath);
-			return false;
-		}
-	
-		$this->common->debug_echo('■ is_exists_remkdir end');
-
-		return true;
-	}
 
 }

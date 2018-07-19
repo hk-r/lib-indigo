@@ -11,6 +11,7 @@ class initScreen
 	private $tsBackup;
 
 	private $fileManager;
+	private $gitManager;
 
 	private $check;
 	private $publish;
@@ -63,6 +64,7 @@ class initScreen
 		$this->tsOutput = new tsOutput($this);
 		$this->tsBackup = new tsBackup($this);
 		$this->fileManager = new fileManager($this);
+		$this->gitManager = new gitManager($this);
 		$this->check = new check($this);
 		$this->publish = new publish($this);
 		$this->common = new common($this);
@@ -84,8 +86,8 @@ class initScreen
 		// 公開予約一覧を取得
 		$data_list = $this->tsReserve->get_ts_reserve_list($this->main->dbh);
 
-			$this->common->debug_echo('　□ data_list');
-			$this->common->debug_var_dump($data_list);
+			// $this->common->debug_echo('　□ data_list');
+			// $this->common->debug_var_dump($data_list);
 
 		// // お知らせリストの取得
 		// $alert_list = $this->get_csv_alert_list();
@@ -138,6 +140,10 @@ class initScreen
 			. '<th scope="row">コミット</th>'
 			. '<th scope="row">ブランチ</th>'
 			. '<th scope="row">コメント</th>'
+			. '<th scope="row">登録ユーザ</th>'
+			. '<th scope="row">登録日時</th>'
+			. '<th scope="row">更新ユーザ</th>'
+			. '<th scope="row">更新日時</th>'
 			. '</tr>'
 			. '</thead>'
 			. '<tbody>';
@@ -151,9 +157,13 @@ class initScreen
 			$ret .= '<tr>'
 				. '<td class="p-center"><input type="radio" name="target" value="' . $array[tsReserve::RESERVE_ENTITY_ID_SEQ] . '"/></td>'
 				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_RESERVE_DISPLAY] . '</td>'
-				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_COMMIT] . '</td>'
+				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_COMMIT_HASH] . '</td>'
 				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_BRANCH] . '</td>'
-				. '<td>' . $array[tsReserve::RESERVE_ENTITY_COMMENT] . '</td>'
+				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_COMMENT] . '</td>'
+				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_INSERT_USER_ID] . '</td>'
+				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_INSERT_DATETIME] . '</td>'
+				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_UPDATE_USER_ID] . '</td>'
+				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_UPDATE_DATETIME] . '</td>'
 				. '</tr>';
 		}
 
@@ -204,6 +214,7 @@ class initScreen
 		$branch_select_value = "";
 		$reserve_date = "";
 		$reserve_time = "";
+		$commit_hash = "";
 		$comment = "";
 
 		// フォームパラメタが設定されている場合変数へ設定
@@ -216,12 +227,15 @@ class initScreen
 		if (isset($this->main->options->_POST->reserve_time)) {
 			$reserve_time = $this->main->options->_POST->reserve_time;
 		}
+		if (isset($this->main->options->_POST->commit_hash)) {
+			$commit_hash = $this->main->options->_POST->commit_hash;
+		}
 		if (isset($this->main->options->_POST->comment)) {
 			$comment = $this->main->options->_POST->comment;
 		}
 
 		// 入力ダイアログHTMLの作成
-		$ret = $this->create_dialog_html(self::INPUT_MODE_ADD_BACK, $branch_select_value, $reserve_date, $reserve_time, $comment);
+		$ret = $this->create_dialog_html(self::INPUT_MODE_ADD_BACK, $branch_select_value, $reserve_date, $reserve_time, $commit_hash, $comment);
 
 		$this->common->debug_echo('■ disp_back_add_dialog end');
 
@@ -241,6 +255,7 @@ class initScreen
 		$branch_select_value = "";
 		$reserve_date = "";
 		$reserve_time = "";
+		$commit_hash = "";
 		$comment = "";
 
 		// 画面選択された公開予約情報を取得
@@ -258,12 +273,12 @@ class initScreen
 
 			$reserve_date = $selected_data[tsReserve::RESERVE_ENTITY_RESERVE_DATE];
 			$reserve_time = $selected_data[tsReserve::RESERVE_ENTITY_RESERVE_TIME];
-
+			$commit_hash = $selected_data[tsReserve::RESERVE_ENTITY_COMMIT_HASH];
 			$comment = $selected_data[tsReserve::RESERVE_ENTITY_COMMENT];
 		}
 
 		// ダイアログHTMLの作成
-		$ret = $this->create_dialog_html(self::INPUT_MODE_UPDATE, $branch_select_value, $reserve_date, $reserve_time, $comment);
+		$ret = $this->create_dialog_html(self::INPUT_MODE_UPDATE, $branch_select_value, $reserve_date, $reserve_time, $commit_hash, $comment);
 
 		$this->common->debug_echo('■ disp_update_dialog end');
 
@@ -284,6 +299,7 @@ class initScreen
 		$branch_select_value = "";
 		$reserve_date = "";
 		$reserve_time = "";
+		$commit_hash = "";
 		$comment = "";
 
 		// フォームパラメタが設定されている場合変数へ設定
@@ -296,12 +312,15 @@ class initScreen
 		if (isset($this->main->options->_POST->reserve_time)) {
 			$reserve_time = $this->main->options->_POST->reserve_time;
 		}
+		if (isset($this->main->options->_POST->commit_hash)) {
+			$commit_hash = $this->main->options->_POST->commit_hash;
+		}
 		if (isset($this->main->options->_POST->comment)) {
 			$comment = $this->main->options->_POST->comment;
 		}
 	
 		// ダイアログHTMLの作成
-		$ret = $this->create_dialog_html(self::INPUT_MODE_UPDATE_BACK, $branch_select_value, $reserve_date, $reserve_time, $comment);
+		$ret = $this->create_dialog_html(self::INPUT_MODE_UPDATE_BACK, $branch_select_value, $reserve_date, $reserve_time, $commit_hash, $comment);
 
 		$this->common->debug_echo('■ do_back_update_dialog end');
 
@@ -345,6 +364,7 @@ class initScreen
 		$branch_select_value = "";
 		$reserve_date = "";
 		$reserve_time = "";
+		$commit_hash = "";
 		$comment = "";
 
 		// フォームパラメタが設定されている場合変数へ設定
@@ -357,12 +377,15 @@ class initScreen
 		if (isset($this->main->options->_POST->reserve_time)) {
 			$reserve_time = $this->main->options->_POST->reserve_time;
 		}
+		if (isset($this->main->options->_POST->commit_hash)) {
+			$commit_hash = $this->main->options->_POST->commit_hash;
+		}
 		if (isset($this->main->options->_POST->comment)) {
 			$comment = $this->main->options->_POST->comment;
 		}
 
 		// 入力ダイアログHTMLの作成
-		$ret = $this->create_dialog_html(self::INPUT_MODE_IMMEDIATE_BACK, $branch_select_value, $reserve_date, $reserve_time, $comment);
+		$ret = $this->create_dialog_html(self::INPUT_MODE_IMMEDIATE_BACK, $branch_select_value, $reserve_date, $reserve_time, $commit_hash, $comment);
 
 		$this->common->debug_echo('■ disp_back_immediate_dialog end');
 
@@ -385,7 +408,7 @@ class initScreen
 	 * @return 
 	 *  入力ダイアログ出力内容
 	 */
-	private function create_dialog_html($input_mode, $branch_select_value, $reserve_date, $reserve_time, $comment) {
+	private function create_dialog_html($input_mode, $branch_select_value, $reserve_date, $reserve_time, $commit_hash, $comment) {
 		
 		$this->common->debug_echo('■ create_dialog_html start');
 
@@ -418,6 +441,9 @@ class initScreen
 			throw new \Exception("Input mode is not found.");
 		}
 
+        // masterディレクトリの絶対パス
+        $master_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_MASTER));
+
 		$ret .= '<form method="post">';
 
 		// // 変更前の値をhidden項目に保持させる
@@ -426,7 +452,8 @@ class initScreen
 		// }
 
 		$ret .= '<input type="hidden" name="selected_id" value="' . $this->main->options->_POST->selected_id . '"/>';
-
+		$ret .= '<input type="hidden" id="master_real_path" value="' . $master_real_path . '"/>';
+		
 		$ret .= '<table class="table table-striped">'
 			  . '<tr>';
 
@@ -435,7 +462,7 @@ class initScreen
 			  . '<td><select id="branch_list" class="form-control" name="branch_select_value">';
 
 				// ブランチリストを取得
-				$get_branch_ret = json_decode($this->get_branch_list());
+				$get_branch_ret = json_decode($this->gitManager->get_branch_list($this->main->options));
 				$branch_list = $get_branch_ret->branch_list;
 
 				foreach ((array)$branch_list as $branch) {
@@ -446,10 +473,11 @@ class initScreen
 			  . '</tr>';
 		
 		// 「コミット」項目
-		// $ret .= '<tr>'
-			  // . '<td class="dialog_thead">コミット</td>'
-			  // . '<td>' . 'dummy' . '</td>'
-			  // . '</tr>'
+		$ret .= '<tr>'
+			  . '<td class="dialog_thead">コミット</td>'
+			  . '<td id="result">' . $commit_hash . '</td>'
+			  . '<input type="hidden" id="commit_hash" name="commit_hash" value="' . $commit_hash . '"/>'
+			  . '</tr>';
 
 		// 「公開予約日時」項目
 		if ( ($input_mode == self::INPUT_MODE_IMMEDIATE) || ($input_mode == self::INPUT_MODE_IMMEDIATE_BACK) ) {
@@ -529,6 +557,7 @@ class initScreen
 		$branch_select_value = "";
 		$reserve_date = "";
 		$reserve_time = "";
+		$commit_hash = "";
 		$comment = "";
 
 		// フォームパラメタが設定されている場合変数へ設定
@@ -540,6 +569,9 @@ class initScreen
 		}
 		if (isset($this->main->options->_POST->reserve_time)) {
 			$reserve_time = $this->main->options->_POST->reserve_time;
+		}
+		if (isset($this->main->options->_POST->commit_hash)) {
+			$commit_hash = $this->main->options->_POST->commit_hash;
 		}
 		if (isset($this->main->options->_POST->comment)) {
 			$comment = $this->main->options->_POST->comment;
@@ -568,10 +600,11 @@ class initScreen
 			. '</tr>';
 
 		// 「コミット」項目
-		// $ret .= '<tr>'
-			// . '<td class="dialog_thead">' . 'コミット' . '</td>'
-			// . '<td>' . 'dummy' . '</td>'
-			// . '</tr>'
+		$ret .= '<tr>'
+			. '<td class="dialog_thead">' . 'コミット' . '</td>'
+			. '<td>' . $commit_hash . '</td>'
+			. '<input type="hidden" name="commit_hash" value="' . $commit_hash . '"/>'
+			. '</tr>';
 
 		// 「公開予約日時」項目
 		$ret .= '<tr>'
@@ -600,7 +633,7 @@ class initScreen
 			. '<ul>';
 
 		// 「確定」ボタン
-		$ret .= '<li><input type="submit" id="confirm_btn" name="add_confirm" class="px2-btn px2-btn--primary" value="確定"/></li>';
+		$ret .= '<li><input type="submit" id="add_confirm_btn" name="add_confirm" class="px2-btn px2-btn--primary" value="確定"/></li>';
 		
 		// 「キャンセル」ボタン
 		$ret .= '<li><input type="submit" id="back_btn" name="add_back" class="px2-btn" value="戻る"/></li>';
@@ -635,6 +668,7 @@ class initScreen
 		$branch_select_value = "";
 		$reserve_date = "";
 		$reserve_time = "";
+		$commit_hash = "";
 		$comment = "";
 
 		// フォームパラメタが設定されている場合変数へ設定
@@ -647,6 +681,9 @@ class initScreen
 		if (isset($this->main->options->_POST->reserve_time)) {
 			$reserve_time = $this->main->options->_POST->reserve_time;
 		}
+		if (isset($this->main->options->_POST->commit_hash)) {
+			$commit_hash = $this->main->options->_POST->commit_hash;
+		}
 		if (isset($this->main->options->_POST->comment)) {
 			$comment = $this->main->options->_POST->comment;
 		}
@@ -657,6 +694,7 @@ class initScreen
 		$before_branch_select_value = "";
 		$before_reserve_date = "";
 		$before_reserve_time = "";
+		$before_commit_hash = "";
 		$before_comment = "";
 		$before_gmt_reserve_datetime = "";
 
@@ -669,6 +707,7 @@ class initScreen
 			$before_branch_select_value = $selected_data[tsReserve::RESERVE_ENTITY_BRANCH];
 			$before_reserve_date = $selected_data[tsReserve::RESERVE_ENTITY_RESERVE_DATE];
 			$before_reserve_time = $selected_data[tsReserve::RESERVE_ENTITY_RESERVE_TIME];
+			$before_commit_hash = $selected_data[tsReserve::RESERVE_ENTITY_COMMIT_HASH];
 			$before_comment = $selected_data[tsReserve::RESERVE_ENTITY_COMMENT];
 	
 			// 画面入力された日時を結合し、GMTへ変換する
@@ -698,10 +737,10 @@ class initScreen
 			. '</tr>';
 		
 		// 「コミット」項目（変更前）
-		// $ret .= '<tr>'
-			// . '<td class="dialog_thead">' . 'コミット' . '</td>'
-			// . '<td>' . 'dummy' . '</td>'
-			// . '</tr>'
+		$ret .= '<tr>'
+			. '<td class="dialog_thead">' . 'コミット' . '</td>'
+			. '<td>' . $before_commit_hash . '</td>'
+			. '</tr>';
 		
 		// 「公開予約日時」項目（変更前）
 		$ret .= '<tr>'
@@ -730,15 +769,16 @@ class initScreen
 			// 「ブランチ」項目（変更後）
 			. '<tr>'
 			. '<td class="dialog_thead">' . 'ブランチ' . '</td>'
-			. '<td>' . $this->main->options->_POST->branch_select_value . '</td>'
+			. '<td>' . $branch_select_value . '</td>'
 			. '<input type="hidden" name="branch_select_value" value="' . $branch_select_value . '"/>'
 			. '</tr>'
 
 			// 「コミット」項目（変更後）			
-			// . '<tr>'
-			// . '<td class="dialog_thead">' . 'コミット' . '</td>'
-			// . '<td>' . 'dummy' . '</td>'
-			// . '</tr>'
+			. '<tr>'
+			. '<td class="dialog_thead">' . 'コミット' . '</td>'
+			. '<td>' . $commit_hash . '</td>'
+			. '<input type="hidden" name="commit_hash" value="' . $commit_hash . '"/>'	
+			. '</tr>'
 
 			// 「公開日時」項目（変更後）
 			. '<tr>'
@@ -764,7 +804,7 @@ class initScreen
 			. '<div class="button_contents">'
 			. '<ul>';
 
-		$ret .= '<li><input type="submit" id="confirm_btn" name="update_confirm" class="px2-btn px2-btn--primary" value="確定"/></li>'
+		$ret .= '<li><input type="submit" id="update_confirm_btn" name="update_confirm" class="px2-btn px2-btn--primary" value="確定"/></li>'
 			. '<li><input type="submit" id="back_btn" name="update_back" class="px2-btn" value="戻る"/></li>';
 
 		$ret .= '</ul>'
@@ -802,6 +842,7 @@ class initScreen
 		$branch_select_value = "";
 		$reserve_date = "";
 		$reserve_time = "";
+		$commit_hash = "";
 		$comment = "";
 
 		// フォームパラメタが設定されている場合変数へ設定
@@ -813,6 +854,9 @@ class initScreen
 		}
 		if (isset($this->main->options->_POST->reserve_time)) {
 			$reserve_time = $this->main->options->_POST->reserve_time;
+		}
+		if (isset($this->main->options->_POST->commit_hash)) {
+			$commit_hash = $this->main->options->_POST->commit_hash;
 		}
 		if (isset($this->main->options->_POST->comment)) {
 			$comment = $this->main->options->_POST->comment;
@@ -838,10 +882,11 @@ class initScreen
 			. '</tr>';
 
 		// 「コミット」項目
-		// $ret .= '<tr>'
-			// . '<td class="dialog_thead">' . 'コミット' . '</td>'
-			// . '<td>' . 'dummy' . '</td>'
-			// . '</tr>'
+		$ret .= '<tr>'
+			. '<td class="dialog_thead">' . 'コミット' . '</td>'
+			. '<td>' . $commit_hash . '</td>'
+			. '<input type="hidden" name="commit_hash" value="' . $commit_hash . '"/>'
+			. '</tr>';
 
 		// 「公開予約日時」項目
 		$ret .= '<tr>'
@@ -866,7 +911,7 @@ class initScreen
 			. '<ul>';
 
 		// 「確定」ボタン
-		$ret .= '<li><input type="submit" id="confirm_btn" name="immediate_confirm" class="px2-btn px2-btn--danger" value="確定（注意：本番環境への公開処理が開始されます）"/></li>';
+		$ret .= '<li><input type="submit" id="immediate_confirm_btn" name="immediate_confirm" class="px2-btn px2-btn--danger" value="確定（注意：本番環境への公開処理が開始されます）"/></li>';
 		
 		// 「キャンセル」ボタン
 		$ret .= '<li><input type="submit" id="back_btn" name="immediate_back" class="px2-btn" value="戻る"/></li>';
@@ -977,8 +1022,6 @@ class initScreen
 		
 		$this->common->debug_echo('■ do_add_confirm start');
 	
-		$current_dir = realpath('.');
-	
 		$output = "";
 		$result = array('status' => true,
 						'message' => '');
@@ -994,43 +1037,35 @@ class initScreen
 			// waitingディレクトリの絶対パスを取得。
 			$waiting_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_WAITING));
 
-			$this->common->debug_echo('　□ waiting_real_path');
-			$this->common->debug_echo($waiting_real_path);
-
 			// 公開予約ディレクトリ名の取得
-			$dirname = $this->common->format_gmt_datetime($this->main->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE) . define::DIR_NAME_RESERVE;
+			$dirname = $this->common->format_gmt_datetime($this->main->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE);
 
-			$this->common->debug_echo('　□ 公開予約ディレクトリ：');
-			$this->common->debug_echo($dirname);
-
-			// コピー処理
-			$ret = json_decode($this->git_file_copy($waiting_real_path, $dirname));
-
-			if ( !$ret->status ) {
-				throw new \Exception('Git file copy failed.');
+			if (!$dirname) {
+				// エラー処理
+				throw new \Exception('Dirname create failed.');
+			} else {
+				$dirname .= define::DIR_NAME_RESERVE;
 			}
 
-	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの登録処理！-----');
+			// コピー処理
+			$this->gitManager->git_file_copy($this->main->options, $waiting_real_path, $dirname);
+
+	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの登録処理-----');
 			
 			//============================================================
 			// 入力情報を公開予約テーブルへ登録
 			//============================================================
-			$this->tsReserve->insert_ts_reserve($this->main->dbh, $this->main->options, 'commit_hash_dummy');
+			$this->tsReserve->insert_ts_reserve($this->main->dbh, $this->main->options);
 			
 		} catch (\Exception $e) {
 
-			set_time_limit(30);
-
 			$result['status'] = false;
-			$result['message'] = $e->getMessage();
+			$result['message'] = 'Add confirm faild. ' . $e->getMessage();
 
-			chdir($current_dir);
 			return json_encode($result);
 		}
 
-		set_time_limit(30);
 		$result['status'] = true;
-		chdir($current_dir);
 
 		$this->common->debug_echo('■ do_add_confirm end');
 
@@ -1045,9 +1080,7 @@ class initScreen
 	 */
 	public function do_update_confirm() {
 		
-		$this->common->debug_echo('■ do_add_confirm start');
-	
-		$current_dir = realpath('.');
+		$this->common->debug_echo('■ do_update_confirm start');
 	
 		$output = "";
 		$result = array('status' => true,
@@ -1062,33 +1095,40 @@ class initScreen
 			// 「waiting」ディレクトリの変更前の公開ソースディレクトリを削除
 			//============================================================
 			// 変更前の公開予約ディレクトリ名の取得
-			$before_dirname = $this->common->format_gmt_datetime($this->main->options->_POST->before_gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE) . define::DIR_NAME_RESERVE;
+			$before_dirname = $this->common->format_gmt_datetime($this->main->options->_POST->before_gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE);
+			
+			if (!$before_dirname) {
+				// エラー処理
+				throw new \Exception('Dirname create failed.');
+			} else {
+				$before_dirname .= define::DIR_NAME_RESERVE;
+			}
 
 			$this->common->debug_echo('　□ 変更前の公開予約ディレクトリ：');
 			$this->common->debug_echo($before_dirname);
 
 			// コピー処理
-			$ret = json_decode($this->file_delete($waiting_real_path, $before_dirname));
+			$this->gitManager->file_delete($waiting_real_path, $before_dirname);
 
-			if ( !$ret->status ) {
-				throw new \Exception('Git file delete failed.');
-			}
 
 			//============================================================
 			// 変更後ブランチのGit情報を「waiting」ディレクトリへコピー
 			//============================================================
 			// 公開予約ディレクトリ名の取得
-			$dirname = $this->common->format_gmt_datetime($this->main->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE) . '_reserve';
+			$dirname = $this->common->format_gmt_datetime($this->main->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE);
+
+			if (!$dirname) {
+				// エラー処理
+				throw new \Exception('Dirname create failed.');
+			} else {
+				$dirname .= define::DIR_NAME_RESERVE;
+			}
 
 			$this->common->debug_echo('　□ 変更後の公開予約ディレクトリ：');
 			$this->common->debug_echo($dirname);
 
 			// コピー処理
-			$ret = json_decode($this->git_file_copy($waiting_real_path, $dirname));
-
-			if ( !$ret->status ) {
-				throw new \Exception('Git file copy failed.');
-			}
+			$this->gitManager->git_file_copy($this->main->options, $waiting_real_path, $dirname);
 
 	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの更新処理-----');
 			
@@ -1097,24 +1137,19 @@ class initScreen
 			//============================================================
 			$selected_id =  $this->main->options->_POST->selected_id;
 
-			$this->tsReserve->update_reserve_table($this->main->dbh, $this->main->options, $selected_id, $this->commit_hash);
+			$this->tsReserve->update_reserve_table($this->main->dbh, $this->main->options, $selected_id);
 			
 		} catch (\Exception $e) {
 
-			set_time_limit(30);
-
 			$result['status'] = false;
-			$result['message'] = $e->getMessage();
+			$result['message'] = 'Update confirm faild. ' . $e->getMessage();
 
-			chdir($current_dir);
 			return json_encode($result);
 		}
 
-		set_time_limit(30);
 		$result['status'] = true;
-		chdir($current_dir);
 
-		$this->common->debug_echo('■ do_add_confirm end');
+		$this->common->debug_echo('■ do_update_confirm end');
 
 		return json_encode($result);
 	}
@@ -1128,57 +1163,71 @@ class initScreen
 		
 		$this->common->debug_echo('■ do_delete start');
 	
-		$current_dir = realpath('.');
-	
 		$output = "";
 		$result = array('status' => true,
 						'message' => '');
 
 		try {
 
+			// 選択ID
+			$selected_id =  $this->main->options->_POST->selected_id;
+
 			// waitingディレクトリの絶対パスを取得。
 			$waiting_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_WAITING));
 
-			//============================================================
-			// 「waiting」ディレクトリの変更前の公開ソースディレクトリを削除
-			//============================================================
-			// 公開予約ディレクトリ名の取得
-			$selected_id =  $this->main->options->_POST->selected_id;
-			$selected_ret = $this->tsReserve->get_selected_ts_reserve($this->main->dbh, $selected_id);
-			$dirname = $this->common->format_gmt_datetime($selected_ret[tsReserve::RESERVE_ENTITY_RESERVE], define::DATETIME_FORMAT_SAVE) . define::DIR_NAME_RESERVE;
 
-			$this->common->debug_echo('　□ 公開予約ディレクトリ：');
-			$this->common->debug_echo($dirname);
+			try {
 
-			// コピー処理
-			$ret = json_decode($this->file_delete($waiting_real_path, $dirname));
+				/* トランザクションを開始する。オートコミットがオフになる */
+				$this->main->dbh->beginTransaction();
 
-			if ( !$ret->status ) {
-				throw new \Exception('Git file delete failed.' . $ret->status);
-			}
+				//============================================================
+				// 公開予約情報の論理削除
+				//============================================================
 
-			//============================================================
-			// 入力情報を公開予約テーブルへ更新
-			//============================================================
+				$this->common->debug_echo('　□ -----公開予約情報の論理削除処理-----');
 
-			$this->common->debug_echo('　□ -----公開処理結果テーブルの削除処理-----');
+				$this->tsReserve->delete_reserve_table($this->main->dbh, $this->main->options, $selected_id);
 
-			$this->tsReserve->delete_reserve_table($this->main->dbh, $selected_id);
-			
+				//============================================================
+				// 「waiting」ディレクトリの変更前の公開ソースディレクトリを削除
+				//============================================================
+				// 公開予約ディレクトリ名の取得
+				$selected_ret = $this->tsReserve->get_selected_ts_reserve($this->main->dbh, $selected_id);
+				$dirname = $this->common->format_gmt_datetime($selected_ret[tsReserve::RESERVE_ENTITY_RESERVE_GMT], define::DATETIME_FORMAT_SAVE);
+				
+				if (!$dirname) {
+					// エラー処理
+					throw new \Exception('Dirname create failed.');
+				} else {
+					$dirname .= define::DIR_NAME_RESERVE;
+				}
+				
+				// コピー処理
+				$this->gitManager->file_delete($waiting_real_path, $dirname);
+
+
+				/* 変更をコミットする */
+				$this->main->dbh->commit();
+				/* データベース接続はオートコミットモードに戻る */
+
+		    } catch (\Exception $e) {
+		    
+		      /* 変更をロールバックする */
+		      $this->main->dbh->rollBack();
+		 
+		      throw $e;
+		    }
+
 		} catch (\Exception $e) {
 
-			set_time_limit(30);
-
 			$result['status'] = false;
-			$result['message'] = $e->getMessage();
+			$result['message'] = 'Delete faild. ' . $e->getMessage();
 
-			chdir($current_dir);
 			return json_encode($result);
 		}
 
-		set_time_limit(30);
 		$result['status'] = true;
-		chdir($current_dir);
 
 		$this->common->debug_echo('■ do_delete end');
 
@@ -1193,8 +1242,6 @@ class initScreen
 
 		$this->common->debug_echo('■ do_immediate_publish start');
 
-		$current_dir = realpath('.');
-
 		$output = "";
 		$result = array('status' => true,
 						'message' => '');
@@ -1208,38 +1255,8 @@ class initScreen
 
 			$this->common->debug_echo('　□ 公開処理開始日時：' . $start_datetime);
 
-
-			// 本番環境ディレクトリの絶対パスを取得。
-			$project_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->project_real_path . "/"));
-
-			// backupディレクトリの絶対パスを取得。
-			$backup_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_BACKUP));
-
-			// logディレクトリの絶対パスを取得。
-			$log_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_LOG));
-
-
-			// ============================================================
-			// 指定ブランチのGit情報を「running」ディレクトリへコピー
-			// ============================================================
-
-	 		$this->common->debug_echo('　□ -----[即時公開]指定ブランチのGit情報を「running」ディレクトリへコピー-----');
-			
-			// runningディレクトリの絶対パスを取得。
-			$running_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_RUNNING));
-
-			// 公開予約ディレクトリ名の取得
-			$dirname = $this->common->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
-
-			$this->common->debug_echo('　□ 公開予約ディレクトリ：' . $dirname);
-
-			// Git情報のコピー処理
-			$ret = json_decode($this->git_file_copy($running_real_path, $dirname));
-
-			if ( !$ret->status ) {
-				throw new \Exception('Git file copy failed.');
-			}
-
+			// 作業用ディレクトリの絶対パスを取得
+			$real_path = json_decode($this->common->get_workdir_real_path($this->main->options));
 
 			//============================================================
 			// 公開処理結果テーブルの登録処理
@@ -1247,13 +1264,15 @@ class initScreen
 
 	 		$this->common->debug_echo('　□ -----[即時公開]公開処理結果テーブルの登録処理-----');
 
+			// 現在時刻
+			$now = $this->common->get_current_datetime_of_gmt();
 
 			$dataArray = array(
 				tsOutput::TS_OUTPUT_RESERVE_ID => null,
 				tsOutput::TS_OUTPUT_BACKUP_ID => null,
 				tsOutput::TS_OUTPUT_RESERVE => null,
 				tsOutput::TS_OUTPUT_BRANCH => $this->main->options->_POST->branch_select_value,
-				tsOutput::TS_OUTPUT_COMMIT => "dummy_commit_hash",
+				tsOutput::TS_OUTPUT_COMMIT_HASH => $this->main->options->_POST->commit_hash,
 				tsOutput::TS_OUTPUT_COMMENT => $this->main->options->_POST->comment,
 				tsOutput::TS_OUTPUT_PUBLISH_TYPE => define::PUBLISH_TYPE_IMMEDIATE,
 				tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_RUNNING,
@@ -1263,94 +1282,126 @@ class initScreen
 				tsOutput::TS_OUTPUT_START => $start_datetime,
 				tsOutput::TS_OUTPUT_END => null,
 				tsOutput::TS_OUTPUT_DELETE_FLG => define::DELETE_FLG_OFF,
-				tsOutput::TS_OUTPUT_DELETE => null
-				// . tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
-				// . tsOutput::TS_OUTPUT_INSERT_USER_ID => "dummy_insert_user",
-				// . tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
-				// . tsOutput::TS_OUTPUT_UPDATE_USER_ID => null
+				tsOutput::TS_OUTPUT_DELETE => null,
+				tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
+				tsOutput::TS_OUTPUT_INSERT_USER_ID => $this->main->options->user_id,
+				tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
+				tsOutput::TS_OUTPUT_UPDATE_USER_ID => null
 			);
 
+			// 公開処理結果テーブルの登録（インサートしたシーケンスIDをリターン値で取得）
+			$insert_id = $this->tsOutput->insert_ts_output($this->main->dbh, $dataArray);
 
-			// 公開処理結果テーブルの登録
-			$ret = json_decode($this->tsOutput->insert_ts_output($this->main->dbh, $dataArray));
+			// ============================================================
+			// 指定ブランチのGit情報を「running」ディレクトリへコピー
+			// ============================================================
 
-			if ( !$ret->status) {
-				throw new \Exception("TS_OUTPUT insert failed.");
-			}
-
-			// インサートしたシーケンスIDを取得（処理終了時の更新処理にて使用）
-			$insert_id = $ret->insert_id;
-
-			$this->common->debug_echo('　□ $insert_id：' . $insert_id);
-
-
-			//============================================================
-			// 本番ソースを「backup」ディレクトリへコピー
-			//============================================================
-
-	 		$this->common->debug_echo('　□ -----本番ソースを「backup」ディレクトリへコピー-----');
+	 		$this->common->debug_echo('　□ -----[即時公開]指定ブランチのGit情報を「running」ディレクトリへコピー-----');
 			
-			// GMTの現在日時
-			$backup_datetime = $this->common->get_current_datetime_of_gmt();
-			$backup_dirname = $this->common->format_gmt_datetime($backup_datetime, define::DATETIME_FORMAT_SAVE);
+			// 公開予約ディレクトリ名の取得
+			$dirname = $this->common->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
 
-			$this->common->debug_echo('　□ バックアップ日時：' . $backup_datetime);
+			$this->common->debug_echo('　□ 公開予約ディレクトリ：' . $dirname);
 
-			// バックアップファイル作成
-			$ret = json_decode($this->publish->create_backup($project_real_path, $backup_real_path, $log_real_path, $backup_dirname));
-		
-			if ( !$ret->status) {
-				throw new \Exception($ret->message);
-			}
+			// Git情報のコピー処理
+			$this->gitManager->git_file_copy($this->main->options, $real_path->running_real_path, $dirname);
 
-			//============================================================
-			// バックアップテーブルの登録処理
-			//============================================================
+			try {
 
-	 		$this->common->debug_echo('　□ -----バックアップテーブルの登録処理-----');
-			
-			$ret = json_decode($this->tsBackup->insert_ts_backup($this->main->dbh, $this->main->options, $backup_datetime, $insert_id));
-			if ( !$ret->status) {
-				throw new \Exception("TS_OUTPUT insert failed.");
-			}
+				/* トランザクションを開始する。オートコミットがオフになる */
+				$this->main->dbh->beginTransaction();
 
+				//============================================================
+				// バックアップテーブルの登録処理
+				//============================================================
 
-			//============================================================
-			// ※公開処理※
-			//============================================================
+		 		$this->common->debug_echo('　□ -----バックアップテーブルの登録処理-----');
+				
+				// GMTの現在日時
+				$backup_datetime = $this->common->get_current_datetime_of_gmt();
 
-	 		$this->common->debug_echo('　□ -----公開処理-----');
-			
+				$this->common->debug_echo('　□ バックアップ日時：' . $backup_datetime);
 
-			$ret = json_decode($this->publish->do_publish($dirname, $this->main->options));
-		
-			// 公開ステータスの設定
-			$publish_status;
-			if ( $ret->status) {
-				$publish_status = define::PUBLISH_STATUS_SUCCESS;
-			} else {
-				$publish_status = define::PUBLISH_STATUS_FAILED;
-			}
+				$this->tsBackup->insert_ts_backup($this->main->dbh, $this->main->options, $backup_datetime, $insert_id);
 
 
-			//============================================================
-			// 公開処理結果テーブルの更新処理（成功）
-			//============================================================
+				//============================================================
+				// 本番ソースを「backup」ディレクトリへコピー
+				//============================================================
 
-	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの更新処理（成功）-----');
-			
-			// GMTの現在日時
-			$end_datetime = $this->common->get_current_datetime_of_gmt();
+		 		$this->common->debug_echo('　□ -----本番ソースを「backup」ディレクトリへコピー-----');
+				
+				$backup_dirname = $this->common->format_gmt_datetime($backup_datetime, define::DATETIME_FORMAT_SAVE);
+				
+				// バックアップファイル作成
+				$this->publish->create_backup($backup_dirname, $real_path);
 
-	 		$ret = json_decode($this->tsOutput->update_ts_output($this->main->dbh, $insert_id, $end_datetime, $publish_status));
+		 		/* 変更をコミットする */
+				$this->main->dbh->commit();
+				/* データベース接続はオートコミットモードに戻る */
 
-			if ( !$ret->status) {
-				throw new \Exception("TS_OUTPUT update failed. " . $ret->message);
-			}
+		    } catch (\Exception $e) {
+		    
+		      /* 変更をロールバックする */
+		      $this->main->dbh->rollBack();
+		 
+		      throw $e;
+		    }
+
+
+			try {
+
+				/* トランザクションを開始する。オートコミットがオフになる */
+				$this->main->dbh->beginTransaction();
+
+				//============================================================
+				// 公開処理結果テーブルの更新処理（成功）
+				//============================================================
+
+		 		$this->common->debug_echo('　□ -----公開処理結果テーブルの更新処理（成功）-----');
+				
+				// GMTの現在日時
+				$end_datetime = $this->common->get_current_datetime_of_gmt();
+
+				$dataArray = array(
+					tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_SUCCESS,
+					tsOutput::TS_OUTPUT_DIFF_FLG1 => "0",
+					tsOutput::TS_OUTPUT_DIFF_FLG2 => "0",
+					tsOutput::TS_OUTPUT_DIFF_FLG3 => "0",
+					tsOutput::TS_OUTPUT_END => $end_datetime,
+					tsOutput::TS_OUTPUT_UPDATE_USER_ID => $this->main->options->user_id
+				);
+
+		 		$this->tsOutput->update_ts_output($this->main->dbh, $insert_id, $dataArray);
+
+
+				//============================================================
+				// ※公開処理※
+				//============================================================
+
+		 		$this->common->debug_echo('　□ -----公開処理-----');
+				
+				$this->publish->do_publish($dirname, $this->main->options);
+
+
+		 		/* 変更をコミットする */
+				$this->main->dbh->commit();
+				/* データベース接続はオートコミットモードに戻る */
+
+		    } catch (\Exception $e) {
+		    
+		      /* 変更をロールバックする */
+		      $this->main->dbh->rollBack();
+		 
+		      throw $e;
+		    }
 
 		} catch (\Exception $e) {
 
-			// set_time_limit(30);
+		$this->common->debug_echo('■ 3');
+
+			$result['status'] = false;
+			$result['message'] = 'Immediate publish faild. ' . $e->getMessage();
 
 			//============================================================
 			// 公開処理結果テーブルの更新処理（失敗）
@@ -1359,22 +1410,24 @@ class initScreen
 	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの更新処理（失敗）-----');
 			// GMTの現在日時
 			$end_datetime = $this->common->get_current_datetime_of_gmt();
-	 		$this->tsOutput->update_ts_output($this->main->dbh, $insert_id, $end_datetime, define::PUBLISH_STATUS_FAILED);
 
-			$result['status'] = false;
-			$result['message'] = $e->getMessage();
+			$dataArray = array(
+				tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_FAILED,
+				tsOutput::TS_OUTPUT_DIFF_FLG1 => "0",
+				tsOutput::TS_OUTPUT_DIFF_FLG2 => "0",
+				tsOutput::TS_OUTPUT_DIFF_FLG3 => "0",
+				tsOutput::TS_OUTPUT_END => $end_datetime,
+				tsOutput::TS_OUTPUT_UPDATE_USER_ID => $this->main->options->user_id
+			);
+
+	 		$this->tsOutput->update_ts_output($this->main->dbh, $insert_id, $dataArray);
 
 			$this->common->debug_echo('■ immediate_publish error end');
 
-			chdir($current_dir);
 			return json_encode($result);
 		}
 
-		// set_time_limit(30);
-
 		$result['status'] = true;
-
-		chdir($current_dir);
 
 		$this->common->debug_echo('■ immediate_publish end');
 
@@ -1461,75 +1514,6 @@ class initScreen
 		return $ret;
 	}
 
-
-	/**
-	 * ブランチリストを取得
-	 *	 
-	 * @return 指定リポジトリ内のブランチリストを返す
-	 */
-	private function get_branch_list() {
-
-
-		$this->common->debug_echo('■ get_branch_list start');
-
-		$current_dir = realpath('.');
-
-		$output_array = array();
-		$result = array('status' => true,
-						'message' => '');
-
-		try {
-
-			// masterディレクトリの絶対パス
-			$master_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_MASTER));
-
-			$this->common->debug_echo('　□ master_real_path：');
-			$this->common->debug_echo($master_real_path);
-
-			if ( chdir( $master_real_path )) {
-
-				// fetch
-				$command = 'git fetch';
-				$this->common->command_execute($command, false);
-
-				// ブランチの一覧取得
-				$command = 'git branch -r';
-				$ret = $this->common->command_execute($command, false);
-
-				foreach ((array)$ret['output'] as $key => $value) {
-					if( strpos($value, '/HEAD') !== false ){
-						continue;
-					}
-					$output_array[] = trim($value);
-				}
-
-				$result['branch_list'] = $output_array;
-
-			} else {
-				// ディレクトリ移動に失敗
-				throw new \Exception('Move to master directory failed.');
-			}
-
-		} catch (\Exception $e) {
-
-			$result['status'] = false;
-			$result['message'] = $e->getMessage();
-
-			chdir($current_dir);
-
-			$this->common->debug_echo('■ get_branch_list error end');
-			return json_encode($result);
-		}
-
-		$result['status'] = true;
-
-		chdir($current_dir);
-
-		$this->common->debug_echo('■ get_branch_list end');
-		return json_encode($result);
-
-	}
-
 	/**
 	 * プルダウンで選択状態とさせる値であるか比較する
 	 *	 
@@ -1551,163 +1535,6 @@ class initScreen
 
 		return $ret;
 	}
-
-	/**
-	 * 公開ソースディレクトリを作成し、Gitファイルのコピー
-	 *
-	 * @return なし
-	 */
-	private function git_file_copy($path, $dirname) {
-
-		$this->common->debug_echo('■ git_file_copy start');
-
-		$current_dir = realpath('.');
-
-		$output = "";
-		$result = array('status' => true,
-						'message' => '');
-
-		try {
-
-			// 公開日時ディレクトリの絶対パスを取得。
-			// すでに存在している場合は削除して再作成する。
-			$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($path . $dirname));
-			if ( !$this->fileManager->is_exists_remkdir($dir_real_path) ) {
-				throw new \Exception('Creation of Waiting publish directory failed.');
-			}
-
-			//============================================================
-			// 作成ディレクトリに移動し、指定ブランチのGit情報をコピーする
-			//============================================================
-			if ( chdir($dir_real_path) ) {
-				$this->git_pull();
-			} else {
-				throw new \Exception('Publish directory not found.');
-			}
-
-		} catch (\Exception $e) {
-
-			$result['status'] = false;
-			$result['message'] = $e->getMessage();
-
-			chdir($current_dir);
-			return json_encode($result);
-		}
-
-		$result['status'] = true;
-		chdir($current_dir);
-
-		$this->common->debug_echo('■ git_file_copy end');
-
-		return json_encode($result);
-
-	}
-
-	/**
-	 * 新規追加時のGitファイルのコピー
-	 *
-	 * @return なし
-	 */
-	private function git_pull() {
-
-		$this->common->debug_echo('■ git_pull start');
-
-		try {
-
-			// 指定ブランチ
-			$branch_name = trim(str_replace("origin/", "", $this->main->options->_POST->branch_select_value));
-
-			// git init
-			$command = 'git init';
-			$this->common->command_execute($command, false);
-
-			// git urlのセット
-			$url = $this->main->options->git->protocol . "://" . urlencode($this->main->options->git->username) . ":" . urlencode($this->main->options->git->password) . "@" . $this->main->options->git->url;
-			
-			// initしたリポジトリに名前を付ける
-			$command = 'git remote add origin ' . $url;
-			$this->common->command_execute($command, false);
-
-			// git fetch（リモートリポジトリの指定ブランチの情報をローカルブランチへ反映）
-			$command = 'git fetch origin' . ' ' . $branch_name;
-			$this->common->command_execute($command, false);
-
-			// git pull（リモート取得ブランチを任意のローカルブランチにマージするコマンド）
-			$command = 'git pull origin' . ' ' . $branch_name;
-			$this->common->command_execute($command, false);
-	
-		} catch (\Exception $e) {
-
-			set_time_limit(30);
-
-			$result['status'] = false;
-			$result['message'] = $e->getMessage();
-
-			return json_encode($result);
-		}
-
-		set_time_limit(30);
-
-		$result['status'] = true;
-		
-		$this->common->debug_echo('■ git_pull end');
-
-		return json_encode($result);
-
-	}
-
-	/**
-	 * 公開ソースディレクトリをGitファイルごと削除
-	 *
-	 * @return なし
-	 */
-	private function file_delete($path, $dirname) {
-		
-		$this->common->debug_echo('■ file_delete start');
-
-		$current_dir = realpath('.');
-
-		$output = "";
-		$result = array('status' => true,
-						'message' => '');
-
-		try {
-
-			// 公開ソースディレクトリの絶対パスを取得
-			$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($path . $dirname));
-
-			$this->common->debug_echo('　□ $dir_real_path' . $dir_real_path);
-
-			if( $dir_real_path && file_exists( $dir_real_path )) {
-				// ディレクトリが存在する場合、削除コマンド実行
-				$command = 'rm -rf --preserve-root '. $dir_real_path;
-				$ret = $this->common->command_execute($command, true);
-
-				if ( $ret['return'] !== 0 ) {
-					throw new \Exception('Delete directory failed.');
-				}
-			} else {
-				throw new \Exception('Delete directory not found.');
-			}
-		
-		} catch (\Exception $e) {
-
-			$result['status'] = false;
-			$result['message'] = $e->getMessage();
-
-			chdir($current_dir);
-			return json_encode($result);
-		}
-
-		$result['status'] = true;
-		chdir($current_dir);
-
-		$this->common->debug_echo('■ file_delete end');
-
-		return json_encode($result);
-
-	}
-
 
 	/**
 	 * 引数の日付と日時を結合し、GMTの日時へ変換する

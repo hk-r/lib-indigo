@@ -25,19 +25,6 @@ class pdoManager
 		$this->main = $main;
 		$this->fileManager = new fileManager($this);
 		$this->common = new common($this);
-
-
-		// // DELETE文作成
-		// $delete_sql = "DELETE FROM list WHERE id = :id";
-		// // パラメータ作成
-		// $params = array(
-		// 	':id' => '1'
-		// );
-		// // DELETE実行
-		// $stmt = $this->select($delete_sql, $params);
-
-		// // デバック用（直前の操作件数取得）
-		// // $count = $stmt->rowCount();
 	}
 
 
@@ -96,7 +83,7 @@ class pdoManager
 			$this->common->debug_echo('　□ db_real_path：' . $db_real_path);
 
 			// DBディレクトリが存在しない場合は作成
-			if ( !$this->fileManager->is_exists_mkdir($db_real_path) ) {
+			if ( !$this->common->is_exists_mkdir($db_real_path) ) {
 
 					// エラー処理
 					throw new \Exception('Creation of sqlite directory failed.');
@@ -175,7 +162,7 @@ class pdoManager
 			  . tsReserve::TS_RESERVE_RESERVE_ID_SEQ . ' INTEGER PRIMARY KEY AUTOINCREMENT,
 			' . tsReserve::TS_RESERVE_RESERVE . ' TEXT,
 			' . tsReserve::TS_RESERVE_BRANCH . ' TEXT,
-			' . tsReserve::TS_RESERVE_COMMIT . ' TEXT,
+			' . tsReserve::TS_RESERVE_COMMIT_HASH . ' TEXT,
 			' . tsReserve::TS_RESERVE_COMMENT . ' TEXT,
 			' . tsReserve::TS_RESERVE_DELETE_FLG . ' TEXT,			
 			' . tsReserve::TS_RESERVE_INSERT_DATETIME . ' TEXT,
@@ -203,7 +190,7 @@ class pdoManager
 			' . tsOutput::TS_OUTPUT_BACKUP_ID . ' INTEGER,
 			' . tsOutput::TS_OUTPUT_RESERVE . ' TEXT,
 			' . tsOutput::TS_OUTPUT_BRANCH . ' TEXT,
-			' . tsOutput::TS_OUTPUT_COMMIT . ' TEXT,
+			' . tsOutput::TS_OUTPUT_COMMIT_HASH . ' TEXT,
 			' . tsOutput::TS_OUTPUT_COMMENT . ' TEXT,
 			' . tsOutput::TS_OUTPUT_PUBLISH_TYPE . ' TEXT,
 			' . tsOutput::TS_OUTPUT_STATUS . ' TEXT,
@@ -322,8 +309,6 @@ class pdoManager
 
 		if (!$stmt) {
 			
-			$this->common->debug_echo('　□ execute error');
-
 			// エラー情報表示
 			throw new \Exception($dbh->errorInfo());
 		}
