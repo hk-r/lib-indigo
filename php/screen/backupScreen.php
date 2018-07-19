@@ -190,11 +190,13 @@ class backupScreen
 				throw new \Exception('Target data not found.');
 			}
 
-			$dirname = $this->common->format_gmt_datetime($data[tsBackup::BACKUP_ENTITY_DATETIME_GMT], define::DATETIME_FORMAT_SAVE) . define::DIR_NAME_RESERVE;
+			$dirname = $this->common->format_gmt_datetime($selected_data[tsBackup::BACKUP_ENTITY_DATETIME_GMT], define::DATETIME_FORMAT_SAVE);
 		
 			if (!$dirname) {
 				// エラー処理
 				throw new \Exception('Publish dirname create failed.');
+			} else {
+				$dirname .= define::DIR_NAME_RESERVE
 			}
 
 			//============================================================
