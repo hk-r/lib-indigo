@@ -228,7 +228,7 @@ class tsBackup
 		$entity[self::BACKUP_ENTITY_ID_SEQ] = $array[self::BACKUP_ENTITY_ID_SEQ];
 		
 		// バックアップ日時
-		$entity[self::RESERVE_ENTITY_DATETIME_GMT] = $array[self::BACKUP_ENTITY_DATETIME];
+		$entity[self::BACKUP_ENTITY_DATETIME_GMT] = $array[self::BACKUP_ENTITY_DATETIME];
 		// タイムゾーンの時刻へ変換
 		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::BACKUP_ENTITY_DATETIME]);
 		
