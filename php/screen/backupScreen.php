@@ -8,6 +8,7 @@ class backupScreen
 
 	private $check;
 	private $tsBackup;
+	private $tsOutput;
 	private $fileManager;
 	private $common;
 
@@ -32,6 +33,7 @@ class backupScreen
 
 		$this->check = new check($this);
 		$this->tsBackup = new tsBackup($this);
+		$this->tsOutput = new tsOutput($this);
 		$this->fileManager = new fileManager($this);
 		$this->common = new common($this);
 
@@ -174,6 +176,8 @@ class backupScreen
 			//============================================================
 			// バックアップテーブルより、公開対象データの取得
 			//============================================================
+
+	 		$this->common->debug_echo('　□ -----[復元公開]バックアップテーブルより、公開対象データの取得-----');
 
 			$selected_id =  $this->main->options->_POST->selected_id;
 
