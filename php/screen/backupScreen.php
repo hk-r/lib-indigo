@@ -250,7 +250,7 @@ class backupScreen
 		      $this->main->dbh->rollBack();
 		 
 		      // throw $e;
-		      throw new \Exception($e.getMessage());
+		      throw new \Exception($e->getMessage());
 		    }
 
 			try {
@@ -297,7 +297,7 @@ class backupScreen
 		      $this->main->dbh->rollBack();
 		      
 		      // throw $e;
-		      throw new \Exception($e.getMessage());
+		      throw new \Exception($e->getMessage());
 		    }
 
 		} catch (\Exception $e) {
