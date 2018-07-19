@@ -1034,7 +1034,14 @@ class initScreen
 			$waiting_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_WAITING));
 
 			// 公開予約ディレクトリ名の取得
-			$dirname = $this->common->format_gmt_datetime($this->main->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE) . define::DIR_NAME_RESERVE;
+			$dirname = $this->common->format_gmt_datetime($this->main->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE);
+
+			if (!$dirname) {
+				// エラー処理
+				throw new \Exception('Dirname create failed.');
+			} else {
+				$dirname .= define::DIR_NAME_RESERVE;
+			}
 
 			// コピー処理
 			$this->gitManager->git_file_copy($this->main->options, $waiting_real_path, $dirname);
@@ -1084,7 +1091,14 @@ class initScreen
 			// 「waiting」ディレクトリの変更前の公開ソースディレクトリを削除
 			//============================================================
 			// 変更前の公開予約ディレクトリ名の取得
-			$before_dirname = $this->common->format_gmt_datetime($this->main->options->_POST->before_gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE) . define::DIR_NAME_RESERVE;
+			$before_dirname = $this->common->format_gmt_datetime($this->main->options->_POST->before_gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE);
+			
+			if (!$dirname) {
+				// エラー処理
+				throw new \Exception('Dirname create failed.');
+			} else {
+				$dirname .= define::DIR_NAME_RESERVE;
+			}
 
 			$this->common->debug_echo('　□ 変更前の公開予約ディレクトリ：');
 			$this->common->debug_echo($before_dirname);
@@ -1152,7 +1166,7 @@ class initScreen
 
 
 			try {
-				
+
 				/* トランザクションを開始する。オートコミットがオフになる */
 				$this->main->dbh->beginTransaction();
 
@@ -1169,7 +1183,14 @@ class initScreen
 				//============================================================
 				// 公開予約ディレクトリ名の取得
 				$selected_ret = $this->tsReserve->get_selected_ts_reserve($this->main->dbh, $selected_id);
-				$dirname = $this->common->format_gmt_datetime($selected_ret[tsReserve::RESERVE_ENTITY_RESERVE_GMT], define::DATETIME_FORMAT_SAVE) . define::DIR_NAME_RESERVE;
+				$dirname = $this->common->format_gmt_datetime($selected_ret[tsReserve::RESERVE_ENTITY_RESERVE_GMT], define::DATETIME_FORMAT_SAVE);
+				
+				if (!$dirname) {
+					// エラー処理
+					throw new \Exception('Dirname create failed.');
+				} else {
+					$dirname .= define::DIR_NAME_RESERVE;
+				}
 				
 				// コピー処理
 				$this->gitManager->file_delete($waiting_real_path, $dirname);
