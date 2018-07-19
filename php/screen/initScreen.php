@@ -142,6 +142,8 @@ class initScreen
 			. '<th scope="row">コメント</th>'
 			. '<th scope="row">登録ユーザ</th>'
 			. '<th scope="row">登録日時</th>'
+			. '<th scope="row">更新ユーザ</th>'
+			. '<th scope="row">更新日時</th>'
 			. '</tr>'
 			. '</thead>'
 			. '<tbody>';
@@ -160,6 +162,8 @@ class initScreen
 				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_COMMENT] . '</td>'
 				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_INSERT_USER_ID] . '</td>'
 				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_INSERT_DATETIME] . '</td>'
+				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_UPDATE_USER_ID] . '</td>'
+				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_UPDATE_DATETIME] . '</td>'
 				. '</tr>';
 		}
 

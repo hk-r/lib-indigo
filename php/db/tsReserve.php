@@ -444,7 +444,14 @@ class tsReserve
 		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_RESERVE_INSERT_DATETIME]);
 
 		$entity[self::RESERVE_ENTITY_INSERT_DATETIME] = $tz_datetime;
-		
+	
+		// 更新ユーザID
+		$entity[self::RESERVE_ENTITY_UPDATE_USER_ID] = $array[self::TS_RESERVE_UPDATE_USER_ID];
+		// 更新日時
+		// タイムゾーンの時刻へ変換
+		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_RESERVE_UPDATE_DATETIME]);
+
+		$entity[self::RESERVE_ENTITY_UPDATE_DATETIME] = $tz_datetime;
 		$this->common->debug_echo('■ convert_ts_reserve_entity end');
 
 	    return $entity;
