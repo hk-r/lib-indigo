@@ -1360,7 +1360,7 @@ class initScreen
 		$form = $this->get_form_value();
 
 		// 画面入力された日時を結合し、GMTへ変換する
-		$gmt_reserve_datetime = $this->combine_to_gmt_date_and_time($reserve_date, $reserve_time);
+		$gmt_reserve_datetime = $this->combine_to_gmt_date_and_time($form['reserve_date'], $form['reserve_time']);
 	
 		$before_branch_select_value = "";
 		$before_reserve_date = "";
