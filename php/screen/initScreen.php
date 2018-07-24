@@ -549,7 +549,7 @@ class initScreen
 			$result['status'] = false;
 			$result['message'] = 'Add confirm faild. ' . $e->getMessage();
 
-			return json_encode($result);
+			return $result;
 		}
 
 		$result['status'] = true;
@@ -632,7 +632,7 @@ class initScreen
 			$result['status'] = false;
 			$result['message'] = 'Update confirm faild. ' . $e->getMessage();
 
-			return json_encode($result);
+			return $result;
 		}
 
 		$result['status'] = true;
