@@ -17,9 +17,9 @@ class tsBackup
 
 
 	/**
-	 * 公開予約テーブルのカラム定義
+	 * バックアップテーブルのカラム定義
 	 */
-	const TS_BACKUP_BACKUP_ID_SEQ = 'backup_id_seq';		// ID
+	const TS_BACKUP_ID_SEQ = 'backup_id_seq';		// ID
 	const TS_BACKUP_OUTPUT_ID = 'output_id';	// 公開予約日時
 	const TS_BACKUP_DATETIME = 'backup_datetime';	// ブランチ名
 	const TS_BACKUP_GEN_DELETE_FLG = 'gen_delete_flg';	// コミットハッシュ値（短縮）
@@ -32,7 +32,7 @@ class tsBackup
 
 
 	/**
-	 * 公開予約エンティティのカラム定義
+	 * バックアップエンティティのカラム定義
 	 */
 	const BACKUP_ENTITY_ID_SEQ = 'backup_id_seq';		// ID
 	const BACKUP_ENTITY_DATETIME_GMT = 'backup_datetime_gmt';	// バックアップ日時（GMT日時）
@@ -80,7 +80,7 @@ class tsBackup
 		// SELECT文作成（削除フラグ = 0、ソート順：公開予約日時の昇順）
 		$select_sql = "
 				SELECT 
-				  TS_BACKUP." . self::TS_BACKUP_BACKUP_ID_SEQ . "		as " . self::BACKUP_ENTITY_ID_SEQ . ",
+				  TS_BACKUP." . self::TS_BACKUP_ID_SEQ . "		as " . self::BACKUP_ENTITY_ID_SEQ . ",
 				  TS_BACKUP." . self::TS_BACKUP_DATETIME . "			as " . self::BACKUP_ENTITY_DATETIME . ",
 				  TS_BACKUP." . self::TS_BACKUP_INSERT_USER_ID . "		as " . self::BACKUP_ENTITY_INSERT_USER_ID . ",
 				  TS_OUTPUT." . tsOutput::TS_OUTPUT_RESERVE . "			as " . self::BACKUP_ENTITY_RESERVE . ",
@@ -135,12 +135,12 @@ class tsBackup
 		$conv_ret_array = array();
 
 		if (!$selected_id) {
-			throw new \Exception('更新対象のID「' . $id . '」が取得できませんでした。 ');
+			throw new \Exception('選択されたIDが取得できませんでした。 ');
 		}
 
 		// SELECT文作成
 		$select_sql = "SELECT * from TS_BACKUP 
-		WHERE " . self::TS_BACKUP_BACKUP_ID_SEQ . " = " . $selected_id . ";";
+		WHERE " . self::TS_BACKUP_ID_SEQ . " = " . $selected_id . ";";
 
 		// SELECT実行
 		$ret_array = array_shift($this->pdoManager->select($dbh, $select_sql));
@@ -151,6 +151,43 @@ class tsBackup
 		// $this->common->debug_var_dump($ret_array);
 
 		$this->common->debug_echo('■ get_selected_ts_backup end');
+
+		return $conv_ret_array;
+	}
+
+	/**
+	 * バックアップテーブルから公開処理結果IDを条件に情報を取得する
+	 *
+	 * @return 選択行の情報
+	 */
+	public function get_selected_ts_backup_by_output_id($dbh, $output_id) {
+
+
+		$this->common->debug_echo('■ get_selected_ts_backup_by_output_id start');
+
+		$this->common->debug_echo('　□ output_id：' . $output_id);
+
+		$ret_array = array();
+
+		$conv_ret_array = array();
+
+		if (!$output_id) {
+			throw new \Exception('復元対象の公開処理結果IDが取得できませんでした。 ');
+		}
+
+		// SELECT文作成
+		$select_sql = "SELECT * from TS_BACKUP 
+		WHERE " . self::TS_BACKUP_OUTPUT_ID . " = " . $output_id . ";";
+
+		// SELECT実行
+		$ret_array = array_shift($this->pdoManager->select($dbh, $select_sql));
+
+		$conv_ret_array = $this->convert_ts_backup_entity($ret_array);
+
+		// $this->common->debug_echo('　□ SELECTデータ：');
+		// $this->common->debug_var_dump($ret_array);
+
+		$this->common->debug_echo('■ get_selected_ts_backup_by_output_id end');
 
 		return $conv_ret_array;
 	}
@@ -209,7 +246,14 @@ class tsBackup
 		// INSERT実行
 		$this->pdoManager->execute($dbh, $insert_sql, $params);
 
+		// 登録したシーケンスIDを取得
+		$insert_id = $dbh->lastInsertId();
+		
+		$this->common->debug_echo('　□ insert_id：' . $insert_id);
+
 		$this->common->debug_echo('■ insert_ts_backup end');
+
+		return $insert_id;
 	}
 
 	/**

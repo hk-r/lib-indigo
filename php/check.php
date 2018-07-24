@@ -19,6 +19,81 @@ class check
 		$this->common = new common($this);
 	}
 
+	/**
+	 * ブランチの必須チェック
+	 *	 
+	 * @param $datetime       = 公開予約日時の日付
+	 *	 
+	 * @return 
+	 *  未来日である：true
+	 *  未来日でない：false
+	 */
+	public function is_null_branch($branch_select_value) {
+
+		$ret = true;
+		if (!$branch_select_value) {
+			$ret = false;
+		}
+
+		return $ret;
+	}
+
+	/**
+	 * コミットの必須チェック
+	 *	 
+	 * @param $datetime       = 公開予約日時の日付
+	 *	 
+	 * @return 
+	 *  未来日である：true
+	 *  未来日でない：false
+	 */
+	public function is_null_commit_hash($commit_hash) {
+
+		$ret = true;
+		if (!$commit_hash) {
+			$ret = false;
+		}
+
+		return $ret;
+	}
+
+	/**
+	 * 公開予約日付の必須チェック
+	 *	 
+	 * @param $datetime       = 公開予約日時の日付
+	 *	 
+	 * @return 
+	 *  未来日である：true
+	 *  未来日でない：false
+	 */
+	public function is_null_reserve_date($reserve_date) {
+
+		$ret = true;
+		if (!$reserve_date) {
+			$ret = false;
+		}
+
+		return $ret;
+	}
+
+	/**
+	 * 公開予約時刻の必須チェック
+	 *	 
+	 * @param $datetime       = 公開予約日時の日付
+	 *	 
+	 * @return 
+	 *  未来日である：true
+	 *  未来日でない：false
+	 */
+	public function is_null_reserve_time($reserve_time) {
+
+		$ret = true;
+		if (!$reserve_time) {
+			$ret = false;
+		}
+
+		return $ret;
+	}
 
 	/**
 	 * 公開予約の最大件数チェック
@@ -107,7 +182,7 @@ class check
 
 		foreach ((array)$data_list as $array) {
 			
-			if (($array[tsReserve::RESERVE_ENTITY_ID] != $selected_id) && ($array[tsReserve::RESERVE_ENTITY_BRANCH] == $selected_branch)) {
+			if (($array[tsReserve::RESERVE_ENTITY_ID_SEQ] != $selected_id) && ($array[tsReserve::RESERVE_ENTITY_BRANCH] == $selected_branch)) {
 				$ret = false;
 				break;
 			}
@@ -132,7 +207,7 @@ class check
 		$ret = true;
 
 		foreach ((array)$data_list as $array) {
-			if (($array[tsReserve::RESERVE_ENTITY_ID] != $selected_id) && ($array[tsReserve::RESERVE_ENTITY_RESERVE] == $input_reserve)) {
+			if (($array[tsReserve::RESERVE_ENTITY_ID_SEQ] != $selected_id) && ($array[tsReserve::RESERVE_ENTITY_RESERVE] == $input_reserve)) {
 				$ret = false;
 				break;
 			}

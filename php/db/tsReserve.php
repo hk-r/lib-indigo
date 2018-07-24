@@ -19,7 +19,7 @@ class tsReserve
 	/**
 	 * 公開予約テーブルのカラム定義
 	 */
-	const TS_RESERVE_RESERVE_ID_SEQ = 'reserve_id_seq';		// ID
+	const TS_RESERVE_ID_SEQ = 'reserve_id_seq';		// ID
 	const TS_RESERVE_RESERVE = 'reserve_datetime';	// 公開予約日時
 	const TS_RESERVE_BRANCH = 'branch_name';	// ブランチ名
 	const TS_RESERVE_COMMIT_HASH = 'commit_hash';	// コミットハッシュ値（短縮）
@@ -76,6 +76,7 @@ class tsReserve
 		try {
 
 			// SELECT文作成（削除フラグ = 0、ソート順：公開予約日時の昇順）
+			// 公開処理結果にデータが存在しない場合（公開前の場合）
 			$select_sql = "
 					SELECT * FROM TS_RESERVE 
 					WHERE NOT EXISTS (SELECT *
@@ -133,7 +134,7 @@ class tsReserve
 					SELECT * FROM TS_RESERVE
 					WHERE NOT EXISTS (SELECT *
               						FROM TS_OUTPUT
-              						WHERE TS_RESERVE." . tsReserve::TS_RESERVE_RESERVE_ID_SEQ . " = TS_OUTPUT." . tsOutput::TS_OUTPUT_RESERVE_ID .
+              						WHERE TS_RESERVE." . tsReserve::TS_RESERVE_ID_SEQ . " = TS_OUTPUT." . tsOutput::TS_OUTPUT_RESERVE_ID .
               			")
 					    and " . tsReserve::TS_RESERVE_DELETE_FLG . " = " . define::DELETE_FLG_OFF .
 					    $option_param .
@@ -194,7 +195,7 @@ class tsReserve
 
 				// SELECT文作成
 				$select_sql = "SELECT * from TS_RESERVE 
-				WHERE " . self::TS_RESERVE_RESERVE_ID_SEQ . " = " . $selected_id . ";";
+				WHERE " . self::TS_RESERVE_ID_SEQ . " = " . $selected_id . ";";
 
 				// // パラメータ作成
 				// $params = array(
@@ -322,7 +323,7 @@ class tsReserve
 			self::TS_RESERVE_COMMENT .		"= :" . self::TS_RESERVE_COMMENT . "," .
 			self::TS_RESERVE_UPDATE_DATETIME .	"= :" . self::TS_RESERVE_UPDATE_DATETIME . "," .
 			self::TS_RESERVE_UPDATE_USER_ID .	"= :" . self::TS_RESERVE_UPDATE_USER_ID .
-			" WHERE " . self::TS_RESERVE_RESERVE_ID_SEQ . "= :" . self::TS_RESERVE_RESERVE_ID_SEQ . ";";
+			" WHERE " . self::TS_RESERVE_ID_SEQ . "= :" . self::TS_RESERVE_ID_SEQ . ";";
 
 
 		// $update_sql = "UPDATE TS_RESERVE SET 
@@ -345,7 +346,7 @@ class tsReserve
 			":" . self::TS_RESERVE_COMMENT	 		=> $options->_POST->comment,
 			":" . self::TS_RESERVE_UPDATE_DATETIME 	=> $now,
 			":" . self::TS_RESERVE_UPDATE_USER_ID	=> $options->user_id,
-			":" . self::TS_RESERVE_RESERVE_ID_SEQ	=> $selected_id
+			":" . self::TS_RESERVE_ID_SEQ	=> $selected_id
 		);
 
 		// UPDATE実行
@@ -372,7 +373,7 @@ class tsReserve
 			self::TS_RESERVE_DELETE_FLG .		"= :" . self::TS_RESERVE_DELETE_FLG . "," .
 			self::TS_RESERVE_UPDATE_DATETIME .	"= :" . self::TS_RESERVE_UPDATE_DATETIME . "," .
 			self::TS_RESERVE_UPDATE_USER_ID .	"= :" . self::TS_RESERVE_UPDATE_USER_ID .
-			" WHERE " . self::TS_RESERVE_RESERVE_ID_SEQ . "= :" . self::TS_RESERVE_RESERVE_ID_SEQ . ";";
+			" WHERE " . self::TS_RESERVE_ID_SEQ . "= :" . self::TS_RESERVE_ID_SEQ . ";";
 
 
 		// // UPDATE文作成（論理削除）
@@ -399,7 +400,7 @@ class tsReserve
 			":" . self::TS_RESERVE_DELETE_FLG 		=> define::DELETE_FLG_ON,
 			":" . self::TS_RESERVE_UPDATE_DATETIME 	=> $now,
 			":" . self::TS_RESERVE_UPDATE_USER_ID	=> $options->user_id,
-			":" . self::TS_RESERVE_RESERVE_ID_SEQ	=> $selected_id
+			":" . self::TS_RESERVE_ID_SEQ	=> $selected_id
 		);
 
 		// UPDATE実行
@@ -417,12 +418,12 @@ class tsReserve
 	 */
 	private function convert_ts_reserve_entity($array) {
 	
-		$this->common->debug_echo('■ convert_ts_reserve_entity start');
+		// $this->common->debug_echo('■ convert_ts_reserve_entity start');
 
 		$entity = array();
 
 		// ID
-		$entity[self::RESERVE_ENTITY_ID_SEQ] = $array[self::TS_RESERVE_RESERVE_ID_SEQ];
+		$entity[self::RESERVE_ENTITY_ID_SEQ] = $array[self::TS_RESERVE_ID_SEQ];
 		// 公開予約日時
 		$entity[self::RESERVE_ENTITY_RESERVE_GMT] = $array[self::TS_RESERVE_RESERVE];
 		// タイムゾーンの時刻へ変換
@@ -452,7 +453,7 @@ class tsReserve
 		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_RESERVE_UPDATE_DATETIME]);
 
 		$entity[self::RESERVE_ENTITY_UPDATE_DATETIME] = $tz_datetime;
-		$this->common->debug_echo('■ convert_ts_reserve_entity end');
+		// $this->common->debug_echo('■ convert_ts_reserve_entity end');
 
 	    return $entity;
 	}

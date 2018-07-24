@@ -242,6 +242,38 @@ class common
 	}
 
 
+
+	/**
+	 * 本番サーバの絶対パス取得（複数サーバ対応（※作成中））
+	 *	 
+	 * @param $path = 作成ディレクトリ名
+	 *	 
+	 * @return ソート後の配列
+	 */
+	public function get_server_real_path($options) {
+	
+		$this->debug_echo('■ get_server_real_path start');
+
+
+		$server_list = $options->server;
+
+		$server_real_path = array();
+
+		foreach ( (array)$server_list as $server ) {
+			
+			// 本番環境ディレクトリの絶対パスを取得。
+			$server_real_path[] = $this->fileManager->normalize_path($this->fileManager->get_realpath($server . "/"));
+		}
+
+		$this->debug_echo('　□ server_real_path');
+		$this->debug_var_dump($server_real_path);
+
+		$this->debug_echo('■ get_server_real_path end');
+
+	    return json_encode($server_real_path);
+	}
+
+
 	/**
 	 * 作業用ディレクトリの絶対パス取得
 	 *	 
@@ -253,7 +285,7 @@ class common
 	
 		$this->debug_echo('■ get_indigo_work_dir start');
 
-		$result = array('project_real_path' => '',
+		$result = array('server_real_path' => '',
 						'backup_real_path' => '',
 						'waiting_real_path' => '',
 						'running_real_path' => '',
@@ -261,7 +293,7 @@ class common
 						'log_real_path' => '');
 
 			// 本番環境ディレクトリの絶対パスを取得。
-			$result['project_real_path'] = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->project_real_path . "/"));
+			$result['server_real_path'] = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->server_real_path . "/"));
 
 			// backupディレクトリの絶対パスを取得。
 			$result['backup_real_path'] = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . define::PATH_BACKUP));
@@ -289,8 +321,8 @@ class common
 	 */
 	public function debug_echo($text) {
 	
-		// echo strval($text);
-		// echo "<br>";
+		echo strval($text);
+		echo "<br>";
 
 		return;
 	}
@@ -301,8 +333,8 @@ class common
 	 */
 	public function debug_var_dump($text) {
 	
-		// var_dump($text);
-		// echo "<br>";
+		var_dump($text);
+		echo "<br>";
 
 		return;
 	}

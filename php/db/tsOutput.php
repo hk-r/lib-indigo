@@ -23,6 +23,7 @@ class tsOutput
 	const TS_OUTPUT_COMMENT = 'comment';		// コメント
 	const TS_OUTPUT_PUBLISH_TYPE = 'publish_type';	// 公開種別
 	const TS_OUTPUT_STATUS = 'status';				// 状態
+	
 	const TS_OUTPUT_DIFF_FLG1 = 'change_check_flg';
 	const TS_OUTPUT_DIFF_FLG2 = 'publish_honban_diff_flg';
 	const TS_OUTPUT_DIFF_FLG3 = 'publish_pre_diff_flg';
@@ -301,7 +302,6 @@ class tsOutput
 		$this->common->debug_echo('■ update_ts_output end');
 	}
 
-
 	/**
 	 * 公開処理結果テーブルの情報を変換する
 	 *	 
@@ -311,7 +311,7 @@ class tsOutput
 	 */
 	private function convert_ts_output_entity($array) {
 	
-		$this->common->debug_echo('■ convert_ts_output_entity start');
+		// $this->common->debug_echo('■ convert_ts_output_entity start');
 
 		$entity = array();
 
@@ -355,7 +355,7 @@ class tsOutput
 		// 登録ユーザID
 		$entity[self::OUTPUT_ENTITY_INSERT_USER_ID] = $array[self::TS_OUTPUT_INSERT_USER_ID];
 
-		$this->common->debug_echo('■ convert_ts_output_entity end');
+		// $this->common->debug_echo('■ convert_ts_output_entity end');
 
 	    return $entity;
 	}

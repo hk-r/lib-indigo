@@ -11,9 +11,6 @@ class gitManager
 	private $common;
 
 
-	// git一時ディレクトリパス
-	const PATH_GIT_WORK = '/work_repository/';
-
 	/**
 	 * コンストラクタ
 	 * @param $options = オプション
