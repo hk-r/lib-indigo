@@ -101,7 +101,7 @@ class cron
 		$result = array('status' => true,
 						'message' => '');
 
-		$insert_id;
+		$output_id;
 
 		$publish_data = array();
 
@@ -128,7 +128,8 @@ class cron
 			}
 
 			$cnt = 1;
-			$status;
+			$status = define::PUBLISH_STATUS_RUNNING;
+			$set_start_datetime = $start_datetime;
 
 			try {
 
@@ -140,33 +141,6 @@ class cron
 
 					$this->common->debug_echo('　□ 公開取得データ[配列]');
 					$this->common->debug_var_dump($data);
-
-					if ($cnt == 1) {
-
-						$status = define::PUBLISH_STATUS_RUNNING;
-
-						$dirname = $this->common->format_gmt_datetime($data[tsReserve::RESERVE_ENTITY_RESERVE_GMT], define::DATETIME_FORMAT_SAVE);
-
-						if (!$dirname) {
-							// エラー処理
-							throw new \Exception('Dirname create failed.');
-						} else {
-							$dirname .= define::DIR_NAME_RESERVE;
-						}
-
-						// $publish_data = $data;
-
-						$this->common->debug_echo('　□ 公開ディレクトリ名');
-						$this->common->debug_var_dump($dirname);
-
-						if (!$dirname) {
-							// エラー処理
-							throw new \Exception('Publish dirname create failed.');
-						}
-					} else {
-
-						$status = define::PUBLISH_STATUS_SKIP;
-					}
 
 					//============================================================
 					// 公開処理結果テーブルの登録処理
@@ -187,7 +161,7 @@ class cron
 						tsOutput::TS_OUTPUT_PUBLISH_TYPE 	=> define::PUBLISH_TYPE_RESERVE,
 						tsOutput::TS_OUTPUT_STATUS 			=> $status,
 						tsOutput::TS_OUTPUT_SRV_BK_DIFF_FLG => null,
-						tsOutput::TS_OUTPUT_START 			=> $start_datetime,
+						tsOutput::TS_OUTPUT_START 			=> $set_start_datetime,
 						tsOutput::TS_OUTPUT_END 			=> null,
 						tsOutput::TS_OUTPUT_GEN_DELETE_FLG 	=> define::DELETE_FLG_OFF,
 						tsOutput::TS_OUTPUT_GEN_DELETE 		=> null,
@@ -200,12 +174,38 @@ class cron
 					// 公開処理結果テーブルの登録（インサートしたシーケンスIDをリターン値で取得）
 					$insert_id = $this->tsOutput->insert_ts_output($this->dbh, $dataArray);
 
+					if ($cnt == 1) {
+
+						$dirname = $this->common->format_gmt_datetime($data[tsReserve::RESERVE_ENTITY_RESERVE_GMT], define::DATETIME_FORMAT_SAVE);
+
+						if (!$dirname) {
+							// エラー処理
+							throw new \Exception('Dirname create failed.');
+						} else {
+							$dirname .= define::DIR_NAME_RESERVE;
+						}
+
+						$output_id = $insert_id;
+
+						$this->common->debug_echo('　□ 公開ディレクトリ名');
+						$this->common->debug_var_dump($dirname);
+
+						if (!$dirname) {
+							// エラー処理
+							throw new \Exception('Publish dirname create failed.');
+						}
+
+						// 以降のループはスキップデータなので値を変更
+						$status = define::PUBLISH_STATUS_SKIP;
+						$set_start_datetime = null;
+					}
+
 					//============================================================
 					// 公開予約テーブルのステータス更新処理
 					//============================================================
 					
 					// 公開予約テーブルのステータス更新処理
-					$insert_id = $this->tsReserve->update_ts_reserve_status($this->dbh, $data[tsReserve::RESERVE_ENTITY_ID_SEQ]);
+					$this->tsReserve->update_ts_reserve_status($this->dbh, $data[tsReserve::RESERVE_ENTITY_ID_SEQ]);
 				
 					$cnt++;
 				}
@@ -248,7 +248,7 @@ class cron
 				// GMTの現在日時
 				$backup_datetime = $this->common->get_current_datetime_of_gmt();
 
-				$this->tsBackup->insert_ts_backup($this->dbh, $this->options, $backup_datetime, $insert_id);
+				$this->tsBackup->insert_ts_backup($this->dbh, $this->options, $backup_datetime, $output_id);
 
 
 				//============================================================
@@ -300,7 +300,7 @@ class cron
 					tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> $this->options->user_id
 				);
 
-		 		$this->tsOutput->update_ts_output($this->dbh, $insert_id, $dataArray);
+		 		$this->tsOutput->update_ts_output($this->dbh, $output_id, $dataArray);
 
 				//============================================================
 				// ※公開処理※
@@ -342,7 +342,7 @@ class cron
 				tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> $this->options->user_id
 			);
 
-	 		$this->tsOutput->update_ts_output($this->dbh, $insert_id, $dataArray);
+	 		$this->tsOutput->update_ts_output($this->dbh, $output_id, $dataArray);
 
 			$this->common->debug_echo('■ immediate_publish error end');
 
