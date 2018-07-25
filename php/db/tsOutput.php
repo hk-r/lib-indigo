@@ -120,8 +120,8 @@ class tsOutput
 		. self::TS_OUTPUT_SRV_BK_DIFF_FLG . ","
 		. self::TS_OUTPUT_START . ","
 		. self::TS_OUTPUT_END . ","
-		. self::TS_OUTPUT_DELETE_FLG . ","
-		. self::TS_OUTPUT_DELETE . ","
+		. self::TS_OUTPUT_GEN_DELETE_FLG . ","
+		. self::TS_OUTPUT_GEN_DELETE . ","
 		. self::TS_OUTPUT_INSERT_DATETIME . ","
 		. self::TS_OUTPUT_INSERT_USER_ID . ","
 		. self::TS_OUTPUT_UPDATE_DATETIME . ","
@@ -140,8 +140,8 @@ class tsOutput
 		 ":" . self::TS_OUTPUT_SRV_BK_DIFF_FLG . "," .
 		 ":" . self::TS_OUTPUT_START . "," .
 		 ":" . self::TS_OUTPUT_END . "," .
-		 ":" . self::TS_OUTPUT_DELETE_FLG . "," .
-		 ":" . self::TS_OUTPUT_DELETE . "," .
+		 ":" . self::TS_OUTPUT_GEN_DELETE_FLG . "," .
+		 ":" . self::TS_OUTPUT_GEN_DELETE . "," .
 		 ":" . self::TS_OUTPUT_INSERT_DATETIME . "," .
 		 ":" . self::TS_OUTPUT_INSERT_USER_ID . "," .
 		 ":" . self::TS_OUTPUT_UPDATE_DATETIME . "," .
@@ -166,8 +166,8 @@ class tsOutput
 			":" . self::TS_OUTPUT_SRV_BK_DIFF_FLG 	=> $dataArray[self::TS_OUTPUT_SRV_BK_DIFF_FLG],
 			":" . self::TS_OUTPUT_START 			=> $dataArray[self::TS_OUTPUT_START],
 			":" . self::TS_OUTPUT_END 				=> $dataArray[self::TS_OUTPUT_END],
-			":" . self::TS_OUTPUT_DELETE_FLG 		=> $dataArray[self::TS_OUTPUT_DELETE_FLG],
-			":" . self::TS_OUTPUT_DELETE 			=> $dataArray[self::TS_OUTPUT_DELETE],
+			":" . self::TS_OUTPUT_GEN_DELETE_FLG 	=> $dataArray[self::TS_OUTPUT_GEN_DELETE_FLG],
+			":" . self::TS_OUTPUT_GEN_DELETE 		=> $dataArray[self::TS_OUTPUT_GEN_DELETE],
 			":" . self::TS_OUTPUT_INSERT_DATETIME	=> $now,
 			":" . self::TS_OUTPUT_INSERT_USER_ID	=> $dataArray[self::TS_OUTPUT_INSERT_USER_ID],
 			":" . self::TS_OUTPUT_UPDATE_DATETIME	=> null,
