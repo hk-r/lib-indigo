@@ -9,7 +9,6 @@ class backupScreen
 	private $check;
 	private $tsBackup;
 	private $tsOutput;
-	private $fileManager;
 	private $publish;
 	private $common;
 
@@ -35,7 +34,6 @@ class backupScreen
 		$this->check = new check($this);
 		$this->tsBackup = new tsBackup($this);
 		$this->tsOutput = new tsOutput($this);
-		$this->fileManager = new fileManager($this);
 		$this->publish = new publish($this);
 		$this->common = new common($this);
 
@@ -86,9 +84,9 @@ class backupScreen
 			
 			$ret .= '<tr>'
 				. '<td class="p-center"><input type="radio" name="target" value="' . $array[tsBackup::BACKUP_ENTITY_ID_SEQ] . '"/></td>'
-				. '<td class="p-center">' . $array[tsBackup::BACKUP_ENTITY_DATETIME_DISPLAY] . '</td>'
+				. '<td class="p-center">' . $array[tsBackup::BACKUP_ENTITY_DATETIME_DISP] . '</td>'
 				. '<td class="p-center">' . $array[tsBackup::BACKUP_ENTITY_PUBLISH_TYPE] . '</td>'
-				. '<td class="p-center">' . $array[tsBackup::BACKUP_ENTITY_RESERVE_DISPLAY] . '</td>'
+				. '<td class="p-center">' . $array[tsBackup::BACKUP_ENTITY_RESERVE_DISP] . '</td>'
 				. '<td class="p-center">' . $array[tsBackup::BACKUP_ENTITY_BRANCH] . '</td>'
 				. '<td class="p-center">' . $array[tsBackup::BACKUP_ENTITY_COMMIT_HASH] . '</td>'
 				. '<td class="p-center">' . $array[tsBackup::BACKUP_ENTITY_COMMENT] . '</td>'
@@ -149,25 +147,23 @@ class backupScreen
 			$now = $this->common->get_current_datetime_of_gmt();
 
 			$dataArray = array(
-				tsOutput::TS_OUTPUT_RESERVE_ID => null,
-				tsOutput::TS_OUTPUT_BACKUP_ID => null,
-				tsOutput::TS_OUTPUT_RESERVE => null,
-				tsOutput::TS_OUTPUT_BRANCH => null,
-				tsOutput::TS_OUTPUT_COMMIT_HASH => null,
-				tsOutput::TS_OUTPUT_COMMENT => null,
-				tsOutput::TS_OUTPUT_PUBLISH_TYPE => define::PUBLISH_TYPE_RESTORE,
-				tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_RUNNING,
-				tsOutput::TS_OUTPUT_DIFF_FLG1 => null,
-				tsOutput::TS_OUTPUT_DIFF_FLG2 => null,
-				tsOutput::TS_OUTPUT_DIFF_FLG3 => null,
-				tsOutput::TS_OUTPUT_START => $start_datetime,
-				tsOutput::TS_OUTPUT_END => null,
-				tsOutput::TS_OUTPUT_DELETE_FLG => define::DELETE_FLG_OFF,
-				tsOutput::TS_OUTPUT_DELETE => null,
+				tsOutput::TS_OUTPUT_RESERVE_ID 		=> null,
+				tsOutput::TS_OUTPUT_BACKUP_ID 		=> null,
+				tsOutput::TS_OUTPUT_RESERVE 		=> null,
+				tsOutput::TS_OUTPUT_BRANCH 			=> null,
+				tsOutput::TS_OUTPUT_COMMIT_HASH 	=> null,
+				tsOutput::TS_OUTPUT_COMMENT 		=> null,
+				tsOutput::TS_OUTPUT_PUBLISH_TYPE 	=> define::PUBLISH_TYPE_RESTORE,
+				tsOutput::TS_OUTPUT_STATUS 			=> define::PUBLISH_STATUS_RUNNING,
+				tsOutput::TS_OUTPUT_SRV_BK_DIFF_FLG => null,
+				tsOutput::TS_OUTPUT_START 			=> $start_datetime,
+				tsOutput::TS_OUTPUT_END 			=> null,
+				tsOutput::TS_OUTPUT_GEN_DELETE_FLG 	=> define::DELETE_FLG_OFF,
+				tsOutput::TS_OUTPUT_GEN_DELETE 		=> null,
 				tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
-				tsOutput::TS_OUTPUT_INSERT_USER_ID => $this->main->options->user_id,
+				tsOutput::TS_OUTPUT_INSERT_USER_ID 	=> $this->main->options->user_id,
 				tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
-				tsOutput::TS_OUTPUT_UPDATE_USER_ID => null
+				tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> null
 			);
 
 			// 公開処理結果テーブルの登録（インサートしたシーケンスIDをリターン値で取得）
@@ -268,12 +264,10 @@ class backupScreen
 				$end_datetime = $this->common->get_current_datetime_of_gmt();
 
 				$dataArray = array(
-					tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_SUCCESS,
-					tsOutput::TS_OUTPUT_DIFF_FLG1 => "0",
-					tsOutput::TS_OUTPUT_DIFF_FLG2 => "0",
-					tsOutput::TS_OUTPUT_DIFF_FLG3 => "0",
-					tsOutput::TS_OUTPUT_END => $end_datetime,
-					tsOutput::TS_OUTPUT_UPDATE_USER_ID => $this->main->options->user_id
+					tsOutput::TS_OUTPUT_STATUS 			=> define::PUBLISH_STATUS_SUCCESS,
+					tsOutput::TS_OUTPUT_SRV_BK_DIFF_FLG => "0",
+					tsOutput::TS_OUTPUT_END 			=> $end_datetime,
+					tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> $this->main->options->user_id
 				);
 
 		 		$this->tsOutput->update_ts_output($this->main->dbh, $insert_id, $dataArray);
@@ -313,12 +307,10 @@ class backupScreen
 			$end_datetime = $this->common->get_current_datetime_of_gmt();
 
 			$dataArray = array(
-				tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_FAILED,
-				tsOutput::TS_OUTPUT_DIFF_FLG1 => "0",
-				tsOutput::TS_OUTPUT_DIFF_FLG2 => "0",
-				tsOutput::TS_OUTPUT_DIFF_FLG3 => "0",
-				tsOutput::TS_OUTPUT_END => $end_datetime,
-				tsOutput::TS_OUTPUT_UPDATE_USER_ID => $this->options->user_id
+				tsOutput::TS_OUTPUT_STATUS 			=> define::PUBLISH_STATUS_FAILED,
+				tsOutput::TS_OUTPUT_SRV_BK_DIFF_FLG => "0",
+				tsOutput::TS_OUTPUT_END 			=> $end_datetime,
+				tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> $this->options->user_id
 			);
 
 	 		$this->tsOutput->update_ts_output($this->main->dbh, $insert_id, $dataArray);

@@ -6,29 +6,7 @@ class publish
 {
 	private $main;
 
-	private $tsBackup;
-	private $fileManager;
-	private $pdoManager;
 	private $common;
-
-	/**
-	 * PDOインスタンス
-	 */
-	private $dbh;
-
-	/**
-	 * 公開用の操作ディレクトリパス定義
-	 */
-	// backupディレクトリパス
-	const PATH_BACKUP = '/backup/';
-	// waitingディレクトリパス
-	const PATH_WAITING = '/waiting/';
-	// runnningディレクトリパス
-	const PATH_RUNNING = '/running/';
-	// releasedディレクトリパス
-	const PATH_RELEASED = '/released/';
-	// logディレクトリパス
-	const PATH_LOG = '/log/';
 
 	/**
 	 * コンストラクタ
@@ -37,10 +15,6 @@ class publish
 	public function __construct($main) {
 
 		$this->main = $main;
-
-		$this->tsBackup = new tsBackup($this);
-		$this->fileManager = new fileManager($this);
-		$this->pdoManager = new pdoManager($this);
 		$this->common = new common($this);
 	}
 

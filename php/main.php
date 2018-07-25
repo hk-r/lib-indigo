@@ -5,24 +5,17 @@ namespace indigo;
 class main
 {
 	public $options;
-	private $gitManager;
-	private $fileManager;
-	private $pdoManager;
-	private $initScreen;
-	private $historyScreen;
-	private $backupScreen;
-	private $common;
 
+	/**
+	 * オブジェクト
+	 * @access private
+	 */
+	private $gitMgr, $pdoMgr, $initScn, $historyScn, $backupScn, $common;
 
 	/**
 	 * PDOインスタンス
 	 */
 	public $dbh;
-
-	/**
-	 * コミットハッシュ値
-	 */
-	public $commit_hash = '';
 
 	/**
 	 * コンストラクタ
@@ -31,14 +24,12 @@ class main
 	public function __construct($options) {
 
 		$this->options = json_decode(json_encode($options));
-		$this->gitManager = new gitManager($this);
-		$this->fileManager = new fileManager($this);
-		$this->pdoManager = new pdoManager($this);
-		$this->initScreen = new initScreen($this);
-		$this->historyScreen = new historyScreen($this);
-		$this->backupScreen = new backupScreen($this);
+		$this->gitMgr = new gitManager($this);
+		$this->pdoMgr = new pdoManager($this);
+		$this->initScn = new initScreen($this);
+		$this->historyScn = new historyScreen($this);
+		$this->backupScn = new backupScreen($this);
 		$this->common = new common($this);
-
 	}
 
 	/**
@@ -51,7 +42,7 @@ class main
 		// 画面表示
 		$disp = '';  
 
-		// エラーダイアログ表示
+		// エラーメッセージ表示
 		$error_message = '';
 
 		// ダイアログの表示
@@ -82,13 +73,13 @@ class main
 			//============================================================
 			// データベース接続
 			//============================================================
-			$this->dbh = $this->pdoManager->connect();
+			$this->dbh = $this->pdoMgr->connect();
 
 
 			//============================================================
 			// テーブル作成（既にある場合は作成しない）
 			//============================================================
-			$this->pdoManager->create_table();
+			$this->pdoMgr->create_table();
 
 
 			//============================================================
@@ -100,7 +91,7 @@ class main
 			//============================================================
 			// Gitのmaster情報取得
 			//============================================================
-			$this->gitManager->get_git_master($this->options);
+			$this->gitMgr->get_git_master($this->options);
 			
 
 			//============================================================
@@ -109,22 +100,22 @@ class main
 			if (isset($this->options->_POST->add)) {
 				// 初期表示画面の「新規」ボタン押下
 				
-				$result = json_decode($this->initScreen->do_disp_add_dialog());
+				$result = json_decode($this->initScn->do_disp_add_dialog());
 
 			} elseif (isset($this->options->_POST->add_check)) {
 				// 新規ダイアログの「確認」ボタン押下
 				
-				$result = json_decode($this->initScreen->do_check_add());
+				$result = json_decode($this->initScn->do_check_add());
 				
 			} elseif (isset($this->options->_POST->add_confirm)) {
 				// 新規確認ダイアログの「確定」ボタン押下
-				$this->common->debug_echo('★確定ボタン');
-				$result = json_decode($this->initScreen->do_confirm_add());	
+				
+				$result = json_decode($this->initScn->do_confirm_add());	
 
 			} elseif (isset($this->options->_POST->add_back)) {
 				// 新規確認ダイアログの「戻る」ボタン押下
 
-				$result = json_decode($this->initScreen->do_back_add_dialog());
+				$result = json_decode($this->initScn->do_back_add_dialog());
 
 			//============================================================
 			// 変更関連処理
@@ -132,23 +123,23 @@ class main
 			} elseif (isset($this->options->_POST->update)) {
 				// 初期表示画面の「変更」ボタン押下
 				
-				$result = json_decode($this->initScreen->do_disp_update_dialog());
+				$result = json_decode($this->initScn->do_disp_update_dialog());
 
 
 			} elseif (isset($this->options->_POST->update_check)) {
 			// 変更ダイアログの「確認」ボタン押下
 				
-				$result = json_decode($this->initScreen->do_check_update());
+				$result = json_decode($this->initScn->do_check_update());
 
 			} elseif (isset($this->options->_POST->update_confirm)) {
 				// 変更確認ダイアログの「確定」ボタン押下
 				
-				$result = json_decode($this->initScreen->do_confirm_update());	
+				$result = json_decode($this->initScn->do_confirm_update());	
 
 			} elseif (isset($this->options->_POST->update_back)) {
 				// 変更確認ダイアログの「戻る」ボタン押下	
 
-				$result = json_decode($this->initScreen->do_back_update_dialog());
+				$result = json_decode($this->initScn->do_back_update_dialog());
 
 
 			//============================================================
@@ -158,7 +149,7 @@ class main
 				// 初期表示画面の「削除」ボタン押下				
 
 				// Gitファイルの削除
-				$result = json_decode($this->initScreen->do_delete());
+				$result = json_decode($this->initScn->do_delete());
 
 
 			//============================================================
@@ -168,7 +159,7 @@ class main
 				// バックアップ一覧画面の「復元ボタン押下				
 
 				// Gitファイルの削除
-				$result = json_decode($this->backupScreen->do_restore_publish());
+				$result = json_decode($this->backupScn->do_restore_publish());
 
 
 			//============================================================
@@ -177,28 +168,28 @@ class main
 			} elseif (isset($this->options->_POST->immediate)) {
 				// 初期表示画面の「即時公開」ボタン押下				
 
-				$result = json_decode($this->initScreen->do_disp_immediate_dialog());
+				$result = json_decode($this->initScn->do_disp_immediate_dialog());
 
 			} elseif (isset($this->options->_POST->immediate_check)) {
 				// 即時公開ダイアログの「確認」ボタン押下
 
-				$result = json_decode($this->initScreen->do_check_immediate());
+				$result = json_decode($this->initScn->do_check_immediate());
 
 			} elseif (isset($this->options->_POST->immediate_confirm)) {
 				// 即時公開確認ダイアログの「確定」ボタン押下	
 				
-				$result = json_decode($this->initScreen->do_immediate_publish());
+				$result = json_decode($this->initScn->do_immediate_publish());
 
 				if ( !$result->status ) {
 					// 処理失敗の場合、復元処理
 					$error_message = $result->message . " ";
-					$result = json_decode($this->initScreen->do_restore_publish_failure($result->output_id));
+					$result = json_decode($this->initScn->do_restore_publish_failure($result->output_id));
 				}
 
 			} elseif (isset($this->options->_POST->immediate_back)) {
 				// 即時公開確認ダイアログの「戻る」ボタン押下			
 
-				$result = json_decode($this->initScreen->do_back_immediate_dialog());
+				$result = json_decode($this->initScn->do_back_immediate_dialog());
 			}
 
 			if ( !$result->status ) {
@@ -226,17 +217,17 @@ class main
 			if (isset($this->options->_POST->history)) {
 				// 初期表示画面の「履歴」ボタン押下
 
-				$disp = $this->historyScreen->disp_history_screen();
+				$disp = $this->historyScn->disp_history_screen();
 
 			} elseif (isset($this->options->_POST->backup)) {
 				// 初期表示画面の「バックアップ一覧」ボタン押下
 
-				$disp = $this->backupScreen->disp_backup_screen();
+				$disp = $this->backupScn->disp_backup_screen();
 				
 			} else {
 				// 初期表示画面の表示
 
-				$disp = $this->initScreen->do_disp_init_screen();
+				$disp = $this->initScn->do_disp_init_screen();
 
 			}
 
@@ -253,7 +244,7 @@ class main
 			</script>';
 
 			// データベース接続を閉じる
-			$this->pdoManager->close($this->dbh);
+			$this->pdoMgr->close($this->dbh);
 
 			$this->common->debug_echo('■ run error end');
 
@@ -261,7 +252,7 @@ class main
 		}
 		
 		// データベース接続を閉じる
-		$this->pdoManager->close();
+		$this->pdoMgr->close();
 
 		// $this->common->debug_echo('■ run end');
 
@@ -313,6 +304,5 @@ class main
 
 		return $ret;
 	}
-
 
 }

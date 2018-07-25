@@ -71,15 +71,16 @@ class historyScreen
 		foreach ((array)$data_list as $array) {
 			
 			$ret .= '<tr>'
-				. '<td class="p-center"><input type="radio" name="target" value="' . $array[tsOutput::OUTPUT_ENTITY_ID_SEQ] . '"/></td>'
+				. '<td class="p-center">
+				  <input type="radio" name="target" value="' . $array[tsOutput::OUTPUT_ENTITY_ID_SEQ] . '"/></td>'
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_STATUS] . '</td>'
-				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_TYPE] . '</td>'
-				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_RESERVE_DISPLAY] . '</td>'
+				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_PUBLISH_TYPE] . '</td>'
+				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_RESERVE_DISP] . '</td>'
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_COMMIT_HASH] . '</td>'
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_BRANCH] . '</td>'
-				. '<td>' . $array[tsOutput::OUTPUT_ENTITY_COMMENT] . '</td>'
-				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_START_DISPLAY] . '</td>'
-				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_END_DISPLAY] . '</td>'
+				. '<td>' 				  . $array[tsOutput::OUTPUT_ENTITY_COMMENT] . '</td>'
+				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_START_DISP] . '</td>'
+				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_END_DISP] . '</td>'
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_INSERT_USER_ID] . '</td>'
 				. '</tr>';
 		}

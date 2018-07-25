@@ -7,7 +7,7 @@ class pdoManager
 
 	private $main;
 
-	private $fileManager;
+	private $fs;
 	private $common;
 
 	// DBディレクトリパス
@@ -23,8 +23,14 @@ class pdoManager
 	public function __construct ($main){
 
 		$this->main = $main;
-		$this->fileManager = new fileManager($this);
+		// $this->fs = new fs($this);
 		$this->common = new common($this);
+		
+		$this->fs = new \tomk79\filesystem(array(
+		  'file_default_permission' => define::FILE_DEFAULT_PERMISSION,
+		  'dir_default_permission' => define::DIR_DEFAULT_PERMISSION,
+		  'filesystem_encoding' => define::FILESYSTEM_ENCODING
+		));
 	}
 
 
@@ -78,7 +84,7 @@ class pdoManager
 			 * sqliteの場合 
 			 */
 			// dbディレクトリの絶対パス
-			$db_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . self::SQLITE_DB_PATH));
+			$db_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->indigo_workdir_path . self::SQLITE_DB_PATH));
 
 			$this->common->debug_echo('　□ db_real_path：' . $db_real_path);
 
@@ -159,16 +165,17 @@ class pdoManager
 		// 公開予約テーブル作成
 		//============================================================
 		$create_sql = 'CREATE TABLE IF NOT EXISTS TS_RESERVE ('
-			  . tsReserve::TS_RESERVE_ID_SEQ . ' INTEGER PRIMARY KEY AUTOINCREMENT,
-			' . tsReserve::TS_RESERVE_RESERVE . ' TEXT,
-			' . tsReserve::TS_RESERVE_BRANCH . ' TEXT,
-			' . tsReserve::TS_RESERVE_COMMIT_HASH . ' TEXT,
-			' . tsReserve::TS_RESERVE_COMMENT . ' TEXT,
-			' . tsReserve::TS_RESERVE_DELETE_FLG . ' TEXT,			
-			' . tsReserve::TS_RESERVE_INSERT_DATETIME . ' TEXT,
-			' . tsReserve::TS_RESERVE_INSERT_USER_ID . ' TEXT,
-			' . tsReserve::TS_RESERVE_UPDATE_DATETIME . ' TEXT,
-			' . tsReserve::TS_RESERVE_UPDATE_USER_ID . ' TEXT
+			  . tsReserve::TS_RESERVE_ID_SEQ		. ' INTEGER PRIMARY KEY AUTOINCREMENT,
+			' . tsReserve::TS_RESERVE_RESERVE		. ' TEXT,
+			' . tsReserve::TS_RESERVE_BRANCH		. ' TEXT,
+			' . tsReserve::TS_RESERVE_COMMIT_HASH	. ' TEXT,
+			' . tsReserve::TS_RESERVE_COMMENT 		. ' TEXT,
+			' . tsReserve::TS_RESERVE_STATUS 		. ' TEXT,			
+			' . tsReserve::TS_RESERVE_DELETE_FLG	. ' TEXT,			
+			' . tsReserve::TS_RESERVE_INSERT_DATETIME	. ' TEXT,
+			' . tsReserve::TS_RESERVE_INSERT_USER_ID	. ' TEXT,
+			' . tsReserve::TS_RESERVE_UPDATE_DATETIME	. ' TEXT,
+			' . tsReserve::TS_RESERVE_UPDATE_USER_ID	. ' TEXT
 		)';
 
 		// SQL実行
@@ -179,32 +186,30 @@ class pdoManager
 			throw new \Exception($this->main->dbh->errorInfo());
 		}
 
-		// $this->common->debug_echo('　□ 公開予約テーブル作成完了');
+		$this->common->debug_echo('　□ 公開予約テーブル作成完了');
 
 		//============================================================
 		// 公開処理結果テーブル作成
 		//============================================================
 		$create_sql = 'CREATE TABLE IF NOT EXISTS TS_OUTPUT ('
-			  . tsOutput::TS_OUTPUT_ID_SEQ . ' INTEGER PRIMARY KEY AUTOINCREMENT,
-			' . tsOutput::TS_OUTPUT_RESERVE_ID . ' INTEGER,
-			' . tsOutput::TS_OUTPUT_BACKUP_ID . ' INTEGER,
-			' . tsOutput::TS_OUTPUT_RESERVE . ' TEXT,
-			' . tsOutput::TS_OUTPUT_BRANCH . ' TEXT,
-			' . tsOutput::TS_OUTPUT_COMMIT_HASH . ' TEXT,
-			' . tsOutput::TS_OUTPUT_COMMENT . ' TEXT,
-			' . tsOutput::TS_OUTPUT_PUBLISH_TYPE . ' TEXT,
-			' . tsOutput::TS_OUTPUT_STATUS . ' TEXT,
-			' . tsOutput::TS_OUTPUT_DIFF_FLG1 . ' TEXT,
-			' . tsOutput::TS_OUTPUT_DIFF_FLG2 . ' TEXT,
-			' . tsOutput::TS_OUTPUT_DIFF_FLG3 . ' TEXT,
-			' . tsOutput::TS_OUTPUT_START . ' TEXT,
-			' . tsOutput::TS_OUTPUT_END . ' TEXT,
-			' . tsOutput::TS_OUTPUT_DELETE_FLG . ' TEXT,
-			' . tsOutput::TS_OUTPUT_DELETE . ' TEXT,
+			  . tsOutput::TS_OUTPUT_ID_SEQ		 . ' INTEGER PRIMARY KEY AUTOINCREMENT,
+			' . tsOutput::TS_OUTPUT_RESERVE_ID 		. ' INTEGER,
+			' . tsOutput::TS_OUTPUT_BACKUP_ID 		. ' INTEGER,
+			' . tsOutput::TS_OUTPUT_RESERVE 		. ' TEXT,
+			' . tsOutput::TS_OUTPUT_BRANCH 			. ' TEXT,
+			' . tsOutput::TS_OUTPUT_COMMIT_HASH 	. ' TEXT,
+			' . tsOutput::TS_OUTPUT_COMMENT 		. ' TEXT,
+			' . tsOutput::TS_OUTPUT_PUBLISH_TYPE 	. ' TEXT,
+			' . tsOutput::TS_OUTPUT_STATUS 			. ' TEXT,
+			' . tsOutput::TS_OUTPUT_SRV_BK_DIFF_FLG	. ' TEXT,
+			' . tsOutput::TS_OUTPUT_START 			. ' TEXT,
+			' . tsOutput::TS_OUTPUT_END 			. ' TEXT,
+			' . tsOutput::TS_OUTPUT_GEN_DELETE_FLG	. ' TEXT,
+			' . tsOutput::TS_OUTPUT_GEN_DELETE		. ' TEXT,
 			' . tsOutput::TS_OUTPUT_INSERT_DATETIME . ' TEXT,
-			' . tsOutput::TS_OUTPUT_INSERT_USER_ID . ' TEXT,
+			' . tsOutput::TS_OUTPUT_INSERT_USER_ID 	. ' TEXT,
 			' . tsOutput::TS_OUTPUT_UPDATE_DATETIME . ' TEXT,
-			' . tsOutput::TS_OUTPUT_UPDATE_USER_ID . ' TEXT
+			' . tsOutput::TS_OUTPUT_UPDATE_USER_ID 	. ' TEXT
 		)';
 
 		// SQL実行
@@ -215,21 +220,21 @@ class pdoManager
 			throw new \Exception($this->main->dbh->errorInfo());
 		}
 
-		// $this->common->debug_echo('　□ 公開処理結果テーブル作成完了');
+		$this->common->debug_echo('　□ 公開処理結果テーブル作成完了');
 
 		//============================================================
 		// バックアップテーブル作成
 		//============================================================
-		$create_sql = 'CREATE TABLE IF NOT EXISTS TS_BACKUP (
-			backup_id_seq INTEGER PRIMARY KEY AUTOINCREMENT,
-			output_id INTEGER,
-			backup_datetime TEXT,
-			gen_delete_flg TEXT,
-			gen_delete_datetime TEXT,
-			insert_datetime TEXT,
-			insert_user_id TEXT,
-			update_datetime TEXT,
-			update_user_id TEXT
+		$create_sql = 'CREATE TABLE IF NOT EXISTS TS_BACKUP ('
+			  . tsBackup::TS_BACKUP_ID_SEQ				. ' INTEGER PRIMARY KEY AUTOINCREMENT,
+			' . tsBackup::TS_BACKUP_OUTPUT_ID			. ' INTEGER,
+			' . tsBackup::TS_BACKUP_DATETIME			. ' TEXT,
+			' . tsBackup::TS_BACKUP_GEN_DELETE_FLG		. ' TEXT,
+			' . tsBackup::TS_BACKUP_GEN_DELETE_DATETIME	. ' TEXT,
+			' . tsBackup::TS_BACKUP_INSERT_DATETIME		. ' TEXT,			
+			' . tsBackup::TS_BACKUP_INSERT_USER_ID		. ' TEXT,			
+			' . tsBackup::TS_BACKUP_UPDATE_DATETIME		. ' TEXT,
+			' . tsBackup::TS_BACKUP_UPDATE_USER_ID		. ' TEXT
 		)';
 
 		// SQL実行
@@ -240,7 +245,7 @@ class pdoManager
 			throw new \Exception($this->main->dbh->errorInfo());
 		}
 
-		// $this->common->debug_echo('　□ バックアップテーブル作成完了');
+		$this->common->debug_echo('　□ バックアップテーブル作成完了');
 
 		$this->common->debug_echo('■ create_table end');
 

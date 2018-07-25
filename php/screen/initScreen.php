@@ -10,8 +10,8 @@ class initScreen
 	private $tsOutput;
 	private $tsBackup;
 
-	private $fileManager;
-	private $gitManager;
+	private $fs;
+	private $gitMgr;
 
 	private $check;
 	private $publish;
@@ -69,11 +69,17 @@ class initScreen
 		$this->tsReserve = new tsReserve($this);
 		$this->tsOutput = new tsOutput($this);
 		$this->tsBackup = new tsBackup($this);
-		$this->fileManager = new fileManager($this);
-		$this->gitManager = new gitManager($this);
+		// $this->fs = new fs($this);
+		$this->gitMgr = new gitManager($this);
 		$this->check = new check($this);
 		$this->publish = new publish($this);
 		$this->common = new common($this);
+
+		$this->fs = new \tomk79\filesystem(array(
+		  'file_default_permission' => define::FILE_DEFAULT_PERMISSION,
+		  'dir_default_permission' => define::DIR_DEFAULT_PERMISSION,
+		  'filesystem_encoding' => define::FILESYSTEM_ENCODING
+		));
 	}
 
 	/**
@@ -154,7 +160,7 @@ class initScreen
 			
 			$ret .= '<tr>'
 				. '<td class="p-center"><input type="radio" name="target" value="' . $array[tsReserve::RESERVE_ENTITY_ID_SEQ] . '"/></td>'
-				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_RESERVE_DISPLAY] . '</td>'
+				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_RESERVE_DISP] . '</td>'
 				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_COMMIT_HASH] . '</td>'
 				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_BRANCH] . '</td>'
 				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_COMMENT] . '</td>'
@@ -522,7 +528,7 @@ class initScreen
 	 		$this->common->debug_echo('　□ -----Gitのファイルコピー処理-----');
 			
 			// waitingディレクトリの絶対パスを取得。
-			$waiting_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_WAITING));
+			$waiting_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->indigo_workdir_path . define::PATH_WAITING));
 
 			// 公開予約ディレクトリ名の取得
 			$dirname = $this->common->format_gmt_datetime($this->main->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE);
@@ -535,7 +541,7 @@ class initScreen
 			}
 
 			// コピー処理
-			$this->gitManager->git_file_copy($this->main->options, $waiting_real_path, $dirname);
+			$this->gitMgr->git_file_copy($this->main->options, $waiting_real_path, $dirname);
 
 	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの登録処理-----');
 			
@@ -577,7 +583,7 @@ class initScreen
 		try {
 
 			// waitingディレクトリの絶対パスを取得。
-			$waiting_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_WAITING));
+			$waiting_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->indigo_workdir_path . define::PATH_WAITING));
 
 			//============================================================
 			// 「waiting」ディレクトリの変更前の公開ソースディレクトリを削除
@@ -596,7 +602,7 @@ class initScreen
 			$this->common->debug_echo($before_dirname);
 
 			// コピー処理
-			$this->gitManager->file_delete($waiting_real_path, $before_dirname);
+			$this->gitMgr->file_delete($waiting_real_path, $before_dirname);
 
 
 			//============================================================
@@ -616,7 +622,7 @@ class initScreen
 			$this->common->debug_echo($dirname);
 
 			// コピー処理
-			$this->gitManager->git_file_copy($this->main->options, $waiting_real_path, $dirname);
+			$this->gitMgr->git_file_copy($this->main->options, $waiting_real_path, $dirname);
 
 	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの更新処理-----');
 			
@@ -625,7 +631,7 @@ class initScreen
 			//============================================================
 			$selected_id =  $this->main->options->_POST->selected_id;
 
-			$this->tsReserve->update_reserve_table($this->main->dbh, $this->main->options, $selected_id);
+			$this->tsReserve->update_ts_reserve($this->main->dbh, $this->main->options, $selected_id);
 			
 		} catch (\Exception $e) {
 
@@ -662,7 +668,7 @@ class initScreen
 			$selected_id =  $this->main->options->_POST->selected_id;
 
 			// waitingディレクトリの絶対パスを取得。
-			$waiting_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_WAITING));
+			$waiting_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->indigo_workdir_path . define::PATH_WAITING));
 
 
 			try {
@@ -693,7 +699,7 @@ class initScreen
 				}
 				
 				// コピー処理
-				$this->gitManager->file_delete($waiting_real_path, $dirname);
+				$this->gitMgr->file_delete($waiting_real_path, $dirname);
 
 
 				/* 変更をコミットする */
@@ -759,25 +765,23 @@ class initScreen
 			$now = $this->common->get_current_datetime_of_gmt();
 
 			$dataArray = array(
-				tsOutput::TS_OUTPUT_RESERVE_ID => null,
-				tsOutput::TS_OUTPUT_BACKUP_ID => null,
-				tsOutput::TS_OUTPUT_RESERVE => null,
-				tsOutput::TS_OUTPUT_BRANCH => $this->main->options->_POST->branch_select_value,
-				tsOutput::TS_OUTPUT_COMMIT_HASH => $this->main->options->_POST->commit_hash,
-				tsOutput::TS_OUTPUT_COMMENT => $this->main->options->_POST->comment,
-				tsOutput::TS_OUTPUT_PUBLISH_TYPE => define::PUBLISH_TYPE_IMMEDIATE,
-				tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_RUNNING,
-				tsOutput::TS_OUTPUT_DIFF_FLG1 => null,
-				tsOutput::TS_OUTPUT_DIFF_FLG2 => null,
-				tsOutput::TS_OUTPUT_DIFF_FLG3 => null,
-				tsOutput::TS_OUTPUT_START => $start_datetime,
-				tsOutput::TS_OUTPUT_END => null,
-				tsOutput::TS_OUTPUT_DELETE_FLG => define::DELETE_FLG_OFF,
-				tsOutput::TS_OUTPUT_DELETE => null,
+				tsOutput::TS_OUTPUT_RESERVE_ID 		=> null,
+				tsOutput::TS_OUTPUT_BACKUP_ID		=> null,
+				tsOutput::TS_OUTPUT_RESERVE 		=> null,
+				tsOutput::TS_OUTPUT_BRANCH 			=> $this->main->options->_POST->branch_select_value,
+				tsOutput::TS_OUTPUT_COMMIT_HASH 	=> $this->main->options->_POST->commit_hash,
+				tsOutput::TS_OUTPUT_COMMENT 		=> $this->main->options->_POST->comment,
+				tsOutput::TS_OUTPUT_PUBLISH_TYPE 	=> define::PUBLISH_TYPE_IMMEDIATE,
+				tsOutput::TS_OUTPUT_STATUS 			=> define::PUBLISH_STATUS_RUNNING,
+				tsOutput::TS_OUTPUT_SRV_BK_DIFF_FLG => null,
+				tsOutput::TS_OUTPUT_START 			=> $start_datetime,
+				tsOutput::TS_OUTPUT_END 			=> null,
+				tsOutput::TS_OUTPUT_GEN_DELETE_FLG 	=> define::DELETE_FLG_OFF,
+				tsOutput::TS_OUTPUT_GEN_DELETE 		=> null,
 				tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
-				tsOutput::TS_OUTPUT_INSERT_USER_ID => $this->main->options->user_id,
+				tsOutput::TS_OUTPUT_INSERT_USER_ID 	=> $this->main->options->user_id,
 				tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
-				tsOutput::TS_OUTPUT_UPDATE_USER_ID => null
+				tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> null
 			);
 
 			// 公開処理結果テーブルの登録（インサートしたシーケンスIDをリターン値で取得）
@@ -795,7 +799,7 @@ class initScreen
 			$this->common->debug_echo('　□ 公開予約ディレクトリ：' . $dirname);
 
 			// Git情報のコピー処理
-			$this->gitManager->git_file_copy($this->main->options, $real_path->running_real_path, $dirname);
+			$this->gitMgr->git_file_copy($this->main->options, $real_path->running_real_path, $dirname);
 
 			try {
 
@@ -855,12 +859,10 @@ class initScreen
 				$end_datetime = $this->common->get_current_datetime_of_gmt();
 
 				$dataArray = array(
-					tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_SUCCESS,
-					tsOutput::TS_OUTPUT_DIFF_FLG1 => "0",
-					tsOutput::TS_OUTPUT_DIFF_FLG2 => "0",
-					tsOutput::TS_OUTPUT_DIFF_FLG3 => "0",
-					tsOutput::TS_OUTPUT_END => $end_datetime,
-					tsOutput::TS_OUTPUT_UPDATE_USER_ID => $this->main->options->user_id
+					tsOutput::TS_OUTPUT_STATUS 			=> define::PUBLISH_STATUS_SUCCESS,
+					tsOutput::TS_OUTPUT_SRV_BK_DIFF_FLG => "0",
+					tsOutput::TS_OUTPUT_END 			=> $end_datetime,
+					tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> $this->main->options->user_id
 				);
 
 		 		$this->tsOutput->update_ts_output($this->main->dbh, $result['output_id'], $dataArray);
@@ -903,12 +905,10 @@ class initScreen
 			// GMTの現在日時
 			$end_datetime = $this->common->get_current_datetime_of_gmt();
 			$dataArray = array(
-				tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_FAILED,
-				tsOutput::TS_OUTPUT_DIFF_FLG1 => "0",
-				tsOutput::TS_OUTPUT_DIFF_FLG2 => "0",
-				tsOutput::TS_OUTPUT_DIFF_FLG3 => "0",
-				tsOutput::TS_OUTPUT_END => $end_datetime,
-				tsOutput::TS_OUTPUT_UPDATE_USER_ID => $this->main->options->user_id
+				tsOutput::TS_OUTPUT_STATUS 			=> define::PUBLISH_STATUS_FAILED,
+				tsOutput::TS_OUTPUT_SRV_BK_DIFF_FLG => "0",
+				tsOutput::TS_OUTPUT_END 			=> $end_datetime,
+				tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> $this->main->options->user_id
 			);
 	 		$this->tsOutput->update_ts_output($this->main->dbh, $result['output_id'], $dataArray);
 
@@ -964,8 +964,8 @@ class initScreen
 				tsOutput::TS_OUTPUT_DIFF_FLG3 => null,
 				tsOutput::TS_OUTPUT_START => $start_datetime,
 				tsOutput::TS_OUTPUT_END => null,
-				tsOutput::TS_OUTPUT_DELETE_FLG => define::DELETE_FLG_OFF,
-				tsOutput::TS_OUTPUT_DELETE => null,
+				tsOutput::TS_OUTPUT_GEN_DELETE_FLG => define::DELETE_FLG_OFF,
+				tsOutput::TS_OUTPUT_GEN_DELETE => null,
 				tsOutput::TS_OUTPUT_INSERT_DATETIME => $start_datetime,
 				tsOutput::TS_OUTPUT_INSERT_USER_ID => $this->main->options->user_id,
 				tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
@@ -1158,7 +1158,7 @@ class initScreen
 		}
 
         // masterディレクトリの絶対パス
-        $master_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($this->main->options->indigo_workdir_path . define::PATH_MASTER));
+        $master_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->indigo_workdir_path . define::PATH_MASTER));
 
 		$ret .= '<form method="post">';
 
@@ -1173,7 +1173,7 @@ class initScreen
 			  . '<td><select id="branch_list" class="form-control" name="branch_select_value">';
 
 				// ブランチリストを取得
-				$get_branch_ret = json_decode($this->gitManager->get_branch_list($this->main->options));
+				$get_branch_ret = json_decode($this->gitMgr->get_branch_list($this->main->options));
 				$branch_list = $get_branch_ret->branch_list;
 
 				foreach ((array)$branch_list as $branch) {

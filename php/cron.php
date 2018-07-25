@@ -6,13 +6,11 @@ class cron
 {
 	public $options;
 
-	private $fileManager;
-	private $pdoManager;
-	private $tsReserve;
-	private $tsOutput;
-	private $tsBackup;
-	private $publish;
-	private $common;
+	/**
+	 * オブジェクト
+	 * @access private
+	 */
+	private $pdoMgr, $tsReserve, $tsOutput, $tsBackup, $publish, $common;
 
 
 	/**
@@ -29,8 +27,7 @@ class cron
 
 		$this->options = json_decode(json_encode($options));
 
-		$this->fileManager = new fileManager($this);
-		$this->pdoManager = new pdoManager($this);
+		$this->pdoMgr = new pdoMgr($this);
 		$this->tsReserve = new tsReserve($this);
 		$this->tsOutput = new tsOutput($this);
 		$this->tsBackup = new tsBackup($this);
@@ -57,7 +54,7 @@ class cron
 			//============================================================
 			// データベース接続
 			//============================================================
-			$this->dbh = $this->pdoManager->connect();
+			$this->dbh = $this->pdoMgr->connect();
 
 
 			//============================================================
@@ -76,7 +73,7 @@ class cron
 		} catch (\Exception $e) {
 
 			// データベース接続を閉じる
-			$this->pdoManager->close($this->dbh);
+			$this->pdoMgr->close($this->dbh);
 
 			echo '例外キャッチ：' . $e->getMessage() . "<br>";
 
@@ -84,7 +81,7 @@ class cron
 		}
 
 		// データベース接続を閉じる
-		$this->pdoManager->close();
+		$this->pdoMgr->close();
 
 		$this->common->debug_echo('■ [cron] run end');
 
@@ -130,68 +127,100 @@ class cron
 				return $result;
 			}
 
-			// TODO:ここで複数件取れてきた場合は、最新データ以外はスキップデータとして公開処理結果テーブルへ登録する
-			foreach ( (array) $data_list as $data ) {
+			$cnt = 1;
+			$status;
 
-				$this->common->debug_echo('　□ 公開取得データ[配列]');
-				$this->common->debug_var_dump($data);
+			try {
 
-				$dirname = $this->common->format_gmt_datetime($data[tsReserve::RESERVE_ENTITY_RESERVE_GMT], define::DATETIME_FORMAT_SAVE);
+				/* トランザクションを開始する。オートコミットがオフになる */
+				$this->dbh->beginTransaction();
 
-				if (!$dirname) {
-					// エラー処理
-					throw new \Exception('Dirname create failed.');
-				} else {
-					$dirname .= define::DIR_NAME_RESERVE;
+				// 複数件取れてきた場合は、最新データ以外はスキップデータとして公開処理結果テーブルへ登録する
+				foreach ( (array) $data_list as $data ) {
+
+					$this->common->debug_echo('　□ 公開取得データ[配列]');
+					$this->common->debug_var_dump($data);
+
+					if ($cnt == 1) {
+
+						$status = define::PUBLISH_STATUS_RUNNING;
+
+						$dirname = $this->common->format_gmt_datetime($data[tsReserve::RESERVE_ENTITY_RESERVE_GMT], define::DATETIME_FORMAT_SAVE);
+
+						if (!$dirname) {
+							// エラー処理
+							throw new \Exception('Dirname create failed.');
+						} else {
+							$dirname .= define::DIR_NAME_RESERVE;
+						}
+
+						// $publish_data = $data;
+
+						$this->common->debug_echo('　□ 公開ディレクトリ名');
+						$this->common->debug_var_dump($dirname);
+
+						if (!$dirname) {
+							// エラー処理
+							throw new \Exception('Publish dirname create failed.');
+						}
+					} else {
+
+						$status = define::PUBLISH_STATUS_SKIP;
+					}
+
+					//============================================================
+					// 公開処理結果テーブルの登録処理
+					//============================================================
+
+				 	$this->common->debug_echo('　□ -----[時限公開]公開処理結果テーブルの登録処理-----');
+
+					// 現在時刻
+					$now = $this->common->get_current_datetime_of_gmt();
+
+					$dataArray = array(
+						tsOutput::TS_OUTPUT_RESERVE_ID 		=> $data[tsReserve::RESERVE_ENTITY_ID_SEQ],
+						tsOutput::TS_OUTPUT_BACKUP_ID 		=> null,
+						tsOutput::TS_OUTPUT_RESERVE 		=> $data[tsReserve::RESERVE_ENTITY_RESERVE_GMT],
+						tsOutput::TS_OUTPUT_BRANCH 			=> $data[tsReserve::RESERVE_ENTITY_BRANCH],
+						tsOutput::TS_OUTPUT_COMMIT_HASH 	=> $data[tsReserve::RESERVE_ENTITY_COMMIT_HASH],
+						tsOutput::TS_OUTPUT_COMMENT 		=> $data[tsReserve::RESERVE_ENTITY_COMMENT],
+						tsOutput::TS_OUTPUT_PUBLISH_TYPE 	=> define::PUBLISH_TYPE_RESERVE,
+						tsOutput::TS_OUTPUT_STATUS 			=> $status,
+						tsOutput::TS_OUTPUT_SRV_BK_DIFF_FLG => null,
+						tsOutput::TS_OUTPUT_START 			=> $start_datetime,
+						tsOutput::TS_OUTPUT_END 			=> null,
+						tsOutput::TS_OUTPUT_GEN_DELETE_FLG 	=> define::DELETE_FLG_OFF,
+						tsOutput::TS_OUTPUT_GEN_DELETE 		=> null,
+						tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
+						tsOutput::TS_OUTPUT_INSERT_USER_ID 	=> $this->options->user_id,
+						tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
+						tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> null
+					);
+
+					// 公開処理結果テーブルの登録（インサートしたシーケンスIDをリターン値で取得）
+					$insert_id = $this->tsOutput->insert_ts_output($this->dbh, $dataArray);
+
+					//============================================================
+					// 公開予約テーブルのステータス更新処理
+					//============================================================
+					
+					// 公開予約テーブルのステータス更新処理
+					$insert_id = $this->tsReserve->update_ts_reserve_status($this->dbh, $data[tsReserve::RESERVE_ENTITY_ID_SEQ]);
+				
+					$cnt++;
 				}
 
-				$publish_data = $data;
+		 		/* 変更をコミットする */
+				$this->dbh->commit();
+				/* データベース接続はオートコミットモードに戻る */
 
-				$this->common->debug_echo('　□ 公開ディレクトリ名');
-				$this->common->debug_var_dump($dirname);
-			}
-
-			if (!$dirname) {
-				// エラー処理
-				throw new \Exception('Publish dirname create failed.');
-			}
-
-
-			//============================================================
-			// 公開処理結果テーブルの登録処理
-			//============================================================
-
-		 	$this->common->debug_echo('　□ -----[時限公開]公開処理結果テーブルの登録処理-----');
-
-			// 現在時刻
-			$now = $this->common->get_current_datetime_of_gmt();
-
-			$dataArray = array(
-				tsOutput::TS_OUTPUT_RESERVE_ID => $publish_data[tsReserve::RESERVE_ENTITY_ID_SEQ],
-				tsOutput::TS_OUTPUT_BACKUP_ID => null,
-				tsOutput::TS_OUTPUT_RESERVE => $publish_data[tsReserve::RESERVE_ENTITY_RESERVE_GMT],
-				tsOutput::TS_OUTPUT_BRANCH => $publish_data[tsReserve::RESERVE_ENTITY_BRANCH],
-				tsOutput::TS_OUTPUT_COMMIT_HASH => $publish_data[tsReserve::RESERVE_ENTITY_COMMIT_HASH],
-				tsOutput::TS_OUTPUT_COMMENT => $publish_data[tsReserve::RESERVE_ENTITY_COMMENT],
-				tsOutput::TS_OUTPUT_PUBLISH_TYPE => define::PUBLISH_TYPE_RESERVE,
-				tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_RUNNING,
-				tsOutput::TS_OUTPUT_DIFF_FLG1 => null,
-				tsOutput::TS_OUTPUT_DIFF_FLG2 => null,
-				tsOutput::TS_OUTPUT_DIFF_FLG3 => null,
-				tsOutput::TS_OUTPUT_START => $start_datetime,
-				tsOutput::TS_OUTPUT_END => null,
-				tsOutput::TS_OUTPUT_DELETE_FLG => define::DELETE_FLG_OFF,
-				tsOutput::TS_OUTPUT_DELETE => null,
-				tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
-				tsOutput::TS_OUTPUT_INSERT_USER_ID => $this->options->user_id,
-				tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
-				tsOutput::TS_OUTPUT_UPDATE_USER_ID => null
-			);
-
-
-			// 公開処理結果テーブルの登録（インサートしたシーケンスIDをリターン値で取得）
-			$insert_id = $this->tsOutput->insert_ts_output($this->dbh, $dataArray);
-
+		    } catch (\Exception $e) {
+		    
+		      /* 変更をロールバックする */
+		      $this->dbh->rollBack();
+		 
+		      throw $e;
+		    }
 
 			//============================================================
 			// 公開予約ディレクトリを「waiting」から「running」ディレクトリへ移動
@@ -265,12 +294,10 @@ class cron
 				$end_datetime = $this->common->get_current_datetime_of_gmt();
 
 				$dataArray = array(
-					tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_SUCCESS,
-					tsOutput::TS_OUTPUT_DIFF_FLG1 => "0",
-					tsOutput::TS_OUTPUT_DIFF_FLG2 => "0",
-					tsOutput::TS_OUTPUT_DIFF_FLG3 => "0",
-					tsOutput::TS_OUTPUT_END => $end_datetime,
-					tsOutput::TS_OUTPUT_UPDATE_USER_ID => $this->options->user_id
+					tsOutput::TS_OUTPUT_STATUS 			=> define::PUBLISH_STATUS_SUCCESS,
+					tsOutput::TS_OUTPUT_SRV_BK_DIFF_FLG => "0",
+					tsOutput::TS_OUTPUT_END 			=> $end_datetime,
+					tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> $this->options->user_id
 				);
 
 		 		$this->tsOutput->update_ts_output($this->dbh, $insert_id, $dataArray);
@@ -309,12 +336,10 @@ class cron
 			$end_datetime = $this->common->get_current_datetime_of_gmt();
 
 			$dataArray = array(
-				tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_FAILED,
-				tsOutput::TS_OUTPUT_DIFF_FLG1 => "0",
-				tsOutput::TS_OUTPUT_DIFF_FLG2 => "0",
-				tsOutput::TS_OUTPUT_DIFF_FLG3 => "0",
-				tsOutput::TS_OUTPUT_END => $end_datetime,
-				tsOutput::TS_OUTPUT_UPDATE_USER_ID => $this->options->user_id
+				tsOutput::TS_OUTPUT_STATUS			=> define::PUBLISH_STATUS_FAILED,
+				tsOutput::TS_OUTPUT_SRV_BK_DIFF_FLG => "0",
+				tsOutput::TS_OUTPUT_END 			=> $end_datetime,
+				tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> $this->options->user_id
 			);
 
 	 		$this->tsOutput->update_ts_output($this->dbh, $insert_id, $dataArray);

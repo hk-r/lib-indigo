@@ -6,7 +6,7 @@ class gitManager
 {
 	private $main;
 
-	private $fileManager;
+	private $fs;
 
 	private $common;
 
@@ -19,8 +19,13 @@ class gitManager
 
 		$this->main = $main;
 
-		$this->fileManager = new fileManager($this);
 		$this->common = new common($this);
+
+		$this->fs = new \tomk79\filesystem(array(
+		  'file_default_permission' => define::FILE_DEFAULT_PERMISSION,
+		  'dir_default_permission' => define::DIR_DEFAULT_PERMISSION,
+		  'filesystem_encoding' => define::FILESYSTEM_ENCODING
+		));
 	}
 
 	/**
@@ -35,7 +40,7 @@ class gitManager
 		$current_dir = realpath('.');
 
 		// masterディレクトリの絶対パス
-		$master_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . define::PATH_MASTER));
+		$master_real_path = $this->fs->normalize_path($this->fs->get_realpath($options->indigo_workdir_path . define::PATH_MASTER));
 
 		if ( chdir( $master_real_path )) {
 
@@ -84,7 +89,7 @@ class gitManager
 
 		// 公開日時ディレクトリの絶対パスを取得。
 		// すでに存在している場合は削除して再作成する。
-		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($path . $dirname));
+		$dir_real_path = $this->fs->normalize_path($this->fs->get_realpath($path . $dirname));
 		if ( !$this->common->is_exists_remkdir($dir_real_path) ) {
 			throw new \Exception('Git file copy failed. Creation of directory failed. ' . $dir_real_path);
 		}
@@ -148,7 +153,7 @@ class gitManager
 		$this->common->debug_echo('■ file_delete start');
 
 		// 公開ソースディレクトリの絶対パスを取得
-		$dir_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($path . $dirname));
+		$dir_real_path = $this->fs->normalize_path($this->fs->get_realpath($path . $dirname));
 
 		if( $dir_real_path && file_exists( $dir_real_path )) {
 			// ディレクトリが存在する場合、削除コマンド実行
@@ -177,7 +182,7 @@ class gitManager
 		$current_dir = realpath('.');
 
 		// masterディレクトリの絶対パス
-		$master_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . define::PATH_MASTER));
+		$master_real_path = $this->fs->normalize_path($this->fs->get_realpath($options->indigo_workdir_path . define::PATH_MASTER));
 
 		if ( $master_real_path ) {
 
@@ -245,7 +250,7 @@ class gitManager
 		}
 		
 		// masterディレクトリの絶対パス
-		$master_real_path = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . define::PATH_MASTER));
+		$master_real_path = $this->fs->normalize_path($this->fs->get_realpath($options->indigo_workdir_path . define::PATH_MASTER));
 
 		if ( $master_real_path ) {
 
