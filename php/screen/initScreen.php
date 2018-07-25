@@ -1158,12 +1158,16 @@ class initScreen
 		}
 
         // masterディレクトリの絶対パス
-        $master_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->indigo_workdir_path . define::PATH_MASTER));
+        // $indigo_workdir_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->indigo_workdir_path));
+
+        $indigo_workdir_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->indigo_workdir_path));
+        $document_root = $this->fs->normalize_path($this->fs->get_realpath($_SERVER['DOCUMENT_ROOT']));
 
 		$ret .= '<form method="post">';
 
 		$ret .= '<input type="hidden" name="selected_id" value="' . $form['selected_id'] . '"/>';
-		$ret .= '<input type="hidden" id="master_real_path" value="' . $master_real_path . '"/>';
+		$ret .= '<input type="hidden" id="indigo_workdir_path" value="' . $indigo_workdir_path . '"/>';
+		$ret .= '<input type="hidden" id="document_root" value="' . $document_root . '"/>';
 		
 		$ret .= '<table class="table table-striped">'
 			  . '<tr>';

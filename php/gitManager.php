@@ -233,50 +233,52 @@ class gitManager
 	/**
 	 * Gitブランチのコミットハッシュ値を取得
 	 */
-	public function get_git_commit_hash($options) {
+	public function get_commit_hash() {
 
-		$this->common->debug_echo('■ get_git_commit_hash start');
+		$this->common->debug_echo('■ get_commit_hash start');
 
 		$commit_hash;
-
+		$data;
 		$current_dir = realpath('.');
 
-		// 指定ブランチ
-		$branch_name = trim(str_replace("origin/", "", $options->_POST->branch_select_value));
 
-		if (!$branch_name) {
-			// ディレクトリ移動に失敗
-			throw new \Exception('Failed to get git commitHash. Get branch name failed.');
-		}
-		
-		// masterディレクトリの絶対パス
-		$master_real_path = $this->fs->normalize_path($this->fs->get_realpath($options->indigo_workdir_path . define::PATH_MASTER));
+	   //  if (isset($this->options->_GET->branch_name) && isset($this->options->_GET->path)) {
+	    
+	   //      $current_dir = realpath('.');
 
-		if ( $master_real_path ) {
+	   //      // masterディレクトリの絶対パス
+	   //      $master_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->options->_GET->path . define::PATH_MASTER));
 
-			// ディレクトリ移動
-			if ( chdir( $master_real_path ) ) {
+	   //      // // masterディレクトリの絶対パス
+	   //      // $master_real_path = $fs->normalize_path($fs->get_realpath($this->options->_GET->path));
+	   //      // // $master_real_path = 'error test';
 
-				// コミットハッシュ値取得
-				$command = 'git log --pretty=%h ' . $branch_name . ' -1';
-				$ret = $this->command_execute($command, false);
+	   //      if ( $master_real_path ) {
 
-				foreach ( (array)$ret['output'] as $data ) {
-					$commit_hash = $data;
-				}
+	   //          if ( chdir( $master_real_path ) ) {
 
-			} else {
+	   //              // コミットハッシュ値取得
+	   //              $command = 'git log --pretty=%h ' . $this->options->_GET->branch_name . ' -1';
+	   //              $ret = $common->command_execute($command, false);
+	   //              foreach ( (array)$ret['output'] as $data ) {
+	   //                  $commit_hash = $data;
+	   //              }
 
-				// ディレクトリ移動に失敗
-				throw new \Exception('Failed to get git commitHash. Move to work directory failed.');
-			}
-		}
+				// } else {
 
-		chdir($current_dir);
+				// 	// ディレクトリ移動に失敗
+				// 	throw new \Exception('Failed to get git commitHash. Move to work directory failed.');
+				// } 
+	   //      }
+	   //  }
+	    
+    //     $data = array( 'commit_hash' => $commit_hash );
+    //     chdir($current_dir);
 
-		$this->common->debug_echo('■ get_git_commit_hash end');
+		$this->common->debug_echo('■ get_commit_hash end');
 
-		return $commit_hash;
+		return $data;
+		// return json_encode($data);
 	}
 
 }
