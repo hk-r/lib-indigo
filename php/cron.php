@@ -27,7 +27,7 @@ class cron
 
 		$this->options = json_decode(json_encode($options));
 
-		$this->pdoMgr = new pdoMgr($this);
+		$this->pdoMgr = new pdoManager($this);
 		$this->tsReserve = new tsReserve($this);
 		$this->tsOutput = new tsOutput($this);
 		$this->tsBackup = new tsBackup($this);
