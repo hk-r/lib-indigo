@@ -190,7 +190,16 @@ class main
 				// 即時公開確認ダイアログの「戻る」ボタン押下			
 
 				$result = json_decode($this->initScn->do_back_immediate_dialog());
+			
+			//============================================================
+			// ログ表示処理
+			//============================================================
+			} elseif (isset($this->options->_POST->log)) {
+				// 初期表示画面の「新規」ボタン押下
+				
+				$result = json_decode($this->historyScn->do_disp_log_dialog());
 			}
+
 
 			if ( !$result->status ) {
 				// 処理失敗の場合

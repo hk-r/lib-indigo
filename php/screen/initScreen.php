@@ -528,7 +528,7 @@ class initScreen
 	 		$this->common->debug_echo('　□ -----Gitのファイルコピー処理-----');
 			
 			// waitingディレクトリの絶対パスを取得。
-			$waiting_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->indigo_workdir_path . define::PATH_WAITING));
+			$waiting_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->workdir_relativepath . define::PATH_WAITING));
 
 			// 公開予約ディレクトリ名の取得
 			$dirname = $this->common->format_gmt_datetime($this->main->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE);
@@ -583,7 +583,7 @@ class initScreen
 		try {
 
 			// waitingディレクトリの絶対パスを取得。
-			$waiting_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->indigo_workdir_path . define::PATH_WAITING));
+			$waiting_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->workdir_relativepath . define::PATH_WAITING));
 
 			//============================================================
 			// 「waiting」ディレクトリの変更前の公開ソースディレクトリを削除
@@ -668,7 +668,7 @@ class initScreen
 			$selected_id =  $this->main->options->_POST->selected_id;
 
 			// waitingディレクトリの絶対パスを取得。
-			$waiting_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->indigo_workdir_path . define::PATH_WAITING));
+			$waiting_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->workdir_relativepath . define::PATH_WAITING));
 
 
 			try {
@@ -1081,17 +1081,9 @@ class initScreen
 	/**
 	 * 新規・変更・即時公開の入力ダイアログHTMLの作成
 	 *	 
-	 * @param $add_flg       = 新規フラグ
-	 * @param $error_message = エラーメッセージ出力内容
-	 * @param $branch_list   = ブランチリスト
-	 * @param $branch_select_value = ブランチ選択値
-	 * @param $reserve_date = 公開予約日時
-	 * @param $reserve_time = 公開予約時間
-	 * @param $comment      = コメント
-	 * @param $selected_id  = 変更時の選択ID
+	 * @param $input_mode = 入力モード
 	 *
-	 * @return 
-	 *  入力ダイアログ出力内容
+	 * @return ログ出力内容
 	 */
 	private function create_input_dialog_html($input_mode) {
 		
@@ -1158,16 +1150,21 @@ class initScreen
 		}
 
         // masterディレクトリの絶対パス
-        // $indigo_workdir_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->indigo_workdir_path));
+        // $workdir_relativepath = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->workdir_relativepath));
 
-        $indigo_workdir_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->indigo_workdir_path));
-        $document_root = $this->fs->normalize_path($this->fs->get_realpath($_SERVER['DOCUMENT_ROOT']));
+		// mainクラス呼び出しディレクトリの相対パス
+        $param_relativepath = $this->main->options->param_relativepath;
+        
+		// indigo作業ディレクトリ
+        $workdir_relativepath = $this->main->options->workdir_relativepath;
 
 		$ret .= '<form method="post">';
 
 		$ret .= '<input type="hidden" name="selected_id" value="' . $form['selected_id'] . '"/>';
-		$ret .= '<input type="hidden" id="indigo_workdir_path" value="' . $indigo_workdir_path . '"/>';
-		$ret .= '<input type="hidden" id="document_root" value="' . $document_root . '"/>';
+
+
+		$ret .= '<input type="hidden" id="param_relativepath" value="' . $param_relativepath . '"/>';
+		$ret .= '<input type="hidden" id="workdir_relativepath" value="' . $workdir_relativepath . '"/>';
 		
 		$ret .= '<table class="table table-striped">'
 			  . '<tr>';
@@ -1256,12 +1253,6 @@ class initScreen
 
 	/**
 	 * 新規確認ダイアログの表示
-	 *	 
-	 * @param $add_flg     = 新規フラグ
-	 * @param $branch_select_value = ブランチ選択値
-	 * @param $reserve_date = 公開予約日付
-	 * @param $reserve_time = 公開予約時間
-	 * @param $comment      = コメント
 	 *
 	 * @return 確認ダイアログ出力内容
 	 */
@@ -1353,8 +1344,7 @@ class initScreen
 	/**
 	 * 変更確認ダイアログの表示
 	 *
-	 * @return 
-	 *  確認ダイアログ出力内容
+	 * @return 確認ダイアログ出力内容
 	 */
 	private function create_check_update_dialog_html() {
 		
@@ -1390,7 +1380,7 @@ class initScreen
 		
 		}
 
-		$img_filename = $this->main->options->indigo_workdir_path . self::IMG_ARROW_RIGHT;
+		$img_filename = $this->main->options->workdir_relativepath . self::IMG_ARROW_RIGHT;
 
 		$ret = '<div class="dialog" id="modal_dialog">'
 			. '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
@@ -1499,12 +1489,6 @@ class initScreen
 
 	/**
 	 * 即時公開確認ダイアログの表示
-	 *	 
-	 * @param $add_flg     = 新規フラグ
-	 * @param $branch_select_value = ブランチ選択値
-	 * @param $reserve_date = 公開予約日付
-	 * @param $reserve_time = 公開予約時間
-	 * @param $comment      = コメント
 	 *
 	 * @return 確認ダイアログ出力内容
 	 */
@@ -1589,8 +1573,9 @@ class initScreen
 	/**
 	 * 入力チェック処理
 	 *	 
-	 * @return 
-	 *  エラーメッセージHTML
+	 * @param $input_mode = 入力モード
+	 *
+	 * @return エラーメッセージHTML
 	 */
 	private function do_validation_check($input_mode) {
 				

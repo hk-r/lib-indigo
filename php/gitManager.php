@@ -4,7 +4,7 @@ namespace indigo;
 
 class gitManager
 {
-	private $main;
+	public $main;
 
 	private $fs;
 
@@ -17,7 +17,7 @@ class gitManager
 	 */
 	public function __construct($main) {
 
-		$this->main = $main;
+		$this->main = json_decode(json_encode($main));
 
 		$this->common = new common($this);
 
@@ -40,7 +40,7 @@ class gitManager
 		$current_dir = realpath('.');
 
 		// masterディレクトリの絶対パス
-		$master_real_path = $this->fs->normalize_path($this->fs->get_realpath($options->indigo_workdir_path . define::PATH_MASTER));
+		$master_real_path = $this->fs->normalize_path($this->fs->get_realpath($options->workdir_relativepath . define::PATH_MASTER));
 
 		if ( chdir( $master_real_path )) {
 
@@ -182,7 +182,7 @@ class gitManager
 		$current_dir = realpath('.');
 
 		// masterディレクトリの絶対パス
-		$master_real_path = $this->fs->normalize_path($this->fs->get_realpath($options->indigo_workdir_path . define::PATH_MASTER));
+		$master_real_path = $this->fs->normalize_path($this->fs->get_realpath($options->workdir_relativepath . define::PATH_MASTER));
 
 		if ( $master_real_path ) {
 
@@ -235,50 +235,52 @@ class gitManager
 	 */
 	public function get_commit_hash() {
 
-		$this->common->debug_echo('■ get_commit_hash start');
+		// $this->common->debug_echo('■ get_commit_hash start');
 
 		$commit_hash;
-		$data;
+
+		$data = array(
+					'commit_hash' => ''
+				);
+
 		$current_dir = realpath('.');
 
-
-	   //  if (isset($this->options->_GET->branch_name) && isset($this->options->_GET->path)) {
+	    if (isset($this->main->branch_name) && isset($this->main->workdir_relativepath)) {
 	    
-	   //      $current_dir = realpath('.');
+	        // masterディレクトリの絶対パス
+	        $master_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->workdir_relativepath . define::PATH_MASTER));
 
-	   //      // masterディレクトリの絶対パス
-	   //      $master_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->options->_GET->path . define::PATH_MASTER));
+	        if ( $master_real_path ) {
 
-	   //      // // masterディレクトリの絶対パス
-	   //      // $master_real_path = $fs->normalize_path($fs->get_realpath($this->options->_GET->path));
-	   //      // // $master_real_path = 'error test';
+	            if ( chdir( $master_real_path ) ) {
 
-	   //      if ( $master_real_path ) {
+	                // コミットハッシュ値取得
+	                $command = 'git log --pretty=%h ' . $this->main->branch_name . ' -1';
+	                $ret = $this->common->command_execute($command, false);
+	                foreach ( (array)$ret['output'] as $element ) {
+	                    $commit_hash = $element;
+	                }
 
-	   //          if ( chdir( $master_real_path ) ) {
+				} else {
 
-	   //              // コミットハッシュ値取得
-	   //              $command = 'git log --pretty=%h ' . $this->options->_GET->branch_name . ' -1';
-	   //              $ret = $common->command_execute($command, false);
-	   //              foreach ( (array)$ret['output'] as $data ) {
-	   //                  $commit_hash = $data;
-	   //              }
+					// ディレクトリ移動に失敗
+					throw new \Exception('Failed to get git commitHash. Move to work directory failed.');
+				} 
+	        }
+		} else {
 
-				// } else {
-
-				// 	// ディレクトリ移動に失敗
-				// 	throw new \Exception('Failed to get git commitHash. Move to work directory failed.');
-				// } 
-	   //      }
-	   //  }
+			// ディレクトリ移動に失敗
+			throw new \Exception('Parameter is empty.');
+		} 
 	    
-    //     $data = array( 'commit_hash' => $commit_hash );
-    //     chdir($current_dir);
+	    if ($commit_hash) {
+	    	$data['commit_hash'] = $commit_hash;
+	    }
+		
+        chdir($current_dir);
 
-		$this->common->debug_echo('■ get_commit_hash end');
-
-		return $data;
-		// return json_encode($data);
+		header('Content-Type: application/json; charset=utf-8');
+		return json_encode($data);
 	}
 
 }

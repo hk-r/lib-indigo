@@ -17,14 +17,12 @@ $(function($){
 
 			} else {
 
-				var path = document.getElementById('indigo_workdir_path').value;
-				var document_root = document.getElementById('document_root').value;
-				alert(path);
-				alert(document_root);
+				var path = document.getElementById('master_real_path').value;
+				
 				$.ajax ({
 					type: 'GET',
 					// "url": "./../vendor/pickles2/lib-indigo/php/jquery.php",
-					url: document_root + "/ajax.php",
+					url: "./../vendor/pickles2/lib-indigo/php/ajax.php",
 					
 					data: { 'branch_name': branch_name, 'path': path },
 					dataType: 'json',

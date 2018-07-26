@@ -38,15 +38,16 @@ class tsOutput
 	 * 公開処理結果エンティティのカラム定義
 	 */
 	const OUTPUT_ENTITY_ID_SEQ 			= 'output_id_seq';			// ID
-	const OUTPUT_ENTITY_RESERVE 		= 'reserve_datetime';		// 公開予約日時（タイムゾーン日j）
-	const OUTPUT_ENTITY_RESERVE_DISP 	= 'reserve_datetime_disp';	// 公開予約日時（タイムゾーン日時）
+	const OUTPUT_ENTITY_RESERVE 		= 'reserve_datetime';		// 公開予約日時（タイムゾーン日時）
+	const OUTPUT_ENTITY_RESERVE_DISP 	= 'reserve_datetime_disp';	// 公開予約日時（表示用フォーマット）
 	const OUTPUT_ENTITY_BRANCH 			= 'branch_name';			// ブランチ名
 	const OUTPUT_ENTITY_COMMIT_HASH 	= 'commit_hash';			// コミットハッシュ値（短縮）
 	const OUTPUT_ENTITY_PUBLISH_TYPE 	= 'publish_type';			// 公開種別
 	const OUTPUT_ENTITY_COMMENT 		= 'comment';				// コメント
 	const OUTPUT_ENTITY_STATUS 			= 'status';					// 状態
 	const OUTPUT_ENTITY_SRV_BK_DIFF_FLG = 'srv_bk_diff_flg';		// 本番と最新バックアップの差分有無
-	const OUTPUT_ENTITY_START 			= 'start_datetime';			// 公開処理開始日時
+	const OUTPUT_ENTITY_START_GMT 		= 'start_datetime_gmt';		// 公開処理開始日時（GMT日時）
+	const OUTPUT_ENTITY_START 			= 'start_datetime';			// 公開処理開始日時（タイムゾーン日時）
 	const OUTPUT_ENTITY_START_DISP 		= 'start_datetime_disp';	// 公開処理開始日時（表示用フォーマット）
 	const OUTPUT_ENTITY_END 			= 'end_datetime';			// 公開処理終了日時
 	const OUTPUT_ENTITY_END_DISP 		= 'end_datetime_disp';		// 公開処理終了日時（表示用フォーマット）
@@ -98,6 +99,39 @@ class tsOutput
 		return $conv_ret_array;
 	}
 	
+	/**
+	 * 公開処理結果テーブルから、選択された処理結果情報を取得する
+	 *
+	 * @return 選択行の情報
+	 */
+	public function get_selected_ts_output($dbh, $selected_id) {
+
+
+		$this->common->debug_echo('■ get_selected_ts_output start');
+
+		$ret_array = array();
+
+		$conv_ret_array = array();
+
+		if (!$selected_id) {
+			throw new \Exception('選択されたIDが取得できませんでした。 ');
+		} else {
+
+			// SELECT文作成
+			$select_sql = "SELECT * from TS_OUTPUT 
+			WHERE " . self::TS_OUTPUT_ID_SEQ . " = " . $selected_id . ";";
+
+			// SELECT実行
+			$ret_array = array_shift($this->pdoMgr->select($dbh, $select_sql));
+
+			$conv_ret_array = $this->convert_ts_output_entity($ret_array);
+		}
+		
+		$this->common->debug_echo('■ get_selected_ts_output end');
+
+		return $conv_ret_array;
+	}
+
 	/**
 	 * 公開処理結果一覧テーブルの登録処理
 	 *
@@ -246,10 +280,13 @@ class tsOutput
 
 		// ID
 		$entity[self::OUTPUT_ENTITY_ID_SEQ] = $array[self::TS_OUTPUT_ID_SEQ];
+
 		// 公開予約日時（タイムゾーン日時）
 		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_OUTPUT_RESERVE]);
 		$entity[self::OUTPUT_ENTITY_RESERVE] 		 = $tz_datetime;
 		$entity[self::OUTPUT_ENTITY_RESERVE_DISP] = $this->common->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
+		// 処理開始日時（GMT日時）
+		$entity[self::OUTPUT_ENTITY_START_GMT] 	= $array[self::TS_OUTPUT_START];
 		// 処理開始日時（タイムゾーン日時）
 		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_OUTPUT_START]);
 		$entity[self::OUTPUT_ENTITY_START]		   = $tz_datetime;
