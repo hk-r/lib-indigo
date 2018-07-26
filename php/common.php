@@ -6,7 +6,7 @@ class common
 {
 
 	private $main;
-	private $fileManager;
+	private $fs;
 
 	const DIR_PERMISSION_0757 = 0757;
 
@@ -19,7 +19,12 @@ class common
 	public function __construct ($main){
 
 		$this->main = $main;
-		$this->fileManager = new fileManager($this);
+
+		$this->fs = new \tomk79\filesystem(array(
+		  'file_default_permission' => define::FILE_DEFAULT_PERMISSION,
+		  'dir_default_permission' => define::DIR_DEFAULT_PERMISSION,
+		  'filesystem_encoding' => define::FILESYSTEM_ENCODING
+		));
 	}
 
 	/**
@@ -262,7 +267,7 @@ class common
 		foreach ( (array)$server_list as $server ) {
 			
 			// 本番環境ディレクトリの絶対パスを取得。
-			$server_real_path[] = $this->fileManager->normalize_path($this->fileManager->get_realpath($server . "/"));
+			$server_real_path[] = $this->fs->normalize_path($this->fs->get_realpath($server . "/"));
 		}
 
 		$this->debug_echo('　□ server_real_path');
@@ -293,22 +298,22 @@ class common
 						'log_real_path' => '');
 
 			// 本番環境ディレクトリの絶対パスを取得。
-			$result['server_real_path'] = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->server_real_path . "/"));
+			$result['server_real_path'] = $this->fs->normalize_path($this->fs->get_realpath($options->server_real_path . "/"));
 
 			// backupディレクトリの絶対パスを取得。
-			$result['backup_real_path'] = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . define::PATH_BACKUP));
+			$result['backup_real_path'] = $this->fs->normalize_path($this->fs->get_realpath($options->workdir_relativepath . define::PATH_BACKUP));
 
 			// waitingディレクトリの絶対パスを取得。
-			$result['waiting_real_path'] = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . define::PATH_WAITING));
+			$result['waiting_real_path'] = $this->fs->normalize_path($this->fs->get_realpath($options->workdir_relativepath . define::PATH_WAITING));
 
 			// runningディレクトリの絶対パスを取得。
-			$result['running_real_path'] = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . define::PATH_RUNNING));
+			$result['running_real_path'] = $this->fs->normalize_path($this->fs->get_realpath($options->workdir_relativepath . define::PATH_RUNNING));
 
 			// releasedディレクトリの絶対パスを取得。
-			$result['released_real_path'] = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . define::PATH_RELEASED));
+			$result['released_real_path'] = $this->fs->normalize_path($this->fs->get_realpath($options->workdir_relativepath . define::PATH_RELEASED));
 
 			// logディレクトリの絶対パスを取得。
-			$result['log_real_path'] = $this->fileManager->normalize_path($this->fileManager->get_realpath($options->indigo_workdir_path . define::PATH_LOG));
+			$result['log_real_path'] = $this->fs->normalize_path($this->fs->get_realpath($options->workdir_relativepath . define::PATH_LOG));
 
 		$this->debug_echo('■ get_indigo_work_dir end');
 

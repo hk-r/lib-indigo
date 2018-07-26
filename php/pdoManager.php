@@ -78,13 +78,11 @@ class pdoManager
 
 			// $this->common->debug_echo('　□ sqlite');
 
-			// $this->common->debug_echo($this->main->options->indigo_workdir_path . self::SQLITE_DB_PATH);
-
 			/**
 			 * sqliteの場合 
 			 */
 			// dbディレクトリの絶対パス
-			$db_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->indigo_workdir_path . self::SQLITE_DB_PATH));
+			$db_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->workdir_relativepath . self::SQLITE_DB_PATH));
 
 			$this->common->debug_echo('　□ db_real_path：' . $db_real_path);
 
