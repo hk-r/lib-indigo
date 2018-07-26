@@ -66,6 +66,18 @@ class publish
 			$this->common->debug_echo($command);
 
 			$ret = $this->common->command_execute($command, true);
+			
+			// ファイルのパスを変数に格納
+			$filename = $log_datetime_dir_path . 'rsync_copy_' . $running_dirname . '.log';
+ 
+			// ファイルに書き込む
+			file_put_contents($filename, $ret['output']);
+// // ファイルを出力する
+// readfile($filename);
+
+				// foreach ( (array) $ret['output'] as $element ) {
+				// 	$this->common->debug_echo($element);
+				// }
 
 			// $this->common->debug_echo('　▼本番反映の公開処理結果');
 
@@ -114,11 +126,9 @@ class publish
 				$ret = $this->common->command_execute($command, true);
 
 				$this->common->debug_echo('　★ バックアップ作成の処理結果');
-				$i = 1;
+				
 				foreach ( (array) $ret['output'] as $element ) {
-					$this->common->debug_echo($i);
 					$this->common->debug_echo($element);
-					$i++;
 				}
 
 			} else {

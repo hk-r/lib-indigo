@@ -771,6 +771,8 @@ class initScreen
 				throw new \Exception('Create log directory is failed. ' . $result->server_real_path);
 			}
 
+			error_log('', 3, $log_datetime_dir_path . 'rsync_copy_' . $dirname . '.log');
+			error_log('', 3, $log_datetime_dir_path . 'rsync_backup_' . $dirname . '.log');
 
 			//============================================================
 			// 公開処理結果テーブルの登録処理
