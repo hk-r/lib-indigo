@@ -114,9 +114,11 @@ class publish
 				$ret = $this->common->command_execute($command, true);
 
 				$this->common->debug_echo('　★ バックアップ作成の処理結果');
-
+				$i = 1;
 				foreach ( (array) $ret['output'] as $element ) {
+					$this->common->debug_echo($i);
 					$this->common->debug_echo($element);
+					$i++;
 				}
 
 			} else {
