@@ -5,6 +5,8 @@ namespace indigo;
 class historyScreen
 {
 	private $main;
+
+	private $fs;
 	private $tsOutput;
 	private $common;
 
@@ -24,6 +26,12 @@ class historyScreen
 
 		$this->tsOutput = new tsOutput($this);
 		$this->common = new common($this);
+
+		$this->fs = new \tomk79\filesystem(array(
+		  'file_default_permission' => define::FILE_DEFAULT_PERMISSION,
+		  'dir_default_permission' => define::DIR_DEFAULT_PERMISSION,
+		  'filesystem_encoding' => define::FILESYSTEM_ENCODING
+		));
 	}
 	
 
