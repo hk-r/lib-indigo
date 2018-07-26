@@ -63,8 +63,8 @@ class publish
 			$exclude_command = '';
 
 			foreach ($options->ignore as $key => $value) {
-			 	$exclude_command = "--exclude='" . $value . "' "
-			};
+			 	$exclude_command = "--exclude='" . $value . "' ";
+			}
 
 			$command = 'rsync -rtvzP --delete ' . $exclude_command . $result->running_real_path . $running_dirname . '/' . ' ' . $result->server_real_path . ' ' . '--log-file=' . $log_datetime_dir_path . 'rsync_' . $running_dirname . '.log' ;
 
