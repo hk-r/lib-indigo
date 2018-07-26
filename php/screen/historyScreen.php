@@ -159,25 +159,31 @@ class historyScreen
 			  . '<div style="position: absolute; left: 0px; top: 0px; padding-top: 4em; overflow: auto; width: 100%; height: 100%;">'
 			  . '<div class="dialog_box">';
 
-
-			// logディレクトリの絶対パスを取得。
-			$log_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->workdir_relativepath . define::PATH_LOG));
 			
 			// 公開ディレクトリ名の取得
 			$start_datetime_gmt = $selected_ret[tsOutput::OUTPUT_ENTITY_START_GMT];
 			// 公開予約ディレクトリ名の取得
 			$dirname = $this->common->format_gmt_datetime($start_datetime_gmt, define::DATETIME_FORMAT_SAVE);
 
+		$this->common->debug_echo('　□ 1');
+
+			// logディレクトリの絶対パスを取得。
+			$log_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->workdir_relativepath . define::PATH_LOG . $dirname . "/"));
+		
+		$this->common->debug_echo('　□ 2');
+
 			// ファイルを変数に格納
-			$filename = $log_real_path . 'rsync_' . $dirname . '.log';
+			$filename = $log_real_path . 'rsync_copy_' . $dirname . '.log';
 			// ファイルを読み込み変数に格納
 			$content = file_get_contents($filename);
+
+		$this->common->debug_echo('　□ 3');
 
 		$ret .= '<p>公開開始日時：' . $selected_ret[tsOutput::OUTPUT_ENTITY_START_DISP] . '</p>'
 			  . '<p>公開終了日時：' . $selected_ret[tsOutput::OUTPUT_ENTITY_END_DISP] . '</p>'
 			  . '<p>  User ID  ：' . $selected_ret[tsOutput::OUTPUT_ENTITY_INSERT_USER_ID] . '</p>'
 			  . '<p>' . nl2br($content) .'</p>';
-
+		$this->common->debug_echo('　□ 4');
 		$ret .=  '<div class="button_contents_box">'
 			  . '<div class="button_contents">'
 			  . '<ul>';
