@@ -60,13 +60,14 @@ class publish
 			// -P ファイル転送中の場合、途中から再開するように
 
 			// ※runningディレクトリパスの後ろにはスラッシュは付けない（スラッシュを付けると日付ディレクトリも含めて同期してしまう）
+			
+			// 同期除外コマンドの作成
 			$exclude_command = '';
-
 			foreach ($options->ignore as $key => $value) {
-			 	$exclude_command = "--exclude='" . $value . "' ";
+			 	$exclude_command .= "--exclude='" . $value . "' ";
 			}
 
-			$command = 'rsync -rtvzP --delete ' . $exclude_command . $result->running_real_path . $running_dirname . '/' . ' ' . $result->server_real_path . ' ' . '--log-file=' . $log_datetime_dir_path . 'rsync_' . $running_dirname . '.log' ;
+			$command = 'rsync -rvzP --delete ' . $exclude_command . $result->running_real_path . $running_dirname . '/' . ' ' . $result->server_real_path . ' ' . '--log-file=' . $log_datetime_dir_path . 'rsync_' . $running_dirname . '.log' ;
 
 			$this->common->debug_echo('　□ $command：');
 			$this->common->debug_echo($command);
