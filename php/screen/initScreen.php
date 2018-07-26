@@ -755,6 +755,23 @@ class initScreen
 			// 作業用ディレクトリの絶対パスを取得
 			$real_path = json_decode($this->common->get_workdir_real_path($this->main->options));
 
+			// 公開日時ディレクトリ名の取得
+			$dirname = $this->common->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
+
+			$this->common->debug_echo('　□ 公開日時ディレクトリ名：' . $dirname);
+
+			//============================================================
+			// ログ出力用の日付ディレクトリ作成
+			//============================================================
+
+			// logの日付ディレクトリを作成
+			$log_datetime_dir_path = $this->fs->normalize_path($this->fs->get_realpath($real_path->log_real_path . $dirname) . "/");
+			if ( !$this->common->is_exists_mkdir($log_datetime_dir_path) ) {
+				// エラー処理
+				throw new \Exception('Create log directory is failed. ' . $result->server_real_path);
+			}
+
+
 			//============================================================
 			// 公開処理結果テーブルの登録処理
 			//============================================================
@@ -793,11 +810,6 @@ class initScreen
 
 	 		$this->common->debug_echo('　□ -----[即時公開]指定ブランチのGit情報を「running」ディレクトリへコピー-----');
 			
-			// 公開予約ディレクトリ名の取得
-			$dirname = $this->common->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
-
-			$this->common->debug_echo('　□ 公開予約ディレクトリ：' . $dirname);
-
 			// Git情報のコピー処理
 			$this->gitMgr->git_file_copy($this->main->options, $real_path->running_real_path, $dirname);
 
