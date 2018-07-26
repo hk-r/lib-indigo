@@ -223,7 +223,8 @@ class main
 				}
 			}
 
-			if (isset($this->options->_POST->history) || isset($this->options->_POST->log)) {
+			if (isset($this->options->_POST->history) ||
+				isset($this->options->_POST->log)) {
 				// 初期表示画面の「履歴」ボタン押下
 
 				$disp = $this->historyScn->disp_history_screen();
