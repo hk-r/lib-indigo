@@ -45,7 +45,7 @@ class historyScreen
 			. '<form id="form_table" method="post">'
 			. '<div class="button_contents" style="float:right;">'
 			. '<ul>'
-			. '<li><input type="submit" name="log" class="px2-btn px2-btn--primary" value="ログ"/></li>'
+			. '<li><input type="submit" id="log_btn" name="log" class="px2-btn px2-btn--primary" value="ログ"/></li>'
 			. '</div>'
 			. '</div>';
 
