@@ -67,7 +67,7 @@ class publish
 			 	$exclude_command .= "--exclude='" . $value . "' ";
 			}
 
-			$command = 'rsync -urvzP --delete ' . $exclude_command . $result->running_real_path . $running_dirname . '/' . ' ' . $result->server_real_path . ' ' . '--log-file=' . $log_datetime_dir_path . 'rsync_' . $running_dirname . '.log' ;
+			$command = 'rsync -rvzP -u --delete ' . $exclude_command . $result->running_real_path . $running_dirname . '/' . ' ' . $result->server_real_path . ' ' . '--log-file=' . $log_datetime_dir_path . 'rsync_' . $running_dirname . '.log' ;
 
 			$this->common->debug_echo('　□ $command：');
 			$this->common->debug_echo($command);
