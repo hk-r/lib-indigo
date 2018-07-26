@@ -22,7 +22,7 @@ class publish
 	/**
 	 * 公開処理
 	 */
-	public function do_publish($running_dirname, $options) {
+	public function do_publish($running_dirname, $options, $log_datetime_dir_path) {
 
 		$this->common->debug_echo('■ do_publish start');
 
