@@ -322,6 +322,8 @@ $this->main->common()->debug_echo('　□ 3');
 			$copy_logpath = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($real_path->log_real_path . $running_dirname . "/")) . 'rsync_copy_' . $running_dirname . '.log';
 			$backup_logpath = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($real_path->log_real_path . $running_dirname . "/")) . 'rsync_backup_' . $running_dirname . '.log';
 
+		$this->main->common()->debug_echo('　□1');
+
 			// 親ディレクトリの作成
 			if( !@is_dir( dirname( $copy_logpath ) ) ){
 				$this->main->fs()->mkdir_r( dirname( $copy_logpath ) );
@@ -330,16 +332,17 @@ $this->main->common()->debug_echo('　□ 3');
 			if( !@is_dir( dirname( $backup_logpath ) ) ){
 				$this->main->fs()->mkdir_r( dirname( $backup_logpath ) );
 			}
-
+$this->main->common()->debug_echo('　□2');
 			$src = '';
 
 			if (!$this->main->fs()->save_file( $copy_logpath , $src )) {
 				throw new \Exception('Create copy logfile is failed. ' . $copy_logpath);
 			}
+$this->main->common()->debug_echo('　□3');
 			if (!$this->main->fs()->save_file( $backup_logpath , $src )) {
 				throw new \Exception('Create backup logfile is failed. ' . $backup_logpath);
 			}
-
+$this->main->common()->debug_echo('　□4');
 			// if ( !$this->main->common()->is_exists_mkdir($copylogpath) ) {
 			// 	// エラー処理
 			// 	throw new \Exception('Create copy logfi directory is failed. ' . $result->server_real_path);
@@ -503,7 +506,7 @@ $this->main->common()->debug_echo('　□ 3');
 						
 						// Git情報のコピー処理
 						$this->main->gitMgr()->git_file_copy($this->main->options, $real_path->running_real_path, $dirname);
-						
+
 
 					} elseif ($publish_type == define::PUBLISH_TYPE_RESTORE) {
 
