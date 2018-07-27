@@ -10,7 +10,7 @@ class main
 	 * オブジェクト
 	 * @access private
 	 */
-	private $gitMgr, $pdoMgr, $initScn, $historyScn, $backupScn, $common;
+	private $gitMgr, $fs, $pdoMgr, $initScn, $historyScn, $backupScn, $common;
 
 	/**
 	 * PDOインスタンス
@@ -24,12 +24,21 @@ class main
 	public function __construct($options) {
 
 		$this->options = json_decode(json_encode($options));
+
+		$this->fs = new \tomk79\filesystem(array(
+		  'file_default_permission' => define::FILE_DEFAULT_PERMISSION,
+		  'dir_default_pefrmission' => define::DIR_DEFAULT_PERMISSION,
+		  'filesystem_encoding' 	=> define::FILESYSTEM_ENCODING
+		));
+		
+		$this->common = new common($this);
 		$this->gitMgr = new gitManager($this);
+
 		$this->pdoMgr = new pdoManager($this);
 		$this->initScn = new initScreen($this);
 		$this->historyScn = new historyScreen($this);
 		$this->backupScn = new backupScreen($this);
-		$this->common = new common($this);
+
 	}
 
 	/**
@@ -77,10 +86,10 @@ class main
 
 
 			//============================================================
-			// テーブル作成（既にある場合は作成しない）
+			// テーブル作成（作成済みの場合はスキップ）
 			//============================================================
 			$this->pdoMgr->create_table();
-
+			
 
 			//============================================================
 			// 作業用ディレクトリの作成（既にある場合は作成しない）
@@ -315,4 +324,45 @@ class main
 		return $ret;
 	}
 
+
+	/**
+	 * `$fs` オブジェクトを取得する。
+	 *
+	 * `$fs`(class [tomk79\filesystem](tomk79.filesystem.html))のインスタンスを返します。
+	 *
+	 * @see https://github.com/tomk79/filesystem
+	 * @return object $fs オブジェクト
+	 */
+	public function fs(){
+		return $this->fs;
+	}
+
+	/**
+	 * `$gitMgr` オブジェクトを取得する。
+	 *
+	 * @return object $gitMgr オブジェクト
+	 */
+	public function gitMgr(){
+		return $this->gitMgr;
+	}
+
+	/**
+	 * `$common` オブジェクトを取得する。
+	 *
+	 * @return object $common オブジェクト
+	 */
+	public function common(){
+		return $this->common;
+	}
+
+	/**
+	 * response status code を取得する。
+	 *
+	 * `$px->set_status()` で登録した情報を取り出します。
+	 *
+	 * @return int ステータスコード (100〜599の間の数値)
+	 */
+	public function get_dbh(){
+		return $this->dbh;
+	}
 }

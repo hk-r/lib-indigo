@@ -4,26 +4,19 @@ namespace indigo;
 
 class initScreen
 {
-	private $main;
+	/** mainオブジェクト */
+	public $main;
 	
-	private $tsReserve;
-	private $tsOutput;
-	private $tsBackup;
-
-	private $fs;
-	private $gitMgr;
-
-	private $check;
-	private $publish;
-	private $common;
-
+	/**
+	 * オブジェクト
+	 * @access private
+	 */
+	private $tsReserve, $tsOutput, $tsBackup, $check, $publish;
 
 	/**
 	 * 入力画面のエラーメッセージ
 	 */
 	private $input_error_message = '';
-
-
 
 	/**
 	 * 画像パス定義
@@ -57,7 +50,6 @@ class initScreen
 	const INPUT_MODE_IMMEDIATE_BACK = 9;
 
 
-
 	/**
 	 * コンストラクタ
 	 * @param $options = オプション
@@ -69,32 +61,25 @@ class initScreen
 		$this->tsReserve = new tsReserve($this);
 		$this->tsOutput = new tsOutput($this);
 		$this->tsBackup = new tsBackup($this);
-		// $this->fs = new fs($this);
-		$this->gitMgr = new gitManager($this);
+		
 		$this->check = new check($this);
-		$this->publish = new publish($this);
-		$this->common = new common($this);
+		$this->publish = new publish($this->main);
 
-		$this->fs = new \tomk79\filesystem(array(
-		  'file_default_permission' => define::FILE_DEFAULT_PERMISSION,
-		  'dir_default_permission' => define::DIR_DEFAULT_PERMISSION,
-		  'filesystem_encoding' => define::FILESYSTEM_ENCODING
-		));
 	}
 
 	/**
-	 * 初期表示のコンテンツ作成
+	 * 初期表示画面のHTML作成
 	 *	 
 	 * @return 初期表示の出力内容
 	 */
 	public function do_disp_init_screen() {
 		
-		$this->common->debug_echo('■ do_disp_init_screen start');
+		$this->main->common()->debug_echo('■ do_disp_init_screen start');
 
 		$ret = "";
 
 		// 公開予約一覧を取得
-		$data_list = $this->tsReserve->get_ts_reserve_list($this->main->dbh);
+		$data_list = $this->tsReserve->get_ts_reserve_list($this->main->get_dbh());
 
 		// // お知らせリストの取得
 		// $alert_list = $this->get_csv_alert_list();
@@ -176,7 +161,7 @@ class initScreen
 			. '</form>'
 			. '</div>';
 
-		$this->common->debug_echo('■ do_disp_init_screen end');
+		$this->main->common()->debug_echo('■ do_disp_init_screen end');
 
 		return $ret;
 	}
@@ -188,7 +173,7 @@ class initScreen
 	 */
 	public function do_disp_add_dialog() {
 		
-		$this->common->debug_echo('■ disp_add_dialog start');
+		$this->main->common()->debug_echo('■ disp_add_dialog start');
 
 		$result = array('status' => true,
 						'message' => '',
@@ -197,7 +182,7 @@ class initScreen
 		// ダイアログHTMLの作成
 		$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_ADD);
 
-		$this->common->debug_echo('■ disp_add_dialog end');
+		$this->main->common()->debug_echo('■ disp_add_dialog end');
 
 		return json_encode($result);
 	}
@@ -212,7 +197,7 @@ class initScreen
 	 */
 	public function do_check_add() {
 		
-		$this->common->debug_echo('■ do_check_add start');
+		$this->main->common()->debug_echo('■ do_check_add start');
 
 		// 入力チェック処理
 		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_ADD);
@@ -230,7 +215,7 @@ class initScreen
 			$result['dialog_disp'] = $this->create_check_add_dialog_html();
 		}
 
-		$this->common->debug_echo('■ do_check_add end');
+		$this->main->common()->debug_echo('■ do_check_add end');
 
 		return json_encode($result);
 	}
@@ -244,7 +229,7 @@ class initScreen
 	 */
 	public function do_confirm_add() {
 		
-		$this->common->debug_echo('■ do_confirm_add start');
+		$this->main->common()->debug_echo('■ do_confirm_add start');
 
 		// 入力チェック処理
 		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_ADD_CHECK);
@@ -262,7 +247,7 @@ class initScreen
 			$result = $this->confirm_add();
 		}
 
-		$this->common->debug_echo('■ do_confirm_add end');
+		$this->main->common()->debug_echo('■ do_confirm_add end');
 
 		return json_encode($result);
 	}
@@ -276,7 +261,7 @@ class initScreen
 	 */
 	public function do_back_add_dialog() {
 		
-		$this->common->debug_echo('■ disp_back_add_dialog start');
+		$this->main->common()->debug_echo('■ disp_back_add_dialog start');
 
 		$result = array('status' => true,
 						'message' => '',
@@ -285,7 +270,7 @@ class initScreen
 		// 入力ダイアログへ戻る
 		$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_ADD_BACK);
 
-		$this->common->debug_echo('■ disp_back_add_dialog end');
+		$this->main->common()->debug_echo('■ disp_back_add_dialog end');
 
 		return json_encode($result);
 	}
@@ -298,7 +283,7 @@ class initScreen
 	 */
 	public function do_disp_update_dialog() {
 		
-		$this->common->debug_echo('■ disp_update_dialog start');
+		$this->main->common()->debug_echo('■ disp_update_dialog start');
 
 		$result = array('status' => true,
 						'message' => '',
@@ -307,7 +292,7 @@ class initScreen
 		// 入力ダイアログHTMLの作成
 		$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_UPDATE);
 
-		$this->common->debug_echo('■ disp_update_dialog end');
+		$this->main->common()->debug_echo('■ disp_update_dialog end');
 
 		return json_encode($result);
 	}
@@ -321,7 +306,7 @@ class initScreen
 	 */
 	public function do_check_update() {
 		
-		$this->common->debug_echo('■ do_check_update start');
+		$this->main->common()->debug_echo('■ do_check_update start');
 
 		// 入力チェック処理
 		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_UPDATE);
@@ -338,7 +323,7 @@ class initScreen
 			$result['dialog_disp'] = $this->create_check_update_dialog_html();
 		}
 
-		$this->common->debug_echo('■ do_check_update end');
+		$this->main->common()->debug_echo('■ do_check_update end');
 
 		return json_encode($result);
 	}
@@ -352,7 +337,7 @@ class initScreen
 	 */
 	public function do_confirm_update() {
 		
-		$this->common->debug_echo('■ do_confirm_update start');
+		$this->main->common()->debug_echo('■ do_confirm_update start');
 
 		// 入力チェック処理
 		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_UPDATE_CHECK);
@@ -370,7 +355,7 @@ class initScreen
 			$result = $this->confirm_update();
 		}
 
-		$this->common->debug_echo('■ do_confirm_update end');
+		$this->main->common()->debug_echo('■ do_confirm_update end');
 		
 		return json_encode($result);
 	}
@@ -384,7 +369,7 @@ class initScreen
 	 */
 	public function do_back_update_dialog() {
 		
-		$this->common->debug_echo('■ do_back_update_dialog start');
+		$this->main->common()->debug_echo('■ do_back_update_dialog start');
 
 		$result = array('status' => true,
 						'message' => '',
@@ -393,7 +378,7 @@ class initScreen
 		// 入力ダイアログHTMLの作成
 		$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_UPDATE_BACK);
 
-		$this->common->debug_echo('■ do_back_update_dialog end');
+		$this->main->common()->debug_echo('■ do_back_update_dialog end');
 
 		return json_encode($result);
 	}
@@ -405,7 +390,7 @@ class initScreen
 	 */
 	public function do_disp_immediate_dialog() {
 		
-		$this->common->debug_echo('■ do_disp_immediate_dialog start');
+		$this->main->common()->debug_echo('■ do_disp_immediate_dialog start');
 
 		$result = array('status' => true,
 						'message' => '',
@@ -414,7 +399,7 @@ class initScreen
 		// ダイアログHTMLの作成
 		$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_IMMEDIATE);
 
-		$this->common->debug_echo('■ do_disp_immediate_dialog end');
+		$this->main->common()->debug_echo('■ do_disp_immediate_dialog end');
 
 		return json_encode($result);
 	}
@@ -428,7 +413,7 @@ class initScreen
 	 */
 	public function do_check_immediate() {
 		
-		$this->common->debug_echo('■ do_check_immediate start');
+		$this->main->common()->debug_echo('■ do_check_immediate start');
 
 		// 入力チェック処理
 		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_IMMEDIATE);
@@ -445,7 +430,7 @@ class initScreen
 			$result['dialog_disp'] = $this->create_check_immediate_dialog_html();
 		}
 
-		$this->common->debug_echo('■ do_check_immediate end');
+		$this->main->common()->debug_echo('■ do_check_immediate end');
 
 		return json_encode($result);
 	}
@@ -459,25 +444,24 @@ class initScreen
 	 */
 	public function do_immediate_publish() {
 		
-		$this->common->debug_echo('■ do_immediate_publish start');
+		$this->main->common()->debug_echo('■ do_immediate_publish start');
 
 		// 入力チェック処理
 		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_IMMEDIATE_CHECK);
 
 		$result = array('status' => true,
 						'message' => '',
-						'dialog_disp' => '',
-						'output_id' => '');
+						'dialog_disp' => '');
 
 		if ($this->input_error_message) {
 			// エラーがあるので入力ダイアログへ戻る
 			$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_IMMEDIATE_BACK);
 		} else {
 			// エラーがないので即時公開処理へ進む
-			$result = $this->immediate_publish();
+			$result = $this->publish->exec_immediate_publish(define::PUBLISH_TYPE_IMMEDIATE);
 		}
 
-		$this->common->debug_echo('■ do_immediate_publish end');
+		$this->main->common()->debug_echo('■ do_immediate_publish end');
 
 		return json_encode($result);
 	}
@@ -491,7 +475,7 @@ class initScreen
 	 */
 	public function do_back_immediate_dialog() {
 		
-		$this->common->debug_echo('■ do_back_immediate_dialog start');
+		$this->main->common()->debug_echo('■ do_back_immediate_dialog start');
 
 		$result = array('status' => true,
 						'message' => '',
@@ -500,7 +484,7 @@ class initScreen
 		// 入力ダイアログHTMLの作成
 		$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_IMMEDIATE_BACK);
 
-		$this->common->debug_echo('■ do_back_immediate_dialog end');
+		$this->main->common()->debug_echo('■ do_back_immediate_dialog end');
 
 		return json_encode($result);
 	}
@@ -512,7 +496,7 @@ class initScreen
 	 */
 	private function confirm_add() {
 		
-		$this->common->debug_echo('■ confirm_add start');
+		$this->main->common()->debug_echo('■ confirm_add start');
 
 		$output = "";
 		$result = array('status' => true,
@@ -525,13 +509,13 @@ class initScreen
 			// 指定ブランチのGit情報を「waiting」ディレクトリへコピー
 			//============================================================
 
-	 		$this->common->debug_echo('　□ -----Gitのファイルコピー処理-----');
+	 		$this->main->common()->debug_echo('　□ -----Gitのファイルコピー処理-----');
 			
 			// waitingディレクトリの絶対パスを取得。
-			$waiting_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->workdir_relativepath . define::PATH_WAITING));
+			$waiting_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->options->workdir_relativepath . define::PATH_WAITING));
 
 			// 公開予約ディレクトリ名の取得
-			$dirname = $this->common->format_gmt_datetime($this->main->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE);
+			$dirname = $this->main->common()->format_gmt_datetime($this->main->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE);
 
 			if (!$dirname) {
 				// エラー処理
@@ -541,14 +525,14 @@ class initScreen
 			}
 
 			// コピー処理
-			$this->gitMgr->git_file_copy($this->main->options, $waiting_real_path, $dirname);
+			$this->main->gitMgr()->git_file_copy($this->main->options, $waiting_real_path, $dirname);
 
-	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの登録処理-----');
+	 		$this->main->common()->debug_echo('　□ -----公開処理結果テーブルの登録処理-----');
 			
 			//============================================================
 			// 入力情報を公開予約テーブルへ登録
 			//============================================================
-			$this->tsReserve->insert_ts_reserve($this->main->dbh, $this->main->options);
+			$this->tsReserve->insert_ts_reserve($this->main->get_dbh(), $this->main->options);
 			
 		} catch (\Exception $e) {
 
@@ -560,7 +544,7 @@ class initScreen
 
 		$result['status'] = true;
 
-		$this->common->debug_echo('■ confirm_add end');
+		$this->main->common()->debug_echo('■ confirm_add end');
 
 		return $result;
 	}
@@ -573,7 +557,7 @@ class initScreen
 	 */
 	private function confirm_update() {
 		
-		$this->common->debug_echo('■ confirm_update start');
+		$this->main->common()->debug_echo('■ confirm_update start');
 	
 		$output = "";
 		$result = array('status' => true,
@@ -583,13 +567,13 @@ class initScreen
 		try {
 
 			// waitingディレクトリの絶対パスを取得。
-			$waiting_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->workdir_relativepath . define::PATH_WAITING));
+			$waiting_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->options->workdir_relativepath . define::PATH_WAITING));
 
 			//============================================================
 			// 「waiting」ディレクトリの変更前の公開ソースディレクトリを削除
 			//============================================================
 			// 変更前の公開予約ディレクトリ名の取得
-			$before_dirname = $this->common->format_gmt_datetime($this->main->options->_POST->before_gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE);
+			$before_dirname = $this->main->common()->format_gmt_datetime($this->main->options->_POST->before_gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE);
 			
 			if (!$before_dirname) {
 				// エラー処理
@@ -598,18 +582,18 @@ class initScreen
 				$before_dirname .= define::DIR_NAME_RESERVE;
 			}
 
-			$this->common->debug_echo('　□ 変更前の公開予約ディレクトリ：');
-			$this->common->debug_echo($before_dirname);
+			$this->main->common()->debug_echo('　□ 変更前の公開予約ディレクトリ：');
+			$this->main->common()->debug_echo($before_dirname);
 
 			// コピー処理
-			$this->gitMgr->file_delete($waiting_real_path, $before_dirname);
+			$this->main->gitMgr()->file_delete($waiting_real_path, $before_dirname);
 
 
 			//============================================================
 			// 変更後ブランチのGit情報を「waiting」ディレクトリへコピー
 			//============================================================
 			// 公開予約ディレクトリ名の取得
-			$dirname = $this->common->format_gmt_datetime($this->main->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE);
+			$dirname = $this->main->common()->format_gmt_datetime($this->main->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE);
 
 			if (!$dirname) {
 				// エラー処理
@@ -618,20 +602,20 @@ class initScreen
 				$dirname .= define::DIR_NAME_RESERVE;
 			}
 
-			$this->common->debug_echo('　□ 変更後の公開予約ディレクトリ：');
-			$this->common->debug_echo($dirname);
+			$this->main->common()->debug_echo('　□ 変更後の公開予約ディレクトリ：');
+			$this->main->common()->debug_echo($dirname);
 
 			// コピー処理
-			$this->gitMgr->git_file_copy($this->main->options, $waiting_real_path, $dirname);
+			$this->main->gitMgr()->git_file_copy($this->main->options, $waiting_real_path, $dirname);
 
-	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの更新処理-----');
+	 		$this->main->common()->debug_echo('　□ -----公開処理結果テーブルの更新処理-----');
 			
 			//============================================================
 			// 入力情報を公開予約テーブルへ更新
 			//============================================================
 			$selected_id =  $this->main->options->_POST->selected_id;
 
-			$this->tsReserve->update_ts_reserve($this->main->dbh, $this->main->options, $selected_id);
+			$this->tsReserve->update_ts_reserve($this->main->get_dbh(), $this->main->options, $selected_id);
 			
 		} catch (\Exception $e) {
 
@@ -643,7 +627,7 @@ class initScreen
 
 		$result['status'] = true;
 
-		$this->common->debug_echo('■ confirm_update end');
+		$this->main->common()->debug_echo('■ confirm_update end');
 
 		return $result;
 	}
@@ -655,7 +639,7 @@ class initScreen
 	 */
 	public function do_delete() {
 		
-		$this->common->debug_echo('■ do_delete start');
+		$this->main->common()->debug_echo('■ do_delete start');
 	
 		$output = "";
 		$result = array('status' => true,
@@ -668,28 +652,28 @@ class initScreen
 			$selected_id =  $this->main->options->_POST->selected_id;
 
 			// waitingディレクトリの絶対パスを取得。
-			$waiting_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->workdir_relativepath . define::PATH_WAITING));
+			$waiting_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->options->workdir_relativepath . define::PATH_WAITING));
 
 
 			try {
 
 				/* トランザクションを開始する。オートコミットがオフになる */
-				$this->main->dbh->beginTransaction();
+				$this->main->get_dbh()->beginTransaction();
 
 				//============================================================
 				// 公開予約情報の論理削除
 				//============================================================
 
-				$this->common->debug_echo('　□ -----公開予約情報の論理削除処理-----');
+				$this->main->common()->debug_echo('　□ -----公開予約情報の論理削除処理-----');
 
-				$this->tsReserve->delete_reserve_table($this->main->dbh, $this->main->options, $selected_id);
+				$this->tsReserve->delete_reserve_table($this->main->get_dbh(), $this->main->options, $selected_id);
 
 				//============================================================
 				// 「waiting」ディレクトリの変更前の公開ソースディレクトリを削除
 				//============================================================
 				// 公開予約ディレクトリ名の取得
-				$selected_ret = $this->tsReserve->get_selected_ts_reserve($this->main->dbh, $selected_id);
-				$dirname = $this->common->format_gmt_datetime($selected_ret[tsReserve::RESERVE_ENTITY_RESERVE_GMT], define::DATETIME_FORMAT_SAVE);
+				$selected_ret = $this->tsReserve->get_selected_ts_reserve($this->main->get_dbh(), $selected_id);
+				$dirname = $this->main->common()->format_gmt_datetime($selected_ret[tsReserve::RESERVE_ENTITY_RESERVE_GMT], define::DATETIME_FORMAT_SAVE);
 				
 				if (!$dirname) {
 					// エラー処理
@@ -699,17 +683,17 @@ class initScreen
 				}
 				
 				// コピー処理
-				$this->gitMgr->file_delete($waiting_real_path, $dirname);
+				$this->main->gitMgr()->file_delete($waiting_real_path, $dirname);
 
 
 				/* 変更をコミットする */
-				$this->main->dbh->commit();
+				$this->main->get_dbh()->commit();
 				/* データベース接続はオートコミットモードに戻る */
 
 		    } catch (\Exception $e) {
 		    
 		      /* 変更をロールバックする */
-		      $this->main->dbh->rollBack();
+		      $this->main->get_dbh()->rollBack();
 		 
 		      throw $e;
 		    }
@@ -724,218 +708,9 @@ class initScreen
 
 		$result['status'] = true;
 
-		$this->common->debug_echo('■ do_delete end');
+		$this->main->common()->debug_echo('■ do_delete end');
 
 		return json_encode($result);
-	}
-
-	/**
-	 * 即時公開処理
-	 */
-	private function immediate_publish() {
-
-		$this->common->debug_echo('■ immediate_publish start');
-
-		$output = "";
-		$result = array('status' => true,
-						'message' => '',
-						'dialog_disp' => '',
-						'output_id' => '',
-						'backup_id' => '');
-
-		$backup_dirname;
-
-		try {
-
-			// GMTの現在日時
-			$start_datetime = $this->common->get_current_datetime_of_gmt();
-
-			$this->common->debug_echo('　□ 公開処理開始日時：' . $start_datetime);
-
-			// 作業用ディレクトリの絶対パスを取得
-			$real_path = json_decode($this->common->get_workdir_real_path($this->main->options));
-
-			// 公開日時ディレクトリ名の取得
-			$dirname = $this->common->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
-
-			$this->common->debug_echo('　□ 公開日時ディレクトリ名：' . $dirname);
-
-			//============================================================
-			// ログ出力用の日付ディレクトリ作成
-			//============================================================
-
-			// logの日付ディレクトリを作成
-			$log_datetime_dir_path = $this->fs->normalize_path($this->fs->get_realpath($real_path->log_real_path . $dirname) . "/");
-			if ( !$this->common->is_exists_mkdir($log_datetime_dir_path) ) {
-				// エラー処理
-				throw new \Exception('Create log directory is failed. ' . $result->server_real_path);
-			}
-
-			error_log('', 3, $log_datetime_dir_path . 'rsync_copy_' . $dirname . '.log');
-			error_log('', 3, $log_datetime_dir_path . 'rsync_backup_' . $dirname . '.log');
-
-			//============================================================
-			// 公開処理結果テーブルの登録処理
-			//============================================================
-
-	 		$this->common->debug_echo('　□ -----[即時公開]公開処理結果テーブルの登録処理-----');
-
-			// 現在時刻
-			$now = $this->common->get_current_datetime_of_gmt();
-
-			$dataArray = array(
-				tsOutput::TS_OUTPUT_RESERVE_ID 		=> null,
-				tsOutput::TS_OUTPUT_BACKUP_ID		=> null,
-				tsOutput::TS_OUTPUT_RESERVE 		=> null,
-				tsOutput::TS_OUTPUT_BRANCH 			=> $this->main->options->_POST->branch_select_value,
-				tsOutput::TS_OUTPUT_COMMIT_HASH 	=> $this->main->options->_POST->commit_hash,
-				tsOutput::TS_OUTPUT_COMMENT 		=> $this->main->options->_POST->comment,
-				tsOutput::TS_OUTPUT_PUBLISH_TYPE 	=> define::PUBLISH_TYPE_IMMEDIATE,
-				tsOutput::TS_OUTPUT_STATUS 			=> define::PUBLISH_STATUS_RUNNING,
-				tsOutput::TS_OUTPUT_SRV_BK_DIFF_FLG => null,
-				tsOutput::TS_OUTPUT_START 			=> $start_datetime,
-				tsOutput::TS_OUTPUT_END 			=> null,
-				tsOutput::TS_OUTPUT_GEN_DELETE_FLG 	=> define::DELETE_FLG_OFF,
-				tsOutput::TS_OUTPUT_GEN_DELETE 		=> null,
-				tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
-				tsOutput::TS_OUTPUT_INSERT_USER_ID 	=> $this->main->options->user_id,
-				tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
-				tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> null
-			);
-
-			// 公開処理結果テーブルの登録（インサートしたシーケンスIDをリターン値で取得）
-			$result['output_id'] = $this->tsOutput->insert_ts_output($this->main->dbh, $dataArray);
-
-			// ============================================================
-			// 指定ブランチのGit情報を「running」ディレクトリへコピー
-			// ============================================================
-
-	 		$this->common->debug_echo('　□ -----[即時公開]指定ブランチのGit情報を「running」ディレクトリへコピー-----');
-			
-			// Git情報のコピー処理
-			$this->gitMgr->git_file_copy($this->main->options, $real_path->running_real_path, $dirname);
-
-			try {
-
-				/* トランザクションを開始する。オートコミットがオフになる */
-				$this->main->dbh->beginTransaction();
-
-				//============================================================
-				// バックアップテーブルの登録処理
-				//============================================================
-
-		 		$this->common->debug_echo('　□ -----バックアップテーブルの登録処理-----');
-				
-				// GMTの現在日時
-				$backup_datetime = $this->common->get_current_datetime_of_gmt();
-
-				$this->common->debug_echo('　□ バックアップ日時：' . $backup_datetime);
-
-				$result['backup_id'] = $this->tsBackup->insert_ts_backup($this->main->dbh, $this->main->options, $backup_datetime, $result['output_id']);
-
-
-				//============================================================
-				// 本番ソースを「backup」ディレクトリへコピー
-				//============================================================
-
-		 		$this->common->debug_echo('　□ -----本番ソースを「backup」ディレクトリへコピー-----');
-				
-				$backup_dirname = $this->common->format_gmt_datetime($backup_datetime, define::DATETIME_FORMAT_SAVE);
-				
-				// バックアップファイル作成
-				$this->publish->create_backup($backup_dirname, $real_path);
-
-		 		/* 変更をコミットする */
-				$this->main->dbh->commit();
-				/* データベース接続はオートコミットモードに戻る */
-
-		    } catch (\Exception $e) {
-		    
-		      /* 変更をロールバックする */
-		      $this->main->dbh->rollBack();
-		 
-		      throw $e;
-		    }
-
-
-			try {
-
-				/* トランザクションを開始する。オートコミットがオフになる */
-				$this->main->dbh->beginTransaction();
-
-				//============================================================
-				// 公開処理結果テーブルの更新処理（成功）
-				//============================================================
-
-		 		$this->common->debug_echo('　□ -----公開処理結果テーブルの更新処理（成功）-----');
-				
-				// GMTの現在日時
-				$end_datetime = $this->common->get_current_datetime_of_gmt();
-
-				$dataArray = array(
-					tsOutput::TS_OUTPUT_STATUS 			=> define::PUBLISH_STATUS_SUCCESS,
-					tsOutput::TS_OUTPUT_SRV_BK_DIFF_FLG => "0",
-					tsOutput::TS_OUTPUT_END 			=> $end_datetime,
-					tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> $this->main->options->user_id
-				);
-
-		 		$this->tsOutput->update_ts_output($this->main->dbh, $result['output_id'], $dataArray);
-
-
-				//============================================================
-				// ※公開処理※
-				//============================================================
-
-		 		$this->common->debug_echo('　□ -----公開処理-----');
-				
-				$this->publish->do_publish($dirname, $this->main->options, $log_datetime_dir_path);
-
-
-		 		/* 変更をコミットする */
-				$this->main->dbh->commit();
-				/* データベース接続はオートコミットモードに戻る */
-
-		    } catch (\Exception $e) {
-		    
-		      /* 変更をロールバックする */
-		      $this->main->dbh->rollBack();
-		 
-		      throw $e;
-		    }
-
-		} catch (\Exception $e) {
-
-		$this->common->debug_echo('■ 3');
-
-			$result['status'] = false;
-			$result['message'] = '【Immediate publish faild.】' . $e->getMessage();
-
-			//============================================================
-			// 公開処理結果テーブルの更新処理（失敗）
-			//============================================================
-
-	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの更新処理（失敗）-----');
-			
-			// GMTの現在日時
-			$end_datetime = $this->common->get_current_datetime_of_gmt();
-			$dataArray = array(
-				tsOutput::TS_OUTPUT_STATUS 			=> define::PUBLISH_STATUS_FAILED,
-				tsOutput::TS_OUTPUT_SRV_BK_DIFF_FLG => "0",
-				tsOutput::TS_OUTPUT_END 			=> $end_datetime,
-				tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> $this->main->options->user_id
-			);
-	 		$this->tsOutput->update_ts_output($this->main->dbh, $result['output_id'], $dataArray);
-
-			$this->common->debug_echo('■ immediate_publish error end');
-
-			return $result;
-		}
-
-		$result['status'] = true;
-
-		$this->common->debug_echo('■ immediate_publish end');
-
-		return $result;
 	}
 
 	/**
@@ -943,153 +718,18 @@ class initScreen
 	 */
 	public function do_restore_publish_failure($output_id) {
 
-		$this->common->debug_echo('■ do_restore_publish_failure start');
+		$this->main->common()->debug_echo('■ do_restore_publish_failure start');
 
 		$output = "";
 		$result = array('status' => true,
 						'message' => '',
 						'dialog_disp' => '');
 
-		try {
+		$result = $this->publish->exec_restore_publish($output_id);
 
-			// 処理結果IDからバックアップ情報を取得
-			$backup_data = $this->tsBackup->get_selected_ts_backup_by_output_id($this->main->dbh, $output_id);
+		$this->main->common()->debug_echo('■ do_restore_publish_failure end');
 
-			//============================================================
-			// 公開処理結果テーブルの登録処理（復元用）
-			//============================================================
-
-	 		$this->common->debug_echo('　□ -----[復元公開]公開処理結果テーブルの登録処理-----');
-
-			// 開始時刻
-			$start_datetime = $this->common->get_current_datetime_of_gmt();
-
-			$dataArray = array(
-				tsOutput::TS_OUTPUT_RESERVE_ID => $output_id,
-				tsOutput::TS_OUTPUT_BACKUP_ID => $backup_data[tsBackup::BACKUP_ENTITY_ID_SEQ],
-				tsOutput::TS_OUTPUT_RESERVE => null,
-				tsOutput::TS_OUTPUT_BRANCH => null,
-				tsOutput::TS_OUTPUT_COMMIT_HASH => null,
-				tsOutput::TS_OUTPUT_COMMENT => null,
-				tsOutput::TS_OUTPUT_PUBLISH_TYPE => define::PUBLISH_TYPE_RESTORE,
-				tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_RUNNING,
-				tsOutput::TS_OUTPUT_DIFF_FLG1 => null,
-				tsOutput::TS_OUTPUT_DIFF_FLG2 => null,
-				tsOutput::TS_OUTPUT_DIFF_FLG3 => null,
-				tsOutput::TS_OUTPUT_START => $start_datetime,
-				tsOutput::TS_OUTPUT_END => null,
-				tsOutput::TS_OUTPUT_GEN_DELETE_FLG => define::DELETE_FLG_OFF,
-				tsOutput::TS_OUTPUT_GEN_DELETE => null,
-				tsOutput::TS_OUTPUT_INSERT_DATETIME => $start_datetime,
-				tsOutput::TS_OUTPUT_INSERT_USER_ID => $this->main->options->user_id,
-				tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
-				tsOutput::TS_OUTPUT_UPDATE_USER_ID => null
-			);
-
-			// 公開処理結果テーブルの登録（インサートしたシーケンスIDをリターン値で取得）
-			$insert_id = $this->tsOutput->insert_ts_output($this->main->dbh, $dataArray);
-
-			$this->common->debug_echo('　□ $insert_id：' . $insert_id);
-
-
-
-			//============================================================
-			// バックアップディレクトリを「backup」から「running」ディレクトリへ移動
-			//============================================================
-
-	 		$this->common->debug_echo('　□ -----バックアップディレクトリを「backup」から「running」ディレクトリへコピー-----');
-
-			$backup_dirname = $this->common->format_gmt_datetime($backup_data[tsBackup::BACKUP_ENTITY_DATETIME_GMT], define::DATETIME_FORMAT_SAVE);
-				
-			// runningディレクトリの絶対パスを取得。
-			$running_dirname = $this->common->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
-
-			$this->publish->copy_dir($real_path->backup_real_path, $backup_dirname, $real_path->running_real_path, $running_dirname, $real_path->log_real_path);
-
-			try {
-
-				/* トランザクションを開始する。オートコミットがオフになる */
-				$this->main->dbh->beginTransaction();
-
-				//============================================================
-				// 公開処理結果テーブルの更新処理（成功）
-				//============================================================
-
-		 		$this->common->debug_echo('　□ -----公開処理結果テーブルの更新処理（成功）-----');
-				
-				// GMTの現在日時
-				$end_datetime = $this->common->get_current_datetime_of_gmt();
-
-				$dataArray = array(
-					tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_SUCCESS,
-					tsOutput::TS_OUTPUT_DIFF_FLG1 => "0",
-					tsOutput::TS_OUTPUT_DIFF_FLG2 => "0",
-					tsOutput::TS_OUTPUT_DIFF_FLG3 => "0",
-					tsOutput::TS_OUTPUT_END => $end_datetime,
-					tsOutput::TS_OUTPUT_UPDATE_USER_ID => $this->main->options->user_id
-				);
-
-		 		$this->tsOutput->update_ts_output($this->main->dbh, $insert_id, $dataArray);
-
-				//============================================================
-				// ※公開処理※
-				//============================================================
-				
-		 		$this->common->debug_echo('　□ -----公開処理-----');
-				
-				$this->publish->do_publish($running_dirname, $this->main->options);
-			
-
-		 		/* 変更をコミットする */
-				$this->main->dbh->commit();
-				/* データベース接続はオートコミットモードに戻る */
-
-		    } catch (\Exception $e) {
-		    
-		      /* 変更をロールバックする */
-		      $this->main->dbh->rollBack();
-		      
-		      // throw $e;
-		      throw new \Exception($e->getMessage());
-		    }
-
-		} catch (\Exception $e) {
-
-		$this->common->debug_echo('■ 3');
-
-			$result['status'] = false;
-			$result['message'] = '【Restore publication failure faild.】' . $e->getMessage();
-
-
-			//============================================================
-			// 公開処理結果テーブルの更新処理（失敗）
-			//============================================================
-
-	 		$this->common->debug_echo('　□ -----公開処理結果テーブルの更新処理（失敗）-----');
-			// GMTの現在日時
-			$end_datetime = $this->common->get_current_datetime_of_gmt();
-
-			$dataArray = array(
-				tsOutput::TS_OUTPUT_STATUS => define::PUBLISH_STATUS_FAILED,
-				tsOutput::TS_OUTPUT_DIFF_FLG1 => "0",
-				tsOutput::TS_OUTPUT_DIFF_FLG2 => "0",
-				tsOutput::TS_OUTPUT_DIFF_FLG3 => "0",
-				tsOutput::TS_OUTPUT_END => $end_datetime,
-				tsOutput::TS_OUTPUT_UPDATE_USER_ID => $this->main->options->user_id
-			);
-
-	 		$this->tsOutput->update_ts_output($this->main->dbh, $insert_id, $dataArray);
-
-			$this->common->debug_echo('■ do_restore_publish_failure error end');
-
-			return json_encode($result);
-		}
-
-		$result['status'] = true;
-
-		$this->common->debug_echo('■ do_restore_publish_failure end');
-
-		return $result;
+		return json_encode($result);
 	}
 
 	/**
@@ -1101,7 +741,7 @@ class initScreen
 	 */
 	private function create_input_dialog_html($input_mode) {
 		
-		$this->common->debug_echo('■ create_input_dialog_html start');
+		$this->main->common()->debug_echo('■ create_input_dialog_html start');
 
 
 		$ret = '<div class="dialog" id="modal_dialog">'
@@ -1151,7 +791,7 @@ class initScreen
 			// 画面選択された公開予約情報を取得
 			$form['selected_id'] = $this->main->options->_POST->selected_id;
 
-			$selected_data = $this->tsReserve->get_selected_ts_reserve($this->main->dbh, $form['selected_id']);
+			$selected_data = $this->tsReserve->get_selected_ts_reserve($this->main->get_dbh(), $form['selected_id']);
 
 			if ($selected_data) {
 
@@ -1164,7 +804,7 @@ class initScreen
 		}
 
         // masterディレクトリの絶対パス
-        // $workdir_relativepath = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->workdir_relativepath));
+        // $workdir_relativepath = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->options->workdir_relativepath));
 
 		// mainクラス呼び出しディレクトリの相対パス
         $param_relativepath = $this->main->options->param_relativepath;
@@ -1188,7 +828,7 @@ class initScreen
 			  . '<td><select id="branch_list" class="form-control" name="branch_select_value">';
 
 				// ブランチリストを取得
-				$get_branch_ret = json_decode($this->gitMgr->get_branch_list($this->main->options));
+				$get_branch_ret = json_decode($this->main->gitMgr()->get_branch_list($this->main->options));
 				$branch_list = $get_branch_ret->branch_list;
 
 				foreach ((array)$branch_list as $branch) {
@@ -1260,7 +900,7 @@ class initScreen
 			  . '</div>'
 			  . '</div></div>';
 		
-		$this->common->debug_echo('■ create_input_dialog_html end');
+		$this->main->common()->debug_echo('■ create_input_dialog_html end');
 
 		return $ret;
 	}
@@ -1272,7 +912,7 @@ class initScreen
 	 */
 	private function create_check_add_dialog_html() {
 		
-		$this->common->debug_echo('■ create_check_add_dialog_html start');
+		$this->main->common()->debug_echo('■ create_check_add_dialog_html start');
 
 		// フォームパラメタの設定
 		$form = $this->get_form_value();
@@ -1349,7 +989,7 @@ class initScreen
 			 . '</div>'
 			 . '</div></div></div>';
 
-		$this->common->debug_echo('■ create_check_add_dialog_html end');
+		$this->main->common()->debug_echo('■ create_check_add_dialog_html end');
 
 		return $ret;
 	}
@@ -1362,7 +1002,7 @@ class initScreen
 	 */
 	private function create_check_update_dialog_html() {
 		
-		$this->common->debug_echo('■ create_check_update_dialog_html start');
+		$this->main->common()->debug_echo('■ create_check_update_dialog_html start');
 
 		// フォームパラメタの設定
 		$form = $this->get_form_value();
@@ -1379,7 +1019,7 @@ class initScreen
 
 		// 画面選択された変更前の公開予約情報を取得
 		$selected_id =  $this->main->options->_POST->selected_id;
-		$selected_data = $this->tsReserve->get_selected_ts_reserve($this->main->dbh, $selected_id);
+		$selected_data = $this->tsReserve->get_selected_ts_reserve($this->main->get_dbh(), $selected_id);
 
 		if ($selected_data) {
 
@@ -1496,7 +1136,7 @@ class initScreen
 			. '</div>'
 			. '</div></div>';
 
-		$this->common->debug_echo('■ create_check_update_dialog_html end');
+		$this->main->common()->debug_echo('■ create_check_update_dialog_html end');
 
 		return $ret;
 	}
@@ -1508,7 +1148,7 @@ class initScreen
 	 */
 	private function create_check_immediate_dialog_html() {
 		
-		$this->common->debug_echo('■ create_check_immediate_dialog_html start');
+		$this->main->common()->debug_echo('■ create_check_immediate_dialog_html start');
 
 		// フォームパラメタの設定
 		$form = $this->get_form_value();
@@ -1578,7 +1218,7 @@ class initScreen
 			 . '</div>'
 			 . '</div></div></div>';
 
-		$this->common->debug_echo('■ create_check_immediate_dialog_html end');
+		$this->main->common()->debug_echo('■ create_check_immediate_dialog_html end');
 
 		return $ret;
 	}
@@ -1593,7 +1233,7 @@ class initScreen
 	 */
 	private function do_validation_check($input_mode) {
 				
-		$this->common->debug_echo('■ do_validation_check start');
+		$this->main->common()->debug_echo('■ do_validation_check start');
 
 		$ret = "";
 
@@ -1605,7 +1245,7 @@ class initScreen
 		/**
  		* 公開予約一覧を取得
 		*/ 
-		$data_list = $this->tsReserve->get_ts_reserve_list($this->main->dbh);
+		$data_list = $this->tsReserve->get_ts_reserve_list($this->main->get_dbh());
 	
 		// 画面入力された日時を結合し、GMTへ変換する
 		$gmt_reserve_datetime = $this->combine_to_gmt_date_and_time($form['reserve_date'], $form['reserve_time']);
@@ -1665,7 +1305,7 @@ class initScreen
 			}
 		}
 
-		$this->common->debug_echo('■ do_validation_check end');
+		$this->main->common()->debug_echo('■ do_validation_check end');
 
 		return $ret;
 	}
@@ -1702,7 +1342,7 @@ class initScreen
 	 */
 	private function combine_to_gmt_date_and_time($date, $time) {
 	
-		// $this->common->debug_echo('■ combine_to_gmt_date_and_time start');
+		// $this->main->common()->debug_echo('■ combine_to_gmt_date_and_time start');
 
 		$ret = '';
 
@@ -1717,13 +1357,13 @@ class initScreen
 		
 			// $ret = $t->format(DATE_ATOM);
 			$ret = $t->format(define::DATETIME_FORMAT);
-			// $this->common->debug_echo('　□timezone：' . $timezone);
+			// $this->main->common()->debug_echo('　□timezone：' . $timezone);
 		}
 		
-		// $this->common->debug_echo('　□変換前の時刻：' . $datetime);
-		// $this->common->debug_echo('　□変換後の時刻（GMT）：'. $ret);
+		// $this->main->common()->debug_echo('　□変換前の時刻：' . $datetime);
+		// $this->main->common()->debug_echo('　□変換後の時刻（GMT）：'. $ret);
 		
-		// $this->common->debug_echo('■ combine_to_gmt_date_and_time end');
+		// $this->main->common()->debug_echo('■ combine_to_gmt_date_and_time end');
 
 	    return $ret;
 	}
@@ -1735,7 +1375,7 @@ class initScreen
 	 */
 	private function get_form_value() {
 
-		$this->common->debug_echo('■ get_form_value start');
+		$this->main->common()->debug_echo('■ get_form_value start');
 
 		$form = array('branch_select_value' => '',
 						'reserve_date' => '',
@@ -1765,8 +1405,9 @@ class initScreen
 			$form['selected_id'] = $this->main->options->_POST->selected_id;
 		}
 
-		$this->common->debug_echo('■ get_form_value end');
+		$this->main->common()->debug_echo('■ get_form_value end');
 
 		return $form;
 	}
+
 }

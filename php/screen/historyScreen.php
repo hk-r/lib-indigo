@@ -185,7 +185,9 @@ class historyScreen
 		$ret .= '<p>公開開始日時：' . $selected_ret[tsOutput::OUTPUT_ENTITY_START_DISP] . '</p>'
 			  . '<p>公開終了日時：' . $selected_ret[tsOutput::OUTPUT_ENTITY_END_DISP] . '</p>'
 			  . '<p>  User ID  ：' . $selected_ret[tsOutput::OUTPUT_ENTITY_INSERT_USER_ID] . '</p>'
-			  . '<p>' . nl2br($content) .'</p>';
+			  . '<p>-----------------------------------------------------</p>'
+			  . '<p>' . nl2br($content) .'</p>'
+			  . '<p>-----------------------------------------------------</p>';
 
 		$ret .=  '<div class="button_contents_box">'
 			  . '<div class="button_contents">'
