@@ -630,7 +630,7 @@ $this->main->common()->debug_echo('　□5');
 
 		 		$this->main->common()->debug_echo('　□ -----公開処理-----');
 				
-				$this->do_publish($dirname, $this->main->options, $copylogpath);
+				$this->do_publish($running_dirname, $this->main->options, $copylogpath);
 
 
 		 		/* 変更をコミットする */
