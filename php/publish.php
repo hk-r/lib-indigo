@@ -6,7 +6,7 @@ class publish
 {
 	private $main;
 
-	private $tsOutput, $tsBackup;
+	private $tsReserve, $tsOutput, $tsBackup;
 
 	/** ロックファイルの格納パス */
 	private $path_lockfile;
@@ -22,6 +22,7 @@ class publish
 
 		$this->main = $main;
 
+		$this->tsReserve = new tsReserve($this);
 		$this->tsOutput = new tsOutput($this);
 		$this->tsBackup = new tsBackup($this);
 		
@@ -225,8 +226,6 @@ $this->main->common()->debug_echo('　□ 3');
 			throw new \Exception('Copy base directory not found. ' . $from_real_path);
 		}
 
-		chdir($current_dir);
-
 		$this->main->common()->debug_echo('■ move_dir end');
 	}
 
@@ -274,11 +273,11 @@ $this->main->common()->debug_echo('　□ 3');
 
 
 	/**
-	 * 即時公開処理
+	 * 公開処理
 	 */
-	public function exec_immediate_publish($publish_type) {
+	public function exec_publish($publish_type) {
 
-		$this->main->common()->debug_echo('■ exec_immediate_publish start');
+		$this->main->common()->debug_echo('■ exec_publish start');
 
 		$output = "";
 		$result = array('status' => true,
@@ -365,9 +364,11 @@ $this->main->common()->debug_echo('　□4');
 					//============================================================
 					// 公開予約の一覧を取得
 					$data_list = $this->tsReserve->get_ts_reserve_publish_list($this->main->get_dbh(), $start_datetime);
+$this->main->common()->debug_echo('　□5');
+					$this->main->common()->debug_var_dump($data_list);
 
 					if (!$data_list) {
-						$this->common->debug_echo('Target data does not exist.');
+						$this->main->common()->debug_echo('Target data does not exist.');
 						return $result;
 					}
 
@@ -378,17 +379,17 @@ $this->main->common()->debug_echo('　□4');
 					// 複数件取れてきた場合は、最新データ以外はスキップデータとして公開処理結果テーブルへ登録する
 					foreach ( (array) $data_list as $data ) {
 
-						$this->common->debug_echo('　□ 公開取得データ[配列]');
-						$this->common->debug_var_dump($data);
+						$this->main->common()->debug_echo('　□ 公開取得データ[配列]');
+						$this->main->common()->debug_var_dump($data);
 
 						//============================================================
 						// 公開処理結果テーブルの登録処理
 						//============================================================
 
-					 	$this->common->debug_echo('　□ -----[時限公開]公開処理結果テーブルの登録処理-----');
+					 	$this->main->common()->debug_echo('　□ -----[時限公開]公開処理結果テーブルの登録処理-----');
 
 						// 現在時刻
-						$now = $this->common->get_current_datetime_of_gmt();
+						$now = $this->main->common()->get_current_datetime_of_gmt();
 
 						$dataArray = array(
 							tsOutput::TS_OUTPUT_RESERVE_ID 		=> $data[tsReserve::RESERVE_ENTITY_ID_SEQ],
@@ -405,7 +406,7 @@ $this->main->common()->debug_echo('　□4');
 							tsOutput::TS_OUTPUT_GEN_DELETE_FLG 	=> define::DELETE_FLG_OFF,
 							tsOutput::TS_OUTPUT_GEN_DELETE 		=> null,
 							tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
-							tsOutput::TS_OUTPUT_INSERT_USER_ID 	=> $this->options->user_id,
+							tsOutput::TS_OUTPUT_INSERT_USER_ID 	=> $this->main->options->user_id,
 							tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
 							tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> null
 						);
@@ -415,7 +416,7 @@ $this->main->common()->debug_echo('　□4');
 
 						if ($cnt == 1) {
 
-							$dirname = $this->common->format_gmt_datetime($data[tsReserve::RESERVE_ENTITY_RESERVE_GMT], define::DATETIME_FORMAT_SAVE);
+							$dirname = $this->main->common()->format_gmt_datetime($data[tsReserve::RESERVE_ENTITY_RESERVE_GMT], define::DATETIME_FORMAT_SAVE);
 
 							if (!$dirname) {
 								// エラー処理
@@ -424,10 +425,10 @@ $this->main->common()->debug_echo('　□4');
 								$dirname .= define::DIR_NAME_RESERVE;
 							}
 
-							$output_id = $insert_id;
+							$result['output_id'] = $insert_id;
 
-							$this->common->debug_echo('　□ 公開ディレクトリ名');
-							$this->common->debug_var_dump($dirname);
+							$this->main->common()->debug_echo('　□ 公開ディレクトリ名');
+							$this->main->common()->debug_var_dump($dirname);
 
 							if (!$dirname) {
 								// エラー処理
@@ -453,10 +454,10 @@ $this->main->common()->debug_echo('　□4');
 					// 公開予約ディレクトリを「waiting」から「running」ディレクトリへ移動
 					//============================================================
 
-			 		$this->common->debug_echo('　□ -----公開予約ディレクトリを「waiting」から「running」ディレクトリへ移動-----');
+			 		$this->main->common()->debug_echo('　□ -----公開予約ディレクトリを「waiting」から「running」ディレクトリへ移動-----');
 
 					// // runningディレクトリの絶対パスを取得。
-					// $running_dirname = $this->common->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
+					// $running_dirname = $this->main->common()->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
 
 					$this->move_dir($real_path->waiting_real_path, $dirname, $real_path->running_real_path, $running_dirname, $real_path->log_real_path);
 
@@ -646,7 +647,7 @@ $this->main->common()->debug_echo('　□4');
 
 		} catch (\Exception $e) {
 
-		$this->main->common()->debug_echo('■ 3');
+			$this->main->common()->debug_echo('■ 3');
 
 			$result['status'] = false;
 			$result['message'] = '【Immediate publish faild.】' . $e->getMessage();
@@ -667,14 +668,14 @@ $this->main->common()->debug_echo('　□4');
 			);
 	 		$this->tsOutput->update_ts_output($this->main->get_dbh(), $result['output_id'], $dataArray);
 
-			$this->main->common()->debug_echo('■ exec_immediate_publish error end');
+			$this->main->common()->debug_echo('■ exec_publish error end');
 
 			return $result;
 		}
 
 		$result['status'] = true;
 
-		$this->main->common()->debug_echo('■ exec_immediate_publish end');
+		$this->main->common()->debug_echo('■ exec_publish end');
 
 		return $result;
 	}

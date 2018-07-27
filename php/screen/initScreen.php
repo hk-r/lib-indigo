@@ -458,7 +458,7 @@ class initScreen
 			$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_IMMEDIATE_BACK);
 		} else {
 			// エラーがないので即時公開処理へ進む
-			$result = $this->publish->exec_immediate_publish(define::PUBLISH_TYPE_IMMEDIATE);
+			$result = $this->publish->exec_publish(define::PUBLISH_TYPE_IMMEDIATE);
 		}
 
 		$this->main->common()->debug_echo('■ do_immediate_publish end');

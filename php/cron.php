@@ -27,6 +27,12 @@ class cron
 
 		$this->options = json_decode(json_encode($options));
 
+		$this->fs = new \tomk79\filesystem(array(
+		  'file_default_permission' => define::FILE_DEFAULT_PERMISSION,
+		  'dir_default_pefrmission' => define::DIR_DEFAULT_PERMISSION,
+		  'filesystem_encoding' 	=> define::FILESYSTEM_ENCODING
+		));
+		
 		$this->common = new common($this);
 
 		$this->publish = new publish($this);
@@ -61,7 +67,7 @@ class cron
 			//============================================================
 			// 公開処理実施
 			//============================================================
-			$result = json_encode($this->publish->exec_immediate_publish(define::PUBLISH_TYPE_RESERVE));
+			$result = json_decode(json_encode($this->publish->exec_publish(define::PUBLISH_TYPE_RESERVE)));
 	
 			if ( !$result->status ) {
 				// 処理失敗の場合

@@ -121,7 +121,7 @@ class backupScreen
 		$this->main->common()->debug_echo('■ do_restore_publish start');
 
 		// エラーがないので即時公開処理へ進む
-		$result = $this->publish->exec_immediate_publish(define::PUBLISH_TYPE_IMMEDIATE);
+		$result = $this->publish->exec_publish(define::PUBLISH_TYPE_IMMEDIATE);
 
 		$this->main->common()->debug_echo('■ do_restore_publish end');
 
@@ -138,7 +138,7 @@ class backupScreen
 	// 	//============================================================
 	// 	// 公開処理実施
 	// 	//============================================================
-	// 	$result = json_encode($this->publish->exec_immediate_publish(define::PUBLISH_TYPE_RESTORE));
+	// 	$result = json_encode($this->publish->exec_publish(define::PUBLISH_TYPE_RESTORE));
 
 	// 	$insert_id;
 
