@@ -355,7 +355,7 @@ $this->main->common()->debug_echo('　□4');
 			try {
 
 				/* トランザクションを開始する。オートコミットがオフになる */
-				$this->dbh->beginTransaction();
+				$this->main->get_dbh()->beginTransaction();
 
 				// 予約公開の場合
 				if ($publish_type == define::PUBLISH_TYPE_RESERVE) {
@@ -364,7 +364,7 @@ $this->main->common()->debug_echo('　□4');
 					// 公開予約テーブルより、公開対象データの取得
 					//============================================================
 					// 公開予約の一覧を取得
-					$data_list = $this->tsReserve->get_ts_reserve_publish_list($this->dbh, $start_datetime);
+					$data_list = $this->tsReserve->get_ts_reserve_publish_list($this->main->get_dbh(), $start_datetime);
 
 					if (!$data_list) {
 						$this->common->debug_echo('Target data does not exist.');
@@ -411,7 +411,7 @@ $this->main->common()->debug_echo('　□4');
 						);
 
 						// 公開処理結果テーブルの登録（インサートしたシーケンスIDをリターン値で取得）
-						$insert_id = $this->tsOutput->insert_ts_output($this->dbh, $dataArray);
+						$insert_id = $this->tsOutput->insert_ts_output($this->main->get_dbh(), $dataArray);
 
 						if ($cnt == 1) {
 
@@ -444,7 +444,7 @@ $this->main->common()->debug_echo('　□4');
 						//============================================================
 						
 						// 公開予約テーブルのステータス更新処理
-						$this->tsReserve->update_ts_reserve_status($this->dbh, $data[tsReserve::RESERVE_ENTITY_ID_SEQ]);
+						$this->tsReserve->update_ts_reserve_status($this->main->get_dbh(), $data[tsReserve::RESERVE_ENTITY_ID_SEQ]);
 					
 						$cnt++;
 					}
@@ -518,7 +518,7 @@ $this->main->common()->debug_echo('　□4');
 
 						$selected_id =  $this->main->options->_POST->selected_id;
 
-						$selected_data = $this->tsBackup->get_selected_ts_backup($this->main->dbh, $selected_id);
+						$selected_data = $this->tsBackup->get_selected_ts_backup($this->main->get_dbh(), $selected_id);
 					
 						if (!$selected_data) {
 							throw new \Exception('Target data not found.');
@@ -545,13 +545,13 @@ $this->main->common()->debug_echo('　□4');
 				}
 
 		 		/* 変更をコミットする */
-				$this->dbh->commit();
+				$this->main->get_dbh()->commit();
 				/* データベース接続はオートコミットモードに戻る */
 
 		    } catch (\Exception $e) {
 		    
 		      /* 変更をロールバックする */
-		      $this->dbh->rollBack();
+		      $this->main->get_dbh()->rollBack();
 		 
 		      throw $e;
 		    }
