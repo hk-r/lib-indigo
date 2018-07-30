@@ -533,7 +533,7 @@ class publish
 				$to_realpath = $result->realpath_released . $running_dirname . '/';
 
 				$logstr = "カレントディレクトリ：" . realpath('.') . "\r\n";
-				$logstr = "runningディレクトリ：" . $from_realpath . "\r\n";
+				$logstr .= "runningディレクトリ：" . $from_realpath . "\r\n";
 				$logstr .= "releasedディレクトリ：" . $to_realpath . "\r\n";
 				$this->main->put_log($realpath_tracelog, $logstr);
 
