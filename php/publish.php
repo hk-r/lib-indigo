@@ -50,6 +50,8 @@ class publish
 
 		$backup_dirname;
 
+		$result['output_id'] = $output_id;
+
 		try {
 
 
@@ -272,11 +274,14 @@ class publish
 
 						$backup_id = $backup_data[tsBackup::BACKUP_ENTITY_ID_SEQ];
 
-						$logstr .= "バックアップID：" . $backup_id . "\r\n";
+						$logstr = "バックアップID：" . $backup_id . "\r\n";
 						$this->main->put_log($realpath_tracelog, $logstr);
 
 						$backup_dirname = $this->main->common()->format_gmt_datetime($backup_data[tsBackup::BACKUP_ENTITY_DATETIME_GMT], define::DATETIME_FORMAT_SAVE);
 					
+						$logstr = "バックアップディレクトリ：" . $backup_dirname . "\r\n";
+						$this->main->put_log($realpath_tracelog, $logstr);
+
 						if (!$backup_dirname) {
 							// エラー処理
 							throw new \Exception('Backup dirname not found.');
@@ -296,13 +301,21 @@ class publish
 						// 処理結果IDからバックアップ情報を取得
 						$backup_data = $this->tsBackup->get_selected_ts_backup_by_output_id($this->main->get_dbh(), $output_id);
 
+						if (!$backup_data) {
+							// エラー処理
+							throw new \Exception('Could not get data from backup table.');
+						}
+
 						$backup_id = $backup_data[tsBackup::BACKUP_ENTITY_ID_SEQ];
 						
-						$logstr .= "バックアップID：" . $backup_id . "\r\n";
+						$logstr = "バックアップID：" . $backup_id . "\r\n";
+						$logstr .= "バックアップ日時：" . $backup_data[tsBackup::BACKUP_ENTITY_DATETIME_GMT] . "\r\n";
 						$this->main->put_log($realpath_tracelog, $logstr);
 
 						$backup_dirname = $this->main->common()->format_gmt_datetime($backup_data[tsBackup::BACKUP_ENTITY_DATETIME_GMT], define::DATETIME_FORMAT_SAVE);
 					
+						$logstr = "バックアップディレクトリ：" . $backup_dirname . "\r\n";
+						
 						if (!$backup_dirname) {
 							// エラー処理
 							throw new \Exception('Backup dirname not found.');
@@ -387,7 +400,7 @@ class publish
 				$logstr = "===============================================" . "\r\n";
 				$logstr .= "公開処理の事前準備ロールバック" . "\r\n";
 				$logstr .= "===============================================" . "\r\n";
-				$logstr .= $e.getMessage() . "\r\n";
+				// $logstr .= $e.getMessage() . "\r\n";
 				$this->main->put_log($realpath_tracelog, $logstr);
 
 		      /* 変更をロールバックする */
@@ -462,7 +475,6 @@ class publish
 					$logstr = "===============================================" . "\r\n";
 					$logstr .= "バックアップテーブルのロールバック処理実行" . "\r\n";
 					$logstr .= "===============================================" . "\r\n";
-					$logstr .= $e.getMessage() . "\r\n";
 					$this->main->put_log($realpath_tracelog, $logstr);
 
 				    /* 変更をロールバックする */
@@ -519,7 +531,7 @@ class publish
 				$logstr .= "本番環境ディレクトリ：" . $to_realpath . "\r\n";
 				$this->main->put_log($realpath_tracelog, $logstr);
 
-				$this->exec_sync($this->main->options->ignore, $from_realpath, $to_realpath, $realpath_tracelog);
+				$this->exec_sync($this->main->options->ignore, $from_realpath, $to_realpath, $realpath_copylog);
 
 				//============================================================
 				// 公開済みのソースを「running」ディレクトリから「released」ディレクトリへ移動
@@ -589,6 +601,11 @@ class publish
 			);
 
 	 		$this->tsOutput->update_ts_output($this->main->get_dbh(), $result['output_id'], $dataArray);
+			
+			$logstr = "===============================================" . "\r\n";
+			$logstr .= "ステータス更新完了" . "\r\n";
+			$logstr .= "===============================================" . "\r\n";
+			$this->main->put_log($realpath_tracelog, $logstr);
 
 			return $result;
 		}
@@ -608,7 +625,7 @@ class publish
 	/**
 	 * rsyncコマンド実行（公開処理用）
 	 */
-	public function exec_sync($ignore, $from_realpath, $to_realpath, $realpath_tracelog) {
+	public function exec_sync($ignore, $from_realpath, $to_realpath, $realpath_copylog) {
 
 		// ※runningディレクトリパスの後ろにはスラッシュは付けない（スラッシュを付けると日付ディレクトリも含めて同期してしまう）
 			
@@ -638,12 +655,22 @@ class publish
 
 		$command = 'rsync -rtvzP' . ' ' . $from_realpath . ' ' . $to_realpath . ' ' .
 				   '--log-file=' . $realpath_tracelog;
+		
+		$logstr = "コマンド：" . $command . "\r\n";
+		$this->main->put_log($realpath_tracelog, $logstr);
 
 		$ret = $this->main->common()->command_execute($command, true);
 		if ($ret['return']) {
 			// 戻り値が0以外の場合
-			throw new \Exception('Command error. [command]' . $command);
+					
+			$logstr = "**コマンド実行エラー**" . "\r\n";
+			$this->main->put_log($realpath_tracelog, $logstr);
+
+			throw new \Exception('Command error. ' . $command);
 		}
+
+		$logstr = "**コマンド実行成功**";
+		$this->main->put_log($realpath_tracelog, $logstr);
 
 		// // rsyncコマンド実行時のログを格納
 		// $this->main->put_log($realpath_copylog, $ret['output']);		
@@ -674,6 +701,7 @@ class publish
 		$logstr = "-----------------------------------------------" . "\r\n";
 		$logstr .= "移動元の空ディレクトリの削除（サブディレクトリも含む）" . "\r\n";
 		$logstr .= "-----------------------------------------------" . "\r\n";
+		$logstr .= "移動元ディレクトリ：" . $from_realpath . "\r\n";
 		$this->main->put_log($realpath_tracelog, $logstr);
 
 		$command = 'find ' .  $from_realpath . ' -type d -empty -delete' ;

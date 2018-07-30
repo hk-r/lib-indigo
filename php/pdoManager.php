@@ -262,7 +262,7 @@ class pdoManager
 
 		$this->common->debug_echo('■ select start');
 
-		$ret_array = array();
+		$ret_array = null;
 		$stmt = null;
 
 		// $this->common->debug_echo('　□sql：');

@@ -68,9 +68,8 @@ class tsBackup
 
 		$this->common->debug_echo('■ get_ts_backup_list start');
 
-		$ret_array = array();
-
-		$conv_ret_array = array();
+		$ret_array = null;
+		$conv_ret_array = null;
 
 		// バックアップテーブル 外部結合 公開処理結果テーブル
 		$select_sql = "
@@ -93,6 +92,8 @@ class tsBackup
 		// SELECT実行
 		$ret_array = $this->pdoMgr->select($dbh, $select_sql);
 
+		$this->common->debug_var_dump($ret_array);
+
 		foreach ((array)$ret_array as $array) {
 			$conv_ret_array[] = $this->convert_ts_backup_entity($array);
 		}
@@ -113,9 +114,9 @@ class tsBackup
 
 		$this->common->debug_echo('■ get_selected_ts_backup start');
 
-		$ret_array = array();
+		$ret_array = '';
 
-		$conv_ret_array = array();
+		$conv_ret_array = '';
 
 		if (!$selected_id) {
 			throw new \Exception('選択されたIDが取得できませんでした。 ');
@@ -126,9 +127,12 @@ class tsBackup
 		WHERE " . self::TS_BACKUP_ID_SEQ . " = " . $selected_id . ";";
 
 		// SELECT実行
-		$ret_array = array_shift($this->pdoMgr->select($dbh, $select_sql));
+		$get_array = array_shift($this->pdoMgr->select($dbh, $select_sql));
 
-		$conv_ret_array = $this->convert_ts_backup_entity($ret_array);
+		foreach ( (array) $get_array as $data) {
+			$ret_array = array_shift($data);
+			$conv_ret_array = $this->convert_ts_backup_entity($ret_array);
+		}
 
 		$this->common->debug_echo('■ get_selected_ts_backup end');
 
@@ -147,9 +151,8 @@ class tsBackup
 
 		$this->common->debug_echo('　□ output_id：' . $output_id);
 
-		$ret_array = array();
-
-		$conv_ret_array = array();
+		$ret_array = '';
+		$conv_ret_array = '';
 
 		if (!$output_id) {
 			throw new \Exception('復元対象の公開処理結果IDが取得できませんでした。 ');
@@ -160,9 +163,14 @@ class tsBackup
 		WHERE " . self::TS_BACKUP_OUTPUT_ID . " = " . $output_id . ";";
 
 		// SELECT実行
-		$ret_array = array_shift($this->pdoMgr->select($dbh, $select_sql));
+		$get_array = array_shift($this->pdoMgr->select($dbh, $select_sql));
 
-		$conv_ret_array = $this->convert_ts_backup_entity($ret_array);
+		foreach ( (array) $get_array as $data) {
+			$ret_array = array_shift($data);
+			$conv_ret_array = $this->convert_ts_backup_entity($ret_array);
+		}
+
+		$this->common->debug_var_dump('　□conv_ret_array：' . $conv_ret_array);
 
 		$this->common->debug_echo('■ get_selected_ts_backup_by_output_id end');
 
@@ -262,16 +270,12 @@ class tsBackup
 
 		// ブランチ名
 		$entity[self::BACKUP_ENTITY_BRANCH] = $array[self::BACKUP_ENTITY_BRANCH];
-				$this->common->debug_echo('■ convert_ts_backup_entity end');
 		// コミット
 		$entity[self::BACKUP_ENTITY_COMMIT_HASH] = $array[self::BACKUP_ENTITY_COMMIT_HASH];
-				$this->common->debug_echo('■ convert_ts_backup_entity end');
 		// コメント
 		$entity[self::BACKUP_ENTITY_COMMENT] = $array[self::BACKUP_ENTITY_COMMENT];
-				$this->common->debug_echo('■ convert_ts_backup_entity end');
 		// 公開種別
 		$entity[self::BACKUP_ENTITY_PUBLISH_TYPE] = $this->common->convert_publish_type($array[self::BACKUP_ENTITY_PUBLISH_TYPE]);	
-				$this->common->debug_echo('■ convert_ts_backup_entity end');
 		// 登録ユーザ
 		$entity[self::BACKUP_ENTITY_INSERT_USER_ID] = $array[self::BACKUP_ENTITY_INSERT_USER_ID];
 
