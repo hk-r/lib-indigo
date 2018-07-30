@@ -380,7 +380,7 @@ class main
 		} catch (\Exception $e) {
 
 			$logstr = "** run() 例外キャッチ **" . "\r\n";
-			$logstr =. $e->getMessage() . "\r\n";
+			$logstr .= $e->getMessage() . "\r\n";
 			$this->put_log($this->realpath_log, $logstr);
 
 			// エラーメッセージ表示
