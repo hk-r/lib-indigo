@@ -305,7 +305,7 @@ class pdoManager
 		if ($stmt = $dbh->query($sql)) {
 
 			$this->common->debug_echo('★$stmt');
-			$this->common->debug_echo($stmt);
+			$this->common->debug_var_dump($stmt);
 
 
 			// 取得したデータを配列に格納して返す
@@ -313,7 +313,7 @@ class pdoManager
 				$ret_array = $row;
 
 				$this->common->debug_echo('★$ret_array');
-				$this->common->debug_echo($ret_array);
+				$this->common->debug_var_dump($ret_array);
 
 			}
 		}
