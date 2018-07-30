@@ -458,7 +458,7 @@ class initScreen
 			$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_IMMEDIATE_BACK);
 		} else {
 			// エラーがないので即時公開処理へ進む
-			$result = $this->publish->exec_publish(define::PUBLISH_TYPE_IMMEDIATE);
+			$result = $this->publish->exec_publish(define::PUBLISH_TYPE_IMMEDIATE, null);
 		}
 
 		$this->main->common()->debug_echo('■ do_immediate_publish end');
@@ -512,7 +512,7 @@ class initScreen
 	 		$this->main->common()->debug_echo('　□ -----Gitのファイルコピー処理-----');
 			
 			// waitingディレクトリの絶対パスを取得。
-			$waiting_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->options->workdir_relativepath . define::PATH_WAITING));
+			$realpath_waiting = $this->main->realpath_array->realpath_waiting;
 
 			// 公開予約ディレクトリ名の取得
 			$dirname = $this->main->common()->format_gmt_datetime($this->main->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE);
@@ -525,7 +525,7 @@ class initScreen
 			}
 
 			// コピー処理
-			$this->main->gitMgr()->git_file_copy($this->main->options, $waiting_real_path, $dirname);
+			$this->main->gitMgr()->git_file_copy($this->main->options, $realpath_waiting, $dirname);
 
 	 		$this->main->common()->debug_echo('　□ -----公開処理結果テーブルの登録処理-----');
 			
@@ -567,7 +567,7 @@ class initScreen
 		try {
 
 			// waitingディレクトリの絶対パスを取得。
-			$waiting_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->options->workdir_relativepath . define::PATH_WAITING));
+			$realpath_waiting = $this->main->realpath_array->realpath_waiting;
 
 			//============================================================
 			// 「waiting」ディレクトリの変更前の公開ソースディレクトリを削除
@@ -586,7 +586,7 @@ class initScreen
 			$this->main->common()->debug_echo($before_dirname);
 
 			// コピー処理
-			$this->main->gitMgr()->file_delete($waiting_real_path, $before_dirname);
+			$this->main->gitMgr()->file_delete($realpath_waiting, $before_dirname);
 
 
 			//============================================================
@@ -606,7 +606,7 @@ class initScreen
 			$this->main->common()->debug_echo($dirname);
 
 			// コピー処理
-			$this->main->gitMgr()->git_file_copy($this->main->options, $waiting_real_path, $dirname);
+			$this->main->gitMgr()->git_file_copy($this->main->options, $realpath_waiting, $dirname);
 
 	 		$this->main->common()->debug_echo('　□ -----公開処理結果テーブルの更新処理-----');
 			
@@ -652,7 +652,7 @@ class initScreen
 			$selected_id =  $this->main->options->_POST->selected_id;
 
 			// waitingディレクトリの絶対パスを取得。
-			$waiting_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->options->workdir_relativepath . define::PATH_WAITING));
+			$realpath_waiting = $this->main->realpath_array->realpath_waiting;
 
 
 			try {
@@ -683,7 +683,7 @@ class initScreen
 				}
 				
 				// コピー処理
-				$this->main->gitMgr()->file_delete($waiting_real_path, $dirname);
+				$this->main->gitMgr()->file_delete($realpath_waiting, $dirname);
 
 
 				/* 変更をコミットする */
@@ -725,7 +725,7 @@ class initScreen
 						'message' => '',
 						'dialog_disp' => '');
 
-		$result = $this->publish->exec_restore_publish($output_id);
+		$result = $this->publish->exec_publish(define::PUBLISH_TYPE_AUTO_RESTORE, $output_id);
 
 		$this->main->common()->debug_echo('■ do_restore_publish_failure end');
 

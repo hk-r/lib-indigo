@@ -174,10 +174,10 @@ class historyScreen
 			$dirname = $this->common->format_gmt_datetime($start_datetime_gmt, define::DATETIME_FORMAT_SAVE);
 
 			// logディレクトリの絶対パスを取得。
-			$log_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->workdir_relativepath . define::PATH_LOG . $dirname . "/"));
+			$realpath_log = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->workdir_relativepath . define::PATH_LOG . $dirname . "/"));
 		
 			// ファイルを変数に格納
-			$filename = $log_real_path . 'rsync_copy_' . $dirname . '.log';
+			$filename = $realpath_log . 'rsync_copy_' . $dirname . '.log';
 			// ファイルを読み込み変数に格納
 			$content = file_get_contents($filename);
 

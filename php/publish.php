@@ -37,245 +37,7 @@ class publish
 	/**
 	 * 公開処理
 	 */
-	public function do_publish($running_dirname, $options, $log_datetime_dir_path) {
-
-		$this->main->common()->debug_echo('■ do_publish start');
-
-		$current_dir = realpath('.');
-
-		$this->main->common()->debug_echo('　□ 公開ファイル日時：');
-		$this->main->common()->debug_echo($running_dirname);
-
-		// 作業用ディレクトリの絶対パスを取得
-		$result = json_decode($this->main->common()->get_workdir_real_path($options));
-
-
-		//============================================================
-		// 「running」ディレクトリのソースを本番環境へ同期
-		//============================================================
-
- 		$this->main->common()->debug_echo('　□ -----「running」ディレクトリのソースを本番環境へ同期ー-----');
-		
-		if ( file_exists($result->running_real_path) ) {
-
-			if ( file_exists($result->server_real_path) ) {
-
-			// 以下のコマンド（-a）だと、パーミッションまで変えようとするためエラーが発生する。
-			// $command = 'rsync -avzP ' . $running_real_path . $dirname . '/' . ' ' . $server_real_path . ' --log-file=' . $log_real_path . $dirname . '/rsync_' . $dirname . '.log' ;
-
-			// -r ディレクトリを再帰的に調べる。
-			// -l シンボリックリンクをリンクとして扱う（？）
-			// -p パーミッションも含める（除外）
-			// -t 更新時刻などの時刻情報も含める
-			// -o 所有者情報も含める（除外）
-			// -g ファイルのグループ情報も含める（除外）
-			// -D デバイスファイルはそのままデバイスとして扱う（？）
-
-			// -v 進捗を表示
-			// -P ファイル転送中の場合、途中から再開するように
-
-			// ※runningディレクトリパスの後ろにはスラッシュは付けない（スラッシュを付けると日付ディレクトリも含めて同期してしまう）
-			
-			// 同期除外コマンドの作成
-			$exclude_command = '';
-			foreach ($options->ignore as $key => $value) {
-			 	$exclude_command .= "--exclude='" . $value . "' ";
-			}
-
-			$command = 'rsync --checksum -rvzP --delete ' . $exclude_command . $result->running_real_path . $running_dirname . '/' . ' ' . $result->server_real_path . ' ' . '--log-file=' . $log_datetime_dir_path . 'rsync_' . $running_dirname . '.log' ;
-
-			$this->main->common()->debug_echo('　□ $command：');
-			$this->main->common()->debug_echo($command);
-
-			$ret = $this->main->common()->command_execute($command, true);
-			
-			// ファイルのパスを変数に格納
-			$filename = $log_datetime_dir_path . 'rsync_copy_' . $running_dirname . '.log';
- 
-			// ファイルに書き込む
-			file_put_contents($filename, $ret['output']);
-// // ファイルを出力する
-// readfile($filename);
-
-				// foreach ( (array) $ret['output'] as $element ) {
-				// 	$this->main->common()->debug_echo($element);
-				// }
-
-			// $this->main->common()->debug_echo('　▼本番反映の公開処理結果');
-
-			// foreach ( (array)$ret['output'] as $element ) {
-			// 	$this->main->common()->debug_echo($element);
-			// }
-
-			} else {
-				// エラー処理
-				throw new \Exception('Project directory not found. ' . $result->server_real_path);
-			}
-
-		} else {
-			// エラー処理
-			throw new \Exception('Running directory not found .' . $result->running_real_path);
-		}
-		//============================================================
-		// 公開済みのソースを「running」ディレクトリから「released」ディレクトリへ移動
-		//============================================================
-
- 		$this->main->common()->debug_echo('　□ -----公開済みのソースを「running」ディレクトリから「released」ディレクトリへ移動-----');
-
-		$this->move_dir($result->running_real_path, $running_dirname, $result->released_real_path, $running_dirname, $result->log_real_path);
-
-		$this->main->common()->debug_echo('■ do_publish end');
-	}
-
-	/**
-	 * バックアップファイルの作成（コマンド実行）
-	 */
-	public function create_backup($backup_dirname, $real_path) {
-
-		$this->main->common()->debug_echo('■ create_backup start');
-
-				$this->main->common()->debug_echo('　□ $backup_dirname' . $backup_dirname);
-
-		// // 作業用ディレクトリの絶対パスを取得
-		// $result = json_decode($this->main->common()->get_workdir_real_path($options));
-
-		if ( file_exists($real_path->backup_real_path) ) {
-
-			if ( file_exists($real_path->server_real_path) ) {
-
-				$this->main->common()->debug_echo('　□ 1');
-
-				$command = 'rsync -rtvzP' . ' ' . $real_path->server_real_path . ' ' . $real_path->backup_real_path . $backup_dirname . '/' . ' --log-file=' . $real_path->log_real_path . '/rsync_' . $backup_dirname . '.log' ;
-
-				$this->main->common()->debug_echo('　□ $command：' . $command);
-$this->main->common()->debug_echo('　□ 2');
-				$ret = $this->main->common()->command_execute($command, true);
-$this->main->common()->debug_echo('　□ 3');
-				$this->main->common()->debug_echo('　★ バックアップ作成の処理結果');
-				
-				foreach ( (array) $ret['output'] as $element ) {
-					$this->main->common()->debug_echo($element);
-				}
-
-			} else {
-				// エラー処理
-				throw new \Exception('Project directory not found. ' . $real_path->server_real_path);
-			}
-		} else {
-			// エラー処理
-			throw new \Exception('Backup directory not found. ' . $real_path->backup_real_path);
-		}
-
-		$this->main->common()->debug_echo('■ create_backup end');
-
-	}
-
-	/**
-	 * ディレクトリの移動（コマンド実行）
-	 */
-	public function move_dir($from_real_path, $from_dirname, $to_real_path, $to_dirname, $log_real_path) {
-
-		$this->main->common()->debug_echo('■ move_dir start');
-
-			$this->main->common()->debug_echo($from_real_path);
-			$this->main->common()->debug_echo($to_real_path);
-
-		if ( file_exists($from_real_path)  ) {
-
-			if ( file_exists($to_real_path) ) {
-
-				//============================================================
-				// runningディレクトリへファイルを移動する
-				//============================================================
-				$command = 'rsync -rtvzP --remove-source-files ' . $from_real_path . $from_dirname . '/ ' . $to_real_path . $to_dirname . '/' . ' --log-file=' . $log_real_path . '/rsync_' . $to_dirname . '.log' ;
-
-				$ret = $this->main->common()->command_execute($command, true);
-				if ($ret['return']) {
-					// 戻り値が0以外の場合
-					throw new \Exception('Command error. command:' . $command);
-				}
-				$this->main->common()->debug_echo('　★ ファイル移動結果');
-
-				// foreach ( (array)$ret['output'] as $element ) {
-				// 	$this->main->common()->debug_echo($element);
-				// }
-
-				//============================================================
-				// 移動元のディレクトリを削除する
-				//============================================================
-				$command = 'find ' .  $from_real_path . $from_dirname . '/ -type d -empty -delete' ;
-
-				$ret = $this->main->common()->command_execute($command, true);
-				if ($ret['return']) {
-					// 戻り値が0以外の場合
-					throw new \Exception('Command error. command:' . $command);
-				}
-				$this->main->common()->debug_echo('　★ 移動元のディレクトリ削除結果');
-
-				// foreach ( (array)$ret['output'] as $element ) {
-				// 	$this->main->common()->debug_echo($element);
-				// }
-
-			} else {
-				// エラー処理
-				throw new \Exception('Copy to directory not found. ' . $to_real_path);
-			}
-		
-		} else {
-			// エラー処理
-			throw new \Exception('Copy base directory not found. ' . $from_real_path);
-		}
-
-		$this->main->common()->debug_echo('■ move_dir end');
-	}
-
-
-	/**
-	 * ディレクトリのコピー（コマンド実行）
-	 */
-	public function copy_dir($from_real_path, $from_dirname, $to_real_path, $to_dirname, $log_real_path) {
-
-		$this->main->common()->debug_echo('■ copy_dir start');
-
-		if ( file_exists($from_real_path)  ) {
-
-			if ( file_exists($to_real_path) ) {
-
-				//============================================================
-				// runningディレクトリへファイルを移動する
-				//============================================================
-				$command = 'rsync -rtvzP ' . $from_real_path . $from_dirname . '/ ' . $to_real_path . $to_dirname . '/' . ' --log-file=' . $log_real_path . '/rsync_' . $to_dirname . '.log' ;
-
-				$ret = $this->main->common()->command_execute($command, true);
-				if ($ret['return']) {
-					// 戻り値が0以外の場合
-					throw new \Exception('Command error. command:' . $command);
-				}
-				
-				// foreach ( (array)$ret['output'] as $element ) {
-				// 	$this->main->common()->debug_echo($element);
-				// }
-
-			} else {
-				// エラー処理
-				throw new \Exception('Copy to directory not found. ' . $to_real_path);
-			}
-		
-		} else {
-			// エラー処理
-			throw new \Exception('Copy base directory not found. ' . $from_real_path);
-		}
-
-		chdir($current_dir);
-
-		$this->main->common()->debug_echo('■ copy_dir end');
-	}
-
-
-	/**
-	 * 公開処理
-	 */
-	public function exec_publish($publish_type) {
+	public function exec_publish($publish_type, $output_id) {
 
 		$this->main->common()->debug_echo('■ exec_publish start');
 
@@ -290,6 +52,39 @@ $this->main->common()->debug_echo('　□ 3');
 
 		try {
 
+
+			//============================================================
+			// ログ出力用の日付ディレクトリ作成
+			//============================================================
+			// 作業用ディレクトリの絶対パスを取得
+			$realpath_array = $this->main->realpath_array;
+			
+			// GMT現在日時を取得し、ディレクトリ名用にフォーマット変換
+			$start_datetime = $this->main->common()->get_current_datetime_of_gmt();
+			$running_dirname = $this->main->common()->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
+
+			// logの日付ディレクトリを作成
+			$realpath_copylog = $this->main->fs()->normalize_path($this->main->fs()->get_realpath(
+				$realpath_array->realpath_log . $running_dirname . "/")) . 'pub_copy_' . $running_dirname . '.log';
+			
+			$realpath_tracelog = $this->main->fs()->normalize_path($this->main->fs()->get_realpath(
+				$realpath_array->realpath_log . $running_dirname . "/")) . 'pub_trace_' . $running_dirname . '.log';
+
+			$this->main->common()->debug_echo('　□ realpath_copylog' . $realpath_copylog);
+			$this->main->common()->debug_echo('　□ realpath_tracelog' . $realpath_tracelog);
+
+			// ログファイルの上位ディレクトリを作成
+			if( !@is_dir( dirname( $realpath_copylog ) ) ){
+				$this->main->fs()->mkdir_r( dirname( $realpath_copylog ) );
+			}
+			// ログファイルの上位ディレクトリを作成
+			if( !@is_dir( dirname( $realpath_tracelog ) ) ){
+				$this->main->fs()->mkdir_r( dirname( $realpath_tracelog ) );
+			}
+
+			$logstr = "ロック処理\r\n";
+			$this->main->put_log($realpath_tracelog, $logstr);
+
 			if( !$this->lock() ){//ロック
 				// print '------'."\n";
 				// print 'publish is now locked.'."\n";
@@ -300,55 +95,19 @@ $this->main->common()->debug_echo('　□ 3');
 				// exit;
 			}
 
-			// GMTの現在日時
-			$start_datetime = $this->main->common()->get_current_datetime_of_gmt();
+			$logstr = "公開処理開始日時：" . $start_datetime . "\r\n";
+			$logstr .= "公開日時ディレクトリ名：" . $running_dirname . "\r\n";
+			$this->main->put_log($realpath_tracelog, $logstr);
 
-			$this->main->common()->debug_echo('　□ 公開処理開始日時：' . $start_datetime);
 
-			// 作業用ディレクトリの絶対パスを取得
-			$real_path = json_decode($this->main->common()->get_workdir_real_path($this->main->options));
-
-			// 公開日時ディレクトリ名の取得
-			$running_dirname = $this->main->common()->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
-
-			$this->main->common()->debug_echo('　□ 公開日時ディレクトリ名：' . $running_dirname);
-
-			//============================================================
-			// ログ出力用の日付ディレクトリ作成
-			//============================================================
-
-			// logの日付ディレクトリを作成
-			$copy_logpath = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($real_path->log_real_path . $running_dirname . "/")) . 'rsync_copy_' . $running_dirname . '.log';
-			$backup_logpath = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($real_path->log_real_path . $running_dirname . "/")) . 'rsync_backup_' . $running_dirname . '.log';
-
-		$this->main->common()->debug_echo('　□1');
-
-			// 親ディレクトリの作成
-			if( !@is_dir( dirname( $copy_logpath ) ) ){
-				$this->main->fs()->mkdir_r( dirname( $copy_logpath ) );
-			}
-			// 親ディレクトリの作成
-			if( !@is_dir( dirname( $backup_logpath ) ) ){
-				$this->main->fs()->mkdir_r( dirname( $backup_logpath ) );
-			}
-$this->main->common()->debug_echo('　□2');
 			$src = '';
 
-			if (!$this->main->fs()->save_file( $copy_logpath , $src )) {
-				throw new \Exception('Create copy logfile is failed. ' . $copy_logpath);
-			}
-$this->main->common()->debug_echo('　□3');
-			if (!$this->main->fs()->save_file( $backup_logpath , $src )) {
-				throw new \Exception('Create backup logfile is failed. ' . $backup_logpath);
-			}
-$this->main->common()->debug_echo('　□4');
-			// if ( !$this->main->common()->is_exists_mkdir($copylogpath) ) {
-			// 	// エラー処理
-			// 	throw new \Exception('Create copy logfi directory is failed. ' . $result->server_real_path);
+			// if (!$this->main->fs()->save_file( $realpath_copylog , $src )) {
+			// 	throw new \Exception('Create copy logfile is failed. ' . $realpath_copylog);
 			// }
-			// if ( !$this->main->common()->is_exists_mkdir($copylogpath) ) {
-			// 	// エラー処理
-			// 	throw new \Exception('Create log directory is failed. ' . $result->server_real_path);
+
+			// if (!$this->main->fs()->save_file( $backup_logpath , $src )) {
+			// 	throw new \Exception('Create backup logfile is failed. ' . $backup_logpath);
 			// }
 
 			try {
@@ -362,11 +121,13 @@ $this->main->common()->debug_echo('　□4');
 					//============================================================
 					// 公開予約テーブルより、公開対象データの取得
 					//============================================================
-					// 公開予約の一覧を取得
-					$data_list = $this->tsReserve->get_ts_reserve_publish_list($this->main->get_dbh(), $start_datetime);
-$this->main->common()->debug_echo('　□5');
-					$this->main->common()->debug_var_dump($data_list);
+					$logstr = "===============================================" . "\r\n";
+					$logstr .= "公開予約テーブルSELECT処理実行" . "\r\n";
+					$logstr .= "===============================================" . "\r\n";
+					$this->main->put_log($realpath_tracelog, $logstr);
 
+					$data_list = $this->tsReserve->get_ts_reserve_publish_list($this->main->get_dbh(), $start_datetime);
+					
 					if (!$data_list) {
 						$this->main->common()->debug_echo('Target data does not exist.');
 						return $result;
@@ -379,14 +140,32 @@ $this->main->common()->debug_echo('　□5');
 					// 複数件取れてきた場合は、最新データ以外はスキップデータとして公開処理結果テーブルへ登録する
 					foreach ( (array) $data_list as $data ) {
 
-						$this->main->common()->debug_echo('　□ 公開取得データ[配列]');
-						$this->main->common()->debug_var_dump($data);
+						$logstr = "-----------------------------------------------" . "\r\n";
+						$logstr .= "公開予約取得データ" . "\r\n";
+						$logstr .= "-----------------------------------------------" . "\r\n";
+						$this->main->put_log($realpath_tracelog, $logstr);
+						$this->main->put_log($realpath_tracelog, $data);
 
 						//============================================================
 						// 公開処理結果テーブルの登録処理
 						//============================================================
+						$logstr = "===============================================" . "\r\n";
+						$logstr .= "[予約公開]公開処理結果テーブルの登録処理" . "\r\n";
+						$logstr .= "===============================================" . "\r\n";
 
-					 	$this->main->common()->debug_echo('　□ -----[時限公開]公開処理結果テーブルの登録処理-----');
+						if ($cnt != 1) {
+							$logstr .= "-----------------------------------------------" . "\r\n";
+							$logstr .= "スキップ処理" . "\r\n";
+							$logstr .= "-----------------------------------------------" . "\r\n";
+						}
+
+						$logstr .= "公開予約ID" . $data[tsReserve::RESERVE_ENTITY_ID_SEQ] . "\r\n";
+						$logstr .= "公開予約日時(GMT)：" . $data[tsReserve::RESERVE_ENTITY_RESERVE_GMT] . "\r\n";
+						$logstr .= "ブランチ名：" . $data[tsReserve::RESERVE_ENTITY_BRANCH] . "\r\n";
+						$logstr .= "コミット：" . $data[tsReserve::RESERVE_ENTITY_COMMIT_HASH] . "\r\n";
+						$logstr .= "コメント：" . $data[tsReserve::RESERVE_ENTITY_COMMENT] . "\r\n";
+						$logstr .= "ユーザID：" . $this->main->options->user_id . "\r\n";
+						$this->main->put_log($realpath_tracelog, $logstr);
 
 						// 現在時刻
 						$now = $this->main->common()->get_current_datetime_of_gmt();
@@ -416,24 +195,26 @@ $this->main->common()->debug_echo('　□5');
 
 						if ($cnt == 1) {
 
-							$dirname = $this->main->common()->format_gmt_datetime($data[tsReserve::RESERVE_ENTITY_RESERVE_GMT], define::DATETIME_FORMAT_SAVE);
+							$result['output_id'] = $insert_id;
 
-							if (!$dirname) {
+
+							$logstr = "-----------------------------------------------" . "\r\n";
+							$logstr .= "予約対象" . "\r\n";
+							$logstr .= "-----------------------------------------------" . "\r\n";
+							$logstr .= "公開処理結果テーブル登録ID：" . $result['output_id'] . "\r\n";
+							$this->main->put_log($realpath_tracelog, $logstr);
+
+							$reserve_dirname = $this->main->common()->format_gmt_datetime($data[tsReserve::RESERVE_ENTITY_RESERVE_GMT], define::DATETIME_FORMAT_SAVE);
+
+							if (!$reserve_dirname) {
 								// エラー処理
 								throw new \Exception('Dirname create failed.');
 							} else {
-								$dirname .= define::DIR_NAME_RESERVE;
+								$reserve_dirname .= define::DIR_NAME_RESERVE;
 							}
 
-							$result['output_id'] = $insert_id;
-
-							$this->main->common()->debug_echo('　□ 公開ディレクトリ名');
-							$this->main->common()->debug_var_dump($dirname);
-
-							if (!$dirname) {
-								// エラー処理
-								throw new \Exception('Publish dirname create failed.');
-							}
+							$logstr = "公開対象のwaitingディレクトリ名'" . $reserve_dirname . "\r\n";
+							$this->main->put_log($realpath_tracelog, $logstr);
 
 							// 以降のループはスキップデータなので値を変更
 							$status = define::PUBLISH_STATUS_SKIP;
@@ -443,8 +224,11 @@ $this->main->common()->debug_echo('　□5');
 						//============================================================
 						// 公開予約テーブルのステータス更新処理
 						//============================================================
+						$logstr = "===============================================" . "\r\n";
+						$logstr .= "公開予約テーブルのステータス更新処理（処理済みへ）" . "\r\n";
+						$logstr .= "===============================================" . "\r\n";
+						$this->main->put_log($realpath_tracelog, $logstr);
 						
-						// 公開予約テーブルのステータス更新処理
 						$this->tsReserve->update_ts_reserve_status($this->main->get_dbh(), $data[tsReserve::RESERVE_ENTITY_ID_SEQ]);
 					
 						$cnt++;
@@ -453,21 +237,85 @@ $this->main->common()->debug_echo('　□5');
 					//============================================================
 					// 公開予約ディレクトリを「waiting」から「running」ディレクトリへ移動
 					//============================================================
+					$logstr = "===============================================" . "\r\n";
+					$logstr .= "waitingディレクトリからrunningディレクトリへ移動" . "\r\n";
+					$logstr .= "===============================================" . "\r\n";
+					$this->main->put_log($realpath_tracelog, $logstr);
+					
+					$from_realpath = $realpath_array->realpath_waiting . $reserve_dirname . '/';
+					$to_realpath = $realpath_array->realpath_running . $running_dirname . '/';
 
-			 		$this->main->common()->debug_echo('　□ -----公開予約ディレクトリを「waiting」から「running」ディレクトリへ移動-----');
-
-					// // runningディレクトリの絶対パスを取得。
-					// $running_dirname = $this->main->common()->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
-
-					$this->move_dir($real_path->waiting_real_path, $dirname, $real_path->running_real_path, $running_dirname, $real_path->log_real_path);
+					$this->exec_sync_move($from_realpath, $to_realpath, $realpath_tracelog);
 
 				} else {
+
+					$backup_id = null;
+					$backup_dirname = '';
+
+ 					if ($publish_type == define::PUBLISH_TYPE_MANUAL_RESTORE) {
+
+						//============================================================
+						// バックアップテーブルより、公開対象データの取得
+						//============================================================
+						$logstr = "===============================================" . "\r\n";
+						$logstr .= "[復元公開]バックアップ対象データの取得" . "\r\n";
+						$logstr .= "===============================================" . "\r\n";
+						$this->main->put_log($realpath_tracelog, $logstr);
+
+						$selected_id =  $this->main->options->_POST->selected_id;
+
+						$backup_data = $this->tsBackup->get_selected_ts_backup($this->main->get_dbh(), $selected_id);
+					
+						if (!$backup_data) {
+							throw new \Exception('Target data not found.');
+						}
+
+						$backup_id = $backup_data[tsBackup::BACKUP_ENTITY_ID_SEQ];
+
+						$logstr .= "バックアップID：" . $backup_id . "\r\n";
+						$this->main->put_log($realpath_tracelog, $logstr);
+
+						$backup_dirname = $this->main->common()->format_gmt_datetime($backup_data[tsBackup::BACKUP_ENTITY_DATETIME_GMT], define::DATETIME_FORMAT_SAVE);
+					
+						if (!$backup_dirname) {
+							// エラー処理
+							throw new \Exception('Backup dirname not found.');
+						}
+					
+					} elseif ($publish_type == define::PUBLISH_TYPE_AUTO_RESTORE) {
+
+						//============================================================
+						// 公開処理結果ID条件に、バックアップ対象データの取得
+						//============================================================
+						$logstr = "===============================================" . "\r\n";
+						$logstr .= "[自動復元公開]公開処理結果ID条件に、バックアップ対象データの取得" . "\r\n";
+						$logstr .= "===============================================" . "\r\n";
+						$logstr .= "公開処理結果ID：" . $output_id . "\r\n";
+						$this->main->put_log($realpath_tracelog, $logstr);
+
+						// 処理結果IDからバックアップ情報を取得
+						$backup_data = $this->tsBackup->get_selected_ts_backup_by_output_id($this->main->get_dbh(), $output_id);
+
+						$backup_id = $backup_data[tsBackup::BACKUP_ENTITY_ID_SEQ];
+						
+						$logstr .= "バックアップID：" . $backup_id . "\r\n";
+						$this->main->put_log($realpath_tracelog, $logstr);
+
+						$backup_dirname = $this->main->common()->format_gmt_datetime($backup_data[tsBackup::BACKUP_ENTITY_DATETIME_GMT], define::DATETIME_FORMAT_SAVE);
+					
+						if (!$backup_dirname) {
+							// エラー処理
+							throw new \Exception('Backup dirname not found.');
+						}
+					}
 
 					//============================================================
 					// 公開処理結果テーブルの登録処理
 					//============================================================
-
-			 		$this->main->common()->debug_echo('　□ -----公開処理結果テーブルの登録処理-----');
+					$logstr = "===============================================" . "\r\n";
+					$logstr .= "公開処理結果テーブルの登録処理" . "\r\n";
+					$logstr .= "===============================================" . "\r\n";
+					$this->main->put_log($realpath_tracelog, $logstr);
 
 					// 現在時刻
 					$now = $this->main->common()->get_current_datetime_of_gmt();
@@ -476,7 +324,7 @@ $this->main->common()->debug_echo('　□5');
 
 					$dataArray = array(
 						tsOutput::TS_OUTPUT_RESERVE_ID 		=> null,
-						tsOutput::TS_OUTPUT_BACKUP_ID		=> null,
+						tsOutput::TS_OUTPUT_BACKUP_ID		=> $backup_id,
 						tsOutput::TS_OUTPUT_RESERVE 		=> null,
 						tsOutput::TS_OUTPUT_BRANCH 			=> $this->main->options->_POST->branch_select_value,
 						tsOutput::TS_OUTPUT_COMMIT_HASH 	=> $this->main->options->_POST->commit_hash,
@@ -497,51 +345,36 @@ $this->main->common()->debug_echo('　□5');
 					// 公開処理結果テーブルの登録（インサートしたシーケンスIDをリターン値で取得）
 					$result['output_id'] = $this->tsOutput->insert_ts_output($this->main->get_dbh(), $dataArray);
 
+					$logstr = "公開処理結果テーブル登録ID：" . $result['output_id'] . "\r\n";
+					$this->main->put_log($realpath_tracelog, $logstr);
+
 					if ($publish_type == define::PUBLISH_TYPE_IMMEDIATE) {
 
 						// ============================================================
 						// 選択されたブランチのGit情報を「running」ディレクトリへコピー
 						// ============================================================
+						$logstr = "===============================================" . "\r\n";
+						$logstr .= "[即時公開]Git情報をrunningへコピー" . "\r\n";
+						$logstr .= "===============================================" . "\r\n";
+						$this->main->put_log($realpath_tracelog, $logstr);
 
-				 		$this->main->common()->debug_echo('　□ -----指定ブランチのGit情報を「running」ディレクトリへコピー-----');
-						
 						// Git情報のコピー処理
-						$this->main->gitMgr()->git_file_copy($this->main->options, $real_path->running_real_path, $dirname);
+						$this->main->gitMgr()->git_file_copy($this->main->options, $realpath_array->realpath_running, $running_dirname);
 
-
-					} elseif ($publish_type == define::PUBLISH_TYPE_RESTORE) {
-
-						//============================================================
-						// バックアップテーブルより、公開対象データの取得
-						//============================================================
-
-				 		$this->main->common()->debug_echo('　□ -----[復元公開]バックアップテーブルより、公開対象データの取得-----');
-
-						$selected_id =  $this->main->options->_POST->selected_id;
-
-						$selected_data = $this->tsBackup->get_selected_ts_backup($this->main->get_dbh(), $selected_id);
-					
-						if (!$selected_data) {
-							throw new \Exception('Target data not found.');
-						}
-
-						$dirname = $this->main->common()->format_gmt_datetime($selected_data[tsBackup::BACKUP_ENTITY_DATETIME_GMT], define::DATETIME_FORMAT_SAVE);
-					
-						if (!$dirname) {
-							// エラー処理
-							throw new \Exception('Publish dirname create failed.');
-						}
+					} elseif (($publish_type == define::PUBLISH_TYPE_MANUAL_RESTORE) || 
+							  ($publish_type == define::PUBLISH_TYPE_AUTO_RESTORE)) {
 
 						//============================================================
 						// バックアップディレクトリを「backup」から「running」ディレクトリへ移動
 						//============================================================
+						$logstr = "===============================================" . "\r\n";
+						$logstr .= "[復元公開]backupからrunningへディレクトリの移動" . "\r\n";
+						$logstr .= "===============================================" . "\r\n";
+						$logstr .= "backupディレクトリ：" . $realpath_array->realpath_backup . $backup_dirname . "\r\n";
+						$logstr .= "runningディレクトリ：" . $realpath_array->realpath_running . $running_dirname . "\r\n";
+						$this->main->put_log($realpath_tracelog, $logstr);
 
-				 		$this->main->common()->debug_echo('　□ -----バックアップディレクトリを「backup」から「running」ディレクトリへコピー-----');
-
-						// runningディレクトリの絶対パスを取得。
-						$running_dirname = $this->main->common()->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
-
-						$this->copy_dir($real_path->backup_real_path, $dirname, $real_path->running_real_path, $running_dirname, $real_path->log_real_path);
+						$this->copy_dir($realpath_array->realpath_backup, $backup_dirname, $realpath_array->realpath_running, $running_dirname, $realpath_array->realpath_log);
 					}
 				}
 
@@ -557,59 +390,95 @@ $this->main->common()->debug_echo('　□5');
 		      throw $e;
 		    }
 
-			try {
+		    // 自動復元公開の場合は、本番環境からバックアップは取得しない
+		    if ($publish_type != define::PUBLISH_TYPE_AUTO_RESTORE) {
 
-				/* トランザクションを開始する。オートコミットがオフになる */
-				$this->main->get_dbh()->beginTransaction();
+				try {
 
-				//============================================================
-				// バックアップテーブルの登録処理
-				//============================================================
+					$logstr = "===============================================" . "\r\n";
+					$logstr .= "バックアップテーブルのトランザクション処理開始" . "\r\n";
+					$logstr .= "===============================================" . "\r\n";
+					$this->main->put_log($realpath_tracelog, $logstr);
+								
+					/* トランザクションを開始する。オートコミットがオフになる */
+					$this->main->get_dbh()->beginTransaction();
 
-		 		$this->main->common()->debug_echo('　□ -----バックアップテーブルの登録処理-----');
-				
-				// GMTの現在日時
-				$backup_datetime = $this->main->common()->get_current_datetime_of_gmt();
+					//============================================================
+					// バックアップテーブルの登録処理
+					//============================================================
+					$logstr = "===============================================" . "\r\n";
+					$logstr .= "バックアップテーブルの登録処理" . "\r\n";
+					$logstr .= "===============================================" . "\r\n";
+					$this->main->put_log($realpath_tracelog, $logstr);
 
-				$this->main->common()->debug_echo('　□ バックアップ日時：' . $backup_datetime);
+					// GMTの現在日時
+					$backup_datetime = $this->main->common()->get_current_datetime_of_gmt();
+					$backup_dirname = $this->main->common()->format_gmt_datetime($backup_datetime, define::DATETIME_FORMAT_SAVE);
 
-				$result['backup_id'] = $this->tsBackup->insert_ts_backup($this->main->get_dbh(), $this->main->options, $backup_datetime, $result['output_id']);
+					$logstr = "バックアップ日時：" . $backup_datetime . "\r\n";
+					$logstr .= "バックアップディレクトリ名：" . $backup_dirname . "\r\n";
+					$this->main->put_log($realpath_tracelog, $logstr);
+
+					$result['backup_id'] = $this->tsBackup->insert_ts_backup($this->main->get_dbh(), $this->main->options, $backup_datetime, $result['output_id']);
+
+					$logstr = "登録バックアップID：" . $result['backup_id'] . "\r\n";
+					$this->main->put_log($realpath_tracelog, $logstr);
+
+					//============================================================
+					// 本番ソースを「backup」ディレクトリへコピー
+					//============================================================
+					$logstr = "===============================================" . "\r\n";
+					$logstr .= "本番ソースをbackupディレクトリへコピー" . "\r\n";
+					$logstr .= "===============================================" . "\r\n";
+					$this->main->put_log($realpath_tracelog, $logstr);
+			
+					$from_realpath = $realpath_array->realpath_server;
+					$to_realpath = $realpath_array->realpath_backup . $backup_dirname . '/';
+
+					$this->exec_sync_copy($from_realpath, $to_realpath, $realpath_tracelog);
 
 
-				//============================================================
-				// 本番ソースを「backup」ディレクトリへコピー
-				//============================================================
+					$logstr = "===============================================" . "\r\n";
+					$logstr .= "バックアップテーブルのコミット処理実行" . "\r\n";
+					$logstr .= "===============================================" . "\r\n";
+					$this->main->put_log($realpath_tracelog, $logstr);
 
-		 		$this->main->common()->debug_echo('　□ -----本番ソースを「backup」ディレクトリへコピー-----');
-				
-				$backup_dirname = $this->main->common()->format_gmt_datetime($backup_datetime, define::DATETIME_FORMAT_SAVE);
-				
-				// バックアップファイル作成
-				$this->create_backup($backup_dirname, $real_path);
+			 		/* 変更をコミットする */
+					$this->main->get_dbh()->commit();
+					/* データベース接続はオートコミットモードに戻る */
 
-		 		/* 変更をコミットする */
-				$this->main->get_dbh()->commit();
-				/* データベース接続はオートコミットモードに戻る */
+			    } catch (\Exception $e) {
+		
+					$logstr = "===============================================" . "\r\n";
+					$logstr .= "バックアップテーブルのロールバック処理実行" . "\r\n";
+					$logstr .= "===============================================" . "\r\n";
+					$this->main->put_log($realpath_tracelog, $logstr);
 
-		    } catch (\Exception $e) {
-		    
-		      /* 変更をロールバックする */
-		      $this->main->get_dbh()->rollBack();
-		 
-		      throw $e;
+				    /* 変更をロールバックする */
+				    $this->main->get_dbh()->rollBack();
+			 
+			      throw $e;
+			    }
+
 		    }
 
-
 			try {
 
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "公開処理結果テーブルのトランザクション処理開始" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->main->put_log($realpath_tracelog, $logstr);
+							
 				/* トランザクションを開始する。オートコミットがオフになる */
 				$this->main->get_dbh()->beginTransaction();
 
 				//============================================================
 				// 公開処理結果テーブルの更新処理（成功）
 				//============================================================
-
-		 		$this->main->common()->debug_echo('　□ -----公開処理結果テーブルの更新処理（成功）-----');
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "公開処理結果テーブルの更新処理（ステータス：成功）" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->main->put_log($realpath_tracelog, $logstr);
 				
 				// GMTの現在日時
 				$end_datetime = $this->main->common()->get_current_datetime_of_gmt();
@@ -625,13 +494,36 @@ $this->main->common()->debug_echo('　□5');
 
 
 				//============================================================
-				// ※公開処理※
+				// runningディレクトリを本番環境へ同期
 				//============================================================
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "※runningディレクトリを本番環境へ同期※" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->main->put_log($realpath_tracelog, $logstr);
 
-		 		$this->main->common()->debug_echo('　□ -----公開処理-----');
-				
-				$this->do_publish($running_dirname, $this->main->options, $copylogpath);
+				$from_realpath = $realpath_array->realpath_running . $running_dirname . '/';
+				$to_realpath = $realpath_array->realpath_server;
 
+				$this->exec_sync($this->main->options->ignore, $from_realpath, $to_realpath, $realpath_tracelog);
+
+				//============================================================
+				// 公開済みのソースを「running」ディレクトリから「released」ディレクトリへ移動
+				//============================================================
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "runningディレクトリからreleasedディレクトリへコピー" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+		 		$this->main->put_log($realpath_tracelog, $logstr);	
+
+				$from_realpath = $result->realpath_running . $running_dirname . '/';
+				$to_realpath = $result->realpath_released . $running_dirname . '/';
+
+				$this->exec_sync_move($from_realpath, $to_realpath, $realpath_tracelog);
+
+
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "公開処理結果テーブルのコミット処理実行" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->main->put_log($realpath_tracelog, $logstr);
 
 		 		/* 変更をコミットする */
 				$this->main->get_dbh()->commit();
@@ -639,25 +531,34 @@ $this->main->common()->debug_echo('　□5');
 
 		    } catch (\Exception $e) {
 		    
-		      /* 変更をロールバックする */
-		      $this->main->get_dbh()->rollBack();
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "公開処理結果テーブルのロールバック処理実行" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->main->put_log($realpath_tracelog, $logstr);
+
+		    	/* 変更をロールバックする */
+		    	$this->main->get_dbh()->rollBack();
 		 
-		      throw $e;
+		    	throw $e;
 		    }
 
 		} catch (\Exception $e) {
 
-			$this->main->common()->debug_echo('■ 3');
+			$logstr = "** exec_publish例外キャッチ **" . "\r\n";
+			$logstr = $e->getMessage() . "\r\n";
+			$this->main->put_log($realpath_tracelog, $logstr);
 
 			$result['status'] = false;
-			$result['message'] = '【Immediate publish faild.】' . $e->getMessage();
+			$result['message'] = '【publish faild.】' . $e->getMessage();
 
 			//============================================================
 			// 公開処理結果テーブルの更新処理（失敗）
 			//============================================================
+			$logstr = "===============================================" . "\r\n";
+			$logstr .= "公開処理結果テーブルの更新処理（ステータス：失敗）" . "\r\n";
+			$logstr .= "===============================================" . "\r\n";
+			$this->main->put_log($realpath_tracelog, $logstr);
 
-	 		$this->main->common()->debug_echo('　□ -----公開処理結果テーブルの更新処理（失敗）-----');
-			
 			// GMTの現在日時
 			$end_datetime = $this->main->common()->get_current_datetime_of_gmt();
 			$dataArray = array(
@@ -666,19 +567,104 @@ $this->main->common()->debug_echo('　□5');
 				tsOutput::TS_OUTPUT_END 			=> $end_datetime,
 				tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> $this->main->options->user_id
 			);
-	 		$this->tsOutput->update_ts_output($this->main->get_dbh(), $result['output_id'], $dataArray);
 
-			$this->main->common()->debug_echo('■ exec_publish error end');
+	 		$this->tsOutput->update_ts_output($this->main->get_dbh(), $result['output_id'], $dataArray);
 
 			return $result;
 		}
 
 		$result['status'] = true;
 
+		$logstr = "===============================================" . "\r\n";
+		$logstr .= "公開処理完了" . "\r\n";
+		$logstr .= "===============================================" . "\r\n";
+		$this->main->put_log($realpath_tracelog, $logstr);
+
 		$this->main->common()->debug_echo('■ exec_publish end');
 
 		return $result;
 	}
+
+	/**
+	 * rsyncコマンド実行（公開処理用）
+	 */
+	public function exec_sync($ignore, $from_realpath, $to_realpath, $realpath_tracelog) {
+
+		// ※runningディレクトリパスの後ろにはスラッシュは付けない（スラッシュを付けると日付ディレクトリも含めて同期してしまう）
+			
+		// 同期除外コマンドの作成
+		$exclude_command = '';
+		foreach ($ignore as $key => $value) {
+		 	$exclude_command .= "--exclude='" . $value . "' ";
+		}
+
+		$command = 'rsync --checksum -rvzP --delete ' . $exclude_command . $from_realpath . ' ' . $to_realpath . ' ' .
+				   '--log-file=' . $realpath_tracelog;
+
+		$ret = $this->main->common()->command_execute($command, true);
+		if ($ret['return']) {
+			// 戻り値が0以外の場合
+			throw new \Exception('Command error. [command]' . $command);
+		}
+
+		// rsyncコマンド実行時のログを格納
+		$this->main->put_log($realpath_copylog, $ret['output']);		
+	}
+
+	/**
+	 * rsyncコマンド実行（ディレクトリコピー用）
+	 */
+	public function exec_sync_copy($from_realpath, $to_realpath, $realpath_tracelog) {
+
+		$command = 'rsync -rtvzP' . ' ' . $from_realpath . ' ' . $to_realpath . ' ' .
+				   '--log-file=' . $realpath_tracelog;
+
+		$ret = $this->main->common()->command_execute($command, true);
+		if ($ret['return']) {
+			// 戻り値が0以外の場合
+			throw new \Exception('Command error. [command]' . $command);
+		}
+
+		// // rsyncコマンド実行時のログを格納
+		// $this->main->put_log($realpath_copylog, $ret['output']);		
+	}
+
+	/**
+	 * rsyncコマンド実行（ディレクトリ移動用）
+	 */
+	public function exec_sync_move($from_realpath, $to_realpath, $realpath_tracelog) {
+
+		$logstr = "-----------------------------------------------" . "\r\n";
+		$logstr .= "ディレクトリ移動" . "\r\n";
+		$logstr .= "-----------------------------------------------" . "\r\n";
+		$this->main->put_log($realpath_tracelog, $logstr);
+
+		$command = 'rsync -rtvzP --remove-source-files ' . $from_realpath . ' ' . $to_realpath . ' ' .
+				   '--log-file=' . $realpath_tracelog;
+
+		$ret = $this->main->common()->command_execute($command, true);
+		if ($ret['return']) {
+			// 戻り値が0以外の場合
+			throw new \Exception('Command error. [command]' . $command);
+		}
+
+		// // rsyncコマンド実行時のログを格納
+		// $this->main->put_log($realpath_copylog, $ret['output']);	
+
+		$logstr = "-----------------------------------------------" . "\r\n";
+		$logstr .= "移動元の空ディレクトリの削除（サブディレクトリも含む）" . "\r\n";
+		$logstr .= "-----------------------------------------------" . "\r\n";
+		$this->main->put_log($realpath_tracelog, $logstr);
+
+		$command = 'find ' .  $from_realpath . ' -type d -empty -delete' ;
+
+		$ret = $this->main->common()->command_execute($command, true);
+		if ($ret['return']) {
+			// 戻り値が0以外の場合
+			throw new \Exception('Command error. [command]' . $command);
+		}
+	}
+
 
 	/**
 	 * 公開復元処理
@@ -694,17 +680,11 @@ $this->main->common()->debug_echo('　□5');
 
 		try {
 
-			// 処理結果IDからバックアップ情報を取得
-			$backup_data = $this->tsBackup->get_selected_ts_backup_by_output_id($this->main->get_dbh(), $output_id);
-
 			//============================================================
 			// 公開処理結果テーブルの登録処理（復元用）
 			//============================================================
 
 	 		$this->main->common()->debug_echo('　□ -----[復元公開]公開処理結果テーブルの登録処理-----');
-
-			// 開始時刻
-			$start_datetime = $this->main->common()->get_current_datetime_of_gmt();
 
 			$dataArray = array(
 				tsOutput::TS_OUTPUT_RESERVE_ID => $output_id,
@@ -736,15 +716,20 @@ $this->main->common()->debug_echo('　□5');
 			//============================================================
 			// バックアップディレクトリを「backup」から「running」ディレクトリへ移動
 			//============================================================
+			$logstr = "===============================================" . "\r\n";
+			$logstr .= "backupディレクトリからrunningディレクトリへコピー" . "\r\n";
+			$logstr .= "===============================================" . "\r\n";
+			$this->main->put_log($realpath_tracelog, $logstr);
+	
+			$from_realpath = $realpath_array->realpath_backup . $backup_dirname . '/';
+			$to_realpath = $realpath_array->realpath_running . $running_dirname . '/';
+			
+			$logstr = "backupディレクトリ：" . $from_realpath . "\r\n";
+			$logstr .= "runningディレクトリ：" . $to_realpath . "\r\n";
+			$this->main->put_log($realpath_tracelog, $logstr);
 
-	 		$this->main->common()->debug_echo('　□ -----バックアップディレクトリを「backup」から「running」ディレクトリへコピー-----');
+			$this->exec_sync_copy($from_realpath, $to_realpath, $realpath_tracelog);
 
-			$backup_dirname = $this->main->common()->format_gmt_datetime($backup_data[tsBackup::BACKUP_ENTITY_DATETIME_GMT], define::DATETIME_FORMAT_SAVE);
-				
-			// runningディレクトリの絶対パスを取得。
-			$running_dirname = $this->main->common()->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
-
-			$this->copy_dir($real_path->backup_real_path, $backup_dirname, $real_path->running_real_path, $running_dirname, $real_path->log_real_path);
 
 			try {
 
@@ -770,13 +755,36 @@ $this->main->common()->debug_echo('　□5');
 		 		$this->tsOutput->update_ts_output($this->main->get_dbh(), $insert_id, $dataArray);
 
 				//============================================================
-				// ※公開処理※
+				// runningディレクトリを本番環境へ同期
 				//============================================================
-				
-		 		$this->main->common()->debug_echo('　□ -----公開処理-----');
-				
-				$this->do_publish($running_dirname, $this->main->options);
-			
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "※runningディレクトリを本番環境へ同期※" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->main->put_log($realpath_tracelog, $logstr);
+
+				$from_realpath = $realpath_array->realpath_running . $running_dirname . '/';
+				$to_realpath = $realpath_array->realpath_server;
+
+				$this->exec_sync($this->main->options->ignore, $from_realpath, $to_realpath, $realpath_tracelog);
+
+				//============================================================
+				// 公開済みのソースを「running」ディレクトリから「released」ディレクトリへ移動
+				//============================================================
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "runningディレクトリからreleasedディレクトリへコピー" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+		 		$this->main->put_log($realpath_tracelog, $logstr);	
+
+				$from_realpath = $realpath_array->realpath_running .  $running_dirname . '/';
+				$to_realpath = $realpath_array->realpath_released . $running_dirname . '/';
+
+				$this->exec_sync_move($from_realpath, $to_realpath, $realpath_tracelog);
+
+
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "公開処理結果テーブルのコミット処理実行" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->main->put_log($realpath_tracelog, $logstr);
 
 		 		/* 変更をコミットする */
 				$this->main->get_dbh()->commit();

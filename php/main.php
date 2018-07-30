@@ -18,6 +18,11 @@ class main
 	public $dbh;
 
 	/**
+	 * PDOインスタンス
+	 */
+	public $realpath_array;
+
+	/**
 	 * コンストラクタ
 	 * @param $options = オプション
 	 */
@@ -30,7 +35,7 @@ class main
 		  'dir_default_pefrmission' => define::DIR_DEFAULT_PERMISSION,
 		  'filesystem_encoding' 	=> define::FILESYSTEM_ENCODING
 		));
-		
+
 		$this->common = new common($this);
 		$this->gitMgr = new gitManager($this);
 
@@ -291,31 +296,31 @@ class main
 		$ret = true;
 
 		// 作業用ディレクトリの絶対パスを取得
-		$result = json_decode($this->common->get_workdir_real_path($this->options));
+		$this->realpath_array = json_decode($this->common->get_realpath_workdir($this->options));
 
 
 		// logファイルディレクトリが存在しない場合は作成
-		if ( !$this->common->is_exists_mkdir($result->log_real_path) ) {
+		if ( !$this->common->is_exists_mkdir($realpath_array->realpath_log) ) {
 			$ret = false;
 		}
 
 		// backupディレクトリが存在しない場合は作成
-		if ( !$this->common->is_exists_mkdir($result->backup_real_path) ) {
+		if ( !$this->common->is_exists_mkdir($realpath_array->realpath_backup) ) {
 			$ret = false;
 		}
 
 		// waitingディレクトリが存在しない場合は作成
-		if ( !$this->common->is_exists_mkdir($result->waiting_real_path) ) {
+		if ( !$this->common->is_exists_mkdir($realpath_array->realpath_waiting) ) {
 			$ret = false;
 		}
 
 		// runningディレクトリが存在しない場合は作成
-		if ( !$this->common->is_exists_mkdir($result->running_real_path) ) {
+		if ( !$this->common->is_exists_mkdir($realpath_array->realpath_running) ) {
 			$ret = false;
 		}
 
 		// releasedディレクトリが存在しない場合は作成
-		if ( !$this->common->is_exists_mkdir($result->released_real_path) ) {
+		if ( !$this->common->is_exists_mkdir($realpath_array->realpath_released) ) {
 			$ret = false;
 		}
 
@@ -364,5 +369,18 @@ class main
 	 */
 	public function get_dbh(){
 		return $this->dbh;
+	}
+
+
+	/**
+	 * response status code を取得する。
+	 *
+	 * `$px->set_status()` で登録した情報を取り出します。
+	 *
+	 * @return int ステータスコード (100〜599の間の数値)
+	 */
+	public function put_log($path, $text){
+		
+		file_put_contents($path, $text, FILE_APPEND);
 	}
 }

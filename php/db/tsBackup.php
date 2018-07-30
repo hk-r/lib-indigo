@@ -262,12 +262,16 @@ class tsBackup
 
 		// ブランチ名
 		$entity[self::BACKUP_ENTITY_BRANCH] = $array[self::BACKUP_ENTITY_BRANCH];
+				$this->common->debug_echo('■ convert_ts_backup_entity end');
 		// コミット
 		$entity[self::BACKUP_ENTITY_COMMIT_HASH] = $array[self::BACKUP_ENTITY_COMMIT_HASH];
+				$this->common->debug_echo('■ convert_ts_backup_entity end');
 		// コメント
 		$entity[self::BACKUP_ENTITY_COMMENT] = $array[self::BACKUP_ENTITY_COMMENT];
+				$this->common->debug_echo('■ convert_ts_backup_entity end');
 		// 公開種別
 		$entity[self::BACKUP_ENTITY_PUBLISH_TYPE] = $this->common->convert_publish_type($array[self::BACKUP_ENTITY_PUBLISH_TYPE]);	
+				$this->common->debug_echo('■ convert_ts_backup_entity end');
 		// 登録ユーザ
 		$entity[self::BACKUP_ENTITY_INSERT_USER_ID] = $array[self::BACKUP_ENTITY_INSERT_USER_ID];
 
