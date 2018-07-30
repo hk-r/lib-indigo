@@ -266,7 +266,7 @@ class publish
 
 						$selected_id =  $this->main->options->_POST->selected_id;
 
-						$logstr = "選択されたバックアップID" . $selected_id . "\r\n";
+						$logstr = "選択されたバックアップID：" . $selected_id . "\r\n";
 						$this->main->put_log($realpath_tracelog, $logstr);
 
 						$backup_data = $this->tsBackup->get_selected_ts_backup($this->main->get_dbh(), $selected_id);
@@ -275,6 +275,9 @@ class publish
 							throw new \Exception('Target data not found.');
 						}
 
+						$logstr = "取得データ" . $backup_data . "\r\n";
+						$this->main->put_log($realpath_tracelog, $logstr);
+						
 						$backup_id = $backup_data[tsBackup::BACKUP_ENTITY_ID_SEQ];
 
 						$logstr = "バックアップID：" . $backup_id . "\r\n";
