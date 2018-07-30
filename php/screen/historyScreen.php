@@ -6,7 +6,6 @@ class historyScreen
 {
 	private $main;
 
-	private $fs;
 	private $tsOutput;
 	private $common;
 
@@ -26,12 +25,6 @@ class historyScreen
 
 		$this->tsOutput = new tsOutput($this);
 		$this->common = new common($this);
-
-		$this->fs = new \tomk79\filesystem(array(
-		  'file_default_permission' => define::FILE_DEFAULT_PERMISSION,
-		  'dir_default_permission' => define::DIR_DEFAULT_PERMISSION,
-		  'filesystem_encoding' => define::FILESYSTEM_ENCODING
-		));
 	}
 	
 
@@ -173,11 +166,16 @@ class historyScreen
 			// 公開予約ディレクトリ名の取得
 			$dirname = $this->common->format_gmt_datetime($start_datetime_gmt, define::DATETIME_FORMAT_SAVE);
 
+
 			// logディレクトリの絶対パスを取得。
-			$realpath_log = $this->fs->normalize_path($this->fs->get_realpath($this->main->options->workdir_relativepath . define::PATH_LOG . $dirname . "/"));
+			$realpath_log = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->realpath_array->realpath_log . $dirname . "/"));
 		
+		$this->common->debug_echo('■ $realpath_log:' . $realpath_log);
+
 			// ファイルを変数に格納
-			$filename = $realpath_log . 'rsync_copy_' . $dirname . '.log';
+			$filename = $realpath_log . 'pub_copy_' . $dirname . '.log';
+
+$this->common->debug_echo('■ $filename:' . $filename);
 			// ファイルを読み込み変数に格納
 			$content = file_get_contents($filename);
 
