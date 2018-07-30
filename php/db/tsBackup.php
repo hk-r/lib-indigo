@@ -114,9 +114,8 @@ class tsBackup
 
 		$this->common->debug_echo('■ get_selected_ts_backup start');
 
-		$ret_array = '';
-
-		$conv_ret_array = '';
+		$ret_array = null;
+		$conv_ret_array = null;
 
 		if (!$selected_id) {
 			throw new \Exception('選択されたIDが取得できませんでした。 ');
@@ -151,8 +150,8 @@ class tsBackup
 
 		$this->common->debug_echo('　□ output_id：' . $output_id);
 
-		$ret_array = '';
-		$conv_ret_array = '';
+		$ret_array = null;
+		$conv_ret_array = null;
 
 		if (!$output_id) {
 			throw new \Exception('復元対象の公開処理結果IDが取得できませんでした。 ');

@@ -266,6 +266,9 @@ class publish
 
 						$selected_id =  $this->main->options->_POST->selected_id;
 
+						$logstr = "選択されたバックアップID" . $selected_id . "\r\n";
+						$this->main->put_log($realpath_tracelog, $logstr);
+
 						$backup_data = $this->tsBackup->get_selected_ts_backup($this->main->get_dbh(), $selected_id);
 					
 						if (!$backup_data) {
