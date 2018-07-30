@@ -383,7 +383,13 @@ class publish
 				/* データベース接続はオートコミットモードに戻る */
 
 		    } catch (\Exception $e) {
-		    
+		    		    
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "公開処理の事前準備ロールバック" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$logstr .= $e.getMessage() . "\r\n";
+				$this->main->put_log($realpath_tracelog, $logstr);
+
 		      /* 変更をロールバックする */
 		      $this->main->get_dbh()->rollBack();
 		 
@@ -452,6 +458,7 @@ class publish
 					$logstr = "===============================================" . "\r\n";
 					$logstr .= "バックアップテーブルのロールバック処理実行" . "\r\n";
 					$logstr .= "===============================================" . "\r\n";
+					$logstr .= $e.getMessage() . "\r\n";
 					$this->main->put_log($realpath_tracelog, $logstr);
 
 				    /* 変更をロールバックする */
@@ -534,6 +541,7 @@ class publish
 				$logstr = "===============================================" . "\r\n";
 				$logstr .= "公開処理結果テーブルのロールバック処理実行" . "\r\n";
 				$logstr .= "===============================================" . "\r\n";
+				$logstr .= $e.getMessage() . "\r\n";
 				$this->main->put_log($realpath_tracelog, $logstr);
 
 		    	/* 変更をロールバックする */
@@ -673,6 +681,11 @@ class publish
 
 		$this->main->common()->debug_echo('■ exec_restore_publish start');
 
+	  	$logstr = "===============================================" . "\r\n";
+		$logstr .= "復元公開処理の開始" . "\r\n";
+		$logstr .= "===============================================" . "\r\n";
+		$this->main->put_log($realpath_tracelog, $logstr);
+
 		$output = "";
 		$result = array('status' => true,
 						'message' => '',
@@ -684,7 +697,10 @@ class publish
 			// 公開処理結果テーブルの登録処理（復元用）
 			//============================================================
 
-	 		$this->main->common()->debug_echo('　□ -----[復元公開]公開処理結果テーブルの登録処理-----');
+		  	$logstr = "===============================================" . "\r\n";
+			$logstr .= "公開処理結果テーブルの登録処理" . "\r\n";
+			$logstr .= "===============================================" . "\r\n";
+			$this->main->put_log($realpath_tracelog, $logstr);
 
 			$dataArray = array(
 				tsOutput::TS_OUTPUT_RESERVE_ID => $output_id,
@@ -740,8 +756,12 @@ class publish
 				// 公開処理結果テーブルの更新処理（成功）
 				//============================================================
 
-		 		$this->main->common()->debug_echo('　□ -----公開処理結果テーブルの更新処理（成功）-----');
-				
+			  	$logstr = "===============================================" . "\r\n";
+				$logstr .= "公開処理結果テーブルの更新処理（成功）" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$logstr .= $e.getMessage() . "\r\n";
+				$this->main->put_log($realpath_tracelog, $logstr);
+
 				// GMTの現在日時
 				$end_datetime = $this->main->common()->get_current_datetime_of_gmt();
 
@@ -792,6 +812,12 @@ class publish
 
 		    } catch (\Exception $e) {
 		    
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "公開後処理のロールバック処理実行" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$logstr .= $e.getMessage() . "\r\n";
+				$this->main->put_log($realpath_tracelog, $logstr);
+
 		      /* 変更をロールバックする */
 		      $this->main->get_dbh()->rollBack();
 		      
@@ -801,7 +827,9 @@ class publish
 
 		} catch (\Exception $e) {
 
-		$this->main->common()->debug_echo('■ 3');
+			$logstr = "** exec_restore_publish 例外キャッチ **" . "\r\n";
+			$logstr = $e->getMessage() . "\r\n";
+			$this->main->put_log($realpath_tracelog, $logstr);
 
 			$result['status'] = false;
 			$result['message'] = '【Restore publication failure faild.】' . $e->getMessage();
@@ -811,7 +839,12 @@ class publish
 			// 公開処理結果テーブルの更新処理（失敗）
 			//============================================================
 
-	 		$this->main->common()->debug_echo('　□ -----公開処理結果テーブルの更新処理（失敗）-----');
+		  	$logstr = "===============================================" . "\r\n";
+			$logstr .= "公開処理結果テーブルの更新処理（失敗）" . "\r\n";
+			$logstr .= "===============================================" . "\r\n";
+			$logstr .= $e.getMessage() . "\r\n";
+			$this->main->put_log($realpath_tracelog, $logstr);
+
 			// GMTの現在日時
 			$end_datetime = $this->main->common()->get_current_datetime_of_gmt();
 
