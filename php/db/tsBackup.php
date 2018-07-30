@@ -126,7 +126,7 @@ class tsBackup
 		WHERE " . self::TS_BACKUP_ID_SEQ . " = " . $selected_id . ";";
 
 		// SELECT実行
-		$get_array = $this->pdoMgr->selectOne($dbh, $select_sql);
+		$get_array = $this->pdoMgr->select($dbh, $select_sql);
 
 		foreach ( (array) $get_array as $data) {
 			$ret_array = array_shift($data);
