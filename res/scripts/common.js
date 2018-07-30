@@ -17,14 +17,19 @@ $(function($){
 
 			} else {
 
-				var path = document.getElementById('master_real_path').value;
-				
+				var param_relativepath = document.getElementById('param_relativepath').value;
+				var workdir_relativepath = document.getElementById('workdir_relativepath').value;
+				// alert(workdir_relativepath);
+				// alert(current_path);
 				$.ajax ({
 					type: 'GET',
 					// "url": "./../vendor/pickles2/lib-indigo/php/jquery.php",
-					url: "./../vendor/pickles2/lib-indigo/php/ajax.php",
+					// url: path + "php/ajax.php",
+					url: param_relativepath + "ajax.php",
 					
-					data: { 'branch_name': branch_name, 'path': path },
+					data: { 'branch_name': branch_name, 
+							'workdir_relativepath': workdir_relativepath
+						},
 					dataType: 'json',
 				    success: function(data, dataType) {
 				    	if (data) {
@@ -32,10 +37,12 @@ $(function($){
 				    		$('#commit_hash').val(data.commit_hash);
 				    	}					
 			    	},
-			    	error: function(XMLHttpRequest, textStatus, errorThrown) {
+			    	error: function(jqXHR, textStatus, errorThrown) {
 				        // エラーメッセージの表示
 				        alert('コミット取得に失敗しました。');
-				        console.log(errorThrown);
+	                      $("#XMLHttpRequest").html("XMLHttpRequest : " + jqXHR.status);
+	                      $("#textStatus").html("textStatus : " + textStatus);
+	                      $("#errorThrown").html("errorThrown : " + errorThrown);
 		      		}
 				});
 			}
@@ -181,14 +188,10 @@ $(function($){
 		/*
 		 * 新規、変更ダイアログの[確認][確定]ボタン
 		 */
-		$('#add_check_btn, #update_check_btn, #add_confirm_btn, #update_confirm_btn').on('click', function() {
+		$('#add_check_btn, #update_check_btn').on('click', function() {
 
 			/// ブランチ入力チェック
 			if (!check_branch_validation()) {
-				return false;
-			}
-			/// コミット取得チェック
-			if (!check_commit_validation()) {
 				return false;
 			}
 			/// 日付入力チェック
@@ -202,20 +205,13 @@ $(function($){
 		/*
 		 * 即時公開ダイアログの[確認][確定]ボタン
 		 */
-		$('#immediate_check_btn, #immediate_confirm_btn').on('click', function() {
+		$('#immediate_check_btn').on('click', function() {
 
 			/// ブランチ入力チェック
 			if (!check_branch_validation()) {
 				return false;
 			}
-			/// コミット取得チェック
-			if (!check_commit_validation()) {
-				return false;
-			}
-			// /// 日付入力チェック
-			// if (!check_date_validation()) {
-			// 	return false;
-			// }
+			
 			// ダイアログ画面ロック
 			display_lock();
 		});	
@@ -223,9 +219,46 @@ $(function($){
 		 * 入力チェック不要
 		 * [新規][履歴][戻る][確定][即時公開][バックアップ一覧]ボタン
 		 */
-		$('#add_btn, #back_btn, #history_btn, #backup_btn, #sokuji_btn').on('click', function() {
+		$('#add_btn, #back_btn, #history_btn, #backup_btn, #immediate_btn, #confirm_btn').on('click', function() {
 
 			// ダイアログ画面ロック
+			display_lock();
+		});	
+
+
+		/*
+		 * ログボタン
+		 */
+		$('#log_btn').on('click', function() {
+
+			var selected_flg = false;
+				
+			var element = document.getElementsByName('target');
+				
+			var str = "";
+
+			for (var i = 0; i < element.length; i++) {
+
+				if (element[i].checked) {
+					selected_flg = true;
+					str = element[i].value;
+					break;
+				}
+			}
+
+			if (!selected_flg) {
+				
+				alert('選択されていません');
+				return false;
+			}
+			$("#form_table").submit(function(){
+				$('<input />').attr('type', 'hidden')
+				 .attr('name', 'selected_id')
+				 .attr('value', str)
+				 .appendTo('#form_table');
+			});
+
+			// 画面ロック
 			display_lock();
 		});	
 
@@ -259,22 +292,6 @@ $(function($){
 	}
 
 	/*
-	 * コミット設定チェック
-	 */
-	function check_commit_validation () {
-
-		var commit_hash = document.getElementById('commit_hash').value;
-
-		if(commit_hash === ""){
-		  
-			alert("選択ブランチに紐づくコミットハッシュ値が取得されておりません。");
-			return false;
-		}
-
-		return true;
-	}
-
-	/*
 	 * 日付入力チェック
 	 */
 	function check_date_validation () {
@@ -288,11 +305,11 @@ $(function($){
 			return false;
 		}
 
-		if(!date.match(/^[0-9]{4}\-[0-9]{2}\-[0-9]{2}$/)){
+		// if(!date.match(/^[0-9]{4}\-[0-9]{2}\-[0-9]{2}$/)){
 
-			alert("日付の形式が正しくありません。YYYY-MM-DDの形式で入力してください。");
-			return false;
-		}
+		// 	alert("日付の形式が正しくありません。YYYY-MM-DDの形式で入力してください。");
+		// 	return false;
+		// }
 
 		return true;
 	}
