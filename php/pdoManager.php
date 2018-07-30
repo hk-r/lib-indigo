@@ -298,8 +298,16 @@ class pdoManager
 		$ret_array = null;
 		$stmt = null;
 
+		$this->common->debug_echo('★$sql');
+		$this->common->debug_echo($sql);
+
 		// 実行
 		if ($stmt = $dbh->query($sql)) {
+
+			$this->common->debug_echo('★$stmt');
+			$this->common->debug_echo($stmt);
+
+
 			// 取得したデータを配列に格納して返す
 			while ($row = $stmt->fetch(\PDO::FETCH_BOTH)) {
 				$ret_array = $row;
