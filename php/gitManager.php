@@ -67,6 +67,8 @@ class gitManager
 		} else {
 			// ディレクトリ移動に失敗
 
+			chdir($current_dir);
+
 			throw new \Exception('Move to master directory failed.');
 		}
 
@@ -131,6 +133,8 @@ class gitManager
 			$ret = $this->common->command_execute($command, false);
 			if ($ret['return']) {
 				// 戻り値が0以外の場合
+
+				chdir($current_dir);
 				throw new \Exception('Git pull command error. branch_name:' . $branch_name);
 			}
 
