@@ -23,6 +23,12 @@ class main
 	public $realpath_array;
 
 	/**
+	 * logパス
+	 */
+	public $realpath_log;
+
+
+	/**
 	 * コンストラクタ
 	 * @param $options = オプション
 	 */
@@ -44,6 +50,39 @@ class main
 		$this->historyScn = new historyScreen($this);
 		$this->backupScn = new backupScreen($this);
 
+		//============================================================
+		// タイムゾーンの設定
+		//============================================================
+		$time_zone = $this->options->time_zone;
+		if (!$time_zone) {
+			throw new \Exception('Parameter of timezone not found.');
+		}
+		date_default_timezone_set($time_zone);
+
+
+		//============================================================
+		// 作業用ディレクトリの作成（既にある場合は作成しない）
+		//============================================================
+		$this->create_indigo_work_dir();
+
+
+		//============================================================
+		// ログ出力用の日付ディレクトリ作成
+		//============================================================
+		// // 作業用ディレクトリの絶対パスを取得
+		// $realpath_array = $this->realpath_array;
+		
+		// GMT現在日時を取得し、ディレクトリ名用にフォーマット変換
+		$start_datetime = $this->common()->get_current_datetime_of_gmt();
+
+		$log_dirname = $this->common()->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_YMD);
+
+		// logの日付ディレクトリを作成
+		$this->realpath_log = $this->fs()->normalize_path($this->fs()->get_realpath(
+			$this->realpath_array->realpath_log)) . 'log_' . $log_dirname . '.log';
+			
+		$this->common()->debug_echo('　□ realpath_log' . $realpath_log);
+
 	}
 
 	/**
@@ -52,6 +91,11 @@ class main
 	public function run() {
 	
 		$this->common->debug_echo('■ run start');
+		
+		$logstr = "===============================================" . "\r\n";
+		$logstr .= "run()関数呼び出し" . "\r\n";
+		$logstr .= "===============================================" . "\r\n";
+		$this->put_log($this->realpath_log, $logstr);
 
 		// 画面表示
 		$disp = '';  
@@ -75,16 +119,6 @@ class main
 		try {
 
 			//============================================================
-			// タイムゾーンの設定
-			//============================================================
-			$time_zone = $this->options->time_zone;
-			if (!$time_zone) {
-				throw new \Exception('Parameter of timezone not found.');
-			}
-			date_default_timezone_set($time_zone);
-
-
-			//============================================================
 			// データベース接続
 			//============================================================
 			$this->dbh = $this->pdoMgr->connect();
@@ -97,12 +131,6 @@ class main
 			
 
 			//============================================================
-			// 作業用ディレクトリの作成（既にある場合は作成しない）
-			//============================================================
-			$this->create_indigo_work_dir();
-
-
-			//============================================================
 			// Gitのmaster情報取得
 			//============================================================
 			$this->gitMgr->get_git_master($this->options);
@@ -113,22 +141,42 @@ class main
 			//============================================================
 			if (isset($this->options->_POST->add)) {
 				// 初期表示画面の「新規」ボタン押下
-				
+
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "初期表示画面の「新規」ボタン押下" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->put_log($this->realpath_log, $logstr);
+		
 				$result = json_decode($this->initScn->do_disp_add_dialog());
 
 			} elseif (isset($this->options->_POST->add_check)) {
 				// 新規ダイアログの「確認」ボタン押下
 				
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "新規ダイアログの「確認」ボタン押下" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->put_log($this->realpath_log, $logstr);
+			
 				$result = json_decode($this->initScn->do_check_add());
 				
 			} elseif (isset($this->options->_POST->add_confirm)) {
 				// 新規確認ダイアログの「確定」ボタン押下
 				
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "新規ダイアログの「確定」ボタン押下" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->put_log($this->realpath_log, $logstr);
+		
 				$result = json_decode($this->initScn->do_confirm_add());	
 
 			} elseif (isset($this->options->_POST->add_back)) {
 				// 新規確認ダイアログの「戻る」ボタン押下
-
+				
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "新規ダイアログの「戻る」ボタン押下" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->put_log($this->realpath_log, $logstr);
+		
 				$result = json_decode($this->initScn->do_back_add_dialog());
 
 			//============================================================
@@ -137,22 +185,42 @@ class main
 			} elseif (isset($this->options->_POST->update)) {
 				// 初期表示画面の「変更」ボタン押下
 				
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "初期表示画面の「変更」ボタン押下" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->put_log($this->realpath_log, $logstr);
+			
 				$result = json_decode($this->initScn->do_disp_update_dialog());
 
 
 			} elseif (isset($this->options->_POST->update_check)) {
-			// 変更ダイアログの「確認」ボタン押下
+				// 変更ダイアログの「確認」ボタン押下
 				
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "変更ダイアログの「確認」ボタン押下" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->put_log($this->realpath_log, $logstr);
+			
 				$result = json_decode($this->initScn->do_check_update());
 
 			} elseif (isset($this->options->_POST->update_confirm)) {
 				// 変更確認ダイアログの「確定」ボタン押下
 				
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "変更ダイアログの「確定」ボタン押下" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->put_log($this->realpath_log, $logstr);
+			
 				$result = json_decode($this->initScn->do_confirm_update());	
 
 			} elseif (isset($this->options->_POST->update_back)) {
 				// 変更確認ダイアログの「戻る」ボタン押下	
-
+				
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "変更ダイアログの「戻る」ボタン押下" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->put_log($this->realpath_log, $logstr);
+			
 				$result = json_decode($this->initScn->do_back_update_dialog());
 
 
@@ -161,7 +229,12 @@ class main
 			//============================================================
 			} elseif (isset($this->options->_POST->delete)) {
 				// 初期表示画面の「削除」ボタン押下				
-
+				
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "初期表示画面の「削除」ボタン押下" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->put_log($this->realpath_log, $logstr);
+			
 				// Gitファイルの削除
 				$result = json_decode($this->initScn->do_delete());
 
@@ -171,7 +244,12 @@ class main
 			//============================================================
 			} elseif (isset($this->options->_POST->restore)) {
 				// バックアップ一覧画面の「復元ボタン押下				
-
+				
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "バックアップ一覧画面の「復元」ボタン押下" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->put_log($this->realpath_log, $logstr);
+			
 				// Gitファイルの削除
 				$result = json_decode($this->backupScn->do_restore_publish());
 
@@ -181,17 +259,32 @@ class main
 			//============================================================
 			} elseif (isset($this->options->_POST->immediate)) {
 				// 初期表示画面の「即時公開」ボタン押下				
-
+				
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "初期表示画面の「即時公開」ボタン押下" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->put_log($this->realpath_log, $logstr);
+			
 				$result = json_decode($this->initScn->do_disp_immediate_dialog());
 
 			} elseif (isset($this->options->_POST->immediate_check)) {
 				// 即時公開ダイアログの「確認」ボタン押下
-
+				
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "即時公開ダイアログの「確認」ボタン押下" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->put_log($this->realpath_log, $logstr);
+			
 				$result = json_decode($this->initScn->do_check_immediate());
 
 			} elseif (isset($this->options->_POST->immediate_confirm)) {
 				// 即時公開確認ダイアログの「確定」ボタン押下	
 				
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "即時公開ダイアログの「確定」ボタン押下" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->put_log($this->realpath_log, $logstr);
+			
 				$result = json_decode($this->initScn->do_immediate_publish());
 
 				if ( !$result->status ) {
@@ -202,15 +295,25 @@ class main
 
 			} elseif (isset($this->options->_POST->immediate_back)) {
 				// 即時公開確認ダイアログの「戻る」ボタン押下			
-
+				
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "即時公開ダイアログの「戻る」ボタン押下" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->put_log($this->realpath_log, $logstr);
+			
 				$result = json_decode($this->initScn->do_back_immediate_dialog());
 			
 			//============================================================
 			// ログ表示処理
 			//============================================================
 			} elseif (isset($this->options->_POST->log)) {
-				// 初期表示画面の「新規」ボタン押下
+				// 履歴表示画面の「新規」ボタン押下
 				
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "履歴表示画面の「新規」ボタン押下" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->put_log($this->realpath_log, $logstr);
+			
 				$result = json_decode($this->historyScn->do_disp_log_dialog());
 			}
 
@@ -220,14 +323,15 @@ class main
 
 				$error_message .=  $result->message;
 
-			$this->common->debug_echo('　□error_message');
-			$this->common->debug_echo($error_message);
+				$logstr = "** status : false **" . "\r\n";
+				$logstr = $error_message . "\r\n";
+				$this->put_log($this->realpath_log, $logstr);
 
 				// エラーメッセージ表示
 				$dialog_disp = '
 				<script type="text/javascript">
-					console.error(' . "'" . $error_message. "'" . ');
-					alert(' . "'" . $error_message. "'" . ');
+					console.error(' . "'" . $error_message . "'" . ');
+					alert(' . "'" . $error_message . "'" . ');
 				</script>';
 
 			} else {
@@ -240,17 +344,32 @@ class main
 			if (isset($this->options->_POST->history) ||
 				isset($this->options->_POST->log)) {
 				// 初期表示画面の「履歴」ボタン押下
-
+				
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "履歴画面の表示" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->put_log($this->realpath_log, $logstr);
+			
 				$disp = $this->historyScn->disp_history_screen();
 
 			} elseif (isset($this->options->_POST->backup)) {
 				// 初期表示画面の「バックアップ一覧」ボタン押下
 
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "バックアップ一覧画面の表示" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->put_log($this->realpath_log, $logstr);
+			
 				$disp = $this->backupScn->disp_backup_screen();
 				
 			} else {
 				// 初期表示画面の表示
 
+				$logstr = "===============================================" . "\r\n";
+				$logstr .= "初期表示画面の表示" . "\r\n";
+				$logstr .= "===============================================" . "\r\n";
+				$this->put_log($this->realpath_log, $logstr);
+			
 				$disp = $this->initScn->do_disp_init_screen();
 
 			}
@@ -259,6 +378,10 @@ class main
 			$disp_lock = '<div id="loader-bg"><div id="loading"></div></div>';
 
 		} catch (\Exception $e) {
+
+			$logstr = "** run() 例外キャッチ **" . "\r\n";
+			$logstr =. $e->getMessage() . "\r\n";
+			$this->put_log($this->realpath_log, $logstr);
 
 			// エラーメッセージ表示
 			$dialog_disp = '
@@ -300,29 +423,32 @@ class main
 
 
 		// logファイルディレクトリが存在しない場合は作成
-		if ( !$this->common->is_exists_mkdir($realpath_array->realpath_log) ) {
+		if ( !$this->common->is_exists_mkdir($this->realpath_array->realpath_log) ) {
 			$ret = false;
 		}
 
 		// backupディレクトリが存在しない場合は作成
-		if ( !$this->common->is_exists_mkdir($realpath_array->realpath_backup) ) {
+		if ( !$this->common->is_exists_mkdir($this->realpath_array->realpath_backup) ) {
 			$ret = false;
 		}
 
 		// waitingディレクトリが存在しない場合は作成
-		if ( !$this->common->is_exists_mkdir($realpath_array->realpath_waiting) ) {
+		if ( !$this->common->is_exists_mkdir($this->realpath_array->realpath_waiting) ) {
 			$ret = false;
 		}
 
 		// runningディレクトリが存在しない場合は作成
-		if ( !$this->common->is_exists_mkdir($realpath_array->realpath_running) ) {
+		if ( !$this->common->is_exists_mkdir($this->realpath_array->realpath_running) ) {
 			$ret = false;
 		}
 
 		// releasedディレクトリが存在しない場合は作成
-		if ( !$this->common->is_exists_mkdir($realpath_array->realpath_released) ) {
+		if ( !$this->common->is_exists_mkdir($this->realpath_array->realpath_released) ) {
 			$ret = false;
 		}
+
+		$this->common->debug_echo("　□作業ディレクトリの作成処理結果：");
+		$this->common->debug_echo(($ret == true) ? "成功": "失敗");
 
 		$this->common->debug_echo('■ create_indigo_work_dir end');
 

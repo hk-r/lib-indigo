@@ -54,7 +54,8 @@ class define
 	const DATETIME_FORMAT_SAVE = "YmdHis";
 	// Y-m-d H:i（画面表示用）
 	const DATETIME_FORMAT_DISP = "Y-m-d H:i";
-
+	// YmdHi
+	const DATETIME_FORMAT_YMD = "Ymd";
 
 	/**
 	 * 削除フラグ
