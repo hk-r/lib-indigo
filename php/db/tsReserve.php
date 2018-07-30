@@ -72,8 +72,8 @@ class tsReserve
 
 		$this->common->debug_echo('■ get_ts_reserve_list start');
 
-		$ret_array = array();
-		$conv_ret_array = array();
+		$ret_array = null;
+		$conv_ret_array = null;
 
 		// 公開予約テーブルから未処理、未削除データを取得
 		$select_sql = "
