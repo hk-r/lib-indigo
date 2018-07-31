@@ -62,7 +62,7 @@ class initScreen
 		$this->tsOutput = new tsOutput($this->main);
 		$this->tsBackup = new tsBackup($this->main);
 		
-		$this->check = new check($this);
+		$this->check = new check($this->main);
 		$this->publish = new publish($this->main);
 
 	}

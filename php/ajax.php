@@ -34,9 +34,6 @@ class ajax
      */
     public function get_commit_hash() {
 
-        error_log( "★get_commit_hash" . "\n", 3, "/workspace/sample-lib-indigo/indigo_dir/log/log_20180731.log" );
- 
-
         $commit_hash;
 
         $data = array(
@@ -46,7 +43,7 @@ class ajax
         $current_dir = realpath('.');
 
         if (isset($this->options->branch_name) && isset($this->options->workdir_relativepath)) {
-        
+
             // masterディレクトリの絶対パス
             $master_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->options->workdir_relativepath . define::PATH_MASTER));
 

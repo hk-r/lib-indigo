@@ -52,7 +52,7 @@ class main
 
 		$this->common = new common($this);
 
-		$this->gitMgr = new gitManager($this, null);
+		$this->gitMgr = new gitManager($this);
 		$this->pdoMgr = new pdoManager($this);
 
 		$this->initScn = new initScreen($this);
@@ -311,9 +311,14 @@ class main
 
 				$error_message .=  $result->message;
 
-				$logstr = "** status : false **" . "\r\n";
-				$logstr .= $error_message . "\r\n";
+				$logstr = "*****************************************" . "\r\n";
+				$logstr .= "************** ステータスエラー *************" . "\r\n";
+				$logstr .= "*****************************************" . "\r\n";
+				$this->put_process_log_block($logstr);
+
+				$logstr = $error_message . "\r\n";
 				$this->put_process_log($logstr);
+
 
 				// エラーメッセージ表示
 				$dialog_disp = '
@@ -609,10 +614,10 @@ class main
 	 *
 	 * @return int ステータスコード (100〜599の間の数値)
 	 */
-	public function put_process_log_block($path, $text){
+	public function put_process_log_block($text){
 		
 		$str = "\r\n" . $text . "\r\n";
 
-		file_put_contents($path, $str, FILE_APPEND);
+		return error_log( $str, 3, $this->process_log_path );
 	}
 }

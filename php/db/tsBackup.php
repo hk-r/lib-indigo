@@ -87,8 +87,6 @@ class tsBackup
 		// SELECT実行
 		$ret_array = $this->main->pdoMgr()->select($dbh, $select_sql);
 
-		$this->main->common()->debug_var_dump($ret_array);
-
 		foreach ((array)$ret_array as $array) {
 			$conv_ret_array[] = $this->convert_ts_backup_entity($array);
 		}
@@ -164,8 +162,6 @@ class tsBackup
 			// $ret_array = array_shift($data);
 			$conv_ret_array = $this->convert_ts_backup_entity($ret_array);
 		// }
-
-		$this->main->common()->debug_var_dump('　□conv_ret_array：' . $conv_ret_array);
 
 		$this->main->put_process_log('■ get_selected_ts_backup_by_output_id end');
 

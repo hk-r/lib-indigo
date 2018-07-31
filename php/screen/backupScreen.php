@@ -26,9 +26,9 @@ class backupScreen
 
 		$this->main = $main;
 
-		$this->check = new check($this);
-		$this->tsBackup = new tsBackup($this);
-		$this->tsOutput = new tsOutput($this);
+		$this->check = new check($this->main);
+		$this->tsBackup = new tsBackup($this->main);
+		$this->tsOutput = new tsOutput($this->main);
 		$this->publish = new publish($this->main);
 	}
 
