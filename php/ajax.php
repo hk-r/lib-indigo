@@ -2,7 +2,7 @@
 
 namespace indigo;
 
-class gitManager
+class ajax
 {
     public $options;
 
