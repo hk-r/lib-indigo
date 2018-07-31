@@ -18,14 +18,19 @@ class main
 	public $dbh;
 
 	/**
-	 * PDOインスタンス
+	 * 作業ディレクトリパス配列
 	 */
-	public $realpath_array;
+	public $realpath_array = array('realpath_server' => '',
+									'realpath_backup' => '',
+									'realpath_waiting' => '',
+									'realpath_running' => '',
+									'realpath_released' => '',
+									'realpath_log' => '');
 
 	/**
 	 * logパス
 	 */
-	public $realpath_log;
+	public $process_log_path;
 
 
 	/**
@@ -34,6 +39,9 @@ class main
 	 */
 	public function __construct($options) {
 
+		//============================================================
+		// オブジェクト生成
+		//============================================================	
 		$this->options = json_decode(json_encode($options));
 
 		$this->fs = new \tomk79\filesystem(array(
@@ -43,12 +51,28 @@ class main
 		));
 
 		$this->common = new common($this);
-		$this->gitMgr = new gitManager($this);
 
+		$this->gitMgr = new gitManager($this, null);
 		$this->pdoMgr = new pdoManager($this);
+
 		$this->initScn = new initScreen($this);
 		$this->historyScn = new historyScreen($this);
 		$this->backupScn = new backupScreen($this);
+
+		//============================================================
+		// ログ出力用の日付ディレクトリ作成
+		//============================================================	
+		// ログファイル名
+		$log_dirname = $this->common()->format_gmt_datetime($this->common()->get_current_datetime_of_gmt(), define::DATETIME_FORMAT_YMD);
+
+		// ログパス
+		$this->process_log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->workdir_relativepath . define::PATH_LOG)) . 'log_' . $log_dirname . '.log';
+
+		// $logstr = "起動パラメタ：" . $this->options;
+		// $this->put_process_log($logstr);
+
+		// 作業用ディレクトリの絶対パスを取得
+		$this->realpath_array = json_decode($this->common()->get_realpath_workdir($this->options, $this->realpath_array));
 
 		//============================================================
 		// タイムゾーンの設定
@@ -59,29 +83,13 @@ class main
 		}
 		date_default_timezone_set($time_zone);
 
+		$logstr = "設定タイムゾーン：" . $time_zone;
+		$this->put_process_log($logstr);
 
 		//============================================================
 		// 作業用ディレクトリの作成（既にある場合は作成しない）
 		//============================================================
 		$this->create_indigo_work_dir();
-
-
-		//============================================================
-		// ログ出力用の日付ディレクトリ作成
-		//============================================================
-		// // 作業用ディレクトリの絶対パスを取得
-		// $realpath_array = $this->realpath_array;
-		
-		// GMT現在日時を取得し、ディレクトリ名用にフォーマット変換
-		$start_datetime = $this->common()->get_current_datetime_of_gmt();
-
-		$log_dirname = $this->common()->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_YMD);
-
-		// logの日付ディレクトリを作成
-		$this->realpath_log = $this->fs()->normalize_path($this->fs()->get_realpath(
-			$this->realpath_array->realpath_log)) . 'log_' . $log_dirname . '.log';
-			
-		$this->common()->debug_echo('　□ realpath_log' . $realpath_log);
 
 	}
 
@@ -90,12 +98,8 @@ class main
 	 */
 	public function run() {
 	
-		$this->common->debug_echo('■ run start');
-		
-		$logstr = "===============================================" . "\r\n";
-		$logstr .= "run()関数呼び出し" . "\r\n";
-		$logstr .= "===============================================" . "\r\n";
-		$this->put_log($this->realpath_log, $logstr);
+		$logstr = "run() start";
+		$this->put_process_log($logstr);
 
 		// 画面表示
 		$disp = '';  
@@ -129,7 +133,6 @@ class main
 			//============================================================
 			$this->pdoMgr->create_table();
 			
-
 			//============================================================
 			// Gitのmaster情報取得
 			//============================================================
@@ -142,40 +145,32 @@ class main
 			if (isset($this->options->_POST->add)) {
 				// 初期表示画面の「新規」ボタン押下
 
-				$logstr = "===============================================" . "\r\n";
-				$logstr .= "初期表示画面の「新規」ボタン押下" . "\r\n";
-				$logstr .= "===============================================" . "\r\n";
-				$this->put_log($this->realpath_log, $logstr);
+				$logstr = "==========初期表示画面の「新規」ボタン押下==========";
+				$this->put_process_log($logstr);
 		
 				$result = json_decode($this->initScn->do_disp_add_dialog());
 
 			} elseif (isset($this->options->_POST->add_check)) {
 				// 新規ダイアログの「確認」ボタン押下
 				
-				$logstr = "===============================================" . "\r\n";
-				$logstr .= "新規ダイアログの「確認」ボタン押下" . "\r\n";
-				$logstr .= "===============================================" . "\r\n";
-				$this->put_log($this->realpath_log, $logstr);
+				$logstr = "==========新規ダイアログの「確認」ボタン押下==========";
+				$this->put_process_log($logstr);
 			
 				$result = json_decode($this->initScn->do_check_add());
 				
 			} elseif (isset($this->options->_POST->add_confirm)) {
 				// 新規確認ダイアログの「確定」ボタン押下
 				
-				$logstr = "===============================================" . "\r\n";
-				$logstr .= "新規ダイアログの「確定」ボタン押下" . "\r\n";
-				$logstr .= "===============================================" . "\r\n";
-				$this->put_log($this->realpath_log, $logstr);
+				$logstr = "==========新規ダイアログの「確定」ボタン押下==========";;
+				$this->put_process_log($logstr);
 		
 				$result = json_decode($this->initScn->do_confirm_add());	
 
 			} elseif (isset($this->options->_POST->add_back)) {
 				// 新規確認ダイアログの「戻る」ボタン押下
 				
-				$logstr = "===============================================" . "\r\n";
-				$logstr .= "新規ダイアログの「戻る」ボタン押下" . "\r\n";
-				$logstr .= "===============================================" . "\r\n";
-				$this->put_log($this->realpath_log, $logstr);
+				$logstr = "==========新規ダイアログの「戻る」ボタン押下==========";
+				$this->put_process_log($logstr);
 		
 				$result = json_decode($this->initScn->do_back_add_dialog());
 
@@ -185,10 +180,8 @@ class main
 			} elseif (isset($this->options->_POST->update)) {
 				// 初期表示画面の「変更」ボタン押下
 				
-				$logstr = "===============================================" . "\r\n";
-				$logstr .= "初期表示画面の「変更」ボタン押下" . "\r\n";
-				$logstr .= "===============================================" . "\r\n";
-				$this->put_log($this->realpath_log, $logstr);
+				$logstr = "==========初期表示画面の「変更」ボタン押下==========";
+				$this->put_process_log($logstr);
 			
 				$result = json_decode($this->initScn->do_disp_update_dialog());
 
@@ -196,30 +189,24 @@ class main
 			} elseif (isset($this->options->_POST->update_check)) {
 				// 変更ダイアログの「確認」ボタン押下
 				
-				$logstr = "===============================================" . "\r\n";
-				$logstr .= "変更ダイアログの「確認」ボタン押下" . "\r\n";
-				$logstr .= "===============================================" . "\r\n";
-				$this->put_log($this->realpath_log, $logstr);
+				$logstr = "==========変更ダイアログの「確認」ボタン押下==========";
+				$this->put_process_log($logstr);
 			
 				$result = json_decode($this->initScn->do_check_update());
 
 			} elseif (isset($this->options->_POST->update_confirm)) {
 				// 変更確認ダイアログの「確定」ボタン押下
 				
-				$logstr = "===============================================" . "\r\n";
-				$logstr .= "変更ダイアログの「確定」ボタン押下" . "\r\n";
-				$logstr .= "===============================================" . "\r\n";
-				$this->put_log($this->realpath_log, $logstr);
+				$logstr = "==========変更ダイアログの「確定」ボタン押下==========";
+				$this->put_process_log($logstr);
 			
 				$result = json_decode($this->initScn->do_confirm_update());	
 
 			} elseif (isset($this->options->_POST->update_back)) {
 				// 変更確認ダイアログの「戻る」ボタン押下	
 				
-				$logstr = "===============================================" . "\r\n";
-				$logstr .= "変更ダイアログの「戻る」ボタン押下" . "\r\n";
-				$logstr .= "===============================================" . "\r\n";
-				$this->put_log($this->realpath_log, $logstr);
+				$logstr = "==========変更ダイアログの「戻る」ボタン押下==========";
+				$this->put_process_log($logstr);
 			
 				$result = json_decode($this->initScn->do_back_update_dialog());
 
@@ -230,10 +217,8 @@ class main
 			} elseif (isset($this->options->_POST->delete)) {
 				// 初期表示画面の「削除」ボタン押下				
 				
-				$logstr = "===============================================" . "\r\n";
-				$logstr .= "初期表示画面の「削除」ボタン押下" . "\r\n";
-				$logstr .= "===============================================" . "\r\n";
-				$this->put_log($this->realpath_log, $logstr);
+				$logstr = "==========初期表示画面の「削除」ボタン押下==========";
+				$this->put_process_log($logstr);
 			
 				// Gitファイルの削除
 				$result = json_decode($this->initScn->do_delete());
@@ -245,10 +230,8 @@ class main
 			} elseif (isset($this->options->_POST->restore)) {
 				// バックアップ一覧画面の「復元ボタン押下				
 				
-				$logstr = "===============================================" . "\r\n";
-				$logstr .= "バックアップ一覧画面の「復元」ボタン押下" . "\r\n";
-				$logstr .= "===============================================" . "\r\n";
-				$this->put_log($this->realpath_log, $logstr);
+				$logstr = "==========バックアップ一覧画面の「復元」ボタン押下==========";
+				$this->put_process_log($logstr);
 			
 				// Gitファイルの削除
 				$result = json_decode($this->backupScn->do_restore_publish());
@@ -260,46 +243,53 @@ class main
 			} elseif (isset($this->options->_POST->immediate)) {
 				// 初期表示画面の「即時公開」ボタン押下				
 				
-				$logstr = "===============================================" . "\r\n";
-				$logstr .= "初期表示画面の「即時公開」ボタン押下" . "\r\n";
-				$logstr .= "===============================================" . "\r\n";
-				$this->put_log($this->realpath_log, $logstr);
+				$logstr = "==========初期表示画面の「即時公開」ボタン押下==========";
+				$this->put_process_log($logstr);
 			
 				$result = json_decode($this->initScn->do_disp_immediate_dialog());
 
 			} elseif (isset($this->options->_POST->immediate_check)) {
 				// 即時公開ダイアログの「確認」ボタン押下
 				
-				$logstr = "===============================================" . "\r\n";
-				$logstr .= "即時公開ダイアログの「確認」ボタン押下" . "\r\n";
-				$logstr .= "===============================================" . "\r\n";
-				$this->put_log($this->realpath_log, $logstr);
+				$logstr = "==========即時公開ダイアログの「確認」ボタン押下==========";
+				$this->put_process_log($logstr);
 			
 				$result = json_decode($this->initScn->do_check_immediate());
 
 			} elseif (isset($this->options->_POST->immediate_confirm)) {
 				// 即時公開確認ダイアログの「確定」ボタン押下	
 				
-				$logstr = "===============================================" . "\r\n";
-				$logstr .= "即時公開ダイアログの「確定」ボタン押下" . "\r\n";
-				$logstr .= "===============================================" . "\r\n";
-				$this->put_log($this->realpath_log, $logstr);
+				$logstr = "==========即時公開ダイアログの「確定」ボタン押下==========";
+				$this->put_process_log($logstr);
 			
 				$result = json_decode($this->initScn->do_immediate_publish());
 
 				if ( !$result->status ) {
 					// 処理失敗の場合、復元処理
+
+					$logstr = "==========即時公開失敗==========";
+					$logstr .= $result->message . "\r\n";
+					$this->put_process_log($logstr);
+			
+
 					$error_message = $result->message . " ";
 					$result = json_decode($this->initScn->do_restore_publish_failure($result->output_id));
+
+					if ( !$result->status ) {
+						// 処理失敗の場合、復元処理
+						
+						$logstr = "==========即時公開の復元処理失敗==========";
+						$logstr .= $result->message . "\r\n";
+						$this->put_process_log($logstr);
+					}
+
 				}
 
 			} elseif (isset($this->options->_POST->immediate_back)) {
 				// 即時公開確認ダイアログの「戻る」ボタン押下			
 				
-				$logstr = "===============================================" . "\r\n";
-				$logstr .= "即時公開ダイアログの「戻る」ボタン押下" . "\r\n";
-				$logstr .= "===============================================" . "\r\n";
-				$this->put_log($this->realpath_log, $logstr);
+				$logstr = "==========即時公開ダイアログの「戻る」ボタン押下==========";
+				$this->put_process_log($logstr);
 			
 				$result = json_decode($this->initScn->do_back_immediate_dialog());
 			
@@ -309,10 +299,8 @@ class main
 			} elseif (isset($this->options->_POST->log)) {
 				// 履歴表示画面の「新規」ボタン押下
 				
-				$logstr = "===============================================" . "\r\n";
-				$logstr .= "履歴表示画面の「新規」ボタン押下" . "\r\n";
-				$logstr .= "===============================================" . "\r\n";
-				$this->put_log($this->realpath_log, $logstr);
+				$logstr = "==========履歴表示画面の「新規」ボタン押下==========";
+				$this->put_process_log($logstr);
 			
 				$result = json_decode($this->historyScn->do_disp_log_dialog());
 			}
@@ -324,8 +312,8 @@ class main
 				$error_message .=  $result->message;
 
 				$logstr = "** status : false **" . "\r\n";
-				$logstr = $error_message . "\r\n";
-				$this->put_log($this->realpath_log, $logstr);
+				$logstr .= $error_message . "\r\n";
+				$this->put_process_log($logstr);
 
 				// エラーメッセージ表示
 				$dialog_disp = '
@@ -345,30 +333,24 @@ class main
 				isset($this->options->_POST->log)) {
 				// 初期表示画面の「履歴」ボタン押下
 				
-				$logstr = "===============================================" . "\r\n";
-				$logstr .= "履歴画面の表示" . "\r\n";
-				$logstr .= "===============================================" . "\r\n";
-				$this->put_log($this->realpath_log, $logstr);
+				$logstr = "==========履歴画面の表示==========";
+				$this->put_process_log($logstr);
 			
 				$disp = $this->historyScn->disp_history_screen();
 
 			} elseif (isset($this->options->_POST->backup)) {
 				// 初期表示画面の「バックアップ一覧」ボタン押下
 
-				$logstr = "===============================================" . "\r\n";
-				$logstr .= "バックアップ一覧画面の表示" . "\r\n";
-				$logstr .= "===============================================" . "\r\n";
-				$this->put_log($this->realpath_log, $logstr);
+				$logstr = "==========バックアップ一覧画面の表示==========";
+				$this->put_process_log($logstr);
 			
 				$disp = $this->backupScn->disp_backup_screen();
 				
 			} else {
 				// 初期表示画面の表示
 
-				$logstr = "===============================================" . "\r\n";
-				$logstr .= "初期表示画面の表示" . "\r\n";
-				$logstr .= "===============================================" . "\r\n";
-				$this->put_log($this->realpath_log, $logstr);
+				$logstr = "==========初期表示画面の表示==========";
+				$this->put_process_log($logstr);
 			
 				$disp = $this->initScn->do_disp_init_screen();
 
@@ -381,7 +363,7 @@ class main
 
 			$logstr = "** run() 例外キャッチ **" . "\r\n";
 			$logstr .= $e->getMessage() . "\r\n";
-			$this->put_log($this->realpath_log, $logstr);
+			$this->put_process_log($logstr);
 
 			// エラーメッセージ表示
 			$dialog_disp = '
@@ -393,7 +375,7 @@ class main
 			// データベース接続を閉じる
 			$this->pdoMgr->close($this->dbh);
 
-			$this->common->debug_echo('■ run error end');
+			$this->put_process_log('■ run error end');
 
 			return $dialog_disp;
 		}
@@ -401,11 +383,97 @@ class main
 		// データベース接続を閉じる
 		$this->pdoMgr->close();
 
-		// $this->common->debug_echo('■ run end');
+		$logstr = "run() end";
+		$this->put_process_log($logstr);
 
 		// 画面表示
 		return $disp . $disp_lock . $dialog_disp;
 	}
+
+	/**
+	 * 
+	 */
+    public function cron_run(){
+	
+		$this->put_process_log('■ [cron] run start');
+
+		// 処理実行結果格納
+		$result = json_decode(json_encode(
+					array('status' => true,
+					      'message' => '')
+				  ));
+
+		try {
+
+			$logstr = "\r\n";
+			$logstr .= "===============================================" . "\r\n";
+			$logstr .= "予約公開処理開始" . "\r\n";
+			$logstr .= "===============================================" . "\r\n";
+			$logstr .= "日時：" . $this->common()->get_current_datetime_of_gmt() . "\r\n";
+			$this->put_process_log($logstr);
+
+			//============================================================
+			// データベース接続
+			//============================================================
+			$this->dbh = $this->pdoMgr->connect();
+
+
+			//============================================================
+			// 公開処理実施
+			//============================================================
+			$result = json_decode(json_encode($this->publish->exec_publish(define::PUBLISH_TYPE_RESERVE, null)));
+	
+			if ( !$result->status ) {
+				// 処理失敗の場合、復元処理
+
+				$logstr = "** 予約公開処理失敗 **" . "\r\n";
+				$logstr .= $result->message . "\r\n";
+				$this->put_process_log($logstr);
+
+				// $error_message = $result->message . " ";
+				$result = json_decode(json_encode($this->publish->exec_publish(define::PUBLISH_TYPE_AUTO_RESTORE, $result->output_id)));
+
+				// $result = $this->publish->exec_publish(define::PUBLISH_TYPE_AUTO_RESTORE, $output_id);
+
+				if ( !$result->status ) {
+					// 処理失敗の場合
+
+					$logstr = "** 復元処理失敗 **" . "\r\n";
+					$logstr .= $result->message . "\r\n";
+					$this->put_process_log($logstr);
+				}
+			}
+
+		} catch (\Exception $e) {
+
+			// データベース接続を閉じる
+			$this->pdoMgr->close($this->dbh);
+			
+			$logstr = "\r\n";
+			$logstr .= "===============================================" . "\r\n";
+			$logstr .= "予約公開処理異常終了（例外キャッチ）" . "\r\n";
+			$logstr .= "===============================================" . "\r\n";
+			$logstr .= "日時：" . $this->common()->get_current_datetime_of_gmt() . "\r\n";
+			$logstr .= $e.getMessage() . "\r\n";
+			$this->put_process_log($logstr);
+
+			return;
+		}
+
+		// データベース接続を閉じる
+		$this->pdoMgr->close();
+
+		$logstr = "\r\n";
+		$logstr .= "===============================================" . "\r\n";
+		$logstr .= "予約公開処理終了" . "\r\n";
+		$logstr .= "===============================================" . "\r\n";
+		$logstr .= "日時：" . $this->common()->get_current_datetime_of_gmt() . "\r\n";
+		$this->put_process_log($logstr);
+
+		$this->put_process_log('■ [cron] run end');
+
+		return;
+    }
 
 	/**
 	 * 作業用ディレクトリの作成（既にある場合は作成しない）
@@ -414,43 +482,39 @@ class main
 	 */
 	function create_indigo_work_dir() {
 	
-		$this->common->debug_echo('■ create_indigo_work_dir start');
+		$logstr = "create_indigo_work_dir() start";
+		$this->put_process_log($logstr);
 
 		$ret = true;
 
-		// 作業用ディレクトリの絶対パスを取得
-		$this->realpath_array = json_decode($this->common->get_realpath_workdir($this->options));
-
-
 		// logファイルディレクトリが存在しない場合は作成
-		if ( !$this->common->is_exists_mkdir($this->realpath_array->realpath_log) ) {
+		if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_log) ) {
 			$ret = false;
 		}
 
 		// backupディレクトリが存在しない場合は作成
-		if ( !$this->common->is_exists_mkdir($this->realpath_array->realpath_backup) ) {
+		if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_backup) ) {
 			$ret = false;
 		}
 
 		// waitingディレクトリが存在しない場合は作成
-		if ( !$this->common->is_exists_mkdir($this->realpath_array->realpath_waiting) ) {
+		if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_waiting) ) {
 			$ret = false;
 		}
 
 		// runningディレクトリが存在しない場合は作成
-		if ( !$this->common->is_exists_mkdir($this->realpath_array->realpath_running) ) {
+		if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_running) ) {
 			$ret = false;
 		}
 
 		// releasedディレクトリが存在しない場合は作成
-		if ( !$this->common->is_exists_mkdir($this->realpath_array->realpath_released) ) {
+		if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_released) ) {
 			$ret = false;
 		}
 
-		$this->common->debug_echo("　□作業ディレクトリの作成処理結果：");
-		$this->common->debug_echo(($ret == true) ? "成功": "失敗");
-
-		$this->common->debug_echo('■ create_indigo_work_dir end');
+		$logstr = "$ret = " . $ret;
+		$logstr = "create_indigo_work_dir() end";
+		$this->put_process_log($logstr);
 
 		return $ret;
 	}
@@ -475,6 +539,15 @@ class main
 	 */
 	public function gitMgr(){
 		return $this->gitMgr;
+	}
+
+	/**
+	 * `$pdoMgr` オブジェクトを取得する。
+	 *
+	 * @return object $pdoMgr オブジェクト
+	 */
+	public function pdoMgr(){
+		return $this->pdoMgr;
 	}
 
 	/**
@@ -505,8 +578,41 @@ class main
 	 *
 	 * @return int ステータスコード (100〜599の間の数値)
 	 */
-	public function put_log($path, $text){
+	// public function put_process_log($path, $text){
 		
-		file_put_contents($path, $text, FILE_APPEND);
+	// 	file_put_contents($path, $text, FILE_APPEND);
+	// }
+
+	/**
+	 * response status code を取得する。
+	 *
+	 * `$px->set_status()` で登録した情報を取り出します。
+	 *
+	 * @return int ステータスコード (100〜599の間の数値)
+	 */
+	public function put_process_log($text){
+		
+		$datetime = $this->common()->get_current_datetime_of_gmt();
+
+		$str = "[" . $datetime . "]" . " " . $text . "\r\n";
+
+		// file_put_contents($path, $str, FILE_APPEND);
+
+		return error_log( $str, 3, $this->process_log_path );
+	}
+
+
+	/**
+	 * response status code を取得する。
+	 *
+	 * `$px->set_status()` で登録した情報を取り出します。
+	 *
+	 * @return int ステータスコード (100〜599の間の数値)
+	 */
+	public function put_process_log_block($path, $text){
+		
+		$str = "\r\n" . $text . "\r\n";
+
+		file_put_contents($path, $str, FILE_APPEND);
 	}
 }

@@ -6,7 +6,6 @@ class check
 {
 
 	private $main;
-	private $common;
 
 	/**
 	 * Constructor
@@ -16,7 +15,6 @@ class check
 	public function __construct ($main){
 
 		$this->main = $main;
-		$this->common = new common($this);
 	}
 
 	/**
@@ -30,10 +28,14 @@ class check
 	 */
 	public function is_null_branch($branch_select_value) {
 
+		$this->main->put_process_log('■ is_null_branch start');
+
 		$ret = true;
 		if (!$branch_select_value) {
 			$ret = false;
 		}
+
+		$this->main->put_process_log('■ is_null_branch end');
 
 		return $ret;
 	}
@@ -49,10 +51,14 @@ class check
 	 */
 	public function is_null_commit_hash($commit_hash) {
 
+		$this->main->put_process_log('■ is_null_commit_hash start');
+
 		$ret = true;
 		if (!$commit_hash) {
 			$ret = false;
 		}
+
+		$this->main->put_process_log('■ is_null_commit_hash end');
 
 		return $ret;
 	}
@@ -68,10 +74,14 @@ class check
 	 */
 	public function is_null_reserve_date($reserve_date) {
 
+		$this->main->put_process_log('■ is_null_reserve_date start');
+
 		$ret = true;
 		if (!$reserve_date) {
 			$ret = false;
 		}
+
+		$this->main->put_process_log('■ is_null_reserve_date end');
 
 		return $ret;
 	}
@@ -87,10 +97,14 @@ class check
 	 */
 	public function is_null_reserve_time($reserve_time) {
 
+		$this->main->put_process_log('■ is_null_reserve_time start');
+
 		$ret = true;
 		if (!$reserve_time) {
 			$ret = false;
 		}
+
+		$this->main->put_process_log('■ is_null_reserve_time end');
 
 		return $ret;
 	}
@@ -106,6 +120,8 @@ class check
 	 */
 	public function check_reserve_max_record($data_list) {
 
+		$this->main->put_process_log('■ check_reserve_max_record start');
+
 		$ret = true;
 
 		// TODO:定数化
@@ -114,6 +130,8 @@ class check
 		if ($max <= count($data_list)) {
 			$ret = false;
 		}
+
+		$this->main->put_process_log('■ check_reserve_max_record end');
 
 		return $ret;
 	}
@@ -129,6 +147,8 @@ class check
 	 */
 	public function check_date($reserve_date) {
 
+		$this->main->put_process_log('■ check_date start');
+
 		$ret = true;
 
 		// 日付の妥当性チェック
@@ -137,6 +157,8 @@ class check
 		if (!checkdate(intval($m), intval($d), intval($Y))) {
 			$ret = false;
 		}	
+
+		$this->main->put_process_log('■ check_date end');
 
 		return $ret;
 	}
@@ -152,14 +174,18 @@ class check
 	 */
 	public function check_future_date($datetime) {
 
+		$this->main->put_process_log('■ check_future_date start');
+
 		$ret = true;
 
 		// GMTの現在日時
-		$now = $this->common->get_current_datetime_of_gmt();
+		$now = $this->main->common()->get_current_datetime_of_gmt();
 
 		if (strtotime($now) > strtotime($datetime)) {
 			$ret = false;
 		}
+
+		$this->main->put_process_log('■ check_future_date end');
 
 		return $ret;
 	}
@@ -178,6 +204,8 @@ class check
 	 */
 	public function check_exist_branch($data_list, $selected_branch, $selected_id) {
 
+		$this->main->put_process_log('■ check_exist_branch start');
+
 		$ret = true;
 
 		foreach ((array)$data_list as $array) {
@@ -187,6 +215,8 @@ class check
 				break;
 			}
 		}
+
+		$this->main->put_process_log('■ check_exist_branch end');
 
 		return $ret;
 	}
@@ -204,6 +234,8 @@ class check
 	 */
 	public function check_exist_reserve($data_list, $input_reserve, $selected_id) {
 
+		$this->main->put_process_log('■ check_exist_reserve start');
+
 		$ret = true;
 
 		foreach ((array)$data_list as $array) {
@@ -212,6 +244,8 @@ class check
 				break;
 			}
 		}		
+
+		$this->main->put_process_log('■ check_exist_reserve end');
 
 		return $ret;
 	}

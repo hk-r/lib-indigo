@@ -58,9 +58,9 @@ class initScreen
 
 		$this->main = $main;
 
-		$this->tsReserve = new tsReserve($this);
-		$this->tsOutput = new tsOutput($this);
-		$this->tsBackup = new tsBackup($this);
+		$this->tsReserve = new tsReserve($this->main);
+		$this->tsOutput = new tsOutput($this->main);
+		$this->tsBackup = new tsBackup($this->main);
 		
 		$this->check = new check($this);
 		$this->publish = new publish($this->main);
@@ -74,12 +74,12 @@ class initScreen
 	 */
 	public function do_disp_init_screen() {
 		
-		$this->main->common()->debug_echo('■ do_disp_init_screen start');
+		$this->main->put_process_log('■ do_disp_init_screen start');
 
 		$ret = "";
 
 		// 公開予約一覧を取得
-		$data_list = $this->tsReserve->get_ts_reserve_list($this->main->get_dbh());
+		$data_list = $this->tsReserve->get_ts_reserve_list();
 
 		// // お知らせリストの取得
 		// $alert_list = $this->get_csv_alert_list();
@@ -161,7 +161,7 @@ class initScreen
 			. '</form>'
 			. '</div>';
 
-		$this->main->common()->debug_echo('■ do_disp_init_screen end');
+		$this->main->put_process_log('■ do_disp_init_screen end');
 
 		return $ret;
 	}
@@ -173,7 +173,7 @@ class initScreen
 	 */
 	public function do_disp_add_dialog() {
 		
-		$this->main->common()->debug_echo('■ disp_add_dialog start');
+		$this->main->put_process_log('■ disp_add_dialog start');
 
 		$result = array('status' => true,
 						'message' => '',
@@ -182,7 +182,7 @@ class initScreen
 		// ダイアログHTMLの作成
 		$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_ADD);
 
-		$this->main->common()->debug_echo('■ disp_add_dialog end');
+		$this->main->put_process_log('■ disp_add_dialog end');
 
 		return json_encode($result);
 	}
@@ -197,7 +197,7 @@ class initScreen
 	 */
 	public function do_check_add() {
 		
-		$this->main->common()->debug_echo('■ do_check_add start');
+		$this->main->put_process_log('■ do_check_add start');
 
 		// 入力チェック処理
 		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_ADD);
@@ -215,7 +215,7 @@ class initScreen
 			$result['dialog_disp'] = $this->create_check_add_dialog_html();
 		}
 
-		$this->main->common()->debug_echo('■ do_check_add end');
+		$this->main->put_process_log('■ do_check_add end');
 
 		return json_encode($result);
 	}
@@ -229,7 +229,7 @@ class initScreen
 	 */
 	public function do_confirm_add() {
 		
-		$this->main->common()->debug_echo('■ do_confirm_add start');
+		$this->main->put_process_log('■ do_confirm_add start');
 
 		// 入力チェック処理
 		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_ADD_CHECK);
@@ -247,7 +247,7 @@ class initScreen
 			$result = $this->confirm_add();
 		}
 
-		$this->main->common()->debug_echo('■ do_confirm_add end');
+		$this->main->put_process_log('■ do_confirm_add end');
 
 		return json_encode($result);
 	}
@@ -261,7 +261,7 @@ class initScreen
 	 */
 	public function do_back_add_dialog() {
 		
-		$this->main->common()->debug_echo('■ disp_back_add_dialog start');
+		$this->main->put_process_log('■ disp_back_add_dialog start');
 
 		$result = array('status' => true,
 						'message' => '',
@@ -270,7 +270,7 @@ class initScreen
 		// 入力ダイアログへ戻る
 		$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_ADD_BACK);
 
-		$this->main->common()->debug_echo('■ disp_back_add_dialog end');
+		$this->main->put_process_log('■ disp_back_add_dialog end');
 
 		return json_encode($result);
 	}
@@ -283,7 +283,7 @@ class initScreen
 	 */
 	public function do_disp_update_dialog() {
 		
-		$this->main->common()->debug_echo('■ disp_update_dialog start');
+		$this->main->put_process_log('■ disp_update_dialog start');
 
 		$result = array('status' => true,
 						'message' => '',
@@ -292,7 +292,7 @@ class initScreen
 		// 入力ダイアログHTMLの作成
 		$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_UPDATE);
 
-		$this->main->common()->debug_echo('■ disp_update_dialog end');
+		$this->main->put_process_log('■ disp_update_dialog end');
 
 		return json_encode($result);
 	}
@@ -306,7 +306,7 @@ class initScreen
 	 */
 	public function do_check_update() {
 		
-		$this->main->common()->debug_echo('■ do_check_update start');
+		$this->main->put_process_log('■ do_check_update start');
 
 		// 入力チェック処理
 		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_UPDATE);
@@ -323,7 +323,7 @@ class initScreen
 			$result['dialog_disp'] = $this->create_check_update_dialog_html();
 		}
 
-		$this->main->common()->debug_echo('■ do_check_update end');
+		$this->main->put_process_log('■ do_check_update end');
 
 		return json_encode($result);
 	}
@@ -337,7 +337,7 @@ class initScreen
 	 */
 	public function do_confirm_update() {
 		
-		$this->main->common()->debug_echo('■ do_confirm_update start');
+		$this->main->put_process_log('■ do_confirm_update start');
 
 		// 入力チェック処理
 		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_UPDATE_CHECK);
@@ -355,7 +355,7 @@ class initScreen
 			$result = $this->confirm_update();
 		}
 
-		$this->main->common()->debug_echo('■ do_confirm_update end');
+		$this->main->put_process_log('■ do_confirm_update end');
 		
 		return json_encode($result);
 	}
@@ -369,7 +369,7 @@ class initScreen
 	 */
 	public function do_back_update_dialog() {
 		
-		$this->main->common()->debug_echo('■ do_back_update_dialog start');
+		$this->main->put_process_log('■ do_back_update_dialog start');
 
 		$result = array('status' => true,
 						'message' => '',
@@ -378,7 +378,7 @@ class initScreen
 		// 入力ダイアログHTMLの作成
 		$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_UPDATE_BACK);
 
-		$this->main->common()->debug_echo('■ do_back_update_dialog end');
+		$this->main->put_process_log('■ do_back_update_dialog end');
 
 		return json_encode($result);
 	}
@@ -390,7 +390,7 @@ class initScreen
 	 */
 	public function do_disp_immediate_dialog() {
 		
-		$this->main->common()->debug_echo('■ do_disp_immediate_dialog start');
+		$this->main->put_process_log('■ do_disp_immediate_dialog start');
 
 		$result = array('status' => true,
 						'message' => '',
@@ -399,7 +399,7 @@ class initScreen
 		// ダイアログHTMLの作成
 		$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_IMMEDIATE);
 
-		$this->main->common()->debug_echo('■ do_disp_immediate_dialog end');
+		$this->main->put_process_log('■ do_disp_immediate_dialog end');
 
 		return json_encode($result);
 	}
@@ -413,7 +413,7 @@ class initScreen
 	 */
 	public function do_check_immediate() {
 		
-		$this->main->common()->debug_echo('■ do_check_immediate start');
+		$this->main->put_process_log('■ do_check_immediate start');
 
 		// 入力チェック処理
 		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_IMMEDIATE);
@@ -430,7 +430,7 @@ class initScreen
 			$result['dialog_disp'] = $this->create_check_immediate_dialog_html();
 		}
 
-		$this->main->common()->debug_echo('■ do_check_immediate end');
+		$this->main->put_process_log('■ do_check_immediate end');
 
 		return json_encode($result);
 	}
@@ -444,7 +444,7 @@ class initScreen
 	 */
 	public function do_immediate_publish() {
 		
-		$this->main->common()->debug_echo('■ do_immediate_publish start');
+		$this->main->put_process_log('■ do_immediate_publish start');
 
 		// 入力チェック処理
 		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_IMMEDIATE_CHECK);
@@ -461,7 +461,7 @@ class initScreen
 			$result = $this->publish->exec_publish(define::PUBLISH_TYPE_IMMEDIATE, null);
 		}
 
-		$this->main->common()->debug_echo('■ do_immediate_publish end');
+		$this->main->put_process_log('■ do_immediate_publish end');
 
 		return json_encode($result);
 	}
@@ -475,7 +475,7 @@ class initScreen
 	 */
 	public function do_back_immediate_dialog() {
 		
-		$this->main->common()->debug_echo('■ do_back_immediate_dialog start');
+		$this->main->put_process_log('■ do_back_immediate_dialog start');
 
 		$result = array('status' => true,
 						'message' => '',
@@ -484,7 +484,7 @@ class initScreen
 		// 入力ダイアログHTMLの作成
 		$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_IMMEDIATE_BACK);
 
-		$this->main->common()->debug_echo('■ do_back_immediate_dialog end');
+		$this->main->put_process_log('■ do_back_immediate_dialog end');
 
 		return json_encode($result);
 	}
@@ -496,7 +496,7 @@ class initScreen
 	 */
 	private function confirm_add() {
 		
-		$this->main->common()->debug_echo('■ confirm_add start');
+		$this->main->put_process_log('■ confirm_add start');
 
 		$output = "";
 		$result = array('status' => true,
@@ -509,7 +509,7 @@ class initScreen
 			// 指定ブランチのGit情報を「waiting」ディレクトリへコピー
 			//============================================================
 
-	 		$this->main->common()->debug_echo('　□ -----Gitのファイルコピー処理-----');
+	 		$this->main->put_process_log('　□ -----Gitのファイルコピー処理-----');
 			
 			// waitingディレクトリの絶対パスを取得。
 			$realpath_waiting = $this->main->realpath_array->realpath_waiting;
@@ -527,12 +527,12 @@ class initScreen
 			// コピー処理
 			$this->main->gitMgr()->git_file_copy($this->main->options, $realpath_waiting, $dirname);
 
-	 		$this->main->common()->debug_echo('　□ -----公開処理結果テーブルの登録処理-----');
+	 		$this->main->put_process_log('　□ -----公開処理結果テーブルの登録処理-----');
 			
 			//============================================================
 			// 入力情報を公開予約テーブルへ登録
 			//============================================================
-			$this->tsReserve->insert_ts_reserve($this->main->get_dbh(), $this->main->options);
+			$this->tsReserve->insert_ts_reserve($this->main->options);
 			
 		} catch (\Exception $e) {
 
@@ -544,7 +544,7 @@ class initScreen
 
 		$result['status'] = true;
 
-		$this->main->common()->debug_echo('■ confirm_add end');
+		$this->main->put_process_log('■ confirm_add end');
 
 		return $result;
 	}
@@ -557,7 +557,7 @@ class initScreen
 	 */
 	private function confirm_update() {
 		
-		$this->main->common()->debug_echo('■ confirm_update start');
+		$this->main->put_process_log('■ confirm_update start');
 	
 		$output = "";
 		$result = array('status' => true,
@@ -582,10 +582,10 @@ class initScreen
 				$before_dirname .= define::DIR_NAME_RESERVE;
 			}
 
-			$this->main->common()->debug_echo('　□ 変更前の公開予約ディレクトリ：');
-			$this->main->common()->debug_echo($before_dirname);
+			$this->main->put_process_log('　□ 変更前の公開予約ディレクトリ：');
+			$this->main->put_process_log($before_dirname);
 
-			// コピー処理
+			// 変更前削除
 			$this->main->gitMgr()->file_delete($realpath_waiting, $before_dirname);
 
 
@@ -602,20 +602,20 @@ class initScreen
 				$dirname .= define::DIR_NAME_RESERVE;
 			}
 
-			$this->main->common()->debug_echo('　□ 変更後の公開予約ディレクトリ：');
-			$this->main->common()->debug_echo($dirname);
+			$this->main->put_process_log('　□ 変更後の公開予約ディレクトリ：');
+			$this->main->put_process_log($dirname);
 
 			// コピー処理
 			$this->main->gitMgr()->git_file_copy($this->main->options, $realpath_waiting, $dirname);
 
-	 		$this->main->common()->debug_echo('　□ -----公開処理結果テーブルの更新処理-----');
+	 		$this->main->put_process_log('　□ -----公開処理結果テーブルの更新処理-----');
 			
 			//============================================================
 			// 入力情報を公開予約テーブルへ更新
 			//============================================================
 			$selected_id =  $this->main->options->_POST->selected_id;
 
-			$this->tsReserve->update_ts_reserve($this->main->get_dbh(), $this->main->options, $selected_id);
+			$this->tsReserve->update_ts_reserve($this->main->options, $selected_id);
 			
 		} catch (\Exception $e) {
 
@@ -627,7 +627,7 @@ class initScreen
 
 		$result['status'] = true;
 
-		$this->main->common()->debug_echo('■ confirm_update end');
+		$this->main->put_process_log('■ confirm_update end');
 
 		return $result;
 	}
@@ -639,7 +639,7 @@ class initScreen
 	 */
 	public function do_delete() {
 		
-		$this->main->common()->debug_echo('■ do_delete start');
+		$this->main->put_process_log('■ do_delete start');
 	
 		$output = "";
 		$result = array('status' => true,
@@ -664,15 +664,15 @@ class initScreen
 				// 公開予約情報の論理削除
 				//============================================================
 
-				$this->main->common()->debug_echo('　□ -----公開予約情報の論理削除処理-----');
+				$this->main->put_process_log('　□ -----公開予約情報の論理削除処理-----');
 
-				$this->tsReserve->delete_reserve_table($this->main->get_dbh(), $this->main->options, $selected_id);
+				$this->tsReserve->delete_reserve_table($this->main->options, $selected_id);
 
 				//============================================================
 				// 「waiting」ディレクトリの変更前の公開ソースディレクトリを削除
 				//============================================================
 				// 公開予約ディレクトリ名の取得
-				$selected_ret = $this->tsReserve->get_selected_ts_reserve($this->main->get_dbh(), $selected_id);
+				$selected_ret = $this->tsReserve->get_selected_ts_reserve($selected_id);
 				$dirname = $this->main->common()->format_gmt_datetime($selected_ret[tsReserve::RESERVE_ENTITY_RESERVE_GMT], define::DATETIME_FORMAT_SAVE);
 				
 				if (!$dirname) {
@@ -708,7 +708,7 @@ class initScreen
 
 		$result['status'] = true;
 
-		$this->main->common()->debug_echo('■ do_delete end');
+		$this->main->put_process_log('■ do_delete end');
 
 		return json_encode($result);
 	}
@@ -718,7 +718,7 @@ class initScreen
 	 */
 	public function do_restore_publish_failure($output_id) {
 
-		$this->main->common()->debug_echo('■ do_restore_publish_failure start');
+		$this->main->put_process_log('■ do_restore_publish_failure start');
 
 		$output = "";
 		$result = array('status' => true,
@@ -727,7 +727,7 @@ class initScreen
 
 		$result = $this->publish->exec_publish(define::PUBLISH_TYPE_AUTO_RESTORE, $output_id);
 
-		$this->main->common()->debug_echo('■ do_restore_publish_failure end');
+		$this->main->put_process_log('■ do_restore_publish_failure end');
 
 		return json_encode($result);
 	}
@@ -741,7 +741,7 @@ class initScreen
 	 */
 	private function create_input_dialog_html($input_mode) {
 		
-		$this->main->common()->debug_echo('■ create_input_dialog_html start');
+		$this->main->put_process_log('■ create_input_dialog_html start');
 
 
 		$ret = '<div class="dialog" id="modal_dialog">'
@@ -776,6 +776,7 @@ class initScreen
 						'reserve_time' => '',
 						'commit_hash' => '',
 						'comment' => '',
+						'ver_no' => '',
 						'selected_id' => ''
 					);
 
@@ -791,7 +792,7 @@ class initScreen
 			// 画面選択された公開予約情報を取得
 			$form['selected_id'] = $this->main->options->_POST->selected_id;
 
-			$selected_data = $this->tsReserve->get_selected_ts_reserve($this->main->get_dbh(), $form['selected_id']);
+			$selected_data = $this->tsReserve->get_selected_ts_reserve($form['selected_id']);
 
 			if ($selected_data) {
 
@@ -800,6 +801,7 @@ class initScreen
 				$form['reserve_time'] = $selected_data[tsReserve::RESERVE_ENTITY_RESERVE_TIME];
 				$form['commit_hash'] = $selected_data[tsReserve::RESERVE_ENTITY_COMMIT_HASH];
 				$form['comment'] = $selected_data[tsReserve::RESERVE_ENTITY_COMMENT];
+				$form['ver_no'] = $selected_data[tsReserve::RESERVE_ENTITY_VER_NO];
 			}
 		}
 
@@ -814,11 +816,12 @@ class initScreen
 
 		$ret .= '<form method="post">';
 
+		// hidden項目
 		$ret .= '<input type="hidden" name="selected_id" value="' . $form['selected_id'] . '"/>';
-
-
+		$ret .= '<input type="hidden" name="ver_no" value="' . $form['ver_no'] . '"/>';
 		$ret .= '<input type="hidden" id="param_relativepath" value="' . $param_relativepath . '"/>';
 		$ret .= '<input type="hidden" id="workdir_relativepath" value="' . $workdir_relativepath . '"/>';
+
 		
 		$ret .= '<table class="table table-striped">'
 			  . '<tr>';
@@ -900,7 +903,7 @@ class initScreen
 			  . '</div>'
 			  . '</div></div>';
 		
-		$this->main->common()->debug_echo('■ create_input_dialog_html end');
+		$this->main->put_process_log('■ create_input_dialog_html end');
 
 		return $ret;
 	}
@@ -912,7 +915,7 @@ class initScreen
 	 */
 	private function create_check_add_dialog_html() {
 		
-		$this->main->common()->debug_echo('■ create_check_add_dialog_html start');
+		$this->main->put_process_log('■ create_check_add_dialog_html start');
 
 		// フォームパラメタの設定
 		$form = $this->get_form_value();
@@ -929,7 +932,10 @@ class initScreen
 		$ret .= '<h4>追加確認</h4>';
 
 		$ret .= '<form method="post">'
-			. '<table class="table table-striped">';
+			. '<table class="table table-striped">'
+
+			// hidden項目
+			. '<input type="hidden" name="ver_no" value="' . $form['ver_no'] . '"/>';
 
 		// 「ブランチ」項目
 		$ret .= '<tr>'
@@ -989,7 +995,7 @@ class initScreen
 			 . '</div>'
 			 . '</div></div></div>';
 
-		$this->main->common()->debug_echo('■ create_check_add_dialog_html end');
+		$this->main->put_process_log('■ create_check_add_dialog_html end');
 
 		return $ret;
 	}
@@ -1002,7 +1008,7 @@ class initScreen
 	 */
 	private function create_check_update_dialog_html() {
 		
-		$this->main->common()->debug_echo('■ create_check_update_dialog_html start');
+		$this->main->put_process_log('■ create_check_update_dialog_html start');
 
 		// フォームパラメタの設定
 		$form = $this->get_form_value();
@@ -1019,7 +1025,7 @@ class initScreen
 
 		// 画面選択された変更前の公開予約情報を取得
 		$selected_id =  $this->main->options->_POST->selected_id;
-		$selected_data = $this->tsReserve->get_selected_ts_reserve($this->main->get_dbh(), $selected_id);
+		$selected_data = $this->tsReserve->get_selected_ts_reserve($selected_id);
 
 		if ($selected_data) {
 
@@ -1083,7 +1089,10 @@ class initScreen
 
             . '<div class="right_box">'
 			. '<table class="table table-striped" style="width: 100%">'
+
+			// hidden項目
 		    . '<input type="hidden" name="selected_id" value="' . $form['selected_id'] . '"/>'
+			. '<input type="hidden" name="ver_no" value="' . $form['ver_no'] . '"/>'
 
 			// 「ブランチ」項目（変更後）
 			. '<tr>'
@@ -1136,7 +1145,7 @@ class initScreen
 			. '</div>'
 			. '</div></div>';
 
-		$this->main->common()->debug_echo('■ create_check_update_dialog_html end');
+		$this->main->put_process_log('■ create_check_update_dialog_html end');
 
 		return $ret;
 	}
@@ -1148,7 +1157,7 @@ class initScreen
 	 */
 	private function create_check_immediate_dialog_html() {
 		
-		$this->main->common()->debug_echo('■ create_check_immediate_dialog_html start');
+		$this->main->put_process_log('■ create_check_immediate_dialog_html start');
 
 		// フォームパラメタの設定
 		$form = $this->get_form_value();
@@ -1218,7 +1227,7 @@ class initScreen
 			 . '</div>'
 			 . '</div></div></div>';
 
-		$this->main->common()->debug_echo('■ create_check_immediate_dialog_html end');
+		$this->main->put_process_log('■ create_check_immediate_dialog_html end');
 
 		return $ret;
 	}
@@ -1233,7 +1242,7 @@ class initScreen
 	 */
 	private function do_validation_check($input_mode) {
 				
-		$this->main->common()->debug_echo('■ do_validation_check start');
+		$this->main->put_process_log('■ do_validation_check start');
 
 		$ret = "";
 
@@ -1245,7 +1254,7 @@ class initScreen
 		/**
  		* 公開予約一覧を取得
 		*/ 
-		$data_list = $this->tsReserve->get_ts_reserve_list($this->main->get_dbh());
+		$data_list = $this->tsReserve->get_ts_reserve_list();
 	
 		// 画面入力された日時を結合し、GMTへ変換する
 		$gmt_reserve_datetime = $this->combine_to_gmt_date_and_time($form['reserve_date'], $form['reserve_time']);
@@ -1305,7 +1314,7 @@ class initScreen
 			}
 		}
 
-		$this->main->common()->debug_echo('■ do_validation_check end');
+		$this->main->put_process_log('■ do_validation_check end');
 
 		return $ret;
 	}
@@ -1342,7 +1351,7 @@ class initScreen
 	 */
 	private function combine_to_gmt_date_and_time($date, $time) {
 	
-		// $this->main->common()->debug_echo('■ combine_to_gmt_date_and_time start');
+		// $this->main->put_process_log('■ combine_to_gmt_date_and_time start');
 
 		$ret = '';
 
@@ -1357,13 +1366,13 @@ class initScreen
 		
 			// $ret = $t->format(DATE_ATOM);
 			$ret = $t->format(define::DATETIME_FORMAT);
-			// $this->main->common()->debug_echo('　□timezone：' . $timezone);
+			// $this->main->put_process_log('　□timezone：' . $timezone);
 		}
 		
-		// $this->main->common()->debug_echo('　□変換前の時刻：' . $datetime);
-		// $this->main->common()->debug_echo('　□変換後の時刻（GMT）：'. $ret);
+		// $this->main->put_process_log('　□変換前の時刻：' . $datetime);
+		// $this->main->put_process_log('　□変換後の時刻（GMT）：'. $ret);
 		
-		// $this->main->common()->debug_echo('■ combine_to_gmt_date_and_time end');
+		// $this->main->put_process_log('■ combine_to_gmt_date_and_time end');
 
 	    return $ret;
 	}
@@ -1375,13 +1384,14 @@ class initScreen
 	 */
 	private function get_form_value() {
 
-		$this->main->common()->debug_echo('■ get_form_value start');
+		$this->main->put_process_log('■ get_form_value start');
 
 		$form = array('branch_select_value' => '',
 						'reserve_date' => '',
 						'reserve_time' => '',
 						'commit_hash' => '',
 						'comment' => '',
+						'ver_no' => '',
 						'selected_id' => ''
 					);
 
@@ -1401,11 +1411,14 @@ class initScreen
 		if (isset($this->main->options->_POST->comment)) {
 			$form['comment'] = $this->main->options->_POST->comment;
 		}
+		if (isset($this->main->options->_POST->ver_no)) {
+			$form['ver_no'] = $this->main->options->_POST->ver_no;
+		}
 		if (isset($this->main->options->_POST->selected_id)) {
 			$form['selected_id'] = $this->main->options->_POST->selected_id;
 		}
 
-		$this->main->common()->debug_echo('■ get_form_value end');
+		$this->main->put_process_log('■ get_form_value end');
 
 		return $form;
 	}

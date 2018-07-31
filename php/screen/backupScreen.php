@@ -13,11 +13,6 @@ class backupScreen
 	private $check, $tsBackup, $tsOutput, $publish;
 
 	/**
-	 * PDOインスタンス
-	 */
-	private $dbh;
-
-	/**
 	 * 入力画面のエラーメッセージ
 	 */
 	private $input_error_message = '';
@@ -45,12 +40,12 @@ class backupScreen
 	 */
 	public function disp_backup_screen() {
 		
-		$this->main->common()->debug_echo('■ disp_backup_screen start');
+		$this->main->put_process_log('■ disp_backup_screen start');
 
 		$ret = "";
 
 		// バックアップ一覧を取得
-		$data_list = $this->tsBackup->get_ts_backup_list($this->main->dbh, null);
+		$data_list = $this->tsBackup->get_ts_backup_list($this->main->get_dbh(), null);
 
 		$ret .= '<div style="overflow:hidden">'
 			. '<form id="form_table" method="post">'
@@ -104,7 +99,7 @@ class backupScreen
 			. '</form>'
 			. '</div>';
 
-		$this->main->common()->debug_echo('■ disp_backup_screen end');
+		$this->main->put_process_log('■ disp_backup_screen end');
 
 		return $ret;
 	}
@@ -118,14 +113,14 @@ class backupScreen
 	 */
 	public function do_restore_publish() {
 		
-		$this->main->common()->debug_echo('■ do_restore_publish start');
+		$this->main->put_process_log('■ do_restore_publish start');
 
 		$selected_id =  $this->main->options->_POST->selected_id;
 
 		// エラーがないので即時公開処理へ進む
 		$result = $this->publish->exec_publish(define::PUBLISH_TYPE_MANUAL_RESTORE, $selected_id);
 
-		$this->main->common()->debug_echo('■ do_restore_publish end');
+		$this->main->put_process_log('■ do_restore_publish end');
 
 		return json_encode($result);
 	}

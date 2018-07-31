@@ -7,9 +7,6 @@ class tsOutput
 
 	private $main;
 
-	private $pdoMgr;
-	private $common;
-
 
 	/**
 	 * 公開処理結果テーブルのカラム定義
@@ -64,8 +61,6 @@ class tsOutput
 	public function __construct ($main){
 
 		$this->main = $main;
-		$this->pdoMgr = new pdoManager($this);
-		$this->common = new common($this);
 	}
 
 	/**
@@ -74,9 +69,9 @@ class tsOutput
 	 * @param $now = 現在時刻
 	 * @return データリスト
 	 */
-	public function get_ts_output_list($dbh, $now) {
+	public function get_ts_output_list($now) {
 
-		$this->common->debug_echo('■ get_ts_output_list start');
+		$this->main->put_process_log('■ get_ts_output_list start');
 
 		$ret_array = array();
 		$conv_ret_array = array();
@@ -88,13 +83,13 @@ class tsOutput
 				ORDER BY " . self::TS_OUTPUT_ID_SEQ . " DESC";
 
 		// SELECT実行
-		$ret_array = $this->pdoMgr->select($dbh, $select_sql);
+		$ret_array = $this->main->pdoMgr()->select($this->main->get_dbh(), $select_sql);
 
 		foreach ((array)$ret_array as $array) {
 			$conv_ret_array[] = $this->convert_ts_output_entity($array);
 		}
 
-		$this->common->debug_echo('■ get_ts_output_list end');
+		$this->main->put_process_log('■ get_ts_output_list end');
 
 		return $conv_ret_array;
 	}
@@ -104,10 +99,10 @@ class tsOutput
 	 *
 	 * @return 選択行の情報
 	 */
-	public function get_selected_ts_output($dbh, $selected_id) {
+	public function get_selected_ts_output($selected_id) {
 
 
-		$this->common->debug_echo('■ get_selected_ts_output start');
+		$this->main->put_process_log('■ get_selected_ts_output start');
 
 		$ret_array = array();
 
@@ -122,12 +117,12 @@ class tsOutput
 			WHERE " . self::TS_OUTPUT_ID_SEQ . " = " . $selected_id . ";";
 
 			// SELECT実行
-			$ret_array = array_shift($this->pdoMgr->select($dbh, $select_sql));
+			$ret_array = array_shift($this->main->pdoMgr()->select($this->main->get_dbh(), $select_sql));
 
 			$conv_ret_array = $this->convert_ts_output_entity($ret_array);
 		}
 		
-		$this->common->debug_echo('■ get_selected_ts_output end');
+		$this->main->put_process_log('■ get_selected_ts_output end');
 
 		return $conv_ret_array;
 	}
@@ -137,9 +132,9 @@ class tsOutput
 	 *
 	 * @return なし
 	 */
-	public function insert_ts_output($dbh, $dataArray) {
+	public function insert_ts_output($dataArray) {
 
-		$this->common->debug_echo('■ insert_ts_output start');
+		$this->main->put_process_log('■ insert_ts_output start');
 
 		// INSERT文作成
 		$insert_sql = "INSERT INTO TS_OUTPUT ("
@@ -185,7 +180,7 @@ class tsOutput
 
 
 		// 現在時刻
-		$now = $this->common->get_current_datetime_of_gmt();
+		$now = $this->main->common()->get_current_datetime_of_gmt();
 
 		// パラメータ作成
 		$params = array(
@@ -209,14 +204,14 @@ class tsOutput
 		);
 
 		// INSERT実行
-		$this->pdoMgr->execute($dbh, $insert_sql, $params);
+		$this->main->pdoMgr()->execute($this->main->get_dbh(), $insert_sql, $params);
 
 		// 登録したシーケンスIDを取得
-		$insert_id = $dbh->lastInsertId();
+		$insert_id = $this->main->get_dbh()->lastInsertId();
 		
-		$this->common->debug_echo('　□ insert_id：' . $insert_id);
+		$this->main->put_process_log('　□ insert_id：' . $insert_id);
 
-		$this->common->debug_echo('■ insert_ts_output end');
+		$this->main->put_process_log('■ insert_ts_output end');
 
 		return $insert_id;
 	}
@@ -226,9 +221,9 @@ class tsOutput
 	 *
 	 * @return なし
 	 */
-	public function update_ts_output($dbh, $id, $dataArray) {
+	public function update_ts_output($id, $dataArray) {
 
-		$this->common->debug_echo('■ update_ts_output start');
+		$this->main->put_process_log('■ update_ts_output start');
 
 		if (!$id) {
 			throw new \Exception('更新対象のIDが取得できませんでした。 ');
@@ -243,11 +238,11 @@ class tsOutput
 			self::TS_OUTPUT_UPDATE_USER_ID 		. "= :" . self::TS_OUTPUT_UPDATE_USER_ID .
 			" WHERE " . self::TS_OUTPUT_ID_SEQ 	. "= :" . self::TS_OUTPUT_ID_SEQ . ";";
 
-		$this->common->debug_echo('　□ update_sql');
-		$this->common->debug_echo($update_sql);
+		$this->main->put_process_log('　□ update_sql');
+		$this->main->put_process_log($update_sql);
 
 		// 現在時刻
-		$now = $this->common->get_current_datetime_of_gmt();
+		$now = $this->main->common()->get_current_datetime_of_gmt();
 
 		// パラメータ作成
 		$params = array(
@@ -260,9 +255,9 @@ class tsOutput
 		);
 
 		// UPDATE実行
-		$this->pdoMgr->execute($dbh, $update_sql, $params);
+		$this->main->pdoMgr()->execute($this->main->get_dbh(), $update_sql, $params);
 
-		$this->common->debug_echo('■ update_ts_output end');
+		$this->main->put_process_log('■ update_ts_output end');
 	}
 
 	/**
@@ -274,7 +269,7 @@ class tsOutput
 	 */
 	private function convert_ts_output_entity($array) {
 	
-		// $this->common->debug_echo('■ convert_ts_output_entity start');
+		// $this->main->put_process_log('■ convert_ts_output_entity start');
 
 		$entity = array();
 
@@ -282,19 +277,19 @@ class tsOutput
 		$entity[self::OUTPUT_ENTITY_ID_SEQ] = $array[self::TS_OUTPUT_ID_SEQ];
 
 		// 公開予約日時（タイムゾーン日時）
-		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_OUTPUT_RESERVE]);
+		$tz_datetime = $this->main->common()->convert_to_timezone_datetime($array[self::TS_OUTPUT_RESERVE]);
 		$entity[self::OUTPUT_ENTITY_RESERVE] 		 = $tz_datetime;
-		$entity[self::OUTPUT_ENTITY_RESERVE_DISP] = $this->common->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
+		$entity[self::OUTPUT_ENTITY_RESERVE_DISP] = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
 		// 処理開始日時（GMT日時）
 		$entity[self::OUTPUT_ENTITY_START_GMT] 	= $array[self::TS_OUTPUT_START];
 		// 処理開始日時（タイムゾーン日時）
-		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_OUTPUT_START]);
+		$tz_datetime = $this->main->common()->convert_to_timezone_datetime($array[self::TS_OUTPUT_START]);
 		$entity[self::OUTPUT_ENTITY_START]		   = $tz_datetime;
-		$entity[self::OUTPUT_ENTITY_START_DISP] = $this->common->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
+		$entity[self::OUTPUT_ENTITY_START_DISP] = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
 		// 処理終了日時（タイムゾーン日時）
-		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_OUTPUT_END]);
+		$tz_datetime = $this->main->common()->convert_to_timezone_datetime($array[self::TS_OUTPUT_END]);
 		$entity[self::OUTPUT_ENTITY_END]	     = $tz_datetime;
-		$entity[self::OUTPUT_ENTITY_END_DISP] = $this->common->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
+		$entity[self::OUTPUT_ENTITY_END_DISP] = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
 		// ブランチ名
 		$entity[self::OUTPUT_ENTITY_BRANCH] = $array[self::TS_OUTPUT_BRANCH];
 		// コミット
@@ -304,11 +299,11 @@ class tsOutput
 		// 状態
 		$entity[self::OUTPUT_ENTITY_STATUS] = $this->convert_status($array[self::TS_OUTPUT_STATUS]);
 		// 公開種別
-		$entity[self::OUTPUT_ENTITY_PUBLISH_TYPE] = $this->common->convert_publish_type($array[self::TS_OUTPUT_PUBLISH_TYPE]);
+		$entity[self::OUTPUT_ENTITY_PUBLISH_TYPE] = $this->main->common()->convert_publish_type($array[self::TS_OUTPUT_PUBLISH_TYPE]);
 		// 登録ユーザID
 		$entity[self::OUTPUT_ENTITY_INSERT_USER_ID] = $array[self::TS_OUTPUT_INSERT_USER_ID];
 
-		// $this->common->debug_echo('■ convert_ts_output_entity end');
+		// $this->main->put_process_log('■ convert_ts_output_entity end');
 
 	    return $entity;
 	}
