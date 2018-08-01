@@ -24,7 +24,6 @@
     "autoload": {
         "files": [
             "php/main.php",
-            "php/cron.php",
             "php/publish.php",
             "php/gitManager.php",
             "php/fileManager.php",

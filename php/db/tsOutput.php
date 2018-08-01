@@ -1,6 +1,6 @@
 <?php
 
-namespace indigo;
+namespace indigo\db;
 
 class tsOutput
 {
@@ -71,7 +71,7 @@ class tsOutput
 	 */
 	public function get_ts_output_list($now) {
 
-		$this->main->put_process_log('■ get_ts_output_list start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_ts_output_list start');
 
 		$ret_array = array();
 		$conv_ret_array = array();
@@ -89,7 +89,7 @@ class tsOutput
 			$conv_ret_array[] = $this->convert_ts_output_entity($array);
 		}
 
-		$this->main->put_process_log('■ get_ts_output_list end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_ts_output_list end');
 
 		return $conv_ret_array;
 	}
@@ -102,7 +102,7 @@ class tsOutput
 	public function get_selected_ts_output($selected_id) {
 
 
-		$this->main->put_process_log('■ get_selected_ts_output start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_output start');
 
 		$ret_array = array();
 
@@ -122,7 +122,7 @@ class tsOutput
 			$conv_ret_array = $this->convert_ts_output_entity($ret_array);
 		}
 		
-		$this->main->put_process_log('■ get_selected_ts_output end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_output end');
 
 		return $conv_ret_array;
 	}
@@ -134,7 +134,7 @@ class tsOutput
 	 */
 	public function insert_ts_output($dataArray) {
 
-		$this->main->put_process_log('■ insert_ts_output start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ insert_ts_output start');
 
 		// INSERT文作成
 		$insert_sql = "INSERT INTO TS_OUTPUT ("
@@ -180,7 +180,7 @@ class tsOutput
 
 
 		// 現在時刻
-		$now = $this->main->common()->get_current_datetime_of_gmt();
+		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 
 		// パラメータ作成
 		$params = array(
@@ -209,9 +209,9 @@ class tsOutput
 		// 登録したシーケンスIDを取得
 		$insert_id = $this->main->get_dbh()->lastInsertId();
 		
-		$this->main->put_process_log('　□ insert_id：' . $insert_id);
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ insert_id：' . $insert_id);
 
-		$this->main->put_process_log('■ insert_ts_output end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ insert_ts_output end');
 
 		return $insert_id;
 	}
@@ -223,7 +223,7 @@ class tsOutput
 	 */
 	public function update_ts_output($id, $dataArray) {
 
-		$this->main->put_process_log('■ update_ts_output start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ update_ts_output start');
 
 		if (!$id) {
 			throw new \Exception('更新対象のIDが取得できませんでした。 ');
@@ -238,11 +238,11 @@ class tsOutput
 			self::TS_OUTPUT_UPDATE_USER_ID 		. "= :" . self::TS_OUTPUT_UPDATE_USER_ID .
 			" WHERE " . self::TS_OUTPUT_ID_SEQ 	. "= :" . self::TS_OUTPUT_ID_SEQ . ";";
 
-		$this->main->put_process_log('　□ update_sql');
-		$this->main->put_process_log($update_sql);
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ update_sql');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, $update_sql);
 
 		// 現在時刻
-		$now = $this->main->common()->get_current_datetime_of_gmt();
+		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 
 		// パラメータ作成
 		$params = array(
@@ -257,7 +257,7 @@ class tsOutput
 		// UPDATE実行
 		$this->main->pdoMgr()->execute($this->main->get_dbh(), $update_sql, $params);
 
-		$this->main->put_process_log('■ update_ts_output end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ update_ts_output end');
 	}
 
 	/**
@@ -269,7 +269,7 @@ class tsOutput
 	 */
 	private function convert_ts_output_entity($array) {
 	
-		// $this->main->put_process_log('■ convert_ts_output_entity start');
+		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ convert_ts_output_entity start');
 
 		$entity = array();
 
@@ -303,7 +303,7 @@ class tsOutput
 		// 登録ユーザID
 		$entity[self::OUTPUT_ENTITY_INSERT_USER_ID] = $array[self::TS_OUTPUT_INSERT_USER_ID];
 
-		// $this->main->put_process_log('■ convert_ts_output_entity end');
+		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ convert_ts_output_entity end');
 
 	    return $entity;
 	}

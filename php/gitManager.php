@@ -22,7 +22,7 @@ class gitManager
 	 */
 	public function get_branch_list($options) {
 
-		$this->main->put_process_log('■ get_branch_list start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_branch_list start');
 
 		$current_dir = realpath('.');
 
@@ -61,7 +61,7 @@ class gitManager
 
 		chdir($current_dir);
 
-		$this->main->put_process_log('■ get_branch_list end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_branch_list end');
 		return json_encode($result);
 	}
 
@@ -72,7 +72,7 @@ class gitManager
 	 */
 	public function git_file_copy($options, $path, $dirname) {
 
-		$this->main->put_process_log('■ git_file_copy start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ git_file_copy start');
 
 		$current_dir = realpath('.');
 
@@ -105,7 +105,7 @@ class gitManager
 				// 戻り値が0以外の場合
 				throw new \Exception('Git pull command error. url:' . $url);
 			}
-			$this->main->put_process_log('　□ コマンド実行結果1：' . $ret['return']);
+			$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ コマンド実行結果1：' . $ret['return']);
 
 			// git fetch（リモートリポジトリの指定ブランチの情報をローカルブランチへ反映）
 			$command = 'git fetch origin' . ' ' . $branch_name;
@@ -131,7 +131,7 @@ class gitManager
 
 		chdir($current_dir);
 			
-		$this->main->put_process_log('■ git_file_copy end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ git_file_copy end');
 	}
 
 	/**
@@ -141,7 +141,7 @@ class gitManager
 	 */
 	public function file_delete($path, $dirname) {
 		
-		$this->main->put_process_log('■ file_delete start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ file_delete start');
 
 		// 公開ソースディレクトリの絶対パスを取得
 		$dir_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($path . $dirname));
@@ -159,7 +159,7 @@ class gitManager
 			throw new \Exception('Delete directory not found. ' . $dir_real_path);
 		}
 
-		$this->main->put_process_log('■ file_delete end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ file_delete end');
 	}
 
 
@@ -168,7 +168,7 @@ class gitManager
 	 */
 	public function get_git_master($options) {
 
-		// $this->main->put_process_log('■ get_git_master start');
+		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_git_master start');
 
 		$current_dir = realpath('.');
 
@@ -218,7 +218,7 @@ class gitManager
 
 		chdir($current_dir);
 
-		// $this->main->put_process_log('■ get_git_master end');
+		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_git_master end');
 	}
 
 	// /**

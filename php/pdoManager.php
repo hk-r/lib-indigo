@@ -2,6 +2,10 @@
 
 namespace indigo;
 
+use indigo\db\tsReserve as tsReserve;
+use indigo\db\tsOutput as tsOutput;
+use indigo\db\tsBackup as tsBackup;
+
 class pdoManager
 {
 
@@ -21,6 +25,7 @@ class pdoManager
 	public function __construct ($main){
 
 		$this->main = $main;
+
 	}
 
 
@@ -30,7 +35,7 @@ class pdoManager
 	 */
 	public function connect() {
 	
-		// $this->main->put_process_log('■ connect start');
+		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ connect start');
 
 		$dbh = null; // 初期化
 
@@ -41,12 +46,12 @@ class pdoManager
 
 		$db_type = $this->main->options->db_type;
 
-		// $this->main->put_process_log('　□ db_type');
-		// $this->main->put_process_log($db_type);
+		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ db_type');
+		// $this->main->common()->put_process_log(__METHOD__, __LINE__, $db_type);
 
 		if ($db_type && $db_type == 'mysql') {
 
-			// $this->main->put_process_log('　□ mysql');
+			// $this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ mysql');
 
 			/**
 			 * mysqlの場合
@@ -60,13 +65,13 @@ class pdoManager
 			$db_pass = $this->main->options->mysql_db_pass;
 
 			$option = array(
-						\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES '.SELF::UTF
+						\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES '. SELF::UTF
 					);
 
 	
 		} else {
 
-			// $this->main->put_process_log('　□ sqlite');
+			// $this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ sqlite');
 
 			/**
 			 * sqliteの場合 
@@ -74,7 +79,7 @@ class pdoManager
 			// dbディレクトリの絶対パス
 			$db_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->options->workdir_relativepath . self::SQLITE_DB_PATH));
 
-			// $this->main->put_process_log('　□ db_real_path：' . $db_real_path);
+			// $this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ db_real_path：' . $db_real_path);
 
 			// DBディレクトリが存在しない場合は作成
 			if ( !$this->main->common()->is_exists_mkdir($db_real_path) ) {
@@ -91,7 +96,7 @@ class pdoManager
 			$option = array(
 						\PDO::ATTR_PERSISTENT => false, // ←これをtrueにすると、"持続的な接続" になる
 						\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,	// エラー表示の設定
-						\PDO::ATTR_EMULATE_PREPARES => false　	// prepareを利用する
+						\PDO::ATTR_EMULATE_PREPARES => false 			// prepareを利用する
 					);
 		}
 			
@@ -110,7 +115,7 @@ class pdoManager
 	  		// die();
 		}
 			
-		// $this->main->put_process_log('■ connect end');
+		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ connect end');
 
 		return $dbh;
 
@@ -122,7 +127,7 @@ class pdoManager
 	 */
 	public function close() {
 	
-		// $this->main->put_process_log('■ close start');
+		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ close start');
 
 		try {
 
@@ -136,7 +141,7 @@ class pdoManager
 	  		// die();
 		}
 		
-		// $this->main->put_process_log('■ close end');
+		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ close end');
 
 	}
 
@@ -147,7 +152,7 @@ class pdoManager
 	 */
 	public function create_table() {
 
-		// $this->main->put_process_log('■ create_table start');
+		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ create_table start');
 
 		//============================================================
 		// 公開予約テーブル作成
@@ -175,7 +180,7 @@ class pdoManager
 			throw new \Exception($this->main->dbh->errorInfo());
 		}
 
-		// $this->main->put_process_log('　□ 公開予約テーブル作成完了');
+		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ 公開予約テーブル作成完了');
 
 		//============================================================
 		// 公開処理結果テーブル作成
@@ -209,7 +214,7 @@ class pdoManager
 			throw new \Exception($this->main->dbh->errorInfo());
 		}
 
-		// $this->main->put_process_log('　□ 公開処理結果テーブル作成完了');
+		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ 公開処理結果テーブル作成完了');
 
 		//============================================================
 		// バックアップテーブル作成
@@ -234,9 +239,9 @@ class pdoManager
 			throw new \Exception($this->main->dbh->errorInfo());
 		}
 
-		// $this->main->put_process_log('　□ バックアップテーブル作成完了');
+		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ バックアップテーブル作成完了');
 
-		// $this->main->put_process_log('■ create_table end');
+		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ create_table end');
 
 		return;
 	}
@@ -251,7 +256,7 @@ class pdoManager
 	 */
 	public function select($dbh, $sql) {
 
-		$this->main->put_process_log('■ select start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ select start');
 
 		$ret_array = null;
 		$stmt = null;
@@ -269,7 +274,7 @@ class pdoManager
 			throw new \Exception($dbh->errorInfo());
 		}
 		
-		$this->main->put_process_log('■ select end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ select end');
 
 		return $ret_array;
 	}
@@ -284,7 +289,7 @@ class pdoManager
 	 */
 	public function selectOne($dbh, $sql) {
 
-		$this->main->put_process_log('■ selectOne start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ selectOne start');
 
 		$ret_array = null;
 		$stmt = null;
@@ -303,7 +308,7 @@ class pdoManager
 			throw new \Exception($dbh->errorInfo());
 		}
 		
-		$this->main->put_process_log('■ selectOne end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ selectOne end');
 
 		return $ret_array;
 	}
@@ -319,7 +324,7 @@ class pdoManager
 	 */
 	public function execute ($dbh, $sql, $params) {
 
-		$this->main->put_process_log('■ execute start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ execute start');
 
 		// 前処理
 		$stmt = $dbh->prepare($sql);
@@ -333,7 +338,7 @@ class pdoManager
 			throw new \Exception($dbh->errorInfo());
 		}
 
-		$this->main->put_process_log('■ execute end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ execute end');
 
 		return $stmt;
 	}

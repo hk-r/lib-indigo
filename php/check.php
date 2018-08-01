@@ -28,14 +28,14 @@ class check
 	 */
 	public function is_null_branch($branch_select_value) {
 
-		$this->main->put_process_log('■ is_null_branch start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ is_null_branch start');
 
 		$ret = true;
 		if (!$branch_select_value) {
 			$ret = false;
 		}
 
-		$this->main->put_process_log('■ is_null_branch end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ is_null_branch end');
 
 		return $ret;
 	}
@@ -51,14 +51,14 @@ class check
 	 */
 	public function is_null_commit_hash($commit_hash) {
 
-		$this->main->put_process_log('■ is_null_commit_hash start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ is_null_commit_hash start');
 
 		$ret = true;
 		if (!$commit_hash) {
 			$ret = false;
 		}
 
-		$this->main->put_process_log('■ is_null_commit_hash end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ is_null_commit_hash end');
 
 		return $ret;
 	}
@@ -74,14 +74,14 @@ class check
 	 */
 	public function is_null_reserve_date($reserve_date) {
 
-		$this->main->put_process_log('■ is_null_reserve_date start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ is_null_reserve_date start');
 
 		$ret = true;
 		if (!$reserve_date) {
 			$ret = false;
 		}
 
-		$this->main->put_process_log('■ is_null_reserve_date end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ is_null_reserve_date end');
 
 		return $ret;
 	}
@@ -97,14 +97,14 @@ class check
 	 */
 	public function is_null_reserve_time($reserve_time) {
 
-		$this->main->put_process_log('■ is_null_reserve_time start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ is_null_reserve_time start');
 
 		$ret = true;
 		if (!$reserve_time) {
 			$ret = false;
 		}
 
-		$this->main->put_process_log('■ is_null_reserve_time end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ is_null_reserve_time end');
 
 		return $ret;
 	}
@@ -120,7 +120,7 @@ class check
 	 */
 	public function check_reserve_max_record($data_list) {
 
-		$this->main->put_process_log('■ check_reserve_max_record start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_reserve_max_record start');
 
 		$ret = true;
 
@@ -131,7 +131,7 @@ class check
 			$ret = false;
 		}
 
-		$this->main->put_process_log('■ check_reserve_max_record end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_reserve_max_record end');
 
 		return $ret;
 	}
@@ -147,7 +147,7 @@ class check
 	 */
 	public function check_date($reserve_date) {
 
-		$this->main->put_process_log('■ check_date start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_date start');
 
 		$ret = true;
 
@@ -158,7 +158,7 @@ class check
 			$ret = false;
 		}	
 
-		$this->main->put_process_log('■ check_date end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_date end');
 
 		return $ret;
 	}
@@ -174,18 +174,18 @@ class check
 	 */
 	public function check_future_date($datetime) {
 
-		$this->main->put_process_log('■ check_future_date start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_future_date start');
 
 		$ret = true;
 
 		// GMTの現在日時
-		$now = $this->main->common()->get_current_datetime_of_gmt();
+		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 
 		if (strtotime($now) > strtotime($datetime)) {
 			$ret = false;
 		}
 
-		$this->main->put_process_log('■ check_future_date end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_future_date end');
 
 		return $ret;
 	}
@@ -204,7 +204,7 @@ class check
 	 */
 	public function check_exist_branch($data_list, $selected_branch, $selected_id) {
 
-		$this->main->put_process_log('■ check_exist_branch start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_exist_branch start');
 
 		$ret = true;
 
@@ -216,7 +216,7 @@ class check
 			}
 		}
 
-		$this->main->put_process_log('■ check_exist_branch end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_exist_branch end');
 
 		return $ret;
 	}
@@ -234,7 +234,7 @@ class check
 	 */
 	public function check_exist_reserve($data_list, $input_reserve, $selected_id) {
 
-		$this->main->put_process_log('■ check_exist_reserve start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_exist_reserve start');
 
 		$ret = true;
 
@@ -245,7 +245,7 @@ class check
 			}
 		}		
 
-		$this->main->put_process_log('■ check_exist_reserve end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_exist_reserve end');
 
 		return $ret;
 	}

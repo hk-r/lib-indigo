@@ -1,6 +1,6 @@
 <?php
 
-namespace indigo;
+namespace indigo\screen;
 
 class backupScreen
 {
@@ -26,10 +26,10 @@ class backupScreen
 
 		$this->main = $main;
 
-		$this->check = new check($this->main);
-		$this->tsBackup = new tsBackup($this->main);
-		$this->tsOutput = new tsOutput($this->main);
-		$this->publish = new publish($this->main);
+		$this->check = new \indigo\check($this->main);
+		$this->tsBackup = new \indigo\db\tsBackup($this->main);
+		$this->tsOutput = new \indigo\db\tsOutput($this->main);
+		$this->publish = new \indigo\publish($this->main);
 	}
 
 
@@ -40,7 +40,7 @@ class backupScreen
 	 */
 	public function disp_backup_screen() {
 		
-		$this->main->put_process_log('■ disp_backup_screen start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_backup_screen start');
 
 		$ret = "";
 
@@ -99,7 +99,7 @@ class backupScreen
 			. '</form>'
 			. '</div>';
 
-		$this->main->put_process_log('■ disp_backup_screen end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_backup_screen end');
 
 		return $ret;
 	}
@@ -113,14 +113,14 @@ class backupScreen
 	 */
 	public function do_restore_publish() {
 		
-		$this->main->put_process_log('■ do_restore_publish start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_restore_publish start');
 
 		$selected_id =  $this->main->options->_POST->selected_id;
 
 		// エラーがないので即時公開処理へ進む
 		$result = $this->publish->exec_publish(define::PUBLISH_TYPE_MANUAL_RESTORE, $selected_id);
 
-		$this->main->put_process_log('■ do_restore_publish end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_restore_publish end');
 
 		return json_encode($result);
 	}

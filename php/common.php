@@ -35,10 +35,10 @@ class common
 	 *  一致する場合：selected（文字列）
 	 *  一致しない場合：空文字
 	 */
-	public function get_current_datetime_of_gmt() {
+	public function get_current_datetime_of_gmt($format) {
 
 		// return gmdate(DATE_ATOM, time());
-		return gmdate(define::DATETIME_FORMAT, time());
+		return gmdate($format, time());
 		
 	}
 
@@ -51,7 +51,7 @@ class common
 	 */
 	public function command_execute($command, $captureStderr) {
 	
-		// $this->main->put_process_log('■ execute start');
+		// $this->put_process_log(__METHOD__, __LINE__, '■ execute start');
 
 	    $output = array();
 	    $return = 0;
@@ -63,7 +63,7 @@ class common
 
 	    exec($command, $output, $return);
 
-		// $this->main->put_process_log('■ execute end');
+		// $this->put_process_log(__METHOD__, __LINE__, '■ execute end');
 
 	    return array('output' => $output, 'return' => $return);
 	}
@@ -78,7 +78,7 @@ class common
 	 */
 	public function format_datetime($datetime, $format) {
 	
-		// $this->main->put_process_log('■ format_datetime start');
+		// $this->put_process_log(__METHOD__, __LINE__, '■ format_datetime start');
 
 		$ret = '';
 
@@ -86,10 +86,10 @@ class common
 			$ret = date($format, strtotime($datetime));
 		}
 		
-		// $this->main->put_process_log('　★変換前の時刻：' . $datetime);
-		// $this->main->put_process_log('　★変換後の時刻：'. $ret);
+		// $this->put_process_log(__METHOD__, __LINE__, '　★変換前の時刻：' . $datetime);
+		// $this->put_process_log(__METHOD__, __LINE__, '　★変換後の時刻：'. $ret);
 
-		// $this->main->put_process_log('■ format_datetime end');
+		// $this->put_process_log(__METHOD__, __LINE__, '■ format_datetime end');
 
 	    return $ret;
 	}
@@ -103,7 +103,7 @@ class common
 	 */
 	public function format_gmt_datetime($datetime, $format) {
 	
-		// $this->main->put_process_log('■ format_gmt_datetime start');
+		// $this->put_process_log(__METHOD__, __LINE__, '■ format_gmt_datetime start');
 
 		$ret = '';
 
@@ -114,10 +114,7 @@ class common
 			$ret = $t->format($format);
 		}
 		
-		// $this->main->put_process_log('　★変換前の時刻：' . $datetime);
-		// $this->main->put_process_log('　★変換後の時刻：'. $ret);
-
-		// $this->main->put_process_log('■ format_gmt_datetime end');
+		// $this->put_process_log(__METHOD__, __LINE__, '■ format_gmt_datetime end');
 
 	    return $ret;
 	}
@@ -132,7 +129,7 @@ class common
 	 */
 	public function convert_to_timezone_datetime($datetime) {
 	
-		// $this->main->put_process_log('■ convert_to_timezone_datetime start');
+		// $this->put_process_log(__METHOD__, __LINE__, '■ convert_to_timezone_datetime start');
 
 		$ret = '';
 
@@ -145,10 +142,10 @@ class common
 			$ret = $t->format(define::DATETIME_FORMAT);
 		}
 
-		// $this->main->put_process_log('　□変換前の時刻（GMT）：' . $datetime);
-		// $this->main->put_process_log('　□変換後の時刻：'. $ret);
+		// $this->put_process_log(__METHOD__, __LINE__, '　□変換前の時刻（GMT）：' . $datetime);
+		// $this->put_process_log(__METHOD__, __LINE__, '　□変換後の時刻：'. $ret);
 		
-		// $this->main->put_process_log('■ convert_to_timezone_datetime end');
+		// $this->put_process_log(__METHOD__, __LINE__, '■ convert_to_timezone_datetime end');
 
 	    return $ret;
 	}
@@ -195,7 +192,7 @@ class common
 	 */
 	public function is_exists_mkdir($dirpath) {
 
-		// $this->main->put_process_log('■ is_exists_mkdir start');
+		// $this->put_process_log(__METHOD__, __LINE__, '■ is_exists_mkdir start');
 
 		$ret = true;
 
@@ -210,8 +207,8 @@ class common
 			$ret = false;
 		}
 
-		// $this->main->put_process_log('　□ return：' . $ret);
-		// $this->main->put_process_log('■ is_exists_mkdir end');
+		// $this->put_process_log(__METHOD__, __LINE__, '　□ return：' . $ret);
+		// $this->put_process_log(__METHOD__, __LINE__, '■ is_exists_mkdir end');
 
 		return $ret;
 	}
@@ -225,7 +222,7 @@ class common
 	 */
 	public function is_exists_remkdir($dirpath) {
 		
-		$this->main->put_process_log('■ is_exists_remkdir start');
+		$this->put_process_log(__METHOD__, __LINE__, '■ is_exists_remkdir start');
 
 		if ( file_exists($dirpath) ) {
 			// 削除
@@ -246,7 +243,7 @@ class common
 			return false;
 		}
 	
-		$this->main->put_process_log('■ is_exists_remkdir end');
+		$this->put_process_log(__METHOD__, __LINE__, '■ is_exists_remkdir end');
 
 		return true;
 	}
@@ -262,7 +259,7 @@ class common
 	 */
 	public function get_server_real_path($options) {
 	
-		$this->main->put_process_log('■ get_server_real_path start');
+		$this->put_process_log(__METHOD__, __LINE__, '■ get_server_real_path start');
 
 
 		$server_list = $options->server;
@@ -275,10 +272,10 @@ class common
 			$server_real_path[] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($server . "/"));
 		}
 
-		$this->main->put_process_log('　□ server_real_path');
+		$this->put_process_log(__METHOD__, __LINE__, '　□ server_real_path');
 		$this->debug_var_dump($server_real_path);
 
-		$this->main->put_process_log('■ get_server_real_path end');
+		$this->put_process_log(__METHOD__, __LINE__, '■ get_server_real_path end');
 
 	    return json_encode($server_real_path);
 	}
@@ -294,7 +291,7 @@ class common
 	public function get_realpath_workdir($options, $realpath_array) {
 	
 		$logstr = "get_realpath_workdir() start";
-		$this->main->put_process_log($logstr);
+		$this->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		// 本番環境ディレクトリの絶対パスを取得。
 		$realpath_array['realpath_server'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->server_real_path . "/"));
@@ -315,9 +312,33 @@ class common
 		$realpath_array['realpath_log'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->workdir_relativepath . define::PATH_LOG));
 
 		$logstr = "get_realpath_workdir() end";
-		$this->main->put_process_log($logstr);
+		$this->put_process_log(__METHOD__, __LINE__, $logstr);
 
 	    return json_encode($realpath_array);
+	}
+
+
+	/**
+	 * response status code を取得する。
+	 *
+	 * `$px->set_status()` で登録した情報を取り出します。
+	 *
+	 * @return int ステータスコード (100〜599の間の数値)
+	 */
+	public function put_process_log($method, $line, $text){
+		
+		$datetime = $this->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
+
+		$str = "[" . $datetime . "]" . " " .
+			   "[pid:" . getmypid() . "]" . " " .
+			   "[userid:" . $this->main->options->user_id . "]" . " " .
+			   "[" . $method . "]" . " " .
+			   "[line:" . $line . "]" . " " .
+			   $text . "\r\n";
+
+		// file_put_contents($path, $str, FILE_APPEND);
+
+		return error_log( $str, 3, $this->main->process_log_path );
 	}
 
 

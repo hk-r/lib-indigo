@@ -55,21 +55,24 @@ class main
 		$this->gitMgr = new gitManager($this);
 		$this->pdoMgr = new pdoManager($this);
 
-		$this->initScn = new initScreen($this);
-		$this->historyScn = new historyScreen($this);
-		$this->backupScn = new backupScreen($this);
+		$this->initScn = new \indigo\screen\initScreen($this);
+		$this->historyScn = new \indigo\screen\historyScreen($this);
+		$this->backupScn = new \indigo\screen\backupScreen($this);
 
 		//============================================================
 		// ログ出力用の日付ディレクトリ作成
 		//============================================================	
-		// ログファイル名
-		$log_dirname = $this->common()->format_gmt_datetime($this->common()->get_current_datetime_of_gmt(), define::DATETIME_FORMAT_YMD);
+		
+		if (!$this->process_log_path) {
+			// ログファイル名
+			$log_dirname = $this->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT_YMD);
 
-		// ログパス
-		$this->process_log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->workdir_relativepath . define::PATH_LOG)) . 'log_' . $log_dirname . '.log';
+			// ログパス
+			$this->process_log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->workdir_relativepath . define::PATH_LOG)) . 'log_process_' . $log_dirname . '.log';
+		}
 
 		// $logstr = "起動パラメタ：" . $this->options;
-		// $this->put_process_log($logstr);
+		// $this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		// 作業用ディレクトリの絶対パスを取得
 		$this->realpath_array = json_decode($this->common()->get_realpath_workdir($this->options, $this->realpath_array));
@@ -84,7 +87,7 @@ class main
 		date_default_timezone_set($time_zone);
 
 		$logstr = "設定タイムゾーン：" . $time_zone;
-		$this->put_process_log($logstr);
+		$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		//============================================================
 		// 作業用ディレクトリの作成（既にある場合は作成しない）
@@ -99,7 +102,7 @@ class main
 	public function run() {
 	
 		$logstr = "run() start";
-		$this->put_process_log($logstr);
+		$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		// 画面表示
 		$disp = '';  
@@ -146,7 +149,7 @@ class main
 				// 初期表示画面の「新規」ボタン押下
 
 				$logstr = "==========初期表示画面の「新規」ボタン押下==========";
-				$this->put_process_log($logstr);
+				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 		
 				$result = json_decode($this->initScn->do_disp_add_dialog());
 
@@ -154,7 +157,7 @@ class main
 				// 新規ダイアログの「確認」ボタン押下
 				
 				$logstr = "==========新規ダイアログの「確認」ボタン押下==========";
-				$this->put_process_log($logstr);
+				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_check_add());
 				
@@ -162,7 +165,7 @@ class main
 				// 新規確認ダイアログの「確定」ボタン押下
 				
 				$logstr = "==========新規ダイアログの「確定」ボタン押下==========";;
-				$this->put_process_log($logstr);
+				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 		
 				$result = json_decode($this->initScn->do_confirm_add());	
 
@@ -170,7 +173,7 @@ class main
 				// 新規確認ダイアログの「戻る」ボタン押下
 				
 				$logstr = "==========新規ダイアログの「戻る」ボタン押下==========";
-				$this->put_process_log($logstr);
+				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 		
 				$result = json_decode($this->initScn->do_back_add_dialog());
 
@@ -181,7 +184,7 @@ class main
 				// 初期表示画面の「変更」ボタン押下
 				
 				$logstr = "==========初期表示画面の「変更」ボタン押下==========";
-				$this->put_process_log($logstr);
+				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_disp_update_dialog());
 
@@ -190,7 +193,7 @@ class main
 				// 変更ダイアログの「確認」ボタン押下
 				
 				$logstr = "==========変更ダイアログの「確認」ボタン押下==========";
-				$this->put_process_log($logstr);
+				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_check_update());
 
@@ -198,7 +201,7 @@ class main
 				// 変更確認ダイアログの「確定」ボタン押下
 				
 				$logstr = "==========変更ダイアログの「確定」ボタン押下==========";
-				$this->put_process_log($logstr);
+				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_confirm_update());	
 
@@ -206,7 +209,7 @@ class main
 				// 変更確認ダイアログの「戻る」ボタン押下	
 				
 				$logstr = "==========変更ダイアログの「戻る」ボタン押下==========";
-				$this->put_process_log($logstr);
+				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_back_update_dialog());
 
@@ -218,7 +221,7 @@ class main
 				// 初期表示画面の「削除」ボタン押下				
 				
 				$logstr = "==========初期表示画面の「削除」ボタン押下==========";
-				$this->put_process_log($logstr);
+				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				// Gitファイルの削除
 				$result = json_decode($this->initScn->do_delete());
@@ -231,7 +234,7 @@ class main
 				// バックアップ一覧画面の「復元ボタン押下				
 				
 				$logstr = "==========バックアップ一覧画面の「復元」ボタン押下==========";
-				$this->put_process_log($logstr);
+				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				// Gitファイルの削除
 				$result = json_decode($this->backupScn->do_restore_publish());
@@ -244,7 +247,7 @@ class main
 				// 初期表示画面の「即時公開」ボタン押下				
 				
 				$logstr = "==========初期表示画面の「即時公開」ボタン押下==========";
-				$this->put_process_log($logstr);
+				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_disp_immediate_dialog());
 
@@ -252,7 +255,7 @@ class main
 				// 即時公開ダイアログの「確認」ボタン押下
 				
 				$logstr = "==========即時公開ダイアログの「確認」ボタン押下==========";
-				$this->put_process_log($logstr);
+				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_check_immediate());
 
@@ -260,7 +263,7 @@ class main
 				// 即時公開確認ダイアログの「確定」ボタン押下	
 				
 				$logstr = "==========即時公開ダイアログの「確定」ボタン押下==========";
-				$this->put_process_log($logstr);
+				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_immediate_publish());
 
@@ -269,7 +272,7 @@ class main
 
 					$logstr = "==========即時公開失敗==========";
 					$logstr .= $result->message . "\r\n";
-					$this->put_process_log($logstr);
+					$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 
 					$error_message = $result->message . " ";
@@ -280,7 +283,7 @@ class main
 						
 						$logstr = "==========即時公開の復元処理失敗==========";
 						$logstr .= $result->message . "\r\n";
-						$this->put_process_log($logstr);
+						$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 					}
 
 				}
@@ -289,7 +292,7 @@ class main
 				// 即時公開確認ダイアログの「戻る」ボタン押下			
 				
 				$logstr = "==========即時公開ダイアログの「戻る」ボタン押下==========";
-				$this->put_process_log($logstr);
+				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_back_immediate_dialog());
 			
@@ -300,7 +303,7 @@ class main
 				// 履歴表示画面の「新規」ボタン押下
 				
 				$logstr = "==========履歴表示画面の「新規」ボタン押下==========";
-				$this->put_process_log($logstr);
+				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->historyScn->do_disp_log_dialog());
 			}
@@ -314,10 +317,10 @@ class main
 				$logstr = "*****************************************" . "\r\n";
 				$logstr .= "************** ステータスエラー *************" . "\r\n";
 				$logstr .= "*****************************************" . "\r\n";
-				$this->put_process_log_block($logstr);
+				$this->common()->put_process_log_block(__METHOD__, __LINE__, $logstr);
 
 				$logstr = $error_message . "\r\n";
-				$this->put_process_log($logstr);
+				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 
 				// エラーメッセージ表示
@@ -339,7 +342,7 @@ class main
 				// 初期表示画面の「履歴」ボタン押下
 				
 				$logstr = "==========履歴画面の表示==========";
-				$this->put_process_log($logstr);
+				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$disp = $this->historyScn->disp_history_screen();
 
@@ -347,7 +350,7 @@ class main
 				// 初期表示画面の「バックアップ一覧」ボタン押下
 
 				$logstr = "==========バックアップ一覧画面の表示==========";
-				$this->put_process_log($logstr);
+				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$disp = $this->backupScn->disp_backup_screen();
 				
@@ -355,7 +358,7 @@ class main
 				// 初期表示画面の表示
 
 				$logstr = "==========初期表示画面の表示==========";
-				$this->put_process_log($logstr);
+				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$disp = $this->initScn->do_disp_init_screen();
 
@@ -368,7 +371,7 @@ class main
 
 			$logstr = "** run() 例外キャッチ **" . "\r\n";
 			$logstr .= $e->getMessage() . "\r\n";
-			$this->put_process_log($logstr);
+			$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 			// エラーメッセージ表示
 			$dialog_disp = '
@@ -380,7 +383,7 @@ class main
 			// データベース接続を閉じる
 			$this->pdoMgr->close($this->dbh);
 
-			$this->put_process_log('■ run error end');
+			$this->common()->put_process_log('■ run error end');
 
 			return $dialog_disp;
 		}
@@ -389,7 +392,7 @@ class main
 		$this->pdoMgr->close();
 
 		$logstr = "run() end";
-		$this->put_process_log($logstr);
+		$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		// 画面表示
 		return $disp . $disp_lock . $dialog_disp;
@@ -400,7 +403,7 @@ class main
 	 */
     public function cron_run(){
 	
-		$this->put_process_log('■ [cron] run start');
+		$this->common()->put_process_log('■ [cron] run start');
 
 		// 処理実行結果格納
 		$result = json_decode(json_encode(
@@ -414,8 +417,8 @@ class main
 			$logstr .= "===============================================" . "\r\n";
 			$logstr .= "予約公開処理開始" . "\r\n";
 			$logstr .= "===============================================" . "\r\n";
-			$logstr .= "日時：" . $this->common()->get_current_datetime_of_gmt() . "\r\n";
-			$this->put_process_log($logstr);
+			$logstr .= "日時：" . $this->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT) . "\r\n";
+			$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 			//============================================================
 			// データベース接続
@@ -433,7 +436,7 @@ class main
 
 				$logstr = "** 予約公開処理失敗 **" . "\r\n";
 				$logstr .= $result->message . "\r\n";
-				$this->put_process_log($logstr);
+				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 				// $error_message = $result->message . " ";
 				$result = json_decode(json_encode($this->publish->exec_publish(define::PUBLISH_TYPE_AUTO_RESTORE, $result->output_id)));
@@ -445,7 +448,7 @@ class main
 
 					$logstr = "** 復元処理失敗 **" . "\r\n";
 					$logstr .= $result->message . "\r\n";
-					$this->put_process_log($logstr);
+					$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 				}
 			}
 
@@ -458,9 +461,9 @@ class main
 			$logstr .= "===============================================" . "\r\n";
 			$logstr .= "予約公開処理異常終了（例外キャッチ）" . "\r\n";
 			$logstr .= "===============================================" . "\r\n";
-			$logstr .= "日時：" . $this->common()->get_current_datetime_of_gmt() . "\r\n";
+			$logstr .= "日時：" . $this->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT) . "\r\n";
 			$logstr .= $e.getMessage() . "\r\n";
-			$this->put_process_log($logstr);
+			$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 			return;
 		}
@@ -472,10 +475,10 @@ class main
 		$logstr .= "===============================================" . "\r\n";
 		$logstr .= "予約公開処理終了" . "\r\n";
 		$logstr .= "===============================================" . "\r\n";
-		$logstr .= "日時：" . $this->common()->get_current_datetime_of_gmt() . "\r\n";
-		$this->put_process_log($logstr);
+		$logstr .= "日時：" . $this->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT) . "\r\n";
+		$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
-		$this->put_process_log('■ [cron] run end');
+		$this->common()->put_process_log('■ [cron] run end');
 
 		return;
     }
@@ -488,7 +491,7 @@ class main
 	function create_indigo_work_dir() {
 	
 		$logstr = "create_indigo_work_dir() start";
-		$this->put_process_log($logstr);
+		$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		$ret = true;
 
@@ -519,7 +522,7 @@ class main
 
 		$logstr = "$ret = " . $ret;
 		$logstr = "create_indigo_work_dir() end";
-		$this->put_process_log($logstr);
+		$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		return $ret;
 	}
@@ -597,7 +600,7 @@ class main
 	 */
 	public function put_process_log($text){
 		
-		$datetime = $this->common()->get_current_datetime_of_gmt();
+		$datetime = $this->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 
 		$str = "[" . $datetime . "]" . " " . $text . "\r\n";
 

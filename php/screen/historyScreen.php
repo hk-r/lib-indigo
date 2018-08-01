@@ -1,6 +1,6 @@
 <?php
 
-namespace indigo;
+namespace indigo\screen;
 
 class historyScreen
 {
@@ -22,7 +22,7 @@ class historyScreen
 
 		$this->main = $main;
 
-		$this->tsOutput = new tsOutput($this->main);
+		$this->tsOutput = new \indigo\db\tsOutput($this->main);
 	}
 	
 
@@ -33,7 +33,7 @@ class historyScreen
 	 */
 	public function disp_history_screen() {
 		
-		$this->main->put_process_log('■ disp_history_screen start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_history_screen start');
 
 		$ret = "";
 
@@ -96,7 +96,7 @@ class historyScreen
 			. '</form>'
 			. '</div>';
 		
-		$this->main->put_process_log('■ disp_history_screen end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_history_screen end');
 
 		return $ret;
 	}
@@ -109,7 +109,7 @@ class historyScreen
 	 */
 	public function do_disp_log_dialog() {
 		
-		$this->main->put_process_log('■ do_disp_log_dialog start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_disp_log_dialog start');
 
 		$result = array('status' => true,
 						'message' => '',
@@ -138,7 +138,7 @@ class historyScreen
 
 		$result['status'] = true;
 
-		$this->main->put_process_log('■ do_disp_log_dialog end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_disp_log_dialog end');
 
 		return json_encode($result);
 	}
@@ -150,7 +150,7 @@ class historyScreen
 	 */
 	private function create_log_dialog_html($selected_ret) {
 		
-		$this->main->put_process_log('■ create_log_dialog_html start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ create_log_dialog_html start');
 
 		$ret = '<div class="dialog" id="modal_dialog">'
 			  . '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
@@ -168,12 +168,12 @@ class historyScreen
 			// logディレクトリの絶対パスを取得。
 			$realpath_log = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->realpath_array->realpath_log . $dirname . "/"));
 		
-		$this->main->put_process_log('■ $realpath_log:' . $realpath_log);
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ $realpath_log:' . $realpath_log);
 
 			// ファイルを変数に格納
 			$filename = $realpath_log . 'pub_copy_' . $dirname . '.log';
 
-$this->main->put_process_log('■ $filename:' . $filename);
+$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ $filename:' . $filename);
 			// ファイルを読み込み変数に格納
 			$content = file_get_contents($filename);
 
@@ -202,7 +202,7 @@ $this->main->put_process_log('■ $filename:' . $filename);
 			  . '</div>'
 			  . '</div></div>';
 		
-		$this->main->put_process_log('■ create_log_dialog_html end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ create_log_dialog_html end');
 
 		return $ret;
 	}

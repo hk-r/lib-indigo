@@ -1,6 +1,6 @@
 <?php
 
-namespace indigo;
+namespace indigo\db;
 
 class tsBackup
 {
@@ -61,7 +61,7 @@ class tsBackup
 	 */
 	public function get_ts_backup_list($dbh) {
 
-		$this->main->put_process_log('■ get_ts_backup_list start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_ts_backup_list start');
 
 		$ret_array = null;
 		$conv_ret_array = null;
@@ -91,7 +91,7 @@ class tsBackup
 			$conv_ret_array[] = $this->convert_ts_backup_entity($array);
 		}
 	
-		$this->main->put_process_log('■ get_ts_backup_list end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_ts_backup_list end');
 
 		return $conv_ret_array;
 	}
@@ -105,7 +105,7 @@ class tsBackup
 	public function get_selected_ts_backup($dbh, $selected_id) {
 
 
-		$this->main->put_process_log('■ get_selected_ts_backup start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup start');
 
 		$ret_array = null;
 		$conv_ret_array = null;
@@ -127,7 +127,7 @@ class tsBackup
 			$conv_ret_array = $this->convert_ts_backup_entity($ret_array);
 		// }
 
-		$this->main->put_process_log('■ get_selected_ts_backup end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup end');
 
 		return $conv_ret_array;
 	}
@@ -140,9 +140,9 @@ class tsBackup
 	public function get_selected_ts_backup_by_output_id($dbh, $output_id) {
 
 
-		$this->main->put_process_log('■ get_selected_ts_backup_by_output_id start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup_by_output_id start');
 
-		$this->main->put_process_log('　□ output_id：' . $output_id);
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ output_id：' . $output_id);
 
 		$ret_array = null;
 		$conv_ret_array = null;
@@ -163,7 +163,7 @@ class tsBackup
 			$conv_ret_array = $this->convert_ts_backup_entity($ret_array);
 		// }
 
-		$this->main->put_process_log('■ get_selected_ts_backup_by_output_id end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup_by_output_id end');
 
 		return $conv_ret_array;
 	}
@@ -175,7 +175,7 @@ class tsBackup
 	 */
 	public function insert_ts_backup($dbh, $options, $backup_datetime, $output_id) {
 
-		$this->main->put_process_log('■ insert_ts_backup start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ insert_ts_backup start');
 
 		// INSERT文作成
 		$insert_sql = "INSERT INTO TS_BACKUP ("
@@ -201,11 +201,11 @@ class tsBackup
 
 		. ");";
 
-		$this->main->put_process_log('　□ insert_sql');
-		$this->main->put_process_log($insert_sql);
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ insert_sql');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, $insert_sql);
 
 		// 現在時刻
-		$now = $this->main->common()->get_current_datetime_of_gmt();
+		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 		
 		// パラメータ作成
 		$params = array(
@@ -225,9 +225,9 @@ class tsBackup
 		// 登録したシーケンスIDを取得
 		$insert_id = $dbh->lastInsertId();
 		
-		$this->main->put_process_log('　□ insert_id：' . $insert_id);
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ insert_id：' . $insert_id);
 
-		$this->main->put_process_log('■ insert_ts_backup end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ insert_ts_backup end');
 
 		return $insert_id;
 	}
@@ -241,7 +241,7 @@ class tsBackup
 	 */
 	private function convert_ts_backup_entity($array) {
 	
-		$this->main->put_process_log('■ convert_ts_backup_entity start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ convert_ts_backup_entity start');
 
 		$entity = array();
 
@@ -270,7 +270,7 @@ class tsBackup
 		// 登録ユーザ
 		$entity[self::BACKUP_ENTITY_INSERT_USER_ID] = $array[self::BACKUP_ENTITY_INSERT_USER_ID];
 
-		$this->main->put_process_log('■ convert_ts_backup_entity end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ convert_ts_backup_entity end');
 
 	    return $entity;
 	}
