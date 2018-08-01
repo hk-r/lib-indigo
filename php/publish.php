@@ -413,10 +413,10 @@ class publish
 						$logstr = "===============================================" . "\r\n";
 						$logstr .= "[復元公開]backupからrunningへディレクトリのコピー" . "\r\n";
 						$logstr .= "===============================================" . "\r\n";
-						$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+						$this->main->common()->put_process_log_block($logstr);
 				
-						$from_realpath = $realpath_array->realpath_backup . $backup_dirname . "\r\n";
-						$to_realpath = $realpath_array->realpath_running . $running_dirname . "\r\n";
+						$from_realpath = $realpath_array->realpath_backup . $backup_dirname;
+						$to_realpath = $realpath_array->realpath_running . $running_dirname;
 						
 						$logstr = "backupディレクトリ：" . $from_realpath . "\r\n";
 						$logstr .= "runningディレクトリ：" . $to_realpath . "\r\n";
