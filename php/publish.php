@@ -415,7 +415,9 @@ class publish
 						$logstr .= "===============================================" . "\r\n";
 						$this->main->common()->put_process_log_block($logstr);
 				
-						$from_realpath = $realpath_array->realpath_backup . $backup_dirname;	// コピー元にスラッシュを付けると、日付ディレクトリごとコピーしてしまう
+						// そのディレクトリも含めてコピーしたい場合：「/」なし
+						// そのディレクトリ以下のツリーをコピーしたい場合：「/」あり
+						$from_realpath = $realpath_array->realpath_backup . $backup_dirname . '/';
 						$to_realpath = $realpath_array->realpath_running . $running_dirname . '/';
 						
 						$logstr = "backupディレクトリ：" . $from_realpath . "\r\n";
@@ -482,8 +484,11 @@ class publish
 					$logstr .= "===============================================" . "\r\n";
 					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
-					$from_realpath = $realpath_array->realpath_server;
+					$from_realpath = $realpath_array->realpath_server . '/';
 					$to_realpath = $realpath_array->realpath_backup . $backup_dirname . '/';
+
+					// そのディレクトリも含めてコピーしたい場合：「/」なし
+					// そのディレクトリ以下のツリーをコピーしたい場合：「/」あり
 
 					$logstr = "本番環境ディレクトリ：" . $from_realpath . "\r\n";
 					$logstr .= "backupディレクトリ：" . $to_realpath . "\r\n";
