@@ -415,8 +415,8 @@ class publish
 						$logstr .= "===============================================" . "\r\n";
 						$this->main->common()->put_process_log_block($logstr);
 				
-						$from_realpath = $realpath_array->realpath_backup . $backup_dirname;
-						$to_realpath = $realpath_array->realpath_running . $running_dirname;
+						$from_realpath = $realpath_array->realpath_backup . $backup_dirname . '/';
+						$to_realpath = $realpath_array->realpath_running . $running_dirname . '/';
 						
 						$logstr = "backupディレクトリ：" . $from_realpath . "\r\n";
 						$logstr .= "runningディレクトリ：" . $to_realpath . "\r\n";
