@@ -11,11 +11,6 @@ class historyScreen
 
 	private $tsOutput;
 
-	/**
-	 * PDOインスタンス
-	 */
-	private $dbh;
-	
 
 	/**
 	 * コンストラクタ

@@ -225,7 +225,7 @@ class tsBackup
 		$this->main->pdoMgr()->execute($this->main->get_dbh(), $insert_sql, $params);
 
 		// 登録したシーケンスIDを取得
-		$insert_id = $dbh->lastInsertId();
+		$insert_id = $this->main->get_dbh()->lastInsertId();
 		
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ insert_id：' . $insert_id);
 
