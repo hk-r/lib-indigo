@@ -415,7 +415,7 @@ class publish
 						$logstr .= "===============================================" . "\r\n";
 						$this->main->common()->put_process_log_block($logstr);
 				
-						$from_realpath = $realpath_array->realpath_backup . $backup_dirname . '/';
+						$from_realpath = $realpath_array->realpath_backup . $backup_dirname;	// コピー元にスラッシュを付けると、日付ディレクトリごとコピーしてしまう
 						$to_realpath = $realpath_array->realpath_running . $running_dirname . '/';
 						
 						$logstr = "backupディレクトリ：" . $from_realpath . "\r\n";
@@ -701,6 +701,7 @@ class publish
 
 	/**
 	 * rsyncコマンド実行（ディレクトリコピー用）
+	 * コピー元のディレクトリパスの最後にスラッシュを付けると、ディレクトリごとコピーするので注意！
 	 */
 	public function exec_sync_copy($from_realpath, $to_realpath) {
 
