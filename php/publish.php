@@ -2,6 +2,10 @@
 
 namespace indigo;
 
+use indigo\db\tsReserve as tsReserve;
+use indigo\db\tsOutput as tsOutput;
+use indigo\db\tsBackup as tsBackup;
+
 class publish
 {
 	private $main;
@@ -27,9 +31,9 @@ class publish
 
 		$this->main = $main;
 
-		$this->tsReserve = new \indigo\db\tsReserve($this->main);
-		$this->tsOutput = new \indigo\db\tsOutput($this->main);
-		$this->tsBackup = new \indigo\db\tsBackup($this->main);
+		$this->tsReserve = new tsReserve($this->main);
+		$this->tsOutput = new tsOutput($this->main);
+		$this->tsBackup = new tsBackup($this->main);
 		
 		$this->path_lockdir = $main->fs()->get_realpath( $this->main->options->workdir_relativepath . 'applock/' );
 		$this->path_lockfile = $this->path_lockdir .'applock.txt';
@@ -59,6 +63,7 @@ class publish
 
 		try {
 
+			set_time_limit(12*60*60);
 
 			//============================================================
 			// ログ出力用の日付ディレクトリ作成
@@ -88,8 +93,8 @@ class publish
 
 			$logstr = "===============================================" . "\r\n";
 			$logstr .= "公開予約テーブルSELECT処理実行" . "\r\n";
-			$logstr .= "===============================================" . "\r\n";
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+			$logstr .= "===============================================";
+			$this->main->common()->put_process_log_block($logstr);
 
 
 			if( !$this->lock() ){//ロック
@@ -99,8 +104,6 @@ class publish
 				// print 'Try again later...'."\n";
 				// print 'exit.'."\n";
 				// print $this->cli_footer();
-
-				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 				$logstr = '------'."\n";
 				$logstr .= 'publish is now locked.'."\n";
@@ -135,7 +138,7 @@ class publish
 					$logstr = "===============================================" . "\r\n";
 					$logstr .= "公開予約テーブルSELECT処理実行" . "\r\n";
 					$logstr .= "===============================================" . "\r\n";
-					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+					$this->main->common()->put_process_log_block($logstr);
 
 					$data_list = $this->tsReserve->get_ts_reserve_publish_list($start_datetime);
 					
@@ -145,14 +148,14 @@ class publish
 						$logstr = "===============================================" . "\r\n";
 						$logstr .= "ロック解除" . "\r\n";
 						$logstr .= "===============================================" . "\r\n";
-						$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+						$this->main->common()->put_process_log_block($logstr);
 
 						$this->unlock();//ロック解除
 
 						$logstr = "===============================================" . "\r\n";
 						$logstr .= "公開処理完了" . "\r\n";
 						$logstr .= "===============================================" . "\r\n";
-						$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+						$this->main->common()->put_process_log_block($logstr);
 
 						return $result;
 					}
@@ -170,8 +173,7 @@ class publish
 						$logstr = "-----------------------------------------------" . "\r\n";
 						$logstr .= "公開予約取得データ" . "\r\n";
 						$logstr .= "-----------------------------------------------" . "\r\n";
-						$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-						$this->main->common()->put_process_log(__METHOD__, __LINE__, $data);
+						$this->main->common()->put_process_log_block($logstr);
 
 						//============================================================
 						// 公開処理結果テーブルの登録処理
@@ -254,8 +256,8 @@ class publish
 						$logstr = "===============================================" . "\r\n";
 						$logstr .= "公開予約テーブルのステータス更新処理（処理済みへ）" . "\r\n";
 						$logstr .= "===============================================" . "\r\n";
-						$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-						
+						$this->main->common()->put_process_log_block($logstr);
+
 						$this->tsReserve->update_ts_reserve_status($data[tsReserve::RESERVE_ENTITY_ID_SEQ], $data[tsReserve::RESERVE_ENTITY_VER_NO]);
 						
 						$cnt++;
@@ -305,7 +307,7 @@ class publish
 							$logstr = "選択バックアップID：：" . $selected_id . "\r\n";
 							$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
-							$backup_data = $this->tsBackup->get_selected_ts_backup($this->main->get_dbh(), $selected_id);
+							$backup_data = $this->tsBackup->get_selected_ts_backup($selected_id);
 						
 						} else {
 
@@ -316,10 +318,10 @@ class publish
 							$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 							
 							// 処理結果IDからバックアップ情報を取得
-							$backup_data = $this->tsBackup->get_selected_ts_backup_by_output_id($this->main->get_dbh(), $output_id);
+							$backup_data = $this->tsBackup->get_selected_ts_backup_by_output_id($output_id);
 						}
 
-						$logstr = "取得データ" . var_dump($backup_data) . "\r\n";
+						// $logstr = "取得データ" . var_dump($backup_data) . "\r\n";
 						$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 						if (!$backup_data) {
@@ -467,7 +469,7 @@ class publish
 					$logstr .= "バックアップディレクトリ名：" . $backup_dirname . "\r\n";
 					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
-					$result['backup_id'] = $this->tsBackup->insert_ts_backup($this->main->get_dbh(), $this->main->options, $backup_datetime, $result['output_id']);
+					$result['backup_id'] = $this->tsBackup->insert_ts_backup($this->main->options, $backup_datetime, $result['output_id']);
 
 					$logstr = "登録バックアップID：" . $result['backup_id'] . "\r\n";
 					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
@@ -594,7 +596,7 @@ class publish
 				$logstr = "===============================================" . "\r\n";
 				$logstr .= "公開処理結果テーブルのロールバック処理実行" . "\r\n";
 				$logstr .= "===============================================" . "\r\n";
-				$logstr .= $e.getMessage() . "\r\n";
+				$logstr .= $e->getMessage() . "\r\n";
 				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		    	/* 変更をロールバックする */
@@ -618,7 +620,7 @@ class publish
 			$logstr = "===============================================" . "\r\n";
 			$logstr .= "公開処理結果テーブルの更新処理（ステータス：失敗）" . "\r\n";
 			$logstr .= "===============================================" . "\r\n";
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+			$this->main->common()->put_process_log_block($logstr);
 
 			// GMTの現在日時
 			$end_datetime = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
@@ -634,19 +636,19 @@ class publish
 			$logstr = "===============================================" . "\r\n";
 			$logstr .= "ステータス更新完了" . "\r\n";
 			$logstr .= "===============================================" . "\r\n";
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+			$this->main->common()->put_process_log_block($logstr);
 
 			$logstr = "===============================================" . "\r\n";
 			$logstr .= "ロック解除" . "\r\n";
 			$logstr .= "===============================================" . "\r\n";
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+			$this->main->common()->put_process_log_block($logstr);
 
 			$this->unlock();//ロック解除
 
 			$logstr = "===============================================" . "\r\n";
 			$logstr .= "公開処理完了" . "\r\n";
 			$logstr .= "===============================================" . "\r\n";
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+			$this->main->common()->put_process_log_block($logstr);
 
 			return $result;
 		}
@@ -657,14 +659,14 @@ class publish
 		$logstr = "===============================================" . "\r\n";
 		$logstr .= "ロック解除" . "\r\n";
 		$logstr .= "===============================================" . "\r\n";
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+		$this->main->common()->put_process_log_block($logstr);
 
 		$this->unlock();//ロック解除
 
 		$logstr = "===============================================" . "\r\n";
 		$logstr .= "公開処理完了" . "\r\n";
 		$logstr .= "===============================================" . "\r\n";
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+		$this->main->common()->put_process_log_block($logstr);
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ exec_publish end');
 
@@ -795,7 +797,7 @@ class publish
 				$logstr = "===============================================" . "\r\n";
 				$logstr .= "パブリッシュロック中のため処理中断" . "\r\n";
 				$logstr .= "===============================================" . "\r\n";
-				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+				$this->main->common()->put_process_log_block($logstr);
 
 				return false;
 				break;
@@ -810,7 +812,7 @@ class publish
 		$logstr = "-----------------------------------------------" . "\r\n";
 		$logstr .= "パブリッシュのロック作成 START" . "\r\n";
 		$logstr .= "-----------------------------------------------" . "\r\n";
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+		$this->main->common()->put_process_log_block($logstr);
 	
 
 		$src = '';
@@ -823,7 +825,7 @@ class publish
 		$logstr .= "パブリッシュのロック作成 END" . "\r\n";
 		$logstr .= "-----------------------------------------------" . "\r\n";
 		$logstr .= "結果：" . $rtn . "\r\n";
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+		$this->main->common()->put_process_log_block($logstr);
 	
 		return	$rtn;
 	}//lock()
@@ -845,18 +847,18 @@ class publish
 			if( ( time() - filemtime($lockfilepath) ) > $lockfile_expire ){
 				#	有効期限を過ぎていたら、ロックは成立する。
 
-				$logstr .= "パブリッシュのロック確認 --->>> ロック無し（有効期限の超過）" . "\r\n";
+				$logstr = "パブリッシュのロック確認 --->>> ロック無し（有効期限の超過）" . "\r\n";
 				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 				return false;
 			}
 
-			$logstr .= "パブリッシュのロック確認 --->>> ロック中" . "\r\n";
+			$logstr = "パブリッシュのロック確認 --->>> ロック中" . "\r\n";
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 			return true;
 		}
 
-		$logstr .= "パブリッシュのロック確認 --->>> ロック無し" . "\r\n";
+		$logstr = "パブリッシュのロック確認 --->>> ロック無し" . "\r\n";
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		return false;

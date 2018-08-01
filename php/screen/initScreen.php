@@ -1046,7 +1046,7 @@ class initScreen
 		
 		}
 
-		$img_filename = $this->main->options->workdir_relativepath . self::IMG_ARROW_RIGHT;
+		$img_filename = $this->main->options->resdir_relativepath . self::IMG_ARROW_RIGHT;
 
 		$ret = '<div class="dialog" id="modal_dialog">'
 			. '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'

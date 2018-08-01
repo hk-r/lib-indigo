@@ -2,6 +2,8 @@
 
 namespace indigo\screen;
 
+use indigo\define as define;
+
 class backupScreen
 {
 	private $main;
@@ -45,14 +47,20 @@ class backupScreen
 		$ret = "";
 
 		// バックアップ一覧を取得
-		$data_list = $this->tsBackup->get_ts_backup_list($this->main->get_dbh(), null);
+		$data_list = $this->tsBackup->get_ts_backup_list();
 
 		$ret .= '<div style="overflow:hidden">'
 			. '<form id="form_table" method="post">'
 			. '<input type="hidden" name="selected_id" value="' . $this->main->options->_POST->selected_id . '"/>'
-			. '<div class="button_contents" style="float:right;">'
+			. '<div class="button_contents" style="float:left;">'
+			. '<ul>'
+			. '<li><h4>バックアップ一覧画面</h4></li>'
+			. '</ul>'
+			. '</div>'
+			. '<div class="button_contents" style="float:right">'
 			. '<ul>'
 			. '<li><input type="submit" id="restore_btn" name="restore" class="px2-btn px2-btn--primary" value="復元"/></li>'
+			. '</ul>'
 			. '</div>'
 			. '</div>';
 

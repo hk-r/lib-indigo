@@ -58,7 +58,8 @@ class ajax
                 if ( chdir( $master_real_path ) ) {
 
                     // コミットハッシュ値取得
-                    $command = 'git log --pretty=%h ' . $this->options->branch_name . ' -1';
+                    $command = 'git log --pretty=%h ' . define::GIT_REMOTE_NAME . '/' . $this->options->branch_name . ' -1';
+                     $this->put_ajax_log($command);
                     exec($command, $output, $return);
                     foreach ( (array)$output as $data ) {
                         $commit_hash = $data;

@@ -35,7 +35,7 @@ class pdoManager
 	 */
 	public function connect() {
 	
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ connect start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ connect start');
 
 		$dbh = null; // 初期化
 
@@ -115,7 +115,7 @@ class pdoManager
 	  		// die();
 		}
 			
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ connect end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ connect end');
 
 		return $dbh;
 

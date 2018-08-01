@@ -2,6 +2,8 @@
 
 namespace indigo;
 
+use indigo\db\tsReserve as tsReserve;
+
 class check
 {
 
@@ -236,10 +238,16 @@ class check
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_exist_reserve start');
 
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '□ 入力日時：' . $input_reserve);
+
 		$ret = true;
 
 		foreach ((array)$data_list as $array) {
-			if (($array[tsReserve::RESERVE_ENTITY_ID_SEQ] != $selected_id) && ($array[tsReserve::RESERVE_ENTITY_RESERVE] == $input_reserve)) {
+
+			$this->main->common()->put_process_log(__METHOD__, __LINE__, '□ 比較日時：' . $array[tsReserve::RESERVE_ENTITY_RESERVE_GMT]);
+
+			if (($array[tsReserve::RESERVE_ENTITY_ID_SEQ] != $selected_id) &&
+				($array[tsReserve::RESERVE_ENTITY_RESERVE_GMT] == $input_reserve)) {
 				$ret = false;
 				break;
 			}

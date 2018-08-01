@@ -2,6 +2,8 @@
 
 namespace indigo\db;
 
+use indigo\define as define;
+
 class tsOutput
 {
 
@@ -181,7 +183,7 @@ class tsOutput
 
 		// 現在時刻
 		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
-
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, $now);
 		// パラメータ作成
 		$params = array(
 			":" . self::TS_OUTPUT_RESERVE_ID		=> $dataArray[self::TS_OUTPUT_RESERVE_ID],

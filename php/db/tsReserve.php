@@ -144,12 +144,13 @@ class tsReserve
 
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_reserve start');
-
+		$this->main->common()->put_process_log('$selected_id：' . $selected_id);
 		$ret_array = array();
 
 		$conv_ret_array = array();
 
 		if (!$selected_id) {
+			$this->main->common()->put_process_log('公開予約IDが取得できませんでした。');
 			throw new \Exception('選択されたIDが取得できませんでした。 ');
 		} else {
 
@@ -158,7 +159,7 @@ class tsReserve
 			WHERE " . self::TS_RESERVE_ID_SEQ . " = " . $selected_id . ";";
 
 			// SELECT実行
-			$ret_array = array_shift($this->main->pdoMgr()->select($this->main->get_dbh(), $select_sql));
+			$ret_array = $this->main->pdoMgr()->selectOne($this->main->get_dbh(), $select_sql);
 
 			$conv_ret_array = $this->convert_ts_reserve_entity($ret_array);
 		}
@@ -254,14 +255,14 @@ class tsReserve
 
 
 		// 他ユーザで更新されていないか確認
-		$selected_ret = $this->get_selected_ts_reserve($this->main->get_dbh(), $selected_id);
+		$selected_ret = $this->get_selected_ts_reserve($selected_id);
 
 		$logstr = "[排他確認]データ取得時のバージョンNO：" . $options->_POST->ver_no . "\r\n";
-		$logstr .= "[排他確認]現時点のバージョンNO：" . $selected_ret[tsReserve::RESERVE_ENTITY_VER_NO] . "\r\n";
+		$logstr .= "[排他確認]現時点のバージョンNO：" . $selected_ret[self::RESERVE_ENTITY_VER_NO] . "\r\n";
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		if ($selected_ret &&
-			$selected_ret[tsReserve::RESERVE_ENTITY_VER_NO] != $options->_POST->ver_no) {
+			$selected_ret[self::RESERVE_ENTITY_VER_NO] != $options->_POST->ver_no) {
 
 			throw new \Exception('他のユーザにて公開予約が更新されております。 ');
 		}
@@ -310,19 +311,20 @@ class tsReserve
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ update_ts_reserve_status start');
 
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, $selected_id);
 		if (!$selected_id) {
 			throw new \Exception('更新対象の公開予約IDが取得できませんでした。 ');
 		}
 
 		// 他ユーザで更新されていないか確認
-		$selected_ret = $this->get_selected_ts_reserve($this->main->get_dbh(), $selected_id);
+		$selected_ret = $this->get_selected_ts_reserve($selected_id);
 
 		$logstr = "[排他確認]データ取得時のバージョンNO：" . $ver_no . "\r\n";
-		$logstr .= "[排他確認]現時点のバージョンNO：" . $selected_ret[tsReserve::RESERVE_ENTITY_VER_NO] . "\r\n";
+		$logstr .= "[排他確認]現時点のバージョンNO：" . $selected_ret[self::RESERVE_ENTITY_VER_NO] . "\r\n";
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		if ($selected_ret &&
-			$selected_ret[tsReserve::RESERVE_ENTITY_VER_NO] != $ver_no) {
+			$selected_ret[self::RESERVE_ENTITY_VER_NO] != $ver_no) {
 
 			throw new \Exception('他のユーザにて公開予約が更新されております。 ');
 		}

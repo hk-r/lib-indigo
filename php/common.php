@@ -51,8 +51,8 @@ class common
 	 */
 	public function command_execute($command, $captureStderr) {
 	
-		// $this->put_process_log(__METHOD__, __LINE__, '■ execute start');
-
+		$this->put_process_log(__METHOD__, __LINE__, "■command_execute start");
+		$this->put_process_log(__METHOD__, __LINE__, "　□command：" . $command);
 	    $output = array();
 	    $return = 0;
 
@@ -64,6 +64,8 @@ class common
 	    exec($command, $output, $return);
 
 		// $this->put_process_log(__METHOD__, __LINE__, '■ execute end');
+
+		$this->put_process_log(__METHOD__, __LINE__, "■command_execute end");
 
 	    return array('output' => $output, 'return' => $return);
 	}
@@ -269,15 +271,15 @@ class common
 		foreach ( (array)$server_list as $server ) {
 			
 			// 本番環境ディレクトリの絶対パスを取得。
-			$server_real_path[] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($server . "/"));
+			$server_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($server->real_path . "/"));
+			break; // 現時点では最初の1つのみ有効
 		}
 
-		$this->put_process_log(__METHOD__, __LINE__, '　□ server_real_path');
-		$this->debug_var_dump($server_real_path);
+		$this->put_process_log(__METHOD__, __LINE__, '　□ server_real_path：' . $server_real_path);
 
 		$this->put_process_log(__METHOD__, __LINE__, '■ get_server_real_path end');
 
-	    return json_encode($server_real_path);
+	    return $server_real_path;
 	}
 
 
@@ -293,8 +295,9 @@ class common
 		$logstr = "get_realpath_workdir() start";
 		$this->put_process_log(__METHOD__, __LINE__, $logstr);
 
-		// 本番環境ディレクトリの絶対パスを取得。
-		$realpath_array['realpath_server'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->server_real_path . "/"));
+		// 本番環境ディレクトリの絶対パスを取得。（配列1番目のサーバを設定）
+		$realpath_array['realpath_server'] = $this->get_server_real_path($options);
+		// $realpath_array['realpath_server'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->server_real_path . "/"));
 
 		// backupディレクトリの絶対パスを取得。
 		$realpath_array['realpath_backup'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->workdir_relativepath . define::PATH_BACKUP));
@@ -343,26 +346,16 @@ class common
 
 
 	/**
-	 * ※デバッグ関数（エラー調査用）
-	 *	 
+	 * response status code を取得する。
+	 *
+	 * `$px->set_status()` で登録した情報を取り出します。
+	 *
+	 * @return int ステータスコード (100〜599の間の数値)
 	 */
-	public function debug_echo($text) {
-	
-		echo strval($text);
-		echo "<br>";
+	public function put_process_log_block($text){
+		
+		$str = "\r\n" . $text . "\r\n";
 
-		return;
-	}
-
-	/**
-	 * ※デバッグ関数（エラー調査用）
-	 *	 
-	 */
-	public function debug_var_dump($text) {
-	
-		var_dump($text);
-		echo "<br>";
-
-		return;
+		return error_log( $str, 3, $this->main->process_log_path );
 	}
 }

@@ -7,12 +7,21 @@ class gitManager
 	public $main;
 
 	/**
+	 * gitURL分解パス
+	 */
+	public $protocol, $host, $path;
+
+	/**
 	 * コンストラクタ
 	 * @param $options = オプション
 	 */
 	public function __construct($main) {
 
 		$this->main = $main;
+
+		$this->protocol = parse_url($main->options->git->giturl, PHP_URL_SCHEME);
+		$this->host = parse_url($main->options->git->giturl, PHP_URL_HOST);
+		$this->path = parse_url($main->options->git->giturl, PHP_URL_PATH);
 	}
 
 	/**
@@ -46,7 +55,12 @@ class gitManager
 				if( strpos($value, '/HEAD') !== false ){
 					continue;
 				}
-				$output_array[] = trim($value);
+
+				// リモート名は非表示とする
+				$findme   = '/';
+				$pos = strpos($value, $findme);
+				$trimed = substr($value, $pos + 1);
+				$output_array[] = trim($trimed);
 			}
 
 			$result['branch_list'] = $output_array;
@@ -76,6 +90,8 @@ class gitManager
 
 		$current_dir = realpath('.');
 
+		set_time_limit(12*60*60);
+
 		// 公開日時ディレクトリの絶対パスを取得。
 		// すでに存在している場合は削除して再作成する。
 		$dir_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($path . $dirname));
@@ -87,19 +103,20 @@ class gitManager
 		// 作成ディレクトリに移動し、指定ブランチのGit情報をコピーする
 		//============================================================
 		if ( chdir($dir_real_path) ) {
-			
+
 			// 指定ブランチ
-			$branch_name = trim(str_replace("origin/", "", $options->_POST->branch_select_value));
+			// $branch_name = trim(str_replace("origin/", "", $options->_POST->branch_select_value));
+			$branch_name = trim($options->_POST->branch_select_value);
 
 			// git init
 			$command = 'git init';
 			$this->main->common()->command_execute($command, false);
 
 			// git urlのセット
-			$url = $options->git->protocol . "://" . urlencode($options->git->username) . ":" . urlencode($options->git->password) . "@" . $options->git->url;
+			$url = $this->protocol . "://" . urlencode($options->git->username) . ":" . urlencode($options->git->password) . "@" . $this->host . $this->path;
 			
 			// initしたリポジトリに名前を付ける
-			$command = 'git remote add origin ' . $url;
+			$command = 'git remote add ' . define::GIT_REMOTE_NAME .  ' ' . $url;
 			$ret = $this->main->common()->command_execute($command, false);
 			if ($ret['return']) {
 				// 戻り値が0以外の場合
@@ -108,7 +125,7 @@ class gitManager
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ コマンド実行結果1：' . $ret['return']);
 
 			// git fetch（リモートリポジトリの指定ブランチの情報をローカルブランチへ反映）
-			$command = 'git fetch origin' . ' ' . $branch_name;
+			$command = 'git fetch ' . define::GIT_REMOTE_NAME .  ' ' . $branch_name;
 			$ret = $this->main->common()->command_execute($command, false);
 			if ($ret['return']) {
 				// 戻り値が0以外の場合
@@ -116,7 +133,7 @@ class gitManager
 			}
 
 			// git pull（リモート取得ブランチを任意のローカルブランチにマージするコマンド）
-			$command = 'git pull origin' . ' ' . $branch_name;
+			$command = 'git pull ' . define::GIT_REMOTE_NAME .  ' ' . $branch_name;
 			$ret = $this->main->common()->command_execute($command, false);
 			if ($ret['return']) {
 				// 戻り値が0以外の場合
@@ -195,17 +212,17 @@ class gitManager
 					$this->main->common()->command_execute($command, false);
 
 					// git urlのセット
-					$url = $options->git->protocol . "://" . urlencode($options->git->username) . ":" . urlencode($options->git->password) . "@" . $options->git->url;
+					$url = $this->protocol . "://" . urlencode($options->git->username) . ":" . urlencode($options->git->password) . "@" . $this->host . $this->path;
 
-					$command = 'git remote add origin ' . $url;
+					$command = 'git remote add ' . define::GIT_REMOTE_NAME . ' ' . $url;
 					$this->main->common()->command_execute($command, false);
 
 					// git fetch
-					$command = 'git fetch origin';
+					$command = 'git fetch ' . define::GIT_REMOTE_NAME;
 					$this->main->common()->command_execute($command, false);
 
 					// git pull
-					$command = 'git pull origin master';
+					$command = 'git pull ' . define::GIT_REMOTE_NAME . ' master';
 					$this->main->common()->command_execute($command, false);
 
 				} else {

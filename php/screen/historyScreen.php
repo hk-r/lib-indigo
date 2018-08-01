@@ -2,6 +2,9 @@
 
 namespace indigo\screen;
 
+use indigo\db\tsOutput as tsOutput;
+use indigo\define as define;
+
 class historyScreen
 {
 	private $main;
@@ -22,7 +25,7 @@ class historyScreen
 
 		$this->main = $main;
 
-		$this->tsOutput = new \indigo\db\tsOutput($this->main);
+		$this->tsOutput = new tsOutput($this->main);
 	}
 	
 
@@ -40,11 +43,19 @@ class historyScreen
 		// 公開処理結果一覧を取得
 		$data_list = $this->tsOutput->get_ts_output_list(null);
 
+		$ret -
+
 		$ret .= '<div style="overflow:hidden">'
 			. '<form id="form_table" method="post">'
+			. '<div class="button_contents" style="float:left">'
+			. '<ul>'
+			. '<li><h4>履歴一覧画面</h4></li>'
+			. '</ul>'
+			. '</div>'
 			. '<div class="button_contents" style="float:right;">'
 			. '<ul>'
 			. '<li><input type="submit" id="log_btn" name="log" class="px2-btn px2-btn--primary" value="ログ"/></li>'
+			. '</ul>'
 			. '</div>'
 			. '</div>';
 

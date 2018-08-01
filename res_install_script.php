@@ -14,7 +14,7 @@ Argument error (argument exceeded).
 The specified path does not exist.
 <?php
 	} else {
-		$res_directory = "vendor/pickles2/lib-indigo/res/";
+		$res_directory = "vendor/pickles2/res/";
 		dir_copy($res_directory, $argv[1]);
 	}
 }

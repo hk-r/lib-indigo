@@ -2,6 +2,8 @@
 
 namespace indigo\db;
 
+use indigo\define as define;
+
 class tsBackup
 {
 
@@ -59,7 +61,7 @@ class tsBackup
 	 * @param $now = 現在時刻
 	 * @return データリスト
 	 */
-	public function get_ts_backup_list($dbh) {
+	public function get_ts_backup_list() {
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_ts_backup_list start');
 
@@ -85,7 +87,7 @@ class tsBackup
 				" ORDER BY TS_BACKUP." . self::TS_BACKUP_DATETIME . " DESC";
 
 		// SELECT実行
-		$ret_array = $this->main->pdoMgr()->select($dbh, $select_sql);
+		$ret_array = $this->main->pdoMgr()->select($this->main->get_dbh(), $select_sql);
 
 		foreach ((array)$ret_array as $array) {
 			$conv_ret_array[] = $this->convert_ts_backup_entity($array);
@@ -102,7 +104,7 @@ class tsBackup
 	 *
 	 * @return 選択行の情報
 	 */
-	public function get_selected_ts_backup($dbh, $selected_id) {
+	public function get_selected_ts_backup($selected_id) {
 
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup start');
@@ -120,7 +122,7 @@ class tsBackup
 
 		// SELECT実行
 		// $get_array = array_shift($this->main->pdoMgr()->select($dbh, $select_sql));
-		$ret_array = $this->main->pdoMgr()->selectOne($dbh, $select_sql);
+		$ret_array = $this->main->pdoMgr()->selectOne($this->main->get_dbh(), $select_sql);
 
 		// foreach ( (array) $get_array as $data) {
 			// $ret_array = array_shift($data);
@@ -137,7 +139,7 @@ class tsBackup
 	 *
 	 * @return 選択行の情報
 	 */
-	public function get_selected_ts_backup_by_output_id($dbh, $output_id) {
+	public function get_selected_ts_backup_by_output_id($output_id) {
 
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup_by_output_id start');
@@ -156,7 +158,7 @@ class tsBackup
 		WHERE " . self::TS_BACKUP_OUTPUT_ID . " = " . $output_id . ";";
 
 		// SELECT実行
-		$ret_array = $this->main->pdoMgr()->selectOne($dbh, $select_sql);
+		$ret_array = $this->main->pdoMgr()->selectOne($this->main->get_dbh(), $select_sql);
 
 		// foreach ( (array) $get_array as $data) {
 			// $ret_array = array_shift($data);
@@ -173,7 +175,7 @@ class tsBackup
 	 *
 	 * @return なし
 	 */
-	public function insert_ts_backup($dbh, $options, $backup_datetime, $output_id) {
+	public function insert_ts_backup($options, $backup_datetime, $output_id) {
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ insert_ts_backup start');
 
@@ -220,7 +222,7 @@ class tsBackup
 		);
 	
 		// INSERT実行
-		$this->main->pdoMgr()->execute($dbh, $insert_sql, $params);
+		$this->main->pdoMgr()->execute($this->main->get_dbh(), $insert_sql, $params);
 
 		// 登録したシーケンスIDを取得
 		$insert_id = $dbh->lastInsertId();

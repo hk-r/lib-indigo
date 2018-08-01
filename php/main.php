@@ -10,7 +10,7 @@ class main
 	 * オブジェクト
 	 * @access private
 	 */
-	private $gitMgr, $fs, $pdoMgr, $initScn, $historyScn, $backupScn, $common;
+	private $gitMgr, $fs, $pdoMgr, $initScn, $historyScn, $backupScn, $publish, $common;
 
 	/**
 	 * PDOインスタンス
@@ -54,6 +54,7 @@ class main
 
 		$this->gitMgr = new gitManager($this);
 		$this->pdoMgr = new pdoManager($this);
+		$this->publish = new publish($this);
 
 		$this->initScn = new \indigo\screen\initScreen($this);
 		$this->historyScn = new \indigo\screen\historyScreen($this);
@@ -77,6 +78,14 @@ class main
 		// 作業用ディレクトリの絶対パスを取得
 		$this->realpath_array = json_decode($this->common()->get_realpath_workdir($this->options, $this->realpath_array));
 
+		$logstr = "realpath_server：" . $this->realpath_array->realpath_server . "\r\n";
+		$logstr .= "realpath_backup：" . $this->realpath_array->realpath_backup . "\r\n";
+		$logstr .= "realpath_waiting：" . $this->realpath_array->realpath_waiting . "\r\n";
+		$logstr .= "realpath_running：" . $this->realpath_array->realpath_running . "\r\n";
+		$logstr .= "realpath_released：" . $this->realpath_array->realpath_released . "\r\n";
+		$logstr .= "realpath_log：" . $this->realpath_array->realpath_log;
+		$this->common()->put_process_log_block($logstr);
+
 		//============================================================
 		// タイムゾーンの設定
 		//============================================================
@@ -87,7 +96,7 @@ class main
 		date_default_timezone_set($time_zone);
 
 		$logstr = "設定タイムゾーン：" . $time_zone;
-		$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+		$this->common()->put_process_log_block($logstr);
 
 		//============================================================
 		// 作業用ディレクトリの作成（既にある場合は作成しない）
@@ -314,10 +323,10 @@ class main
 
 				$error_message .=  $result->message;
 
-				$logstr = "*****************************************" . "\r\n";
-				$logstr .= "************** ステータスエラー *************" . "\r\n";
-				$logstr .= "*****************************************" . "\r\n";
-				$this->common()->put_process_log_block(__METHOD__, __LINE__, $logstr);
+				$logstr = "**********************************************************************************" . "\r\n";
+				$logstr .= " ステータスエラー " . "\r\n";
+				$logstr .= "**********************************************************************************" . "\r\n";
+				$this->common()->put_process_log_block($logstr);
 
 				$logstr = $error_message . "\r\n";
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
@@ -403,7 +412,7 @@ class main
 	 */
     public function cron_run(){
 	
-		$this->common()->put_process_log('■ [cron] run start');
+		$this->common()->put_process_log(__METHOD__, __LINE__, '■ [cron] run start');
 
 		// 処理実行結果格納
 		$result = json_decode(json_encode(
@@ -462,7 +471,7 @@ class main
 			$logstr .= "予約公開処理異常終了（例外キャッチ）" . "\r\n";
 			$logstr .= "===============================================" . "\r\n";
 			$logstr .= "日時：" . $this->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT) . "\r\n";
-			$logstr .= $e.getMessage() . "\r\n";
+			$logstr .= $e->getMessage(). "\r\n";
 			$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 			return;
@@ -478,7 +487,7 @@ class main
 		$logstr .= "日時：" . $this->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT) . "\r\n";
 		$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
-		$this->common()->put_process_log('■ [cron] run end');
+		$this->common()->put_process_log(__METHOD__, __LINE__, '■ [cron] run end');
 
 		return;
     }
@@ -591,36 +600,23 @@ class main
 	// 	file_put_contents($path, $text, FILE_APPEND);
 	// }
 
-	/**
-	 * response status code を取得する。
-	 *
-	 * `$px->set_status()` で登録した情報を取り出します。
-	 *
-	 * @return int ステータスコード (100〜599の間の数値)
-	 */
-	public function put_process_log($text){
+	// /**
+	//  * response status code を取得する。
+	//  *
+	//  * `$px->set_status()` で登録した情報を取り出します。
+	//  *
+	//  * @return int ステータスコード (100〜599の間の数値)
+	//  */
+	// public function put_process_log($text){
 		
-		$datetime = $this->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
+	// 	$datetime = $this->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 
-		$str = "[" . $datetime . "]" . " " . $text . "\r\n";
+	// 	$str = "[" . $datetime . "]" . " " . $text . "\r\n";
 
-		// file_put_contents($path, $str, FILE_APPEND);
+	// 	// file_put_contents($path, $str, FILE_APPEND);
 
-		return error_log( $str, 3, $this->process_log_path );
-	}
+	// 	return error_log( $str, 3, $this->process_log_path );
+	// }
 
 
-	/**
-	 * response status code を取得する。
-	 *
-	 * `$px->set_status()` で登録した情報を取り出します。
-	 *
-	 * @return int ステータスコード (100〜599の間の数値)
-	 */
-	public function put_process_log_block($text){
-		
-		$str = "\r\n" . $text . "\r\n";
-
-		return error_log( $str, 3, $this->process_log_path );
-	}
 }
