@@ -2,6 +2,7 @@
 
 namespace indigo\screen;
 
+use indigo\db\tsBackup as tsBackup;
 use indigo\define as define;
 
 class backupScreen
@@ -29,8 +30,7 @@ class backupScreen
 		$this->main = $main;
 
 		$this->check = new \indigo\check($this->main);
-		$this->tsBackup = new \indigo\db\tsBackup($this->main);
-		$this->tsOutput = new \indigo\db\tsOutput($this->main);
+		$this->tsBackup = new tsBackup($this->main);
 		$this->publish = new \indigo\publish($this->main);
 	}
 
