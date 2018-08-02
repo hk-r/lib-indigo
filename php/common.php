@@ -341,6 +341,7 @@ class common
 
 		return error_log( $str, 3, $this->main->process_log_path );
 	}
+
 	/**
 	 * エラーログを出力する。
 	 *
@@ -351,13 +352,7 @@ class common
 		$datetime = $this->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 
 		$str = "[" . $datetime . "]" . " " .
-			   // "[pid:" . getmypid() . "]" . " " .
-			   // "[userid:" . $this->main->options->user_id . "]" . " " .
-			   // "[" . $method . "]" . " " .
-			   // "[line:" . $line . "]" . " " .
 			   $text . "\r\n";
-
-		// file_put_contents($path, $str, FILE_APPEND);
 
 		return error_log( $str, 3, $this->main->error_log_path );
 	}
@@ -373,4 +368,5 @@ class common
 
 		return error_log( $str, 3, $this->main->process_log_path );
 	}
+
 }

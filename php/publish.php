@@ -686,7 +686,10 @@ class publish
 		}
 
 		// rsyncコマンド実行時のログを格納
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, $this->realpath_copylog, implode(' ', $ret['output']));		
+		file_put_contents($this->realpath_copylog, $ret['output'], FILE_APPEND);
+
+		
+		// $this->main->common()->put_process_log(__METHOD__, __LINE__, $this->realpath_copylog, $ret['output']);		
 	}
 
 	/**
