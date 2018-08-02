@@ -1,19 +1,16 @@
 <?php
 
-namespace indigo;
+namespace indigo\screen;
+
+use indigo\db\tsOutput as tsOutput;
+use indigo\define as define;
 
 class historyScreen
 {
 	private $main;
 
 	private $tsOutput;
-	private $common;
 
-	/**
-	 * PDOインスタンス
-	 */
-	private $dbh;
-	
 
 	/**
 	 * コンストラクタ
@@ -23,8 +20,7 @@ class historyScreen
 
 		$this->main = $main;
 
-		$this->tsOutput = new tsOutput($this);
-		$this->common = new common($this);
+		$this->tsOutput = new tsOutput($this->main);
 	}
 	
 
@@ -35,18 +31,26 @@ class historyScreen
 	 */
 	public function disp_history_screen() {
 		
-		$this->common->debug_echo('■ disp_history_screen start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_history_screen start');
 
 		$ret = "";
 
 		// 公開処理結果一覧を取得
-		$data_list = $this->tsOutput->get_ts_output_list($this->main->dbh, null);
+		$data_list = $this->tsOutput->get_ts_output_list(null);
+
+		$ret -
 
 		$ret .= '<div style="overflow:hidden">'
 			. '<form id="form_table" method="post">'
+			. '<div class="button_contents" style="float:left">'
+			. '<ul>'
+			. '<li><h4>履歴一覧画面</h4></li>'
+			. '</ul>'
+			. '</div>'
 			. '<div class="button_contents" style="float:right;">'
 			. '<ul>'
 			. '<li><input type="submit" id="log_btn" name="log" class="px2-btn px2-btn--primary" value="ログ"/></li>'
+			. '</ul>'
 			. '</div>'
 			. '</div>';
 
@@ -74,7 +78,7 @@ class historyScreen
 			$ret .= '<tr>'
 				. '<td class="p-center">
 				  <input type="radio" name="target" value="' . $array[tsOutput::OUTPUT_ENTITY_ID_SEQ] . '"/></td>'
-				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_STATUS] . '</td>'
+				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_STATUS_DISP] . '</td>'
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_PUBLISH_TYPE] . '</td>'
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_RESERVE_DISP] . '</td>'
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_COMMIT_HASH] . '</td>'
@@ -98,7 +102,7 @@ class historyScreen
 			. '</form>'
 			. '</div>';
 		
-		$this->common->debug_echo('■ disp_history_screen end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_history_screen end');
 
 		return $ret;
 	}
@@ -111,7 +115,7 @@ class historyScreen
 	 */
 	public function do_disp_log_dialog() {
 		
-		$this->common->debug_echo('■ do_disp_log_dialog start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_disp_log_dialog start');
 
 		$result = array('status' => true,
 						'message' => '',
@@ -123,7 +127,7 @@ class historyScreen
 			$selected_id =  $this->main->options->_POST->selected_id;
 
 			// 公開処理結果情報の取得
-			$selected_ret = $this->tsOutput->get_selected_ts_output($this->main->dbh, $selected_id);
+			$selected_ret = $this->tsOutput->get_selected_ts_output($selected_id);
 			// ダイアログHTMLの作成
 			$result['dialog_disp'] = $this->create_log_dialog_html($selected_ret);
 
@@ -140,7 +144,7 @@ class historyScreen
 
 		$result['status'] = true;
 
-		$this->common->debug_echo('■ do_disp_log_dialog end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_disp_log_dialog end');
 
 		return json_encode($result);
 	}
@@ -152,7 +156,7 @@ class historyScreen
 	 */
 	private function create_log_dialog_html($selected_ret) {
 		
-		$this->common->debug_echo('■ create_log_dialog_html start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ create_log_dialog_html start');
 
 		$ret = '<div class="dialog" id="modal_dialog">'
 			  . '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
@@ -164,28 +168,33 @@ class historyScreen
 			// 公開ディレクトリ名の取得
 			$start_datetime_gmt = $selected_ret[tsOutput::OUTPUT_ENTITY_START_GMT];
 			// 公開予約ディレクトリ名の取得
-			$dirname = $this->common->format_gmt_datetime($start_datetime_gmt, define::DATETIME_FORMAT_SAVE);
+			$dirname = $this->main->common()->format_gmt_datetime($start_datetime_gmt, define::DATETIME_FORMAT_SAVE);
 
 
 			// logディレクトリの絶対パスを取得。
 			$realpath_log = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->realpath_array->realpath_log . $dirname . "/"));
 		
-		$this->common->debug_echo('■ $realpath_log:' . $realpath_log);
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ $realpath_log:' . $realpath_log);
 
 			// ファイルを変数に格納
 			$filename = $realpath_log . 'pub_copy_' . $dirname . '.log';
 
-$this->common->debug_echo('■ $filename:' . $filename);
-			// ファイルを読み込み変数に格納
-			$content = file_get_contents($filename);
+			$content = "";
+			if (file_exists($filename)) {
+				$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ $filename:' . $filename);
+
+				// ファイルを読み込み変数に格納
+				$content = file_get_contents($filename);
+			}
 
 
-		$ret .= '<p>公開開始日時：' . $selected_ret[tsOutput::OUTPUT_ENTITY_START_DISP] . '</p>'
+		$ret .= '<p>User ID：' . $selected_ret[tsOutput::OUTPUT_ENTITY_INSERT_USER_ID] . '</p>'
+			  . '<p>公開開始日時：' . $selected_ret[tsOutput::OUTPUT_ENTITY_START_DISP] . '</p>'
 			  . '<p>公開終了日時：' . $selected_ret[tsOutput::OUTPUT_ENTITY_END_DISP] . '</p>'
-			  . '<p>  User ID  ：' . $selected_ret[tsOutput::OUTPUT_ENTITY_INSERT_USER_ID] . '</p>'
-			  . '<p>-----------------------------------------------------</p>'
-			  . '<p>' . nl2br($content) .'</p>'
-			  . '<p>-----------------------------------------------------</p>';
+			  // . '<p>-----------------------------------------------------</p>'
+			  . '<p>公開同期ログ：</p>'
+			  . '<p>' . nl2br($content) .'</p>';
+			  // . '<p>-----------------------------------------------------</p>';
 
 		$ret .=  '<div class="button_contents_box">'
 			  . '<div class="button_contents">'
@@ -204,7 +213,7 @@ $this->common->debug_echo('■ $filename:' . $filename);
 			  . '</div>'
 			  . '</div></div>';
 		
-		$this->common->debug_echo('■ create_log_dialog_html end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ create_log_dialog_html end');
 
 		return $ret;
 	}

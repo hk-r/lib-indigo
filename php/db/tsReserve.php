@@ -1,14 +1,14 @@
 <?php
 
-namespace indigo;
+namespace indigo\db;
+
+use indigo\define as define;
 
 class tsReserve
 {
 
 	private $main;
 
-	private $pdoMgr;
-	private $common;
 
 
 	// 日付フォーマット（Y-m-d）
@@ -31,7 +31,8 @@ class tsReserve
 	const TS_RESERVE_INSERT_USER_ID 	= 'insert_user_id';		// 登録ユーザID
 	const TS_RESERVE_UPDATE_DATETIME 	= 'update_datetime';	// 更新日時
 	const TS_RESERVE_UPDATE_USER_ID 	= 'update_user_id';		// 更新ユーザID
-	
+	const TS_RESERVE_VER_NO 			= 'ver_no';				// バージョンNO
+
 	/**
 	 * 公開予約エンティティのカラム定義
 	 */
@@ -48,6 +49,7 @@ class tsReserve
 	const RESERVE_ENTITY_INSERT_USER_ID 	= 'insert_user_id';		// 登録ユーザID
 	const RESERVE_ENTITY_UPDATE_DATETIME 	= 'update_datetime';	// 更新日時
 	const RESERVE_ENTITY_UPDATE_USER_ID		= 'update_user_id';		// 更新ユーザID
+	const RESERVE_ENTITY_VER_NO				= 'ver_no';				// バージョンNO
 
 
 	/**
@@ -58,22 +60,20 @@ class tsReserve
 	public function __construct ($main){
 
 		$this->main = $main;
-		$this->pdoMgr = new pdoManager($this);
-		$this->common = new common($this);
 	}
 
 	/**
 	 * 公開予約一覧テーブルからリストを取得する
 	 *
-	 * @param $dbh = dbオブジェクト
+	 * @param $this->main->get_dbh() = dbオブジェクト
 	 * @return データリスト
 	 */
-	public function get_ts_reserve_list($dbh) {
+	public function get_ts_reserve_list() {
 
-		$this->common->debug_echo('■ get_ts_reserve_list start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_ts_reserve_list start');
 
-		$ret_array = array();
-		$conv_ret_array = array();
+		$ret_array = null;
+		$conv_ret_array = null;
 
 		// 公開予約テーブルから未処理、未削除データを取得
 		$select_sql = "
@@ -83,13 +83,13 @@ class tsReserve
 				ORDER BY " . self::TS_RESERVE_RESERVE . " ASC;";
 
 		// SELECT実行
-		$ret_array = $this->pdoMgr->select($dbh, $select_sql);
+		$ret_array = $this->main->pdoMgr()->select($this->main->get_dbh(), $select_sql);
 
 		foreach ((array)$ret_array as $array) {
 			$conv_ret_array[] = $this->convert_ts_reserve_entity($array);
 		}
 		
-		$this->common->debug_echo('■ get_ts_reserve_list end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_ts_reserve_list end');
 
 		return $conv_ret_array;
 	}
@@ -100,9 +100,9 @@ class tsReserve
 	 * @param $now = 現在時刻
 	 * @return データリスト
 	 */
-	public function get_ts_reserve_publish_list($dbh, $now) {
+	public function get_ts_reserve_publish_list($now) {
 
-		$this->common->debug_echo('■ get_ts_reserve_publish_list start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_ts_reserve_publish_list start');
 
 		$ret_array = array();
 
@@ -123,13 +123,13 @@ class tsReserve
 				" ORDER BY " . self::TS_RESERVE_RESERVE . " DESC;";
 
 		// SELECT実行
-		$ret_array = $this->pdoMgr->select($dbh, $select_sql);
+		$ret_array = $this->main->pdoMgr()->select($this->main->get_dbh(), $select_sql);
 
 		foreach ((array)$ret_array as $array) {
 			$conv_ret_array[] = $this->convert_ts_reserve_entity($array);
 		}
 		
-		$this->common->debug_echo('■ get_ts_reserve_publish_list end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_ts_reserve_publish_list end');
 
 		return $conv_ret_array;
 	}
@@ -140,17 +140,18 @@ class tsReserve
 	 *
 	 * @return 選択行の情報
 	 */
-	public function get_selected_ts_reserve($dbh, $selected_id) {
+	public function get_selected_ts_reserve($selected_id) {
 
 
-		$this->common->debug_echo('■ get_selected_ts_reserve start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_reserve start');
 
-		$ret_array = array();
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '□selected_id：' . $selected_id);
+		$ret_array = null;
 
 		$conv_ret_array = array();
 
 		if (!$selected_id) {
-			throw new \Exception('選択されたIDが取得できませんでした。 ');
+			throw new \Exception('対象の公開予約IDが取得できませんでした。 ');
 		} else {
 
 			// SELECT文作成
@@ -158,12 +159,12 @@ class tsReserve
 			WHERE " . self::TS_RESERVE_ID_SEQ . " = " . $selected_id . ";";
 
 			// SELECT実行
-			$ret_array = array_shift($this->pdoMgr->select($dbh, $select_sql));
+			$ret_array = $this->main->pdoMgr()->selectOne($this->main->get_dbh(), $select_sql);
 
 			$conv_ret_array = $this->convert_ts_reserve_entity($ret_array);
 		}
 		
-		$this->common->debug_echo('■ get_selected_ts_reserve end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_reserve end');
 
 		return $conv_ret_array;
 	}
@@ -173,9 +174,9 @@ class tsReserve
 	 *
 	 * @return なし
 	 */
-	public function insert_ts_reserve($dbh, $options) {
+	public function insert_ts_reserve($options) {
 
-		$this->common->debug_echo('■ insert_ts_reserve start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ insert_ts_reserve start');
 
 		// INSERT文作成
 		$insert_sql = "INSERT INTO TS_RESERVE ("
@@ -188,7 +189,8 @@ class tsReserve
 		. self::TS_RESERVE_INSERT_DATETIME . ","
 		. self::TS_RESERVE_INSERT_USER_ID . ","
 		. self::TS_RESERVE_UPDATE_DATETIME . ","
-		. self::TS_RESERVE_UPDATE_USER_ID
+		. self::TS_RESERVE_UPDATE_USER_ID . ","
+		. self::TS_RESERVE_VER_NO
 
 		. ") VALUES (" .
 
@@ -201,15 +203,16 @@ class tsReserve
 		 ":" . self::TS_RESERVE_INSERT_DATETIME . "," .
 		 ":" . self::TS_RESERVE_INSERT_USER_ID . "," .
 		 ":" . self::TS_RESERVE_UPDATE_DATETIME . "," .
-		 ":" . self::TS_RESERVE_UPDATE_USER_ID
+		 ":" . self::TS_RESERVE_UPDATE_USER_ID . "," .
+		 ":" . self::TS_RESERVE_VER_NO
 
 		. ");";
 
-		$this->common->debug_echo('　□ insert_sql');
-		$this->common->debug_echo($insert_sql);
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ insert_sql');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, $insert_sql);
 
 		// 現在時刻
-		$now = $this->common->get_current_datetime_of_gmt();
+		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 		
 		// パラメータ作成
 		$params = array(
@@ -222,13 +225,15 @@ class tsReserve
 			":" . self::TS_RESERVE_INSERT_DATETIME 	=> $now,
 			":" . self::TS_RESERVE_INSERT_USER_ID 	=> $options->user_id,
 			":" . self::TS_RESERVE_UPDATE_DATETIME 	=> null,
-			":" . self::TS_RESERVE_UPDATE_USER_ID 	=> null
+			":" . self::TS_RESERVE_UPDATE_USER_ID 	=> null,
+			":" . self::TS_RESERVE_VER_NO		 	=> 0
+
 		);
 
 		// INSERT実行
-		$stmt = $this->pdoMgr->execute($dbh, $insert_sql, $params);
+		$stmt = $this->main->pdoMgr()->execute($this->main->get_dbh(), $insert_sql, $params);
 
-		$this->common->debug_echo('■ insert_ts_reserve end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ insert_ts_reserve end');
 
 		return;
 	}
@@ -238,13 +243,30 @@ class tsReserve
 	 *
 	 * @return なし
 	 */
-	public function update_ts_reserve($dbh, $options, $selected_id) {
+	public function update_ts_reserve($options, $selected_id) {
 
-		$this->common->debug_echo('■ update_ts_reserve start');
+		$logstr = "公開予約テーブル更新処理START" . "\r\n";
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		if (!$selected_id) {
 			throw new \Exception('更新対象の公開予約IDが取得できませんでした。 ');
 		}
+
+
+
+		// 他ユーザで更新されていないか確認
+		$selected_ret = $this->get_selected_ts_reserve($selected_id);
+
+		$logstr = "[排他確認]データ取得時のバージョンNO：" . $options->_POST->ver_no . "\r\n";
+		$logstr .= "[排他確認]現時点のバージョンNO：" . $selected_ret[self::RESERVE_ENTITY_VER_NO] . "\r\n";
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+
+		if ($selected_ret &&
+			$selected_ret[self::RESERVE_ENTITY_VER_NO] != $options->_POST->ver_no) {
+
+			throw new \Exception('他のユーザにて公開予約が更新されております。 ');
+		}
+
 
 		// UPDATE文作成
 		$update_sql = "UPDATE TS_RESERVE SET " .
@@ -253,11 +275,12 @@ class tsReserve
 			self::TS_RESERVE_COMMIT_HASH 	 . "= :" . self::TS_RESERVE_COMMIT_HASH . "," .
 			self::TS_RESERVE_COMMENT 		 . "= :" . self::TS_RESERVE_COMMENT . "," .
 			self::TS_RESERVE_UPDATE_DATETIME . "= :" . self::TS_RESERVE_UPDATE_DATETIME . "," .
-			self::TS_RESERVE_UPDATE_USER_ID  . "= :" . self::TS_RESERVE_UPDATE_USER_ID .
+			self::TS_RESERVE_UPDATE_USER_ID	 . "= :" . self::TS_RESERVE_UPDATE_USER_ID . "," .
+			self::TS_RESERVE_VER_NO 		 . "= :" . self::TS_RESERVE_VER_NO .
 			" WHERE " . self::TS_RESERVE_ID_SEQ . "= :" . self::TS_RESERVE_ID_SEQ . ";";
 
 		// 現在時刻
-		$now = $this->common->get_current_datetime_of_gmt();
+		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 
 		// パラメータ作成
 		$params = array(
@@ -267,13 +290,16 @@ class tsReserve
 			":" . self::TS_RESERVE_COMMENT	 		=> $options->_POST->comment,
 			":" . self::TS_RESERVE_UPDATE_DATETIME 	=> $now,
 			":" . self::TS_RESERVE_UPDATE_USER_ID	=> $options->user_id,
-			":" . self::TS_RESERVE_ID_SEQ			=> $selected_id
+			":" . self::TS_RESERVE_ID_SEQ			=> $selected_id,
+			":" . self::TS_RESERVE_VER_NO			=> $options->_POST->ver_no + 1
 		);
 
 		// UPDATE実行
-		$this->pdoMgr->execute($dbh, $update_sql, $params);
+		$this->main->pdoMgr()->execute($this->main->get_dbh(), $update_sql, $params);
 
-		$this->common->debug_echo('■ update_ts_reserve end');
+		$logstr = "公開予約テーブル更新処理END" . "\r\n";
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+
 	}
 
 	/**
@@ -281,13 +307,28 @@ class tsReserve
 	 *
 	 * @return なし
 	 */
-	public function update_ts_reserve_status($dbh, $selected_id) {
+	public function update_ts_reserve_status($selected_id, $ver_no) {
 
-		$this->common->debug_echo('■ update_ts_reserve_status start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ update_ts_reserve_status start');
 
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, $selected_id);
 		if (!$selected_id) {
 			throw new \Exception('更新対象の公開予約IDが取得できませんでした。 ');
 		}
+
+		// 他ユーザで更新されていないか確認
+		$selected_ret = $this->get_selected_ts_reserve($selected_id);
+
+		$logstr = "[排他確認]データ取得時のバージョンNO：" . $ver_no . "\r\n";
+		$logstr .= "[排他確認]現時点のバージョンNO：" . $selected_ret[self::RESERVE_ENTITY_VER_NO] . "\r\n";
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+
+		if ($selected_ret &&
+			$selected_ret[self::RESERVE_ENTITY_VER_NO] != $ver_no) {
+
+			throw new \Exception('他のユーザにて公開予約が更新されております。 ');
+		}
+
 
 		// UPDATE文作成
 		$update_sql = "UPDATE TS_RESERVE SET " .
@@ -301,9 +342,9 @@ class tsReserve
 		);
 
 		// UPDATE実行
-		$this->pdoMgr->execute($dbh, $update_sql, $params);
+		$this->main->pdoMgr()->execute($this->main->get_dbh(), $update_sql, $params);
 
-		$this->common->debug_echo('■ update_ts_reserve_status end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ update_ts_reserve_status end');
 	}
 
 	/**
@@ -311,9 +352,9 @@ class tsReserve
 	 *
 	 * @return なし
 	 */
-	public function delete_reserve_table($dbh, $options, $selected_id) {
+	public function delete_reserve_table($options, $selected_id) {
 
-		$this->common->debug_echo('■ delete_reserve_table start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ delete_reserve_table start');
 
 		if (!$selected_id) {
 			throw new \Exception('選択情報のIDが取得できませんでした。 ');
@@ -328,7 +369,7 @@ class tsReserve
 
 		// 現在時刻
 		// $now = date(self::DATETIME_FORMAT);
-		$now = $this->common->get_current_datetime_of_gmt();
+		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 
 		// パラメータ作成
 		$params = array(
@@ -339,9 +380,9 @@ class tsReserve
 		);
 
 		// UPDATE実行
-		$this->pdoMgr->execute($dbh, $update_sql, $params);
+		$this->main->pdoMgr()->execute($this->main->get_dbh(), $update_sql, $params);
 
-		$this->common->debug_echo('■ delete_reserve_table end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ delete_reserve_table end');
 	}
 
 	/**
@@ -352,7 +393,7 @@ class tsReserve
 	 */
 	private function convert_ts_reserve_entity($array) {
 	
-		// $this->common->debug_echo('■ convert_ts_reserve_entity start');
+		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ convert_ts_reserve_entity start');
 
 		$entity = array();
 
@@ -361,11 +402,11 @@ class tsReserve
 		// 公開予約日時（GMT日時）
 		$entity[self::RESERVE_ENTITY_RESERVE_GMT] 	= $array[self::TS_RESERVE_RESERVE];
 		// 公開予約日時（タイムゾーン日時）
-		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_RESERVE_RESERVE]);
+		$tz_datetime = $this->main->common()->convert_to_timezone_datetime($array[self::TS_RESERVE_RESERVE]);
 		$entity[self::RESERVE_ENTITY_RESERVE] = $tz_datetime;
-		$entity[self::RESERVE_ENTITY_RESERVE_DISP] = $this->common->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
-		$entity[self::RESERVE_ENTITY_RESERVE_DATE] = $this->common->format_datetime($tz_datetime, self::DATE_FORMAT_YMD);
-		$entity[self::RESERVE_ENTITY_RESERVE_TIME] = $this->common->format_datetime($tz_datetime, self::TIME_FORMAT_HI);
+		$entity[self::RESERVE_ENTITY_RESERVE_DISP] = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
+		$entity[self::RESERVE_ENTITY_RESERVE_DATE] = $this->main->common()->format_datetime($tz_datetime, self::DATE_FORMAT_YMD);
+		$entity[self::RESERVE_ENTITY_RESERVE_TIME] = $this->main->common()->format_datetime($tz_datetime, self::TIME_FORMAT_HI);
 		// ブランチ名
 		$entity[self::RESERVE_ENTITY_BRANCH] = $array[self::TS_RESERVE_BRANCH];
 		// コミットハッシュ値
@@ -375,15 +416,17 @@ class tsReserve
 		// 登録ユーザID
 		$entity[self::RESERVE_ENTITY_INSERT_USER_ID] = $array[self::TS_RESERVE_INSERT_USER_ID];
 		// 登録日時
-		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_RESERVE_INSERT_DATETIME]);
+		$tz_datetime = $this->main->common()->convert_to_timezone_datetime($array[self::TS_RESERVE_INSERT_DATETIME]);
 		$entity[self::RESERVE_ENTITY_INSERT_DATETIME] = $tz_datetime;
 		// 更新ユーザID
 		$entity[self::RESERVE_ENTITY_UPDATE_USER_ID] = $array[self::TS_RESERVE_UPDATE_USER_ID];
 		// 更新日時
-		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::TS_RESERVE_UPDATE_DATETIME]);
+		$tz_datetime = $this->main->common()->convert_to_timezone_datetime($array[self::TS_RESERVE_UPDATE_DATETIME]);
 		$entity[self::RESERVE_ENTITY_UPDATE_DATETIME] = $tz_datetime;
+		// バージョンNO
+		$entity[self::RESERVE_ENTITY_VER_NO] 	= $array[self::TS_RESERVE_VER_NO];
 
-		// $this->common->debug_echo('■ convert_ts_reserve_entity end');
+		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ convert_ts_reserve_entity end');
 
 	    return $entity;
 	}

@@ -2,11 +2,12 @@
 
 namespace indigo;
 
+use indigo\db\tsReserve as tsReserve;
+
 class check
 {
 
 	private $main;
-	private $common;
 
 	/**
 	 * Constructor
@@ -16,7 +17,6 @@ class check
 	public function __construct ($main){
 
 		$this->main = $main;
-		$this->common = new common($this);
 	}
 
 	/**
@@ -30,10 +30,14 @@ class check
 	 */
 	public function is_null_branch($branch_select_value) {
 
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ is_null_branch start');
+
 		$ret = true;
 		if (!$branch_select_value) {
 			$ret = false;
 		}
+
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ is_null_branch end');
 
 		return $ret;
 	}
@@ -49,10 +53,14 @@ class check
 	 */
 	public function is_null_commit_hash($commit_hash) {
 
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ is_null_commit_hash start');
+
 		$ret = true;
 		if (!$commit_hash) {
 			$ret = false;
 		}
+
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ is_null_commit_hash end');
 
 		return $ret;
 	}
@@ -68,10 +76,14 @@ class check
 	 */
 	public function is_null_reserve_date($reserve_date) {
 
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ is_null_reserve_date start');
+
 		$ret = true;
 		if (!$reserve_date) {
 			$ret = false;
 		}
+
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ is_null_reserve_date end');
 
 		return $ret;
 	}
@@ -87,10 +99,14 @@ class check
 	 */
 	public function is_null_reserve_time($reserve_time) {
 
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ is_null_reserve_time start');
+
 		$ret = true;
 		if (!$reserve_time) {
 			$ret = false;
 		}
+
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ is_null_reserve_time end');
 
 		return $ret;
 	}
@@ -106,6 +122,8 @@ class check
 	 */
 	public function check_reserve_max_record($data_list) {
 
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_reserve_max_record start');
+
 		$ret = true;
 
 		// TODO:定数化
@@ -114,6 +132,8 @@ class check
 		if ($max <= count($data_list)) {
 			$ret = false;
 		}
+
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_reserve_max_record end');
 
 		return $ret;
 	}
@@ -129,6 +149,8 @@ class check
 	 */
 	public function check_date($reserve_date) {
 
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_date start');
+
 		$ret = true;
 
 		// 日付の妥当性チェック
@@ -137,6 +159,8 @@ class check
 		if (!checkdate(intval($m), intval($d), intval($Y))) {
 			$ret = false;
 		}	
+
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_date end');
 
 		return $ret;
 	}
@@ -152,14 +176,18 @@ class check
 	 */
 	public function check_future_date($datetime) {
 
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_future_date start');
+
 		$ret = true;
 
 		// GMTの現在日時
-		$now = $this->common->get_current_datetime_of_gmt();
+		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 
 		if (strtotime($now) > strtotime($datetime)) {
 			$ret = false;
 		}
+
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_future_date end');
 
 		return $ret;
 	}
@@ -178,6 +206,8 @@ class check
 	 */
 	public function check_exist_branch($data_list, $selected_branch, $selected_id) {
 
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_exist_branch start');
+
 		$ret = true;
 
 		foreach ((array)$data_list as $array) {
@@ -187,6 +217,8 @@ class check
 				break;
 			}
 		}
+
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_exist_branch end');
 
 		return $ret;
 	}
@@ -204,14 +236,24 @@ class check
 	 */
 	public function check_exist_reserve($data_list, $input_reserve, $selected_id) {
 
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_exist_reserve start');
+
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '□ 入力日時：' . $input_reserve);
+
 		$ret = true;
 
 		foreach ((array)$data_list as $array) {
-			if (($array[tsReserve::RESERVE_ENTITY_ID_SEQ] != $selected_id) && ($array[tsReserve::RESERVE_ENTITY_RESERVE] == $input_reserve)) {
+
+			$this->main->common()->put_process_log(__METHOD__, __LINE__, '□ 比較日時：' . $array[tsReserve::RESERVE_ENTITY_RESERVE_GMT]);
+
+			if (($array[tsReserve::RESERVE_ENTITY_ID_SEQ] != $selected_id) &&
+				($array[tsReserve::RESERVE_ENTITY_RESERVE_GMT] == $input_reserve)) {
 				$ret = false;
 				break;
 			}
 		}		
+
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_exist_reserve end');
 
 		return $ret;
 	}

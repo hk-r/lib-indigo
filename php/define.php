@@ -69,4 +69,9 @@ class define
 	// 公開予約ディレクトリの付与文字列
 	const DIR_NAME_RESERVE = '_reserve';
 
+	// gitリモート名
+	const GIT_REMOTE_NAME = 'origin';
+
+	// gitリモート名
+	const LIMIT_LIST_RECORD = 1000;
 }

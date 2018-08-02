@@ -1,16 +1,15 @@
 <?php
 
-namespace indigo;
+namespace indigo\db;
+
+use indigo\define as define;
 
 class tsBackup
 {
 
 	private $main;
 
-	private $pdoMgr;
-	private $common;
-
-
+	
 	/**
 	 * バックアップテーブルのカラム定義
 	 */
@@ -54,8 +53,6 @@ class tsBackup
 	public function __construct ($main){
 
 		$this->main = $main;
-		$this->pdoMgr = new pdoManager($this);
-		$this->common = new common($this);
 	}
 
 	/**
@@ -64,9 +61,9 @@ class tsBackup
 	 * @param $now = 現在時刻
 	 * @return データリスト
 	 */
-	public function get_ts_backup_list($dbh) {
+	public function get_ts_backup_list() {
 
-		$this->common->debug_echo('■ get_ts_backup_list start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_ts_backup_list start');
 
 		$ret_array = null;
 		$conv_ret_array = null;
@@ -87,18 +84,17 @@ class tsBackup
 				LEFT OUTER JOIN TS_OUTPUT
 					ON TS_BACKUP." 	. self::TS_BACKUP_OUTPUT_ID . " = TS_OUTPUT." . tsOutput::TS_OUTPUT_ID_SEQ .
 				" WHERE TS_BACKUP." . self::TS_BACKUP_GEN_DELETE_FLG . " = '0' " .
-				" ORDER BY TS_BACKUP." . self::TS_BACKUP_DATETIME . " DESC";
+				" ORDER BY TS_BACKUP." . self::TS_BACKUP_DATETIME . " DESC 
+				LIMIT " . define::LIMIT_LIST_RECORD;
 
 		// SELECT実行
-		$ret_array = $this->pdoMgr->select($dbh, $select_sql);
-
-		$this->common->debug_var_dump($ret_array);
+		$ret_array = $this->main->pdoMgr()->select($this->main->get_dbh(), $select_sql);
 
 		foreach ((array)$ret_array as $array) {
 			$conv_ret_array[] = $this->convert_ts_backup_entity($array);
 		}
 	
-		$this->common->debug_echo('■ get_ts_backup_list end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_ts_backup_list end');
 
 		return $conv_ret_array;
 	}
@@ -109,10 +105,10 @@ class tsBackup
 	 *
 	 * @return 選択行の情報
 	 */
-	public function get_selected_ts_backup($dbh, $selected_id) {
+	public function get_selected_ts_backup($selected_id) {
 
 
-		$this->common->debug_echo('■ get_selected_ts_backup start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup start');
 
 		$ret_array = null;
 		$conv_ret_array = null;
@@ -126,14 +122,15 @@ class tsBackup
 		WHERE " . self::TS_BACKUP_ID_SEQ . " = " . $selected_id . ";";
 
 		// SELECT実行
-		$get_array = array_shift($this->pdoMgr->select($dbh, $select_sql));
+		// $get_array = array_shift($this->main->pdoMgr()->select($dbh, $select_sql));
+		$ret_array = $this->main->pdoMgr()->selectOne($this->main->get_dbh(), $select_sql);
 
-		foreach ( (array) $get_array as $data) {
-			$ret_array = array_shift($data);
+		// foreach ( (array) $get_array as $data) {
+			// $ret_array = array_shift($data);
 			$conv_ret_array = $this->convert_ts_backup_entity($ret_array);
-		}
+		// }
 
-		$this->common->debug_echo('■ get_selected_ts_backup end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup end');
 
 		return $conv_ret_array;
 	}
@@ -143,12 +140,12 @@ class tsBackup
 	 *
 	 * @return 選択行の情報
 	 */
-	public function get_selected_ts_backup_by_output_id($dbh, $output_id) {
+	public function get_selected_ts_backup_by_output_id($output_id) {
 
 
-		$this->common->debug_echo('■ get_selected_ts_backup_by_output_id start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup_by_output_id start');
 
-		$this->common->debug_echo('　□ output_id：' . $output_id);
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ output_id：' . $output_id);
 
 		$ret_array = null;
 		$conv_ret_array = null;
@@ -162,16 +159,14 @@ class tsBackup
 		WHERE " . self::TS_BACKUP_OUTPUT_ID . " = " . $output_id . ";";
 
 		// SELECT実行
-		$get_array = array_shift($this->pdoMgr->select($dbh, $select_sql));
+		$ret_array = $this->main->pdoMgr()->selectOne($this->main->get_dbh(), $select_sql);
 
-		foreach ( (array) $get_array as $data) {
-			$ret_array = array_shift($data);
+		// foreach ( (array) $get_array as $data) {
+			// $ret_array = array_shift($data);
 			$conv_ret_array = $this->convert_ts_backup_entity($ret_array);
-		}
+		// }
 
-		$this->common->debug_var_dump('　□conv_ret_array：' . $conv_ret_array);
-
-		$this->common->debug_echo('■ get_selected_ts_backup_by_output_id end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup_by_output_id end');
 
 		return $conv_ret_array;
 	}
@@ -181,9 +176,9 @@ class tsBackup
 	 *
 	 * @return なし
 	 */
-	public function insert_ts_backup($dbh, $options, $backup_datetime, $output_id) {
+	public function insert_ts_backup($options, $backup_datetime, $output_id) {
 
-		$this->common->debug_echo('■ insert_ts_backup start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ insert_ts_backup start');
 
 		// INSERT文作成
 		$insert_sql = "INSERT INTO TS_BACKUP ("
@@ -209,11 +204,11 @@ class tsBackup
 
 		. ");";
 
-		$this->common->debug_echo('　□ insert_sql');
-		$this->common->debug_echo($insert_sql);
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ insert_sql');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, $insert_sql);
 
 		// 現在時刻
-		$now = $this->common->get_current_datetime_of_gmt();
+		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 		
 		// パラメータ作成
 		$params = array(
@@ -228,14 +223,14 @@ class tsBackup
 		);
 	
 		// INSERT実行
-		$this->pdoMgr->execute($dbh, $insert_sql, $params);
+		$this->main->pdoMgr()->execute($this->main->get_dbh(), $insert_sql, $params);
 
 		// 登録したシーケンスIDを取得
-		$insert_id = $dbh->lastInsertId();
+		$insert_id = $this->main->get_dbh()->lastInsertId();
 		
-		$this->common->debug_echo('　□ insert_id：' . $insert_id);
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ insert_id：' . $insert_id);
 
-		$this->common->debug_echo('■ insert_ts_backup end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ insert_ts_backup end');
 
 		return $insert_id;
 	}
@@ -249,7 +244,7 @@ class tsBackup
 	 */
 	private function convert_ts_backup_entity($array) {
 	
-		$this->common->debug_echo('■ convert_ts_backup_entity start');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ convert_ts_backup_entity start');
 
 		$entity = array();
 
@@ -258,14 +253,14 @@ class tsBackup
 		// バックアップ日時（GMT日時）
 		$entity[self::BACKUP_ENTITY_DATETIME_GMT] = $array[self::BACKUP_ENTITY_DATETIME];
 		// バックアップ日時（タイムゾーン日時）
-		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::BACKUP_ENTITY_DATETIME]);
+		$tz_datetime = $this->main->common()->convert_to_timezone_datetime($array[self::BACKUP_ENTITY_DATETIME]);
 		$entity[self::BACKUP_ENTITY_DATETIME] = $tz_datetime;
-		$entity[self::BACKUP_ENTITY_DATETIME_DISP] = $this->common->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
+		$entity[self::BACKUP_ENTITY_DATETIME_DISP] = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
 
 		// 公開予約日時（タイムゾーン日時）
-		$tz_datetime = $this->common->convert_to_timezone_datetime($array[self::BACKUP_ENTITY_RESERVE]);
+		$tz_datetime = $this->main->common()->convert_to_timezone_datetime($array[self::BACKUP_ENTITY_RESERVE]);
 		$entity[self::BACKUP_ENTITY_RESERVE] = $tz_datetime;
-		$entity[self::BACKUP_ENTITY_RESERVE_DISP] = $this->common->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
+		$entity[self::BACKUP_ENTITY_RESERVE_DISP] = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
 
 		// ブランチ名
 		$entity[self::BACKUP_ENTITY_BRANCH] = $array[self::BACKUP_ENTITY_BRANCH];
@@ -274,11 +269,11 @@ class tsBackup
 		// コメント
 		$entity[self::BACKUP_ENTITY_COMMENT] = $array[self::BACKUP_ENTITY_COMMENT];
 		// 公開種別
-		$entity[self::BACKUP_ENTITY_PUBLISH_TYPE] = $this->common->convert_publish_type($array[self::BACKUP_ENTITY_PUBLISH_TYPE]);	
+		$entity[self::BACKUP_ENTITY_PUBLISH_TYPE] = $this->main->common()->convert_publish_type($array[self::BACKUP_ENTITY_PUBLISH_TYPE]);	
 		// 登録ユーザ
 		$entity[self::BACKUP_ENTITY_INSERT_USER_ID] = $array[self::BACKUP_ENTITY_INSERT_USER_ID];
 
-		$this->common->debug_echo('■ convert_ts_backup_entity end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ convert_ts_backup_entity end');
 
 	    return $entity;
 	}

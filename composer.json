@@ -24,7 +24,6 @@
     "autoload": {
         "files": [
             "php/main.php",
-            "php/cron.php",
             "php/publish.php",
             "php/gitManager.php",
             "php/fileManager.php",
@@ -37,7 +36,8 @@
             "php/screen/backupScreen.php",
             "php/check.php",
             "php/define.php",
-            "php/common.php"
+            "php/common.php",
+            "php/ajax.php"
         ]
     },
     "extra": {

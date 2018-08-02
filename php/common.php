@@ -6,7 +6,7 @@ class common
 {
 
 	private $main;
-	private $fs;
+	// private $fs;
 
 	const DIR_PERMISSION_0757 = 0757;
 
@@ -19,11 +19,11 @@ class common
 
 		$this->main = $main;
 
-		$this->fs = new \tomk79\filesystem(array(
-		  'file_default_permission' => define::FILE_DEFAULT_PERMISSION,
-		  'dir_default_pefrmission' => define::DIR_DEFAULT_PERMISSION,
-		  'filesystem_encoding' => define::FILESYSTEM_ENCODING
-		));
+		// $this->fs = new \tomk79\filesystem(array(
+		//   'file_default_permission' => define::FILE_DEFAULT_PERMISSION,
+		//   'dir_default_pefrmission' => define::DIR_DEFAULT_PERMISSION,
+		//   'filesystem_encoding' => define::FILESYSTEM_ENCODING
+		// ));
 
 
 	}
@@ -35,10 +35,10 @@ class common
 	 *  一致する場合：selected（文字列）
 	 *  一致しない場合：空文字
 	 */
-	public function get_current_datetime_of_gmt() {
+	public function get_current_datetime_of_gmt($format) {
 
 		// return gmdate(DATE_ATOM, time());
-		return gmdate(define::DATETIME_FORMAT, time());
+		return gmdate($format, time());
 		
 	}
 
@@ -51,8 +51,8 @@ class common
 	 */
 	public function command_execute($command, $captureStderr) {
 	
-		// $this->debug_echo('■ execute start');
-
+		$this->put_process_log(__METHOD__, __LINE__, "command_execute start");
+		$this->put_process_log(__METHOD__, __LINE__, "command --> " . $command);
 	    $output = array();
 	    $return = 0;
 
@@ -63,7 +63,9 @@ class common
 
 	    exec($command, $output, $return);
 
-		// $this->debug_echo('■ execute end');
+		// $this->put_process_log(__METHOD__, __LINE__, '■ execute end');
+
+		$this->put_process_log(__METHOD__, __LINE__, "command_execute end");
 
 	    return array('output' => $output, 'return' => $return);
 	}
@@ -78,7 +80,7 @@ class common
 	 */
 	public function format_datetime($datetime, $format) {
 	
-		// $this->debug_echo('■ format_datetime start');
+		// $this->put_process_log(__METHOD__, __LINE__, '■ format_datetime start');
 
 		$ret = '';
 
@@ -86,10 +88,10 @@ class common
 			$ret = date($format, strtotime($datetime));
 		}
 		
-		// $this->debug_echo('　★変換前の時刻：' . $datetime);
-		// $this->debug_echo('　★変換後の時刻：'. $ret);
+		// $this->put_process_log(__METHOD__, __LINE__, '　★変換前の時刻：' . $datetime);
+		// $this->put_process_log(__METHOD__, __LINE__, '　★変換後の時刻：'. $ret);
 
-		// $this->debug_echo('■ format_datetime end');
+		// $this->put_process_log(__METHOD__, __LINE__, '■ format_datetime end');
 
 	    return $ret;
 	}
@@ -103,7 +105,7 @@ class common
 	 */
 	public function format_gmt_datetime($datetime, $format) {
 	
-		// $this->debug_echo('■ format_gmt_datetime start');
+		// $this->put_process_log(__METHOD__, __LINE__, '■ format_gmt_datetime start');
 
 		$ret = '';
 
@@ -114,10 +116,7 @@ class common
 			$ret = $t->format($format);
 		}
 		
-		// $this->debug_echo('　★変換前の時刻：' . $datetime);
-		// $this->debug_echo('　★変換後の時刻：'. $ret);
-
-		// $this->debug_echo('■ format_gmt_datetime end');
+		// $this->put_process_log(__METHOD__, __LINE__, '■ format_gmt_datetime end');
 
 	    return $ret;
 	}
@@ -132,7 +131,7 @@ class common
 	 */
 	public function convert_to_timezone_datetime($datetime) {
 	
-		// $this->debug_echo('■ convert_to_timezone_datetime start');
+		// $this->put_process_log(__METHOD__, __LINE__, '■ convert_to_timezone_datetime start');
 
 		$ret = '';
 
@@ -145,10 +144,10 @@ class common
 			$ret = $t->format(define::DATETIME_FORMAT);
 		}
 
-		// $this->debug_echo('　□変換前の時刻（GMT）：' . $datetime);
-		// $this->debug_echo('　□変換後の時刻：'. $ret);
+		// $this->put_process_log(__METHOD__, __LINE__, '　□変換前の時刻（GMT）：' . $datetime);
+		// $this->put_process_log(__METHOD__, __LINE__, '　□変換後の時刻：'. $ret);
 		
-		// $this->debug_echo('■ convert_to_timezone_datetime end');
+		// $this->put_process_log(__METHOD__, __LINE__, '■ convert_to_timezone_datetime end');
 
 	    return $ret;
 	}
@@ -195,7 +194,7 @@ class common
 	 */
 	public function is_exists_mkdir($dirpath) {
 
-		// $this->debug_echo('■ is_exists_mkdir start');
+		// $this->put_process_log(__METHOD__, __LINE__, '■ is_exists_mkdir start');
 
 		$ret = true;
 
@@ -210,8 +209,8 @@ class common
 			$ret = false;
 		}
 
-		// $this->debug_echo('　□ return：' . $ret);
-		// $this->debug_echo('■ is_exists_mkdir end');
+		// $this->put_process_log(__METHOD__, __LINE__, '　□ return：' . $ret);
+		// $this->put_process_log(__METHOD__, __LINE__, '■ is_exists_mkdir end');
 
 		return $ret;
 	}
@@ -225,7 +224,7 @@ class common
 	 */
 	public function is_exists_remkdir($dirpath) {
 		
-		$this->debug_echo('■ is_exists_remkdir start');
+		$this->put_process_log(__METHOD__, __LINE__, '■ is_exists_remkdir start');
 
 		if ( file_exists($dirpath) ) {
 			// 削除
@@ -246,7 +245,7 @@ class common
 			return false;
 		}
 	
-		$this->debug_echo('■ is_exists_remkdir end');
+		$this->put_process_log(__METHOD__, __LINE__, '■ is_exists_remkdir end');
 
 		return true;
 	}
@@ -262,7 +261,7 @@ class common
 	 */
 	public function get_server_real_path($options) {
 	
-		$this->debug_echo('■ get_server_real_path start');
+		$this->put_process_log(__METHOD__, __LINE__, '■ get_server_real_path start');
 
 
 		$server_list = $options->server;
@@ -272,15 +271,15 @@ class common
 		foreach ( (array)$server_list as $server ) {
 			
 			// 本番環境ディレクトリの絶対パスを取得。
-			$server_real_path[] = $this->fs->normalize_path($this->fs->get_realpath($server . "/"));
+			$server_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($server->real_path . "/"));
+			break; // 現時点では最初の1つのみ有効
 		}
 
-		$this->debug_echo('　□ server_real_path');
-		$this->debug_var_dump($server_real_path);
+		$this->put_process_log(__METHOD__, __LINE__, '　□ server_real_path：' . $server_real_path);
 
-		$this->debug_echo('■ get_server_real_path end');
+		$this->put_process_log(__METHOD__, __LINE__, '■ get_server_real_path end');
 
-	    return json_encode($server_real_path);
+	    return $server_real_path;
 	}
 
 
@@ -291,62 +290,87 @@ class common
 	 *	 
 	 * @return ソート後の配列
 	 */
-	public function get_realpath_workdir($options) {
+	public function get_realpath_workdir($options, $realpath_array) {
 	
-		$this->debug_echo('■ get_indigo_work_dir start');
+		$logstr = "get_realpath_workdir() start";
+		$this->put_process_log(__METHOD__, __LINE__, $logstr);
 
-		$result = array('realpath_server' => '',
-						'realpath_backup' => '',
-						'realpath_waiting' => '',
-						'realpath_running' => '',
-						'realpath_released' => '',
-						'realpath_log' => '');
-
-		// 本番環境ディレクトリの絶対パスを取得。
-		$result['realpath_server'] = $this->fs->normalize_path($this->fs->get_realpath($options->server_real_path . "/"));
+		// 本番環境ディレクトリの絶対パスを取得。（配列1番目のサーバを設定）
+		$realpath_array['realpath_server'] = $this->get_server_real_path($options);
+		// $realpath_array['realpath_server'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->server_real_path . "/"));
 
 		// backupディレクトリの絶対パスを取得。
-		$result['realpath_backup'] = $this->fs->normalize_path($this->fs->get_realpath($options->workdir_relativepath . define::PATH_BACKUP));
+		$realpath_array['realpath_backup'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->workdir_relativepath . define::PATH_BACKUP));
 
 		// waitingディレクトリの絶対パスを取得。
-		$result['realpath_waiting'] = $this->fs->normalize_path($this->fs->get_realpath($options->workdir_relativepath . define::PATH_WAITING));
+		$realpath_array['realpath_waiting'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->workdir_relativepath . define::PATH_WAITING));
 
 		// runningディレクトリの絶対パスを取得。
-		$result['realpath_running'] = $this->fs->normalize_path($this->fs->get_realpath($options->workdir_relativepath . define::PATH_RUNNING));
+		$realpath_array['realpath_running'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->workdir_relativepath . define::PATH_RUNNING));
 
 		// releasedディレクトリの絶対パスを取得。
-		$result['realpath_released'] = $this->fs->normalize_path($this->fs->get_realpath($options->workdir_relativepath . define::PATH_RELEASED));
+		$realpath_array['realpath_released'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->workdir_relativepath . define::PATH_RELEASED));
 
 		// logディレクトリの絶対パスを取得。
-		$result['realpath_log'] = $this->fs->normalize_path($this->fs->get_realpath($options->workdir_relativepath . define::PATH_LOG));
+		$realpath_array['realpath_log'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->workdir_relativepath . define::PATH_LOG));
 
-		$this->debug_echo('■ get_indigo_work_dir end');
+		$logstr = "get_realpath_workdir() end";
+		$this->put_process_log(__METHOD__, __LINE__, $logstr);
 
-	    return json_encode($result);
+	    return json_encode($realpath_array);
 	}
 
 
 	/**
-	 * ※デバッグ関数（エラー調査用）
-	 *	 
+	 * 通常ログを出力する。
+	 *
+	 * @return ログ出力
 	 */
-	public function debug_echo($text) {
-	
-		echo strval($text);
-		echo "<br>";
+	public function put_process_log($method, $line, $text){
+		
+		$datetime = $this->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 
-		return;
+		$str = "[" . $datetime . "]" . " " .
+			   "[pid:" . getmypid() . "]" . " " .
+			   "[userid:" . $this->main->options->user_id . "]" . " " .
+			   "[" . $method . "]" . " " .
+			   "[line:" . $line . "]" . " " .
+			   $text . "\r\n";
+
+		// file_put_contents($path, $str, FILE_APPEND);
+
+		return error_log( $str, 3, $this->main->process_log_path );
+	}
+	/**
+	 * エラーログを出力する。
+	 *
+	 * @return ログ出力
+	 */
+	public function put_error_log($text){
+		
+		$datetime = $this->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
+
+		$str = "[" . $datetime . "]" . " " .
+			   // "[pid:" . getmypid() . "]" . " " .
+			   // "[userid:" . $this->main->options->user_id . "]" . " " .
+			   // "[" . $method . "]" . " " .
+			   // "[line:" . $line . "]" . " " .
+			   $text . "\r\n";
+
+		// file_put_contents($path, $str, FILE_APPEND);
+
+		return error_log( $str, 3, $this->main->error_log_path );
 	}
 
 	/**
-	 * ※デバッグ関数（エラー調査用）
-	 *	 
+	 * 区切り用のログを出力する。（日時などの詳細を出力しない）
+	 *
+	 * @return ログ出力
 	 */
-	public function debug_var_dump($text) {
-	
-		var_dump($text);
-		echo "<br>";
+	public function put_process_log_block($text){
+		
+		$str = "\r\n" . $text . "\r\n";
 
-		return;
+		return error_log( $str, 3, $this->main->process_log_path );
 	}
 }
