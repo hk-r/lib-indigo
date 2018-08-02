@@ -35,7 +35,7 @@ class publish
 		$this->tsOutput = new tsOutput($this->main);
 		$this->tsBackup = new tsBackup($this->main);
 		
-		$this->path_lockdir = $main->fs()->get_realpath( $this->main->options->workdir_relativepath . 'applock/' );
+		$this->path_lockdir = $main->fs()->get_realpath( $this->main->options->workdir_realpath . 'applock/' );
 		$this->path_lockfile = $this->path_lockdir .'applock.txt';
 
 		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ path_lockdir：' . $this->path_lockdir);

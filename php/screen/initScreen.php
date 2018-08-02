@@ -811,14 +811,11 @@ class initScreen
 			}
 		}
 
-        // masterディレクトリの絶対パス
-        // $workdir_relativepath = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->options->workdir_relativepath));
-
 		// mainクラス呼び出しディレクトリの相対パス
         $param_relativepath = $this->main->options->param_relativepath;
         
-		// indigo作業ディレクトリ
-        $workdir_relativepath = $this->main->options->workdir_relativepath;
+		// indigo作業ディレクトリ（絶対パス）
+        $workdir_realpath = $this->main->options->workdir_realpath;
 
 		$ret .= '<form method="post">';
 
@@ -826,7 +823,7 @@ class initScreen
 		$ret .= '<input type="hidden" name="selected_id" value="' . $form['selected_id'] . '"/>';
 		$ret .= '<input type="hidden" name="ver_no" value="' . $form['ver_no'] . '"/>';
 		$ret .= '<input type="hidden" id="param_relativepath" value="' . $param_relativepath . '"/>';
-		$ret .= '<input type="hidden" id="workdir_relativepath" value="' . $workdir_relativepath . '"/>';
+		$ret .= '<input type="hidden" id="workdir_realpath" value="' . $workdir_realpath . '"/>';
 
 		
 		$ret .= '<table class="table table-striped">'
@@ -1046,7 +1043,7 @@ class initScreen
 		
 		}
 
-		$img_filename = $this->main->options->resdir_relativepath . self::IMG_ARROW_RIGHT;
+		$img_filename = $this->main->options->workdir_relativepath . self::IMG_ARROW_RIGHT;
 
 		$ret = '<div class="dialog" id="modal_dialog">'
 			. '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'

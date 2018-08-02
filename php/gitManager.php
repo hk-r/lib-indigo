@@ -36,7 +36,7 @@ class gitManager
 		$current_dir = realpath('.');
 
 		// masterディレクトリの絶対パス
-		$master_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->workdir_relativepath . define::PATH_MASTER));
+		$master_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->workdir_realpath . define::PATH_MASTER));
 
 		if ( chdir( $master_real_path )) {
 
@@ -190,7 +190,7 @@ class gitManager
 		$current_dir = realpath('.');
 
 		// masterディレクトリの絶対パス
-		$master_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->workdir_relativepath . define::PATH_MASTER));
+		$master_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->workdir_realpath . define::PATH_MASTER));
 
 		if ( $master_real_path ) {
 
@@ -237,59 +237,5 @@ class gitManager
 
 		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_git_master end');
 	}
-
-	// /**
-	//  * Gitブランチのコミットハッシュ値を取得
-	//  */
-	// public function get_commit_hash() {
-
-	// 	error_log( "★__construct", 3, "/workspace/sample-lib-indigo/indigo_dir/log/log_20180731.log" );
-	// 	echo '■ get_commit_hash start';
-
-	// 	$commit_hash;
-
-	// 	$data = array(
-	// 				'commit_hash' => ''
-	// 			);
-
-	// 	$current_dir = realpath('.');
-
-	//     if (isset($this->ajax->branch_name) && isset($this->ajax->workdir_relativepath)) {
-	    
-	//         // masterディレクトリの絶対パス
-	//         $master_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->ajax->workdir_relativepath . define::PATH_MASTER));
-
-	//         if ( $master_real_path ) {
-
-	//             if ( chdir( $master_real_path ) ) {
-
-	//                 // コミットハッシュ値取得
-	//                 $command = 'git log --pretty=%h ' . $this->ajax->branch_name . ' -1';
-	//                 $ret = $this->common->command_execute($command, false);
-	//                 foreach ( (array)$ret['output'] as $element ) {
-	//                     $commit_hash = $element;
-	//                 }
-
-	// 			} else {
-
-	// 				// ディレクトリ移動に失敗
-	// 				throw new \Exception('Failed to get git commitHash. Move to work directory failed.');
-	// 			} 
-	//         }
-	// 	} else {
-
-	// 		// ディレクトリ移動に失敗
-	// 		throw new \Exception('Parameter is empty.');
-	// 	} 
-	    
-	//     if ($commit_hash) {
-	//     	$data['commit_hash'] = $commit_hash;
-	//     }
-		
- //        chdir($current_dir);
-
-	// 	header('Content-Type: application/json; charset=utf-8');
-	// 	return json_encode($data);
-	// }
 
 }

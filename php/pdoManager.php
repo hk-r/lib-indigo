@@ -77,7 +77,7 @@ class pdoManager
 			 * sqliteの場合 
 			 */
 			// dbディレクトリの絶対パス
-			$db_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->options->workdir_relativepath . self::SQLITE_DB_PATH));
+			$db_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->options->workdir_realpath . self::SQLITE_DB_PATH));
 
 			// $this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ db_real_path：' . $db_real_path);
 

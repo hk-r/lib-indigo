@@ -66,7 +66,7 @@ class main
 		//============================================================	
 		
 		// ログパス
-		$this->error_log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->workdir_relativepath . define::PATH_LOG)) . 'error.log';
+		$this->error_log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->workdir_realpath . define::PATH_LOG)) . 'error.log';
 
 		register_shutdown_function(
 		    function(){
