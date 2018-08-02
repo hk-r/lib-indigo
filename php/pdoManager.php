@@ -85,7 +85,7 @@ class pdoManager
 			if ( !$this->main->common()->is_exists_mkdir($db_real_path) ) {
 
 					// エラー処理
-					throw new \Exception('Creation of sqlite directory failed.');
+					throw new \Exception('Creation of sqlite directory failed. path = ' . $db_real_path);
 			}
 
 			$dsn = "sqlite:" . $db_real_path . self::SQLITE_DB_NAME;
