@@ -84,7 +84,8 @@ class main
 		            echo gmdate() . " ";
 		            echo "エラーが発生しました。管理者にお問い合わせください。";
 					echo $e['file'] . " in " . $e['line'] . "\r\n";
-					echo "Error message:" . $e['message'];
+					echo "Error message:" . $e['message'] . "\r\n"
+					echo $this->process_log_path;
 
 					$logstr =  "***** エラー発生 *****" . "\r\n";
 					$logstr .= "[ERROR]" . "\r\n";
