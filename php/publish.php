@@ -685,11 +685,8 @@ class publish
 			throw new \Exception('Command error. [command]' . $command);
 		}
 
-		// rsyncコマンド実行時のログを格納
+		// rsyncコマンド実行ログ配列を、履歴一覧画面のダイアログ表示用にファイル保持しておく
 		file_put_contents($this->realpath_copylog, $ret['output'], FILE_APPEND);
-
-		
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, $this->realpath_copylog, $ret['output']);		
 	}
 
 	/**
