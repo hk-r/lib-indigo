@@ -81,8 +81,9 @@ class main
 		            $e['type'] == E_COMPILE_ERROR ||
 		            $e['type'] == E_USER_ERROR ){
 		            
+		            echo gmdate() . " ";
 		            echo "エラーが発生しました。管理者にお問い合わせください。";
-					echo $e['file'] . " in " . $e['line'];
+					echo $e['file'] . " in " . $e['line'] . "\r\n";
 					echo "Error message:" . $e['message'];
 
 					$logstr =  "***** エラー発生 *****" . "\r\n";
@@ -102,7 +103,7 @@ class main
 		$log_dirname = $this->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT_YMD);
 
 		// ログパス
-		$this->process_log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->workdir_relativepath . define::PATH_LOG)) . 'log_process_' . $log_dirname . '.log';
+		$this->process_log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->workdir_realpath . define::PATH_LOG)) . 'log_process_' . $log_dirname . '.log';
 
 		// $logstr = "起動パラメタ：" . $this->options;
 		// $this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
