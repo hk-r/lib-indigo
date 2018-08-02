@@ -81,10 +81,10 @@ class main
 		            $e['type'] == E_COMPILE_ERROR ||
 		            $e['type'] == E_USER_ERROR ){
 		            
-		            echo gmdate() . " ";
-		            echo "エラーが発生しました。管理者にお問い合わせください。";
+		            // echo gmdate() . " ";
+		            echo "※エラーが発生しました。管理者にお問い合わせください。";
 					echo $e['file'] . " in " . $e['line'] . "\r\n";
-					echo "Error message:" . $e['message'] . "\r\n"
+					echo "Error message:" . $e['message'] . "\r\n";
 					echo $this->process_log_path;
 
 					$logstr =  "***** エラー発生 *****" . "\r\n";
