@@ -50,6 +50,11 @@ class publish
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ exec_publish start');
 
+		$logstr = "===============================================" . "\r\n";
+		$logstr .= "公開処理開始" . "\r\n";
+		$logstr .= "===============================================";
+		$this->main->common()->put_process_log_block($logstr);
+
 		$output = "";
 		$result = array('status' => true,
 						'message' => '',
@@ -61,85 +66,75 @@ class publish
 
 		$result['output_id'] = $output_id;
 
+
+		//============================================================
+		// ログ生成
+		//============================================================
+		// 作業用ディレクトリの絶対パスを取得
+		$realpath_array = $this->main->realpath_array;
+		
+		// GMT現在日時を取得し、ディレクトリ名用にフォーマット変換
+		$start_datetime = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
+		$running_dirname = $this->main->common()->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
+
+		// 同期ログ
+		$this->realpath_copylog = $this->main->fs()->normalize_path($this->main->fs()->get_realpath(
+			$realpath_array->realpath_log . $running_dirname . "/")) . 'pub_copy_' . $running_dirname . '.log';
+		// 公開処理実行ログ
+		$this->realpath_tracelog = $this->main->fs()->normalize_path($this->main->fs()->get_realpath(
+			$realpath_array->realpath_log . $running_dirname . "/")) . 'pub_trace_' . $running_dirname . '.log';
+
+		// ログファイルの上位ディレクトリを作成
+		if( !@is_dir( dirname( $this->realpath_copylog ) ) ){
+			$this->main->fs()->mkdir_r( dirname( $this->realpath_copylog ) );
+		}
+		// ログファイルの上位ディレクトリを作成
+		if( !@is_dir( dirname( $this->realpath_tracelog ) ) ){
+			$this->main->fs()->mkdir_r( dirname( $this->realpath_tracelog ) );
+		}
+
+		//============================================================
+		// ロック処理
+		//============================================================
+		if( !$this->lock() ){//ロック
+
+			// $logstr = 'publish is now locked.'."\n";
+			// $logstr .= '  (lockfile updated: '.@date('Y-m-d H:i:s', filemtime($this->path_lockfile)).')'."\n";
+			// $logstr .= 'Try again later...'."\n";
+			// $logstr .= 'exit.'."\n";
+			// $this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+
+			// エラー処理
+			throw new \Exception('公開ロック中となっております。しばらくお待ちいただいてもロックが解除されない場合は、管理者にお問い合わせください。');
+		}
+
+		// $logstr = "5秒スリープ" . "\r\n";
+		// $this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+		// sleep(3);
+
+
 		try {
 
 			set_time_limit(12*60*60);
-
-			//============================================================
-			// ログ出力用の日付ディレクトリ作成
-			//============================================================
-			// 作業用ディレクトリの絶対パスを取得
-			$realpath_array = $this->main->realpath_array;
-			
-			// GMT現在日時を取得し、ディレクトリ名用にフォーマット変換
-			$start_datetime = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
-			$running_dirname = $this->main->common()->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
-
-			// logの日付ディレクトリを作成
-			$this->realpath_copylog = $this->main->fs()->normalize_path($this->main->fs()->get_realpath(
-				$realpath_array->realpath_log . $running_dirname . "/")) . 'pub_copy_' . $running_dirname . '.log';
-			
-			$this->realpath_tracelog = $this->main->fs()->normalize_path($this->main->fs()->get_realpath(
-				$realpath_array->realpath_log . $running_dirname . "/")) . 'pub_trace_' . $running_dirname . '.log';
-
-			// ログファイルの上位ディレクトリを作成
-			if( !@is_dir( dirname( $this->realpath_copylog ) ) ){
-				$this->main->fs()->mkdir_r( dirname( $this->realpath_copylog ) );
-			}
-			// ログファイルの上位ディレクトリを作成
-			if( !@is_dir( dirname( $this->realpath_tracelog ) ) ){
-				$this->main->fs()->mkdir_r( dirname( $this->realpath_tracelog ) );
-			}
-
-			$logstr = "===============================================" . "\r\n";
-			$logstr .= "公開予約テーブルSELECT処理実行" . "\r\n";
-			$logstr .= "===============================================";
-			$this->main->common()->put_process_log_block($logstr);
-
-
-			if( !$this->lock() ){//ロック
-				// print '------'."\n";
-				// print 'publish is now locked.'."\n";
-				// print '  (lockfile updated: '.@date('Y-m-d H:i:s', filemtime($this->path_lockfile)).')'."\n";
-				// print 'Try again later...'."\n";
-				// print 'exit.'."\n";
-				// print $this->cli_footer();
-
-				$logstr = '------'."\n";
-				$logstr .= 'publish is now locked.'."\n";
-				$logstr .= '  (lockfile updated: '.@date('Y-m-d H:i:s', filemtime($this->path_lockfile)).')'."\n";
-				$logstr .= 'Try again later...'."\n";
-				$logstr .= 'exit.'."\n";
-				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-
-				// エラー処理
-				throw new \Exception('Publish lock error!');
-			}
-
-			$logstr = "10秒スリープ" . "\r\n";
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-
-			// sleep(10);
 
 			$logstr = "公開種別：" . $publish_type . "\r\n";
 			$logstr .= "公開処理開始日時：" . $start_datetime . "\r\n";
 			$logstr .= "公開日時ディレクトリ名：" . $running_dirname . "\r\n";
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
-
 			try {
 
 				// 予約公開の場合
 				if ($publish_type == define::PUBLISH_TYPE_RESERVE) {
-					
-					//============================================================
-					// 公開予約テーブルより、公開対象データの取得
-					//============================================================
+
 					$logstr = "===============================================" . "\r\n";
-					$logstr .= "公開予約テーブルSELECT処理実行" . "\r\n";
+					$logstr .= "公開予約処理実施" . "\r\n";
 					$logstr .= "===============================================" . "\r\n";
 					$this->main->common()->put_process_log_block($logstr);
 
+					//============================================================
+					// 公開予約テーブルより、公開対象データの取得
+					//============================================================
 					$data_list = $this->tsReserve->get_ts_reserve_publish_list($start_datetime);
 					
 					if (!$data_list) {
@@ -330,6 +325,11 @@ class publish
 
 						$backup_id = $backup_data[tsBackup::BACKUP_ENTITY_ID_SEQ];
 
+						if (!$backup_id) {
+							// エラー処理
+							throw new \Exception('バックアップが存在しないため復元処理は実施されませんでした。');
+						}
+
 						$logstr = "バックアップID：" . $backup_id . "\r\n";
 						$logstr .= "バックアップ日時：" . $backup_data[tsBackup::BACKUP_ENTITY_DATETIME_GMT] . "\r\n";
 						$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
@@ -348,12 +348,14 @@ class publish
 					/* トランザクションを開始する。オートコミットがオフになる */
 					$this->main->get_dbh()->beginTransaction();
 
+					$logstr = "==========トランザクション開始==========";
+					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+
+
 					//============================================================
 					// 公開処理結果テーブルの登録処理
 					//============================================================
-					$logstr = "===============================================" . "\r\n";
-					$logstr .= "公開処理結果テーブルの登録処理" . "\r\n";
-					$logstr .= "===============================================" . "\r\n";
+					$logstr = "==========公開処理結果テーブルのINSERT実行==========";
 					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 					// 現在時刻
@@ -362,6 +364,7 @@ class publish
 					$reserve_id = null;
 
 					$dataArray = array(
+
 						tsOutput::TS_OUTPUT_RESERVE_ID 		=> null,
 						tsOutput::TS_OUTPUT_BACKUP_ID		=> $backup_id,
 						tsOutput::TS_OUTPUT_RESERVE 		=> null,
@@ -384,21 +387,24 @@ class publish
 					// 公開処理結果テーブルの登録（インサートしたシーケンスIDをリターン値で取得）
 					$result['output_id'] = $this->tsOutput->insert_ts_output($dataArray);
 
+
 			 		/* 変更をコミットする */
 					$this->main->get_dbh()->commit();
-					/* データベース接続はオートコミットモードに戻る */
 
-					$logstr = "公開処理結果テーブル登録ID：" . $result['output_id'] . "\r\n";
+					$logstr = "==========コミット処理実行==========";
 					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+
+					$logstr = "公開処理結果テーブル登録ID：" . $result['output_id'];
+					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+
+
 
 					if ($publish_type == define::PUBLISH_TYPE_IMMEDIATE) {
 
 						// ============================================================
 						// 選択されたブランチのGit情報を「running」ディレクトリへコピー
 						// ============================================================
-						$logstr = "===============================================" . "\r\n";
-						$logstr .= "[即時公開]Git情報をrunningへコピー" . "\r\n";
-						$logstr .= "===============================================" . "\r\n";
+						$logstr = "==========[即時公開]Git情報をrunningへコピー==========";
 						$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 						// Git情報のコピー処理
@@ -410,19 +416,15 @@ class publish
 						//============================================================
 						// バックアップディレクトリを「backup」から「running」ディレクトリへコピー
 						//============================================================
-						$logstr = "===============================================" . "\r\n";
-						$logstr .= "[復元公開]backupからrunningへディレクトリのコピー" . "\r\n";
-						$logstr .= "===============================================" . "\r\n";
-						$this->main->common()->put_process_log_block($logstr);
-				
-						// そのディレクトリも含めてコピーしたい場合：「/」なし
-						// そのディレクトリ以下のツリーをコピーしたい場合：「/」あり
+						$logstr = "==========[復元公開]backupからrunningへディレクトリのコピー==========";
+						$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+
 						$from_realpath = $realpath_array->realpath_backup . $backup_dirname . '/';
 						$to_realpath = $realpath_array->realpath_running . $running_dirname . '/';
 						
-						$logstr = "backupディレクトリ：" . $from_realpath . "\r\n";
-						$logstr .= "runningディレクトリ：" . $to_realpath . "\r\n";
-						$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+						$logstr = "backupディレクトリ --> " . $from_realpath . "\r\n";
+						$logstr .= "runningディレクトリ --> " . $to_realpath;
+						$this->main->common()->put_process_log_block($logstr);
 
 						$this->exec_sync_copy($from_realpath, $to_realpath);
 					}
@@ -447,70 +449,59 @@ class publish
 
 				try {
 
-					$logstr = "===============================================" . "\r\n";
-					$logstr .= "バックアップテーブルのトランザクション処理開始" . "\r\n";
-					$logstr .= "===============================================" . "\r\n";
-					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-								
 					/* トランザクションを開始する。オートコミットがオフになる */
 					$this->main->get_dbh()->beginTransaction();
+						
+					$logstr = "==========トランザクション開始==========";
+					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 					//============================================================
 					// バックアップテーブルの登録処理
 					//============================================================
-					$logstr = "===============================================" . "\r\n";
-					$logstr .= "バックアップテーブルの登録処理" . "\r\n";
-					$logstr .= "===============================================" . "\r\n";
+					$logstr = "==========バックアップテーブルのINSERT実行==========";
 					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 					// GMTの現在日時
 					$backup_datetime = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 					$backup_dirname = $this->main->common()->format_gmt_datetime($backup_datetime, define::DATETIME_FORMAT_SAVE);
 
-					$logstr = "バックアップ日時：" . $backup_datetime . "\r\n";
-					$logstr .= "バックアップディレクトリ名：" . $backup_dirname . "\r\n";
-					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+					$logstr = "バックアップ日時 --> " . $backup_datetime . "\r\n";
+					$logstr .= "バックアップディレクトリ名 --> " . $backup_dirname;
+					$this->main->common()->put_process_log_block($logstr);
 
 					$result['backup_id'] = $this->tsBackup->insert_ts_backup($this->main->options, $backup_datetime, $result['output_id']);
 
-					$logstr = "登録バックアップID：" . $result['backup_id'] . "\r\n";
-					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 					//============================================================
 					// 本番ソースを「backup」ディレクトリへコピー
 					//============================================================
-					$logstr = "===============================================" . "\r\n";
-					$logstr .= "本番ソースをbackupディレクトリへコピー" . "\r\n";
-					$logstr .= "===============================================" . "\r\n";
+					$logstr = "==========本番ソースをbackupディレクトリへコピー==========";
 					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
-					$from_realpath = $realpath_array->realpath_server . '/';
+					$from_realpath = $realpath_array->realpath_server;
 					$to_realpath = $realpath_array->realpath_backup . $backup_dirname . '/';
 
-					// そのディレクトリも含めてコピーしたい場合：「/」なし
-					// そのディレクトリ以下のツリーをコピーしたい場合：「/」あり
+					$logstr = "本番環境ディレクトリ --> " . $from_realpath . "\r\n";
+					$logstr .= "backupディレクトリ --> " . $to_realpath;
+					$this->main->common()->put_process_log_block($logstr);
 
-					$logstr = "本番環境ディレクトリ：" . $from_realpath . "\r\n";
-					$logstr .= "backupディレクトリ：" . $to_realpath . "\r\n";
-					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-
+					// rsyncによるディレクトリのコピー処理
 					$this->exec_sync_copy($from_realpath, $to_realpath);
 
-
-					$logstr = "===============================================" . "\r\n";
-					$logstr .= "バックアップテーブルのコミット処理実行" . "\r\n";
-					$logstr .= "===============================================" . "\r\n";
-					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-
-			 		/* 変更をコミットする */
+			 		// 変更をコミットする
 					$this->main->get_dbh()->commit();
 					/* データベース接続はオートコミットモードに戻る */
 
+					$logstr = "==========コミット処理実行==========";
+					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+
+					$logstr = "バックアップテーブル登録ID：" . $result['backup_id'];
+					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+
+
 			    } catch (\Exception $e) {
 		
-					$logstr = "===============================================" . "\r\n";
-					$logstr .= "バックアップテーブルのロールバック処理実行" . "\r\n";
-					$logstr .= "===============================================" . "\r\n";
+					$logstr = "==========バックアップテーブルのロールバック処理実行==========";
 					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 				    /* 変更をロールバックする */
@@ -518,7 +509,6 @@ class publish
 			 
 			     	throw $e;
 			    }
-
 		    }
 
 			try {
@@ -612,46 +602,46 @@ class publish
 
 		} catch (\Exception $e) {
 
-			$logstr = "** exec_publish例外キャッチ **" . "\r\n";
-			$logstr .= $e->getMessage() . "\r\n";
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+			// $logstr = "** exec_publish 例外キャッチ **" . "\r\n";
+			// $logstr .= $e->getMessage() . "\r\n";
+			// $this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+
+
+			$logstr =  "***** exec_publish 例外キャッチ *****" . "\r\n";
+			$logstr .= "[ERROR]" . "\r\n";
+			$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
+			$logstr .= "Error message:" . $e->getMessage() . "\r\n";
+			$this->main->common()->put_error_log($logstr);
 
 			$result['status'] = false;
-			$result['message'] = '【publish faild.】' . $e->getMessage();
+			$result['message'] = '公開処理が失敗しました。';
 
 			//============================================================
 			// 公開処理結果テーブルの更新処理（失敗）
 			//============================================================
-			$logstr = "===============================================" . "\r\n";
-			$logstr .= "公開処理結果テーブルの更新処理（ステータス：失敗）" . "\r\n";
-			$logstr .= "===============================================" . "\r\n";
-			$this->main->common()->put_process_log_block($logstr);
+			$logstr = "==========公開処理結果テーブルの更新処理（ステータス：失敗）==========";
+			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
-			// GMTの現在日時
-			$end_datetime = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
-			$dataArray = array(
-				tsOutput::TS_OUTPUT_STATUS 			=> define::PUBLISH_STATUS_FAILED,
-				tsOutput::TS_OUTPUT_SRV_BK_DIFF_FLG => "0",
-				tsOutput::TS_OUTPUT_END 			=> $end_datetime,
-				tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> $this->main->options->user_id
-			);
+			if ($result['output_id']) {
 
-	 		$this->tsOutput->update_ts_output($result['output_id'], $dataArray);
-			
-			$logstr = "===============================================" . "\r\n";
-			$logstr .= "ステータス更新完了" . "\r\n";
-			$logstr .= "===============================================" . "\r\n";
-			$this->main->common()->put_process_log_block($logstr);
+				// GMTの現在日時
+				$end_datetime = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
+				$dataArray = array(
+					tsOutput::TS_OUTPUT_STATUS 			=> define::PUBLISH_STATUS_FAILED,
+					tsOutput::TS_OUTPUT_SRV_BK_DIFF_FLG => "0",
+					tsOutput::TS_OUTPUT_END 			=> $end_datetime,
+					tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> $this->main->options->user_id
+				);
 
-			$logstr = "===============================================" . "\r\n";
-			$logstr .= "ロック解除" . "\r\n";
-			$logstr .= "===============================================" . "\r\n";
-			$this->main->common()->put_process_log_block($logstr);
+				// テーブル更新
+		 		$this->tsOutput->update_ts_output($result['output_id'], $dataArray);
+			}
 
-			$this->unlock();//ロック解除
+			// ロック解除処理
+			$this->unlock();
 
 			$logstr = "===============================================" . "\r\n";
-			$logstr .= "公開処理完了" . "\r\n";
+			$logstr .= "公開処理中止" . "\r\n";
 			$logstr .= "===============================================" . "\r\n";
 			$this->main->common()->put_process_log_block($logstr);
 
@@ -660,17 +650,12 @@ class publish
 
 		$result['status'] = true;
 
-
-		$logstr = "===============================================" . "\r\n";
-		$logstr .= "ロック解除" . "\r\n";
-		$logstr .= "===============================================" . "\r\n";
-		$this->main->common()->put_process_log_block($logstr);
-
-		$this->unlock();//ロック解除
+		// ロック解除処理
+		$this->unlock();
 
 		$logstr = "===============================================" . "\r\n";
 		$logstr .= "公開処理完了" . "\r\n";
-		$logstr .= "===============================================" . "\r\n";
+		$logstr .= "===============================================";
 		$this->main->common()->put_process_log_block($logstr);
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ exec_publish end');
@@ -701,21 +686,22 @@ class publish
 		}
 
 		// rsyncコマンド実行時のログを格納
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, $this->realpath_copylog, $ret['output']);
-		file_put_contents($this->realpath_copylog, $ret['output'], FILE_APPEND);		
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, $this->realpath_copylog, $ret['output']);		
 	}
 
 	/**
 	 * rsyncコマンド実行（ディレクトリコピー用）
-	 * コピー元のディレクトリパスの最後にスラッシュを付けると、ディレクトリごとコピーするので注意！
 	 */
 	public function exec_sync_copy($from_realpath, $to_realpath) {
 
+		$logstr = "==========rsyncコマンドによるディレクトリのコピー実行==========";
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+		
 		$command = 'rsync -rtvzP' . ' ' . $from_realpath . ' ' . $to_realpath . ' ' .
 				   '--log-file=' . $this->realpath_tracelog;
 		
-		$logstr = "コマンド：" . $command . "\r\n";
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+		// $logstr = "コマンド --> " . $command;
+		// $this->main->common()->put_process_log_block($logstr);
 
 		$ret = $this->main->common()->command_execute($command, true);
 		if ($ret['return']) {
@@ -724,14 +710,11 @@ class publish
 			$logstr = "**コマンド実行エラー**" . "\r\n";
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
-			throw new \Exception('Command error. ' . $command);
+			throw new \Exception('Command error.');
 		}
 
 		$logstr = "**コマンド実行成功**";
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-
-		// // rsyncコマンド実行時のログを格納
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, $realpath_copylog, $ret['output']);		
 	}
 
 	/**
@@ -779,16 +762,13 @@ class publish
 	 */
 	private function lock(){
 
-		$logstr = "===============================================" . "\r\n";
-		$logstr .= "パブリッシュのロック処理開始" . "\r\n";
-		$logstr .= "===============================================" . "\r\n";
-		$logstr .= "ロックファイルパス：" . $this->path_lockfile;
-		$this->main->common()->put_process_log_block($logstr);
+		$logstr = "==========パブリッシュのロック処理 START==========";
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 	
 		$lockfilepath = $this->path_lockfile;
 		$timeout_limit = 5;
 
-		// 親ディレクトリのチェック
+		// 親ディレクトリのチェック生成
 		if( !@is_dir( dirname( $lockfilepath ) ) ){
 			$this->main->fs()->mkdir_r( dirname( $lockfilepath ) );
 		}
@@ -801,13 +781,11 @@ class publish
 			$i ++;
 			if( $i >= $timeout_limit ){
 
-				$logstr = "===============================================" . "\r\n";
-				$logstr .= "パブリッシュロック中のため処理中断" . "\r\n";
-				$logstr .= "===============================================" . "\r\n";
-				$this->main->common()->put_process_log_block($logstr);
+				$logstr = "==========パブリッシュロック中のため処理中断==========";
+				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 				return false;
-				break;
+				// break;
 			}
 			sleep(1);
 
@@ -815,26 +793,24 @@ class publish
 			clearstatcache();
 		}
 
-
-		$logstr = "-----------------------------------------------" . "\r\n";
-		$logstr .= "パブリッシュのロック作成 START" . "\r\n";
-		$logstr .= "-----------------------------------------------" . "\r\n";
-		$this->main->common()->put_process_log_block($logstr);
+		$logstr = "==========パブリッシュのロック作成 START==========";
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 	
-
 		$src = '';
 		$src .= 'ProcessID='.getmypid()."\r\n";
-		$src .= @date( 'Y-m-d H:i:s' , gmdate() )."\r\n";
+		// $src .= @date( 'Y-m-d H:i:s' , time() )."\r\n";
+		$src .= 'Date='.@gmdate( 'Y-m-d H:i:s' , time() );
 		$rtn = $this->main->fs()->save_file( $lockfilepath , $src );
 
-		$logstr = $src . "\r\n";	
-		$logstr .= "-----------------------------------------------" . "\r\n";
-		$logstr .= "パブリッシュのロック作成 END" . "\r\n";
-		$logstr .= "-----------------------------------------------" . "\r\n";
-		$logstr .= "結果：" . $rtn . "\r\n";
+		$logstr = "ロックファイル作成結果：rtn=" . $rtn . "\r\n";
+		$logstr .= $src;
 		$this->main->common()->put_process_log_block($logstr);
-	
+
+		$logstr = "==========パブリッシュのロック作成 END==========";
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+
 		return	$rtn;
+
 	}//lock()
 
 	/**
@@ -845,7 +821,7 @@ class publish
 	private function is_locked(){
 	
 		$lockfilepath = $this->path_lockfile;
-		$lockfile_expire = 60*60;//有効期限は60分（過ぎた場合はロック解除してもよいこととする）
+		$lockfile_expire = 12*60*60;//有効期限は12時間（過ぎた場合はロック解除してもよいこととする）
 
 		#	PHPのFileStatusCacheをクリア
 		clearstatcache();
@@ -854,18 +830,18 @@ class publish
 			if( ( time() - filemtime($lockfilepath) ) > $lockfile_expire ){
 				#	有効期限を過ぎていたら、ロックは成立する。
 
-				$logstr = "パブリッシュのロック確認 --->>> ロック無し（有効期限の超過）" . "\r\n";
+				$logstr = "※パブリッシュのロック確認 --->>> ロック無し（有効期限の超過）";
 				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 				return false;
 			}
 
-			$logstr = "パブリッシュのロック確認 --->>> ロック中" . "\r\n";
+			$logstr = "※パブリッシュのロック確認 --->>> ロック中";
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 			return true;
 		}
 
-		$logstr = "パブリッシュのロック確認 --->>> ロック無し" . "\r\n";
+		$logstr = "※パブリッシュのロック確認 --->>> ロック無し";
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		return false;
@@ -879,10 +855,8 @@ class publish
 	 */
 	private function unlock(){
 
-		$logstr = "===============================================" . "\r\n";
-		$logstr .= "パブリッシュのロック解除START" . "\r\n";
-		$logstr .= "===============================================";
-		$this->main->common()->put_process_log_block($logstr);
+		$logstr = "==========パブリッシュのロック解除==========";
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		$lockfilepath = $this->path_lockfile;
 

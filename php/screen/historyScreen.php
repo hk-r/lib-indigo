@@ -78,7 +78,7 @@ class historyScreen
 			$ret .= '<tr>'
 				. '<td class="p-center">
 				  <input type="radio" name="target" value="' . $array[tsOutput::OUTPUT_ENTITY_ID_SEQ] . '"/></td>'
-				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_STATUS] . '</td>'
+				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_STATUS_DISP] . '</td>'
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_PUBLISH_TYPE] . '</td>'
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_RESERVE_DISP] . '</td>'
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_COMMIT_HASH] . '</td>'
@@ -179,17 +179,22 @@ class historyScreen
 			// ファイルを変数に格納
 			$filename = $realpath_log . 'pub_copy_' . $dirname . '.log';
 
-$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ $filename:' . $filename);
-			// ファイルを読み込み変数に格納
-			$content = file_get_contents($filename);
+			$content = "";
+			if (file_exists($filename)) {
+				$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ $filename:' . $filename);
+
+				// ファイルを読み込み変数に格納
+				$content = file_get_contents($filename);
+			}
 
 
-		$ret .= '<p>公開開始日時：' . $selected_ret[tsOutput::OUTPUT_ENTITY_START_DISP] . '</p>'
+		$ret .= '<p>User ID：' . $selected_ret[tsOutput::OUTPUT_ENTITY_INSERT_USER_ID] . '</p>'
+			  . '<p>公開開始日時：' . $selected_ret[tsOutput::OUTPUT_ENTITY_START_DISP] . '</p>'
 			  . '<p>公開終了日時：' . $selected_ret[tsOutput::OUTPUT_ENTITY_END_DISP] . '</p>'
-			  . '<p>  User ID  ：' . $selected_ret[tsOutput::OUTPUT_ENTITY_INSERT_USER_ID] . '</p>'
-			  . '<p>-----------------------------------------------------</p>'
-			  . '<p>' . nl2br($content) .'</p>'
-			  . '<p>-----------------------------------------------------</p>';
+			  // . '<p>-----------------------------------------------------</p>'
+			  . '<p>公開同期ログ：</p>'
+			  . '<p>' . nl2br($content) .'</p>';
+			  // . '<p>-----------------------------------------------------</p>';
 
 		$ret .=  '<div class="button_contents_box">'
 			  . '<div class="button_contents">'

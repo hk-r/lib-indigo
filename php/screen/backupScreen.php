@@ -29,7 +29,6 @@ class backupScreen
 
 		$this->main = $main;
 
-		$this->check = new \indigo\check($this->main);
 		$this->tsBackup = new tsBackup($this->main);
 		$this->publish = new \indigo\publish($this->main);
 	}
@@ -51,7 +50,7 @@ class backupScreen
 
 		$ret .= '<div style="overflow:hidden">'
 			. '<form id="form_table" method="post">'
-			. '<input type="hidden" name="selected_id" value="' . $this->main->options->_POST->selected_id . '"/>'
+			// . '<input type="hidden" name="selected_id" value="' . $this->main->options->_POST->selected_id . '"/>'
 			. '<div class="button_contents" style="float:left;">'
 			. '<ul>'
 			. '<li><h4>バックアップ一覧画面</h4></li>'

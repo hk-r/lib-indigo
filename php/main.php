@@ -30,7 +30,7 @@ class main
 	/**
 	 * logパス
 	 */
-	public $process_log_path;
+	public $process_log_path, $error_log_path;
 
 
 	/**
@@ -60,17 +60,47 @@ class main
 		$this->historyScn = new \indigo\screen\historyScreen($this);
 		$this->backupScn = new \indigo\screen\backupScreen($this);
 
+
 		//============================================================
-		// ログ出力用の日付ディレクトリ作成
+		// エラーログ出力登録
 		//============================================================	
 		
-		if (!$this->process_log_path) {
-			// ログファイル名
-			$log_dirname = $this->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT_YMD);
+		// ログパス
+		$this->error_log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->workdir_relativepath . define::PATH_LOG)) . 'error.log';
 
-			// ログパス
-			$this->process_log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->workdir_relativepath . define::PATH_LOG)) . 'log_process_' . $log_dirname . '.log';
-		}
+		register_shutdown_function(
+		    function(){
+		        $e = error_get_last();
+		        // if ($e === null) {
+		        // 	return;
+		        // }
+		        if( $e['type'] == E_ERROR ||
+		        	$e['type'] == E_WARNING ||
+		            $e['type'] == E_PARSE ||
+		            $e['type'] == E_CORE_ERROR ||
+		            $e['type'] == E_COMPILE_ERROR ||
+		            $e['type'] == E_USER_ERROR ){
+		            
+		            echo "エラーが発生しました。管理者にお問い合わせください。";
+
+					$logstr =  "***** エラー発生 *****" . "\r\n";
+					$logstr .= "[ERROR]" . "\r\n";
+					$logstr .= $e['file'] . " in " . $e['line'] . "\r\n";
+					$logstr .= "Error message:" . $e['message'] . "\r\n";
+					$this->common()->put_error_log($logstr);
+		        }
+		    }
+		);
+
+		//============================================================
+		// 通常ログ出力登録
+		//============================================================	
+		
+		// ログファイル名
+		$log_dirname = $this->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT_YMD);
+
+		// ログパス
+		$this->process_log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->workdir_relativepath . define::PATH_LOG)) . 'log_process_' . $log_dirname . '.log';
 
 		// $logstr = "起動パラメタ：" . $this->options;
 		// $this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
@@ -109,9 +139,14 @@ class main
 	 * 
 	 */
 	public function run() {
-	
+		
 		$logstr = "run() start";
 		$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+
+		// 致命的なエラー以外のエラーハンドラ登録
+		set_error_handler(function($errno, $errstr, $errfile, $errline) {
+			throw new \ErrorException($errstr, $errno, 0, $errfile, $errline);
+		});
 
 		// 画面表示
 		$disp = '';  
@@ -134,6 +169,11 @@ class main
 
 		try {
 
+			// エラーデバッグ用
+			// $i = 5/0;
+			// asdf();
+			// $status = define::PUBLISH_STATUS_RUNNNG;
+
 			//============================================================
 			// データベース接続
 			//============================================================
@@ -145,6 +185,7 @@ class main
 			//============================================================
 			$this->pdoMgr->create_table();
 			
+
 			//============================================================
 			// Gitのmaster情報取得
 			//============================================================
@@ -279,20 +320,22 @@ class main
 				if ( !$result->status ) {
 					// 処理失敗の場合、復元処理
 
-					$logstr = "==========即時公開失敗==========";
-					$logstr .= $result->message . "\r\n";
+					$logstr = "※即時公開処理エラー終了";
 					$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-			
 
-					$error_message = $result->message . " ";
+					// 画面アラート用のメッセージ			
+					$error_message = "[即時公開処理]" . $result->message . " ";
+
 					$result = json_decode($this->initScn->do_restore_publish_failure($result->output_id));
 
 					if ( !$result->status ) {
 						// 処理失敗の場合、復元処理
 						
-						$logstr = "==========即時公開の復元処理失敗==========";
-						$logstr .= $result->message . "\r\n";
+						$logstr = "※復元公開処理エラー終了";
 						$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+
+						// 画面アラート用のメッセージ
+						$result->message = $error_message . "[復元公開処理]" . $result->message;
 					}
 
 				}
@@ -321,22 +364,24 @@ class main
 			if ( !$result->status ) {
 				// 処理失敗の場合
 
-				$error_message .=  $result->message;
+				// $error_message .=  $result->message;
 
 				$logstr = "**********************************************************************************" . "\r\n";
 				$logstr .= " ステータスエラー " . "\r\n";
 				$logstr .= "**********************************************************************************" . "\r\n";
 				$this->common()->put_process_log_block($logstr);
 
-				$logstr = $error_message . "\r\n";
+				$logstr = $result->message . "\r\n";
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+
+				$msg = nl2br($result->message);
 
 
 				// エラーメッセージ表示
 				$dialog_disp = '
 				<script type="text/javascript">
-					console.error(' . "'" . $error_message . "'" . ');
-					alert(' . "'" . $error_message . "'" . ');
+					console.error(' . "'" . $result->message . "'" . ');
+					alert(' . "'" . $msg . "'" . ');
 				</script>';
 
 			} else {
@@ -376,25 +421,44 @@ class main
 			// 画面ロック用
 			$disp_lock = '<div id="loader-bg"><div id="loading"></div></div>';
 
+		} catch (\ErrorException $e) {
+
+		    echo "例外エラーが発生しました。管理者にお問い合わせください。";
+
+			$logstr =  "***** エラー発生 *****" . "\r\n";
+			$logstr .= "[ERROR]" . "\r\n";
+			$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
+			$logstr .= "Error message:" . $e->getMessage() . "\r\n";
+			$this->common()->put_error_log($logstr);
+
 		} catch (\Exception $e) {
 
 			$logstr = "** run() 例外キャッチ **" . "\r\n";
 			$logstr .= $e->getMessage() . "\r\n";
 			$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
-			// エラーメッセージ表示
-			$dialog_disp = '
-			<script type="text/javascript">
-				console.error(' . "'" . $e->getMessage() . "'" . ');
-				alert(' . "'" . $e->getMessage() . "'" . ');
-			</script>';
+			echo $e->getMessage();
+
+			// // エラーメッセージ表示
+			// $dialog_disp = '
+			// <script type="text/javascript">
+			// 	console.error(' . "'" . $e->getMessage() . "'" . ');
+			// 	alert(' . "'" . $e->getMessage() . "'" . ');
+			// </script>';
+
+			$logstr =  "***** 例外エラー発生 *****" . "\r\n";
+			$logstr .= "[ERROR]" . "\r\n";
+			$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
+			$logstr .= "Error message:" . $e->getMessage() . "\r\n";
+			$this->common()->put_error_log($logstr);
 
 			// データベース接続を閉じる
 			$this->pdoMgr->close($this->dbh);
 
-			$this->common()->put_process_log('■ run error end');
+			$this->common()->put_process_log(__METHOD__, __LINE__, '■ run error end');
 
-			return $dialog_disp;
+			// return $dialog_disp;
+			return;
 		}
 		
 		// データベース接続を閉じる
@@ -618,5 +682,10 @@ class main
 	// 	return error_log( $str, 3, $this->process_log_path );
 	// }
 
+
+	function my_error_handler ( $errno, $errstr, $errfile, $errline, $errcontext ) {
+	     // echo "[$errno] $errstr $errfile($errline)\n";
+		echo "エラー！";
+	}
 
 }

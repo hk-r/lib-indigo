@@ -84,7 +84,8 @@ class tsBackup
 				LEFT OUTER JOIN TS_OUTPUT
 					ON TS_BACKUP." 	. self::TS_BACKUP_OUTPUT_ID . " = TS_OUTPUT." . tsOutput::TS_OUTPUT_ID_SEQ .
 				" WHERE TS_BACKUP." . self::TS_BACKUP_GEN_DELETE_FLG . " = '0' " .
-				" ORDER BY TS_BACKUP." . self::TS_BACKUP_DATETIME . " DESC";
+				" ORDER BY TS_BACKUP." . self::TS_BACKUP_DATETIME . " DESC 
+				LIMIT " . define::LIMIT_LIST_RECORD;
 
 		// SELECT実行
 		$ret_array = $this->main->pdoMgr()->select($this->main->get_dbh(), $select_sql);

@@ -72,4 +72,6 @@ class define
 	// gitリモート名
 	const GIT_REMOTE_NAME = 'origin';
 
+	// gitリモート名
+	const LIMIT_LIST_RECORD = 1000;
 }

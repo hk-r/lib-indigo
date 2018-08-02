@@ -44,6 +44,7 @@ class tsOutput
 	const OUTPUT_ENTITY_PUBLISH_TYPE 	= 'publish_type';			// 公開種別
 	const OUTPUT_ENTITY_COMMENT 		= 'comment';				// コメント
 	const OUTPUT_ENTITY_STATUS 			= 'status';					// 状態
+	const OUTPUT_ENTITY_STATUS_DISP		= 'status_disp';			// 状態（表示用）
 	const OUTPUT_ENTITY_SRV_BK_DIFF_FLG = 'srv_bk_diff_flg';		// 本番と最新バックアップの差分有無
 	const OUTPUT_ENTITY_START_GMT 		= 'start_datetime_gmt';		// 公開処理開始日時（GMT日時）
 	const OUTPUT_ENTITY_START 			= 'start_datetime';			// 公開処理開始日時（タイムゾーン日時）
@@ -82,7 +83,8 @@ class tsOutput
 		$select_sql = "
 				SELECT * FROM TS_OUTPUT
 				WHERE " . self::TS_OUTPUT_GEN_DELETE_FLG . " = '0' 
-				ORDER BY " . self::TS_OUTPUT_ID_SEQ . " DESC";
+				ORDER BY " . self::TS_OUTPUT_ID_SEQ . " DESC 
+				LIMIT " . define::LIMIT_LIST_RECORD;
 
 		// SELECT実行
 		$ret_array = $this->main->pdoMgr()->select($this->main->get_dbh(), $select_sql);
@@ -106,9 +108,9 @@ class tsOutput
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_output start');
 
-		$ret_array = array();
+		$ret_array = null;
 
-		$conv_ret_array = array();
+		$conv_ret_array = null;
 
 		if (!$selected_id) {
 			throw new \Exception('選択されたIDが取得できませんでした。 ');
@@ -119,7 +121,7 @@ class tsOutput
 			WHERE " . self::TS_OUTPUT_ID_SEQ . " = " . $selected_id . ";";
 
 			// SELECT実行
-			$ret_array = array_shift($this->main->pdoMgr()->select($this->main->get_dbh(), $select_sql));
+			$ret_array = $this->main->pdoMgr()->selectOne($this->main->get_dbh(), $select_sql);
 
 			$conv_ret_array = $this->convert_ts_output_entity($ret_array);
 		}
@@ -299,7 +301,9 @@ class tsOutput
 		// コメント
 		$entity[self::OUTPUT_ENTITY_COMMENT] = $array[self::TS_OUTPUT_COMMENT];
 		// 状態
-		$entity[self::OUTPUT_ENTITY_STATUS] = $this->convert_status($array[self::TS_OUTPUT_STATUS]);
+		$entity[self::OUTPUT_ENTITY_STATUS] = $array[self::TS_OUTPUT_STATUS];
+		// 状態
+		$entity[self::OUTPUT_ENTITY_STATUS_DISP] = $this->convert_status($array[self::TS_OUTPUT_STATUS]);
 		// 公開種別
 		$entity[self::OUTPUT_ENTITY_PUBLISH_TYPE] = $this->main->common()->convert_publish_type($array[self::TS_OUTPUT_PUBLISH_TYPE]);
 		// 登録ユーザID
@@ -323,7 +327,7 @@ class tsOutput
 		$ret = '';
 
 		if ($status == define::PUBLISH_STATUS_RUNNING) {
-			$ret =  '？（処理中）';
+			$ret =  '▲（処理中）';
 		} else if ($status == define::PUBLISH_STATUS_SUCCESS) {
 			$ret =  '〇（公開成功）';
 		} else if ($status == define::PUBLISH_STATUS_ALERT) {

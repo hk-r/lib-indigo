@@ -51,8 +51,8 @@ class common
 	 */
 	public function command_execute($command, $captureStderr) {
 	
-		$this->put_process_log(__METHOD__, __LINE__, "■command_execute start");
-		$this->put_process_log(__METHOD__, __LINE__, "　□command：" . $command);
+		$this->put_process_log(__METHOD__, __LINE__, "command_execute start");
+		$this->put_process_log(__METHOD__, __LINE__, "command --> " . $command);
 	    $output = array();
 	    $return = 0;
 
@@ -65,7 +65,7 @@ class common
 
 		// $this->put_process_log(__METHOD__, __LINE__, '■ execute end');
 
-		$this->put_process_log(__METHOD__, __LINE__, "■command_execute end");
+		$this->put_process_log(__METHOD__, __LINE__, "command_execute end");
 
 	    return array('output' => $output, 'return' => $return);
 	}
@@ -322,11 +322,9 @@ class common
 
 
 	/**
-	 * response status code を取得する。
+	 * 通常ログを出力する。
 	 *
-	 * `$px->set_status()` で登録した情報を取り出します。
-	 *
-	 * @return int ステータスコード (100〜599の間の数値)
+	 * @return ログ出力
 	 */
 	public function put_process_log($method, $line, $text){
 		
@@ -343,14 +341,31 @@ class common
 
 		return error_log( $str, 3, $this->main->process_log_path );
 	}
+	/**
+	 * エラーログを出力する。
+	 *
+	 * @return ログ出力
+	 */
+	public function put_error_log($text){
+		
+		$datetime = $this->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 
+		$str = "[" . $datetime . "]" . " " .
+			   // "[pid:" . getmypid() . "]" . " " .
+			   // "[userid:" . $this->main->options->user_id . "]" . " " .
+			   // "[" . $method . "]" . " " .
+			   // "[line:" . $line . "]" . " " .
+			   $text . "\r\n";
+
+		// file_put_contents($path, $str, FILE_APPEND);
+
+		return error_log( $str, 3, $this->main->error_log_path );
+	}
 
 	/**
-	 * response status code を取得する。
+	 * 区切り用のログを出力する。（日時などの詳細を出力しない）
 	 *
-	 * `$px->set_status()` で登録した情報を取り出します。
-	 *
-	 * @return int ステータスコード (100〜599の間の数値)
+	 * @return ログ出力
 	 */
 	public function put_process_log_block($text){
 		

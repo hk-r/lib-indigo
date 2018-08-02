@@ -144,14 +144,14 @@ class tsReserve
 
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_reserve start');
-		$this->main->common()->put_process_log('$selected_id：' . $selected_id);
-		$ret_array = array();
+
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '□selected_id：' . $selected_id);
+		$ret_array = null;
 
 		$conv_ret_array = array();
 
 		if (!$selected_id) {
-			$this->main->common()->put_process_log('公開予約IDが取得できませんでした。');
-			throw new \Exception('選択されたIDが取得できませんでした。 ');
+			throw new \Exception('対象の公開予約IDが取得できませんでした。 ');
 		} else {
 
 			// SELECT文作成
