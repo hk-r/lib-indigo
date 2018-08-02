@@ -82,6 +82,8 @@ class main
 		            $e['type'] == E_USER_ERROR ){
 		            
 		            echo "エラーが発生しました。管理者にお問い合わせください。";
+					echo $e['file'] . " in " . $e['line'];
+					echo "Error message:" . $e['message'];
 
 					$logstr =  "***** エラー発生 *****" . "\r\n";
 					$logstr .= "[ERROR]" . "\r\n";
