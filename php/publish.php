@@ -281,6 +281,8 @@ class publish
 					$backup_id = null;
 					$backup_dirname = '';
 
+					// 公開処理結果データ
+					$output_dataArray = null;
 
  					if (($publish_type == define::PUBLISH_TYPE_MANUAL_RESTORE) ||
 						($publish_type == define::PUBLISH_TYPE_AUTO_RESTORE)) {
@@ -343,7 +345,7 @@ class publish
 						}
 
 
-						$dataArray = array(
+						$output_dataArray = array(
 
 							tsOutput::TS_OUTPUT_RESERVE_ID 		=> null,
 							tsOutput::TS_OUTPUT_BACKUP_ID		=> $backup_id,
@@ -366,7 +368,7 @@ class publish
 
 					} elseif ($publish_type == define::PUBLISH_TYPE_IMMEDIATE) {
 
-						$dataArray = array(
+						$output_dataArray = array(
 
 							tsOutput::TS_OUTPUT_RESERVE_ID 		=> null,
 							tsOutput::TS_OUTPUT_BACKUP_ID		=> null,
@@ -427,7 +429,7 @@ class publish
 					// );
 
 					// 公開処理結果テーブルの登録（インサートしたシーケンスIDをリターン値で取得）
-					$result['output_id'] = $this->tsOutput->insert_ts_output($dataArray);
+					$result['output_id'] = $this->tsOutput->insert_ts_output($output_dataArray);
 
 
 			 		/* 変更をコミットする */
