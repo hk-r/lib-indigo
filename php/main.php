@@ -35,7 +35,7 @@ class main
 
 	/**
 	 * コンストラクタ
-	 * @param $options = オプション
+	 * @param $this->options = オプション
 	 */
 	public function __construct($options) {
 
@@ -61,12 +61,8 @@ class main
 		$this->backupScn = new \indigo\screen\backupScreen($this);
 
 
-		//============================================================
-		// エラーログ出力登録
-		//============================================================	
-		
 		// ログパス
-		$this->error_log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir)) . 'error.log';
+		$this->error_log_path = $this->realpath_array->realpath_log . 'error.log';
 
 		register_shutdown_function(
 		    function(){
@@ -83,65 +79,119 @@ class main
 		            
 		            // echo gmdate() . " ";
 		            echo "※エラーが発生しました。管理者にお問い合わせください。";
-					echo $e['file'] . " in " . $e['line'] . "\r\n";
-					echo "Error message:" . $e['message'] . "\r\n";
-					echo $this->process_log_path;
 
-					$logstr =  "***** エラー発生 *****" . "\r\n";
-					$logstr .= "[ERROR]" . "\r\n";
-					$logstr .= $e['file'] . " in " . $e['line'] . "\r\n";
-					$logstr .= "Error message:" . $e['message'] . "\r\n";
-					$this->common()->put_error_log($logstr);
+					if (file_exists($this->error_log_path)) {
+						$logstr =  "***** エラー発生 *****" . "\r\n";
+						$logstr .= "[ERROR]" . "\r\n";
+						$logstr .= $e['file'] . " in " . $e['line'] . "\r\n";
+						$logstr .= "Error message:" . $e['message'] . "\r\n";
+						$this->common()->put_error_log($logstr);
+					} else {
+						echo $e['file'] . " in " . $e['line'] . "\r\n";
+						echo "Error message:" . $e['message'] . "\r\n";
+					}
+
 		        }
 		    }
 		);
 
+		//============================================================
+		// エラーログ出力登録
+		//============================================================	
 
-		// // 作業用ディレクトリの絶対パスを取得
-		// $this->realpath_array = json_decode($this->common()->get_realpath_workdir($this->options, $this->realpath_array));
 
 		// 本番環境ディレクトリの絶対パスを取得。（配列1番目のサーバを設定）
-		foreach ( (array)$options->server as $server ) {
+		foreach ( (array)$this->options->server as $server ) {
 			$realpath_array['realpath_server'] = $this->fs()->normalize_path($this->fs()->get_realpath($server->real_path . "/"));
 			break; // 現時点では最初の1つのみ有効なのでブレイク
 		}
 
 		// backupディレクトリの絶対パスを取得。
-		$realpath_array['realpath_backup'] = $this->fs()->normalize_path($this->fs()->get_realpath($options->realpath_workdir . define::PATH_BACKUP));
+		$realpath_array['realpath_backup'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_BACKUP));
 
 		// waitingディレクトリの絶対パスを取得。
-		$realpath_array['realpath_waiting'] = $this->fs()->normalize_path($this->fs()->get_realpath($options->realpath_workdir . define::PATH_WAITING));
+		$realpath_array['realpath_waiting'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_WAITING));
 
 		// runningディレクトリの絶対パスを取得。
-		$realpath_array['realpath_running'] = $this->fs()->normalize_path($this->fs()->get_realpath($options->realpath_workdir . define::PATH_RUNNING));
+		$realpath_array['realpath_running'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_RUNNING));
 
 		// releasedディレクトリの絶対パスを取得。
-		$realpath_array['realpath_released'] = $this->fs()->normalize_path($this->fs()->get_realpath($options->realpath_workdir . define::PATH_RELEASED));
+		$realpath_array['realpath_released'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_RELEASED));
 
 		// logディレクトリの絶対パスを取得。
-		$realpath_array['realpath_log'] = $this->fs()->normalize_path($this->fs()->get_realpath($options->realpath_workdir . define::PATH_LOG));
+		$realpath_array['realpath_log'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_LOG));
 
+		// 変数へログ情報を格納
 		$this->realpath_array = json_decode(json_encode($realpath_array));
+
+		$current_dir = realpath('.');
+		if (chdir($this->options->realpath_workdir)) {
+
+			// logファイルディレクトリが存在しない場合は作成
+			$this->fs()->mkdir($this->realpath_array->realpath_log);
+			// backupディレクトリが存在しない場合は作成
+			$this->fs()->mkdir($this->realpath_array->realpath_backup);
+			// waitingディレクトリが存在しない場合は作成
+			$this->fs()->mkdir($this->realpath_array->realpath_waiting);
+			// runningディレクトリが存在しない場合は作成
+			$this->fs()->mkdir($this->realpath_array->realpath_running);
+			// releasedディレクトリが存在しない場合は作成
+			$this->fs()->mkdir($this->realpath_array->realpath_released);
+
+		} else {
+			// ディレクトリ移動に失敗
+			chdir($current_dir);
+			throw new \Exception('Move to indigo work directory failed.');
+		}
+
+		chdir($current_dir);
+
+
+		// // 作業用ディレクトリの絶対パスを取得
+		// $this->realpath_array = json_decode($this->common()->get_realpath_workdir($this->options, $this->realpath_array));
+
+		// // 本番環境ディレクトリの絶対パスを取得。（配列1番目のサーバを設定）
+		// foreach ( (array)$this->options->server as $server ) {
+		// 	$realpath_array['realpath_server'] = $this->fs()->normalize_path($this->fs()->get_realpath($server->real_path . "/"));
+		// 	break; // 現時点では最初の1つのみ有効なのでブレイク
+		// }
+
+		// // backupディレクトリの絶対パスを取得。
+		// $realpath_array['realpath_backup'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_BACKUP));
+
+		// // waitingディレクトリの絶対パスを取得。
+		// $realpath_array['realpath_waiting'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_WAITING));
+
+		// // runningディレクトリの絶対パスを取得。
+		// $realpath_array['realpath_running'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_RUNNING));
+
+		// // releasedディレクトリの絶対パスを取得。
+		// $realpath_array['realpath_released'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_RELEASED));
+
+		// // logディレクトリの絶対パスを取得。
+		// $realpath_array['realpath_log'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_LOG));
+
+		// $this->realpath_array = json_decode(json_encode($realpath_array));
 
 		//============================================================
 		// 作業用ディレクトリの作成（既にある場合は作成しない）
 		//============================================================
 		// $this->create_indigo_work_dir();
 
-		// logファイルディレクトリが存在しない場合は作成
-		$this->fs()->mkdir($this->realpath_array->realpath_log);
+		// // logファイルディレクトリが存在しない場合は作成
+		// $this->fs()->mkdir($this->realpath_array->realpath_log);
 
-		// backupディレクトリが存在しない場合は作成
-		$this->fs()->mkdir($this->realpath_array->realpath_backup);
+		// // backupディレクトリが存在しない場合は作成
+		// $this->fs()->mkdir($this->realpath_array->realpath_backup);
 
-		// waitingディレクトリが存在しない場合は作成
-		$this->fs()->mkdir($this->realpath_array->realpath_waiting);
+		// // waitingディレクトリが存在しない場合は作成
+		// $this->fs()->mkdir($this->realpath_array->realpath_waiting);
 
-		// runningディレクトリが存在しない場合は作成
-		$this->fs()->mkdir($this->realpath_array->realpath_running);
+		// // runningディレクトリが存在しない場合は作成
+		// $this->fs()->mkdir($this->realpath_array->realpath_running);
 
-		// releasedディレクトリが存在しない場合は作成
-		$this->fs()->mkdir($this->realpath_array->realpath_released);
+		// // releasedディレクトリが存在しない場合は作成
+		// $this->fs()->mkdir($this->realpath_array->realpath_released);
 
 
 		// $logstr = "realpath_server：" . $this->realpath_array->realpath_server . "\r\n";
@@ -160,11 +210,18 @@ class main
 		$log_dirname = $this->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT_YMD);
 
 		// ログパス
-		$this->process_log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_LOG)) . 'log_process_' . $log_dirname . '.log';
+		$this->process_log_path = $this->realpath_array->realpath_log . 'log_process_' . $log_dirname . '.log';
 
 		// $logstr = "起動パラメタ：" . $this->options;
 		// $this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
+		$logstr = "realpath_server：" . $this->realpath_array->realpath_server . "\r\n";
+		$logstr .= "realpath_backup：" . $this->realpath_array->realpath_backup . "\r\n";
+		$logstr .= "realpath_waiting：" . $this->realpath_array->realpath_waiting . "\r\n";
+		$logstr .= "realpath_running：" . $this->realpath_array->realpath_running . "\r\n";
+		$logstr .= "realpath_released：" . $this->realpath_array->realpath_released . "\r\n";
+		$logstr .= "realpath_log：" . $this->realpath_array->realpath_log;
+		$this->common()->put_process_log_block($logstr);
 
 
 	}
@@ -469,13 +526,20 @@ class main
 
 		} catch (\ErrorException $e) {
 
-		    echo "例外エラーが発生しました。管理者にお問い合わせください。";
+		    echo "例外エラーが発生しました。管理者にお問い合わせください。". "\r\n";
+		    // echo $this->error_log_path. "\r\n";
+		    // echo file_exists($this->error_log_path). "\r\n";
+			if (file_exists($this->error_log_path)) {
+				$logstr =  "***** エラー発生 *****" . "\r\n";
+				$logstr .= "[ERROR]" . "\r\n";
+				$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
+				$logstr .= "Error message:" . $e->getMessage() . "\r\n";
+				$this->common()->put_error_log($logstr);
+			} else {
+				echo $e->getFile() . " in " . $e->getLine() . "\r\n";
+				echo "Error message:" . $e->getMessage() . "\r\n";
+			}
 
-			$logstr =  "***** エラー発生 *****" . "\r\n";
-			$logstr .= "[ERROR]" . "\r\n";
-			$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
-			$logstr .= "Error message:" . $e->getMessage() . "\r\n";
-			$this->common()->put_error_log($logstr);
 
 		} catch (\Exception $e) {
 
