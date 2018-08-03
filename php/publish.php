@@ -341,6 +341,51 @@ class publish
 							// エラー処理
 							throw new \Exception('Backup dirname not found.');
 						}
+
+
+						$dataArray = array(
+
+							tsOutput::TS_OUTPUT_RESERVE_ID 		=> null,
+							tsOutput::TS_OUTPUT_BACKUP_ID		=> $backup_id,
+							tsOutput::TS_OUTPUT_RESERVE 		=> null,
+							tsOutput::TS_OUTPUT_BRANCH 			=> null,
+							tsOutput::TS_OUTPUT_COMMIT_HASH 	=> null,
+							tsOutput::TS_OUTPUT_COMMENT 		=> null,
+							tsOutput::TS_OUTPUT_PUBLISH_TYPE 	=> $publish_type,
+							tsOutput::TS_OUTPUT_STATUS 			=> define::PUBLISH_STATUS_RUNNING,
+							tsOutput::TS_OUTPUT_SRV_BK_DIFF_FLG => null,
+							tsOutput::TS_OUTPUT_START 			=> $start_datetime,
+							tsOutput::TS_OUTPUT_END 			=> null,
+							tsOutput::TS_OUTPUT_GEN_DELETE_FLG 	=> define::DELETE_FLG_OFF,
+							tsOutput::TS_OUTPUT_GEN_DELETE 		=> null,
+							tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
+							tsOutput::TS_OUTPUT_INSERT_USER_ID 	=> $this->main->options->user_id,
+							tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
+							tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> null
+						);
+
+					} elseif ($publish_type == define::PUBLISH_TYPE_IMMEDIATE) {
+
+						$dataArray = array(
+
+							tsOutput::TS_OUTPUT_RESERVE_ID 		=> null,
+							tsOutput::TS_OUTPUT_BACKUP_ID		=> null,
+							tsOutput::TS_OUTPUT_RESERVE 		=> null,
+							tsOutput::TS_OUTPUT_BRANCH 			=> $this->main->options->_POST->branch_select_value,
+							tsOutput::TS_OUTPUT_COMMIT_HASH 	=> $this->main->options->_POST->commit_hash,
+							tsOutput::TS_OUTPUT_COMMENT 		=> $this->main->options->_POST->comment,
+							tsOutput::TS_OUTPUT_PUBLISH_TYPE 	=> $publish_type,
+							tsOutput::TS_OUTPUT_STATUS 			=> define::PUBLISH_STATUS_RUNNING,
+							tsOutput::TS_OUTPUT_SRV_BK_DIFF_FLG => null,
+							tsOutput::TS_OUTPUT_START 			=> $start_datetime,
+							tsOutput::TS_OUTPUT_END 			=> null,
+							tsOutput::TS_OUTPUT_GEN_DELETE_FLG 	=> define::DELETE_FLG_OFF,
+							tsOutput::TS_OUTPUT_GEN_DELETE 		=> null,
+							tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
+							tsOutput::TS_OUTPUT_INSERT_USER_ID 	=> $this->main->options->user_id,
+							tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
+							tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> null
+						);
 					}
 
 					/* トランザクションを開始する。オートコミットがオフになる */
@@ -348,7 +393,6 @@ class publish
 
 					$logstr = "==========トランザクション開始==========";
 					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-
 
 					//============================================================
 					// 公開処理結果テーブルの登録処理
@@ -359,28 +403,28 @@ class publish
 					// 現在時刻
 					$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 
-					$reserve_id = null;
+					// $reserve_id = null;
 
-					$dataArray = array(
+					// $dataArray = array(
 
-						tsOutput::TS_OUTPUT_RESERVE_ID 		=> null,
-						tsOutput::TS_OUTPUT_BACKUP_ID		=> $backup_id,
-						tsOutput::TS_OUTPUT_RESERVE 		=> null,
-						tsOutput::TS_OUTPUT_BRANCH 			=> $this->main->options->_POST->branch_select_value,
-						tsOutput::TS_OUTPUT_COMMIT_HASH 	=> $this->main->options->_POST->commit_hash,
-						tsOutput::TS_OUTPUT_COMMENT 		=> $this->main->options->_POST->comment,
-						tsOutput::TS_OUTPUT_PUBLISH_TYPE 	=> $publish_type,
-						tsOutput::TS_OUTPUT_STATUS 			=> define::PUBLISH_STATUS_RUNNING,
-						tsOutput::TS_OUTPUT_SRV_BK_DIFF_FLG => null,
-						tsOutput::TS_OUTPUT_START 			=> $start_datetime,
-						tsOutput::TS_OUTPUT_END 			=> null,
-						tsOutput::TS_OUTPUT_GEN_DELETE_FLG 	=> define::DELETE_FLG_OFF,
-						tsOutput::TS_OUTPUT_GEN_DELETE 		=> null,
-						tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
-						tsOutput::TS_OUTPUT_INSERT_USER_ID 	=> $this->main->options->user_id,
-						tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
-						tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> null
-					);
+					// 	tsOutput::TS_OUTPUT_RESERVE_ID 		=> null,
+					// 	tsOutput::TS_OUTPUT_BACKUP_ID		=> $backup_id,
+					// 	tsOutput::TS_OUTPUT_RESERVE 		=> null,
+					// 	tsOutput::TS_OUTPUT_BRANCH 			=> $this->main->options->_POST->branch_select_value,
+					// 	tsOutput::TS_OUTPUT_COMMIT_HASH 	=> $this->main->options->_POST->commit_hash,
+					// 	tsOutput::TS_OUTPUT_COMMENT 		=> $this->main->options->_POST->comment,
+					// 	tsOutput::TS_OUTPUT_PUBLISH_TYPE 	=> $publish_type,
+					// 	tsOutput::TS_OUTPUT_STATUS 			=> define::PUBLISH_STATUS_RUNNING,
+					// 	tsOutput::TS_OUTPUT_SRV_BK_DIFF_FLG => null,
+					// 	tsOutput::TS_OUTPUT_START 			=> $start_datetime,
+					// 	tsOutput::TS_OUTPUT_END 			=> null,
+					// 	tsOutput::TS_OUTPUT_GEN_DELETE_FLG 	=> define::DELETE_FLG_OFF,
+					// 	tsOutput::TS_OUTPUT_GEN_DELETE 		=> null,
+					// 	tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
+					// 	tsOutput::TS_OUTPUT_INSERT_USER_ID 	=> $this->main->options->user_id,
+					// 	tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
+					// 	tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> null
+					// );
 
 					// 公開処理結果テーブルの登録（インサートしたシーケンスIDをリターン値で取得）
 					$result['output_id'] = $this->tsOutput->insert_ts_output($dataArray);
@@ -510,15 +554,13 @@ class publish
 		    }
 
 			try {
-
-				$logstr = "===============================================" . "\r\n";
-				$logstr .= "公開処理結果テーブルのトランザクション処理開始" . "\r\n";
-				$logstr .= "===============================================" . "\r\n";
-				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-							
+			
 				/* トランザクションを開始する。オートコミットがオフになる */
 				$this->main->get_dbh()->beginTransaction();
 
+				$logstr = "==========トランザクション開始==========";
+				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+				
 				//============================================================
 				// 公開処理結果テーブルの更新処理（成功）
 				//============================================================
@@ -551,38 +593,37 @@ class publish
 				$from_realpath = $realpath_array->realpath_running . $running_dirname . '/';
 				$to_realpath = $realpath_array->realpath_server;
 
-				$logstr = "runningディレクトリ：" . $from_realpath . "\r\n";
-				$logstr .= "本番環境ディレクトリ：" . $to_realpath . "\r\n";
-				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+				$logstr = "runningディレクトリ --> " . $from_realpath . "\r\n";
+				$logstr .= "本番環境ディレクトリ --> " . $to_realpath;
+				$this->main->common()->put_process_log_block($logstr);
 
 				$this->exec_sync($this->main->options->ignore, $from_realpath, $to_realpath);
 
 				//============================================================
 				// 公開済みのソースを「running」ディレクトリから「released」ディレクトリへ移動
 				//============================================================
-				$logstr = "===============================================" . "\r\n";
-				$logstr .= "runningディレクトリからreleasedディレクトリへ移動" . "\r\n";
-				$logstr .= "===============================================" . "\r\n";
-		 		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);	
+				$logstr = "==========runningディレクトリからreleasedディレクトリへ移動==========";
+				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 				$from_realpath = $realpath_array->realpath_running . $running_dirname . '/';
 				$to_realpath = $realpath_array->realpath_released . $running_dirname . '/';
 
-				$logstr .= "runningディレクトリ：" . $from_realpath . "\r\n";
-				$logstr .= "releasedディレクトリ：" . $to_realpath . "\r\n";
-				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+				$logstr = "runningディレクトリ --> " . $from_realpath . "\r\n";
+				$logstr .= "releasedディレクトリ： --> " . $to_realpath;
+				$this->main->common()->put_process_log_block($logstr);
 
+				// rsyncによるディレクトリの移動処理
 				$this->exec_sync_move($from_realpath, $to_realpath);
-
-
-				$logstr = "===============================================" . "\r\n";
-				$logstr .= "公開処理結果テーブルのコミット処理実行" . "\r\n";
-				$logstr .= "===============================================" . "\r\n";
-				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		 		/* 変更をコミットする */
 				$this->main->get_dbh()->commit();
 				/* データベース接続はオートコミットモードに戻る */
+
+				$logstr = "==========コミット処理実行==========";
+				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+
+				// $logstr = "バックアップテーブル登録ID：" . $result['backup_id'];
+				// $this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		    } catch (\Exception $e) {
 		    
@@ -720,9 +761,7 @@ class publish
 	 */
 	public function exec_sync_move($from_realpath, $to_realpath) {
 
-		$logstr = "-----------------------------------------------" . "\r\n";
-		$logstr .= "ディレクトリ移動" . "\r\n";
-		$logstr .= "-----------------------------------------------" . "\r\n";
+		$logstr = "==========rsyncコマンドによるディレクトリの移動実行==========";
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		$command = 'rsync -rtvzP --remove-source-files ' . $from_realpath . ' ' . $to_realpath . ' ' .
@@ -731,16 +770,22 @@ class publish
 		$ret = $this->main->common()->command_execute($command, true);
 		if ($ret['return']) {
 			// 戻り値が0以外の場合
-			throw new \Exception('Command error. [command]' . $command);
+
+			$logstr = "**移動コマンド実行エラー**" . "\r\n";
+			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+
+			throw new \Exception('Command error.');
 		}
 
-		// // rsyncコマンド実行時のログを格納
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, $realpath_copylog, $ret['output']);	
+		$logstr = "**移動コマンド実行成功**";
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
-		$logstr = "-----------------------------------------------" . "\r\n";
-		$logstr .= "移動元の空ディレクトリの削除（サブディレクトリも含む）" . "\r\n";
-		$logstr .= "-----------------------------------------------" . "\r\n";
-		$logstr .= "移動元ディレクトリ：" . $from_realpath . "\r\n";
+
+		$logstr = "==========rsyncコマンドによる移動元の空ディレクトリ削除==========";
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+
+
+		$logstr .= "移動元ディレクトリ --> " . $from_realpath;
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		$command = 'find ' .  $from_realpath . ' -type d -empty -delete' ;
@@ -748,8 +793,15 @@ class publish
 		$ret = $this->main->common()->command_execute($command, true);
 		if ($ret['return']) {
 			// 戻り値が0以外の場合
-			throw new \Exception('Command error. [command]' . $command);
+
+			$logstr = "**削除コマンド実行エラー**" . "\r\n";
+			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+
+			throw new \Exception('Command error.');
 		}
+
+		$logstr = "**削除コマンド実行成功**";
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 	}
 
 
