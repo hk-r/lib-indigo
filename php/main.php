@@ -619,7 +619,7 @@ class main
 	// 	$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 	// 	return $ret;
-	}
+	// }
 
 
 	/**
@@ -702,11 +702,5 @@ class main
 
 	// 	return error_log( $str, 3, $this->process_log_path );
 	// }
-
-
-	function my_error_handler ( $errno, $errstr, $errfile, $errline, $errcontext ) {
-	     // echo "[$errno] $errstr $errfile($errline)\n";
-		echo "エラー！";
-	}
 
 }
