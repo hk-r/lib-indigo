@@ -99,7 +99,23 @@ class main
 		//============================================================
 		// 作業用ディレクトリの作成（既にある場合は作成しない）
 		//============================================================
-		$this->create_indigo_work_dir();
+		// $this->create_indigo_work_dir();
+
+		// logファイルディレクトリが存在しない場合は作成
+		$this->fs()->mkdir($this->realpath_array->realpath_log);
+
+		// backupディレクトリが存在しない場合は作成
+		$this->fs()->mkdir($this->realpath_array->realpath_backup);
+
+		// waitingディレクトリが存在しない場合は作成
+		$this->fs()->mkdir($this->realpath_array->realpath_waiting);
+
+		// runningディレクトリが存在しない場合は作成
+		$this->fs()->mkdir($this->realpath_array->realpath_running);
+
+		// releasedディレクトリが存在しない場合は作成
+		$this->fs()->mkdir($this->realpath_array->realpath_released);
+
 
 		//============================================================
 		// 通常ログ出力登録
@@ -561,48 +577,48 @@ class main
 		return;
     }
 
-	/**
-	 * 作業用ディレクトリの作成（既にある場合は作成しない）
-	 *	
-	 * @return ソート後の配列
-	 */
-	function create_indigo_work_dir() {
+	// /**
+	//  * 作業用ディレクトリの作成（既にある場合は作成しない）
+	//  *	
+	//  * @return ソート後の配列
+	//  */
+	// function create_indigo_work_dir() {
 	
-		$logstr = "create_indigo_work_dir() start";
-		$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+	// 	$logstr = "create_indigo_work_dir() start";
+	// 	$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
-		$ret = true;
+	// 	$ret = true;
 
-		// logファイルディレクトリが存在しない場合は作成
-		if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_log) ) {
-			$ret = false;
-		}
+	// 	// logファイルディレクトリが存在しない場合は作成
+	// 	if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_log) ) {
+	// 		$ret = false;
+	// 	}
 
-		// backupディレクトリが存在しない場合は作成
-		if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_backup) ) {
-			$ret = false;
-		}
+	// 	// backupディレクトリが存在しない場合は作成
+	// 	if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_backup) ) {
+	// 		$ret = false;
+	// 	}
 
-		// waitingディレクトリが存在しない場合は作成
-		if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_waiting) ) {
-			$ret = false;
-		}
+	// 	// waitingディレクトリが存在しない場合は作成
+	// 	if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_waiting) ) {
+	// 		$ret = false;
+	// 	}
 
-		// runningディレクトリが存在しない場合は作成
-		if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_running) ) {
-			$ret = false;
-		}
+	// 	// runningディレクトリが存在しない場合は作成
+	// 	if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_running) ) {
+	// 		$ret = false;
+	// 	}
 
-		// releasedディレクトリが存在しない場合は作成
-		if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_released) ) {
-			$ret = false;
-		}
+	// 	// releasedディレクトリが存在しない場合は作成
+	// 	if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_released) ) {
+	// 		$ret = false;
+	// 	}
 
-		$logstr = "$ret = " . $ret;
-		$logstr = "create_indigo_work_dir() end";
-		$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+	// 	$logstr = "$ret = " . $ret;
+	// 	$logstr = "create_indigo_work_dir() end";
+	// 	$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
-		return $ret;
+	// 	return $ret;
 	}
 
 
