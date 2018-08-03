@@ -127,7 +127,7 @@ class tsBackup
 
 		// foreach ( (array) $get_array as $data) {
 			// $ret_array = array_shift($data);
-			$conv_ret_array = $this->convert_ts_backup_entity($ret_array);
+			// $conv_ret_array = $this->convert_ts_backup_entity($ret_array);
 		// }
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup end');
