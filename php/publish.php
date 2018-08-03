@@ -320,14 +320,14 @@ class publish
 						$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 						if (!$backup_data) {
-							throw new \Exception('Target data not found.');
+							throw new \Exception('バックアップデータが取得できませんでした。.');
 						}
 
 						$backup_id = $backup_data[tsBackup::TS_BACKUP_ID_SEQ];
 
 						if (!$backup_id) {
 							// エラー処理
-							throw new \Exception('バックアップが存在しないため復元処理は実施されませんでした。');
+							throw new \Exception('バックアップIDが存在しないため復元処理は実施されませんでした。');
 						}
 
 						$logstr = "バックアップID：" . $backup_id . "\r\n";
