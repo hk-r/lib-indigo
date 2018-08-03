@@ -326,28 +326,16 @@ class tsOutput
 
 		$ret = '';
 
-		// if ($status == define::PUBLISH_STATUS_RUNNING) {
-		// 	$ret =  '★（処理中）';
-		// } else if ($status == define::PUBLISH_STATUS_SUCCESS) {
-		// 	$ret =  '〇（成功）';
-		// } else if ($status == define::PUBLISH_STATUS_ALERT) {
-		// 	$ret =  '△（警告あり）';
-		// } else if ($status == define::PUBLISH_STATUS_FAILED) {
-		// 	$ret =  '×（失敗）';
-		// } else if ($status == define::PUBLISH_STATUS_SKIP) {
-		// 	$ret =  '-（スキップ）';
-		// }
-
 		if ($status == define::PUBLISH_STATUS_RUNNING) {
-			$ret =  '処理中';
+			$ret =  '★(処理中)';
 		} else if ($status == define::PUBLISH_STATUS_SUCCESS) {
-			$ret =  '成功';
+			$ret =  '〇(成功)';
 		} else if ($status == define::PUBLISH_STATUS_ALERT) {
-			$ret =  '警告あり';
+			$ret =  '△(警告あり)';
 		} else if ($status == define::PUBLISH_STATUS_FAILED) {
-			$ret =  '失敗';
+			$ret =  '×(失敗)';
 		} else if ($status == define::PUBLISH_STATUS_SKIP) {
-			$ret =  'スキップ';
+			$ret =  '-(スキップ)';
 		}
 
 		return $ret;

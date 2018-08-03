@@ -18,9 +18,8 @@ $(function($){
 			} else {
 
 				var param_relativepath = document.getElementById('param_relativepath').value;
-				var workdir_relativepath = document.getElementById('workdir_relativepath').value;
-				// alert(workdir_relativepath);
-				// alert(current_path);
+				var workdir_realpath = document.getElementById('workdir_realpath').value;
+
 				$.ajax ({
 					type: 'GET',
 					// "url": "./../vendor/pickles2/lib-indigo/php/jquery.php",
@@ -28,7 +27,7 @@ $(function($){
 					url: param_relativepath + "ajax.php",
 					
 					data: { 'branch_name': branch_name, 
-							'workdir_relativepath': workdir_relativepath
+							'workdir_realpath': workdir_realpath
 						},
 					dataType: 'json',
 				    success: function(data, dataType) {
