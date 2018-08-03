@@ -96,6 +96,33 @@ class main
 		    }
 		);
 
+
+		// // 作業用ディレクトリの絶対パスを取得
+		// $this->realpath_array = json_decode($this->common()->get_realpath_workdir($this->options, $this->realpath_array));
+
+		// 本番環境ディレクトリの絶対パスを取得。（配列1番目のサーバを設定）
+		foreach ( (array)$options->server as $server ) {
+			$realpath_array['realpath_server'] = $this->fs()->normalize_path($this->fs()->get_realpath($server->real_path . "/"));
+			break; // 現時点では最初の1つのみ有効なのでブレイク
+		}
+
+		// backupディレクトリの絶対パスを取得。
+		$realpath_array['realpath_backup'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_BACKUP));
+
+		// waitingディレクトリの絶対パスを取得。
+		$realpath_array['realpath_waiting'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_WAITING));
+
+		// runningディレクトリの絶対パスを取得。
+		$realpath_array['realpath_running'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_RUNNING));
+
+		// releasedディレクトリの絶対パスを取得。
+		$realpath_array['realpath_released'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_RELEASED));
+
+		// logディレクトリの絶対パスを取得。
+		$realpath_array['realpath_log'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_LOG));
+
+		$this->realpath_array = json_decode(json_encode($realpath_array));
+
 		//============================================================
 		// 作業用ディレクトリの作成（既にある場合は作成しない）
 		//============================================================
@@ -117,6 +144,14 @@ class main
 		$this->fs()->mkdir($this->realpath_array->realpath_released);
 
 
+		// $logstr = "realpath_server：" . $this->realpath_array->realpath_server . "\r\n";
+		// $logstr .= "realpath_backup：" . $this->realpath_array->realpath_backup . "\r\n";
+		// $logstr .= "realpath_waiting：" . $this->realpath_array->realpath_waiting . "\r\n";
+		// $logstr .= "realpath_running：" . $this->realpath_array->realpath_running . "\r\n";
+		// $logstr .= "realpath_released：" . $this->realpath_array->realpath_released . "\r\n";
+		// $logstr .= "realpath_log：" . $this->realpath_array->realpath_log;
+		// $this->common()->put_process_log_block($logstr);
+
 		//============================================================
 		// 通常ログ出力登録
 		//============================================================	
@@ -130,16 +165,6 @@ class main
 		// $logstr = "起動パラメタ：" . $this->options;
 		// $this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
-		// 作業用ディレクトリの絶対パスを取得
-		$this->realpath_array = json_decode($this->common()->get_realpath_workdir($this->options, $this->realpath_array));
-
-		$logstr = "realpath_server：" . $this->realpath_array->realpath_server . "\r\n";
-		$logstr .= "realpath_backup：" . $this->realpath_array->realpath_backup . "\r\n";
-		$logstr .= "realpath_waiting：" . $this->realpath_array->realpath_waiting . "\r\n";
-		$logstr .= "realpath_running：" . $this->realpath_array->realpath_running . "\r\n";
-		$logstr .= "realpath_released：" . $this->realpath_array->realpath_released . "\r\n";
-		$logstr .= "realpath_log：" . $this->realpath_array->realpath_log;
-		$this->common()->put_process_log_block($logstr);
 
 
 	}

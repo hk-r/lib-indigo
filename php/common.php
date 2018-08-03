@@ -252,73 +252,72 @@ class common
 
 
 
-	/**
-	 * 本番サーバの絶対パス取得（複数サーバ対応（※作成中））
-	 *	 
-	 * @param $path = 作成ディレクトリ名
-	 *	 
-	 * @return ソート後の配列
-	 */
-	public function get_server_real_path($options) {
+	// /**
+	//  * 本番サーバの絶対パス取得（複数サーバ対応（※作成中））
+	//  *	 
+	//  * @param $path = 作成ディレクトリ名
+	//  *	 
+	//  * @return ソート後の配列
+	//  */
+	// public function get_server_real_path($options) {
 	
-		$this->put_process_log(__METHOD__, __LINE__, '■ get_server_real_path start');
+	// 	$this->put_process_log(__METHOD__, __LINE__, '■ get_server_real_path start');
 
 
-		$server_list = $options->server;
+	// 	$server_list = $options->server;
 
-		$server_real_path = array();
+	// 	$server_real_path = array();
 
-		foreach ( (array)$server_list as $server ) {
+	// 	foreach ( (array)$server_list as $server ) {
 			
-			// 本番環境ディレクトリの絶対パスを取得。
-			$server_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($server->real_path . "/"));
-			break; // 現時点では最初の1つのみ有効
-		}
+	// 		// 本番環境ディレクトリの絶対パスを取得。
+	// 		$server_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($server->real_path . "/"));
+	// 		break; // 現時点では最初の1つのみ有効
+	// 	}
 
-		$this->put_process_log(__METHOD__, __LINE__, '　□ server_real_path：' . $server_real_path);
+	// 	$this->put_process_log(__METHOD__, __LINE__, '　□ server_real_path：' . $server_real_path);
 
-		$this->put_process_log(__METHOD__, __LINE__, '■ get_server_real_path end');
+	// 	$this->put_process_log(__METHOD__, __LINE__, '■ get_server_real_path end');
 
-	    return $server_real_path;
-	}
+	//     return $server_real_path;
+	// }
 
 
-	/**
-	 * 作業用ディレクトリの絶対パス取得
-	 *	 
-	 * @param $path = 作成ディレクトリ名
-	 *	 
-	 * @return ソート後の配列
-	 */
-	public function get_realpath_workdir($options, $realpath_array) {
+	// /**
+	//  * 作業用ディレクトリの絶対パス取得
+	//  *	 
+	//  * @param $path = 作成ディレクトリ名
+	//  *	 
+	//  * @return ソート後の配列
+	//  */
+	// public function get_realpath_workdir($options, $realpath_array) {
 	
-		$logstr = "get_realpath_workdir() start";
-		$this->put_process_log(__METHOD__, __LINE__, $logstr);
+	// 	$logstr = "get_realpath_workdir() start";
+	// 	$this->put_process_log(__METHOD__, __LINE__, $logstr);
 
-		// 本番環境ディレクトリの絶対パスを取得。（配列1番目のサーバを設定）
-		$realpath_array['realpath_server'] = $this->get_server_real_path($options);
-		// $realpath_array['realpath_server'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->server_real_path . "/"));
 
-		// backupディレクトリの絶対パスを取得。
-		$realpath_array['realpath_backup'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_BACKUP));
+	// 	// $realpath_array['realpath_server'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->server_real_path . "/"));
 
-		// waitingディレクトリの絶対パスを取得。
-		$realpath_array['realpath_waiting'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_WAITING));
+	// 	// backupディレクトリの絶対パスを取得。
+	// 	$realpath_array['realpath_backup'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_BACKUP));
 
-		// runningディレクトリの絶対パスを取得。
-		$realpath_array['realpath_running'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_RUNNING));
+	// 	// waitingディレクトリの絶対パスを取得。
+	// 	$realpath_array['realpath_waiting'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_WAITING));
 
-		// releasedディレクトリの絶対パスを取得。
-		$realpath_array['realpath_released'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_RELEASED));
+	// 	// runningディレクトリの絶対パスを取得。
+	// 	$realpath_array['realpath_running'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_RUNNING));
 
-		// logディレクトリの絶対パスを取得。
-		$realpath_array['realpath_log'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_LOG));
+	// 	// releasedディレクトリの絶対パスを取得。
+	// 	$realpath_array['realpath_released'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_RELEASED));
 
-		$logstr = "get_realpath_workdir() end";
-		$this->put_process_log(__METHOD__, __LINE__, $logstr);
+	// 	// logディレクトリの絶対パスを取得。
+	// 	$realpath_array['realpath_log'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_LOG));
 
-	    return json_encode($realpath_array);
-	}
+	// 	$logstr = "get_realpath_workdir() end";
+	// 	$this->put_process_log(__METHOD__, __LINE__, $logstr);
+
+	//     return json_encode($realpath_array);
+	// }
 
 
 	/**
