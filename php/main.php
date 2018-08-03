@@ -107,19 +107,19 @@ class main
 		}
 
 		// backupディレクトリの絶対パスを取得。
-		$realpath_array['realpath_backup'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_BACKUP));
+		$realpath_array['realpath_backup'] = $this->fs()->normalize_path($this->fs()->get_realpath($options->realpath_workdir . define::PATH_BACKUP));
 
 		// waitingディレクトリの絶対パスを取得。
-		$realpath_array['realpath_waiting'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_WAITING));
+		$realpath_array['realpath_waiting'] = $this->fs()->normalize_path($this->fs()->get_realpath($options->realpath_workdir . define::PATH_WAITING));
 
 		// runningディレクトリの絶対パスを取得。
-		$realpath_array['realpath_running'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_RUNNING));
+		$realpath_array['realpath_running'] = $this->fs()->normalize_path($this->fs()->get_realpath($options->realpath_workdir . define::PATH_RUNNING));
 
 		// releasedディレクトリの絶対パスを取得。
-		$realpath_array['realpath_released'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_RELEASED));
+		$realpath_array['realpath_released'] = $this->fs()->normalize_path($this->fs()->get_realpath($options->realpath_workdir . define::PATH_RELEASED));
 
 		// logディレクトリの絶対パスを取得。
-		$realpath_array['realpath_log'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_LOG));
+		$realpath_array['realpath_log'] = $this->fs()->normalize_path($this->fs()->get_realpath($options->realpath_workdir . define::PATH_LOG));
 
 		$this->realpath_array = json_decode(json_encode($realpath_array));
 
