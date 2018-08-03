@@ -132,7 +132,7 @@ class tsBackup
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup end');
 
-		return $conv_ret_array;
+		return $ret_array;
 	}
 
 	/**

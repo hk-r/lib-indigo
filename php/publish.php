@@ -292,32 +292,30 @@ class publish
 
 						if ($publish_type == define::PUBLISH_TYPE_MANUAL_RESTORE) {
 
-							$logstr = "===============================================" . "\r\n";
-							$logstr .= "[手動復元公開]バックアップ対象データの取得" . "\r\n";
-							$logstr .= "===============================================" . "\r\n";
+							$logstr = "==========[手動復元公開]バックアップ対象データの取得==========";
 							$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 							$selected_id =  $this->main->options->_POST->selected_id;
 
-							$logstr = "選択バックアップID：：" . $selected_id . "\r\n";
+							$logstr = "選択バックアップID --> " . $selected_id . "\r\n";
 							$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 							$backup_data = $this->tsBackup->get_selected_ts_backup($selected_id);
 						
 						} else {
 
-							$logstr = "===============================================" . "\r\n";
-							$logstr .= "[自動復元公開]公開処理結果ID条件に、バックアップ対象データの取得" . "\r\n";
-							$logstr .= "===============================================" . "\r\n";
-							$logstr .= "公開処理結果ID：" . $output_id . "\r\n";
+							$logstr = "==========[自動復元公開]バックアップ対象データの取得==========";
+							$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+
+							$logstr = "公開処理結果ID --> " . $output_id . "\r\n";
 							$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 							
 							// 処理結果IDからバックアップ情報を取得
 							$backup_data = $this->tsBackup->get_selected_ts_backup_by_output_id($output_id);
 						}
 
-						// $logstr = "取得データ" . var_dump($backup_data) . "\r\n";
-						// $this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+						$logstr = "backup_data : " . implode("|" , $backup_data) . "\r\n";
+						$this->main->common()->put_process_log_block($logstr);
 
 						if (!$backup_data) {
 							throw new \Exception('バックアップデータが取得できませんでした。.');
