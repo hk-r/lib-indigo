@@ -165,19 +165,19 @@ class common
 
 		if ($publish_type == define::PUBLISH_TYPE_RESERVE) {
 		
-			$ret =  '予約公開';
+			$ret =  '予約';
 		
 		} else if ($publish_type == define::PUBLISH_TYPE_MANUAL_RESTORE) {
 			
-			$ret =  '手動復元公開';
+			$ret =  '手動復元';
 
 		} else if ($publish_type == define::PUBLISH_TYPE_IMMEDIATE) {
 			
-			$ret =  '即時公開';
+			$ret =  '即時';
 
  		} else if ($publish_type == define::PUBLISH_TYPE_AUTO_RESTORE) {
 			
-			$ret =  '自動復元公開';
+			$ret =  '自動復元';
 
 		}
 

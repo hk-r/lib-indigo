@@ -327,13 +327,13 @@ class tsOutput
 		$ret = '';
 
 		if ($status == define::PUBLISH_STATUS_RUNNING) {
-			$ret =  '▲（処理中）';
+			$ret =  '★（処理中）';
 		} else if ($status == define::PUBLISH_STATUS_SUCCESS) {
-			$ret =  '〇（公開成功）';
+			$ret =  '〇（成功）';
 		} else if ($status == define::PUBLISH_STATUS_ALERT) {
 			$ret =  '△（警告あり）';
 		} else if ($status == define::PUBLISH_STATUS_FAILED) {
-			$ret =  '×（公開失敗）';
+			$ret =  '×（失敗）';
 		} else if ($status == define::PUBLISH_STATUS_SKIP) {
 			$ret =  '-（スキップ）';
 		}
