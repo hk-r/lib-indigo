@@ -284,6 +284,9 @@ class publish
 					// 公開処理結果データ
 					$output_dataArray = null;
 
+					// 現在時刻
+					$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
+
  					if (($publish_type == define::PUBLISH_TYPE_MANUAL_RESTORE) ||
 						($publish_type == define::PUBLISH_TYPE_AUTO_RESTORE)) {
 
@@ -316,7 +319,7 @@ class publish
 							$backup_data = $this->tsBackup->get_selected_ts_backup_by_output_id($output_id);
 						}
 
-						$logstr = "backup_data : " . implode("|" , $backup_data) . "\r\n";
+						$logstr = "backup_data --> " . implode("|" , $backup_data) . "\r\n";
 						$this->main->common()->put_process_log_block($logstr);
 
 						if (!$backup_data) {
@@ -330,14 +333,14 @@ class publish
 							throw new \Exception('バックアップIDが存在しないため復元処理は実施されませんでした。');
 						}
 
-						$logstr = "バックアップID：" . $backup_id . "\r\n";
-						$logstr .= "バックアップ日時：" . $backup_data[tsBackup::TS_BACKUP_DATETIME] . "\r\n";
-						$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+						$logstr = "バックアップID --> " . $backup_id . "\r\n";
+						$logstr .= "バックアップ日時 --> " . $backup_data[tsBackup::TS_BACKUP_DATETIME];
+						$this->main->common()->put_process_log_block($logstr);
 
 						$backup_dirname = $this->main->common()->format_gmt_datetime($backup_data[tsBackup::TS_BACKUP_DATETIME], define::DATETIME_FORMAT_SAVE);
 					
-						$logstr = "バックアップディレクトリ：" . $backup_dirname . "\r\n";
-						$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+						// $logstr = "バックアップディレクトリ：" . $backup_dirname . "\r\n";
+						// $this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 						if (!$backup_dirname) {
 							// エラー処理
@@ -401,9 +404,6 @@ class publish
 					//============================================================
 					$logstr = "==========公開処理結果テーブルのINSERT実行==========";
 					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-
-					// 現在時刻
-					$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 
 					// $reserve_id = null;
 
