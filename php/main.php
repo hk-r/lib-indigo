@@ -66,7 +66,7 @@ class main
 		//============================================================	
 		
 		// ログパス
-		$this->error_log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->workdir_realpath . define::PATH_LOG)) . 'error.log';
+		$this->error_log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_LOG)) . 'error.log';
 
 		register_shutdown_function(
 		    function(){
@@ -104,7 +104,7 @@ class main
 		$log_dirname = $this->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT_YMD);
 
 		// ログパス
-		$this->process_log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->workdir_realpath . define::PATH_LOG)) . 'log_process_' . $log_dirname . '.log';
+		$this->process_log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_LOG)) . 'log_process_' . $log_dirname . '.log';
 
 		// $logstr = "起動パラメタ：" . $this->options;
 		// $this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
@@ -118,18 +118,6 @@ class main
 		$logstr .= "realpath_running：" . $this->realpath_array->realpath_running . "\r\n";
 		$logstr .= "realpath_released：" . $this->realpath_array->realpath_released . "\r\n";
 		$logstr .= "realpath_log：" . $this->realpath_array->realpath_log;
-		$this->common()->put_process_log_block($logstr);
-
-		//============================================================
-		// タイムゾーンの設定
-		//============================================================
-		$time_zone = $this->options->time_zone;
-		if (!$time_zone) {
-			throw new \Exception('Parameter of timezone not found.');
-		}
-		date_default_timezone_set($time_zone);
-
-		$logstr = "設定タイムゾーン：" . $time_zone;
 		$this->common()->put_process_log_block($logstr);
 
 		//============================================================
@@ -177,6 +165,18 @@ class main
 			// $i = 5/0;
 			// asdf();
 			// $status = define::PUBLISH_STATUS_RUNNNG;
+
+			//============================================================
+			// タイムゾーンの設定
+			//============================================================
+			$time_zone = $this->options->time_zone;
+			if (!$time_zone) {
+				throw new \Exception('Parameter of timezone not found.');
+			}
+			date_default_timezone_set($time_zone);
+
+			$logstr = "設定タイムゾーン：" . $time_zone;
+			$this->common()->put_process_log_block($logstr);
 
 			//============================================================
 			// データベース接続

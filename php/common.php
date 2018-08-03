@@ -300,19 +300,19 @@ class common
 		// $realpath_array['realpath_server'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->server_real_path . "/"));
 
 		// backupディレクトリの絶対パスを取得。
-		$realpath_array['realpath_backup'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->workdir_realpath . define::PATH_BACKUP));
+		$realpath_array['realpath_backup'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_BACKUP));
 
 		// waitingディレクトリの絶対パスを取得。
-		$realpath_array['realpath_waiting'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->workdir_realpath . define::PATH_WAITING));
+		$realpath_array['realpath_waiting'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_WAITING));
 
 		// runningディレクトリの絶対パスを取得。
-		$realpath_array['realpath_running'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->workdir_realpath . define::PATH_RUNNING));
+		$realpath_array['realpath_running'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_RUNNING));
 
 		// releasedディレクトリの絶対パスを取得。
-		$realpath_array['realpath_released'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->workdir_realpath . define::PATH_RELEASED));
+		$realpath_array['realpath_released'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_RELEASED));
 
 		// logディレクトリの絶対パスを取得。
-		$realpath_array['realpath_log'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->workdir_realpath . define::PATH_LOG));
+		$realpath_array['realpath_log'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_LOG));
 
 		$logstr = "get_realpath_workdir() end";
 		$this->put_process_log(__METHOD__, __LINE__, $logstr);

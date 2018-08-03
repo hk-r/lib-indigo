@@ -36,7 +36,7 @@ class gitManager
 		$current_dir = realpath('.');
 
 		// masterディレクトリの絶対パス
-		$master_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->workdir_realpath . define::PATH_MASTER));
+		$master_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_MASTER));
 
 		if ( chdir( $master_real_path )) {
 
@@ -190,7 +190,7 @@ class gitManager
 		$current_dir = realpath('.');
 
 		// masterディレクトリの絶対パス
-		$master_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->workdir_realpath . define::PATH_MASTER));
+		$master_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_MASTER));
 
 		if ( $master_real_path ) {
 
