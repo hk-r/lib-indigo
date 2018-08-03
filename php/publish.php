@@ -317,7 +317,7 @@ class publish
 						}
 
 						// $logstr = "取得データ" . var_dump($backup_data) . "\r\n";
-						$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+						// $this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 						if (!$backup_data) {
 							throw new \Exception('バックアップデータが取得できませんでした。.');
