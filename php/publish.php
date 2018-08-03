@@ -323,7 +323,7 @@ class publish
 							throw new \Exception('Target data not found.');
 						}
 
-						$backup_id = $backup_data[tsBackup::BACKUP_ENTITY_ID_SEQ];
+						$backup_id = $backup_data[tsBackup::TS_BACKUP_ID_SEQ];
 
 						if (!$backup_id) {
 							// エラー処理
@@ -331,10 +331,10 @@ class publish
 						}
 
 						$logstr = "バックアップID：" . $backup_id . "\r\n";
-						$logstr .= "バックアップ日時：" . $backup_data[tsBackup::BACKUP_ENTITY_DATETIME_GMT] . "\r\n";
+						$logstr .= "バックアップ日時：" . $backup_data[tsBackup::TS_BACKUP_DATETIME] . "\r\n";
 						$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
-						$backup_dirname = $this->main->common()->format_gmt_datetime($backup_data[tsBackup::BACKUP_ENTITY_DATETIME_GMT], define::DATETIME_FORMAT_SAVE);
+						$backup_dirname = $this->main->common()->format_gmt_datetime($backup_data[tsBackup::TS_BACKUP_DATETIME], define::DATETIME_FORMAT_SAVE);
 					
 						$logstr = "バックアップディレクトリ：" . $backup_dirname . "\r\n";
 						$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
