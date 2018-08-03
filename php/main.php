@@ -66,7 +66,7 @@ class main
 		//============================================================	
 		
 		// ログパス
-		$this->error_log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_LOG)) . 'error.log';
+		$this->error_log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir)) . 'error.log';
 
 		register_shutdown_function(
 		    function(){
@@ -97,6 +97,11 @@ class main
 		);
 
 		//============================================================
+		// 作業用ディレクトリの作成（既にある場合は作成しない）
+		//============================================================
+		$this->create_indigo_work_dir();
+
+		//============================================================
 		// 通常ログ出力登録
 		//============================================================	
 		
@@ -120,10 +125,6 @@ class main
 		$logstr .= "realpath_log：" . $this->realpath_array->realpath_log;
 		$this->common()->put_process_log_block($logstr);
 
-		//============================================================
-		// 作業用ディレクトリの作成（既にある場合は作成しない）
-		//============================================================
-		$this->create_indigo_work_dir();
 
 	}
 
