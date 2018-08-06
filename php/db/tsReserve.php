@@ -108,19 +108,13 @@ class tsReserve
 
 		$conv_ret_array = array();
 
-		$option_param = '';
-
-		// if ($now) {
-		// 	$option_param = " and reserve_datetime <= '" . $now . "'";
-		// }
-
 		// SELECT文作成（削除フラグ = 0、公開予約日時>=現在日時、ソート順：公開予約日時の降順）
 		$select_sql = "
 				SELECT * FROM TS_RESERVE
-				WHERE " . self::TS_RESERVE_STATUS . " = '0'
-				  AND " . self::TS_RESERVE_DELETE_FLG . " = '0' "
-				. $option_param .
-				" ORDER BY " . self::TS_RESERVE_RESERVE . " DESC;";
+				WHERE " . self::TS_RESERVE_STATUS . " = '0' 
+				  AND " . self::TS_RESERVE_RESERVE . " <= " . "'" . $now . "' 
+				  AND " . self::TS_RESERVE_DELETE_FLG . " = '0' 
+				ORDER BY " . self::TS_RESERVE_RESERVE . " DESC;";
 
 		// SELECT実行
 		$ret_array = $this->main->pdoMgr()->select($this->main->get_dbh(), $select_sql);
