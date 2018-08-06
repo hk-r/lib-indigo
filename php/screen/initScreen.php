@@ -1245,9 +1245,6 @@ class initScreen
 		*/ 
 		$data_list = $this->tsReserve->get_ts_reserve_list();
 	
-		// 画面入力された日時を結合し、GMTへ変換する
-		$gmt_reserve_datetime = $this->combine_to_gmt_date_and_time($form['reserve_date'], $form['reserve_time']);
-
 		// 必須チェック
 		if (!$this->check->is_null_branch($form['branch_select_value'])) {
 			$ret .= '<p class="error_message">ブランチを選択してください。</p>';
@@ -1275,6 +1272,11 @@ class initScreen
 				if (!$this->check->check_date($form['reserve_date'])) {
 					$ret .= '<p class="error_message">「公開予約日時」の日付が有効ではありません。</p>';
 				}
+
+
+				// 画面入力された日時を結合し、GMTへ変換する
+				$gmt_reserve_datetime = $this->combine_to_gmt_date_and_time($form['reserve_date'], $form['reserve_time']);
+
 
 				// 未来の日付であるかチェック
 				if (!$this->check->check_future_date($gmt_reserve_datetime)) {

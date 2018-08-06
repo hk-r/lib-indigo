@@ -591,7 +591,7 @@ class main
 			$logstr .= "予約公開処理異常終了（例外キャッチ）" . "\r\n";
 			$logstr .= "===============================================" . "\r\n";
 			$logstr .= "日時：" . $this->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT) . "\r\n";
-			$logstr .= $e->getMessage(). "\r\n";
+			$logstr .= $e->getMessage();
 			$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 			return;
@@ -605,6 +605,7 @@ class main
 		$logstr .= "予約公開処理終了" . "\r\n";
 		$logstr .= "===============================================" . "\r\n";
 		$logstr .= "日時：" . $this->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT) . "\r\n";
+		$logstr .= $e->getMessage();
 		$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		$this->common()->put_process_log(__METHOD__, __LINE__, '■ [cron] run end');
