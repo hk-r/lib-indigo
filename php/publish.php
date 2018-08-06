@@ -779,9 +779,15 @@ class publish
 				   '--log-file=' . $this->realpath_tracelog;
 
 		$ret = $this->main->common()->command_execute($command, true);
-		if ($ret['return']) {
+
+		if ($ret['return'] !== 0 ) {
 			// 戻り値が0以外の場合
-			throw new \Exception('Command error. [command]' . $command);
+
+			$logstr = "**コマンド実行エラー**" . "\r\n";
+			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+			$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
+
+			throw new \Exception('Command error.');
 		}
 
 		// rsyncコマンド実行ログ配列を、履歴一覧画面のダイアログ表示用にファイル保持しておく
@@ -804,7 +810,8 @@ class publish
 		// $this->main->common()->put_process_log_block($logstr);
 
 		$ret = $this->main->common()->command_execute($command, true);
-		if ($ret['return']) {
+
+		if ($ret['return'] !== 0 ) {
 			// 戻り値が0以外の場合
 					
 			$logstr = "**コマンド実行エラー**" . "\r\n";
@@ -833,7 +840,8 @@ class publish
 				   '--log-file=' . $this->realpath_tracelog;
 
 		$ret = $this->main->common()->command_execute($command, true);
-		if ($ret['return']) {
+
+		if ($ret['return'] !== 0 ) {
 			// 戻り値が0以外の場合
 
 			$logstr = "**移動コマンド実行エラー**" . "\r\n";
@@ -860,7 +868,8 @@ class publish
 		$command = 'find ' .  $from_realpath . ' -type d -empty -delete' ;
 
 		$ret = $this->main->common()->command_execute($command, true);
-		if ($ret['return']) {
+
+		if ($ret['return'] !== 0 ) {
 			// 戻り値が0以外の場合
 
 			$logstr = "**削除コマンド実行エラー**" . "\r\n";

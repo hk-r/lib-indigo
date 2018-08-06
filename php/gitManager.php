@@ -110,39 +110,73 @@ class gitManager
 			// $branch_name = trim(str_replace("origin/", "", $options->_POST->branch_select_value));
 			$branch_name = trim($options->_POST->branch_select_value);
 
+			//============================================================
 			// git init
+			//============================================================
 			$command = 'git init';
-			$this->main->common()->command_execute($command, false);
+			$ret = $this->main->common()->command_execute($command, false);
+			if ($ret['return'] !== 0 ) {
+				// 戻り値が0以外の場合
+				$logstr = "**コマンド実行エラー**" . "\r\n";
+				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+				
+				chdir($current_dir);
+				throw new \Exception('Git init command error.');
+			}
+			$logstr = "**コマンド実行成功**";
+			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
+
+			//============================================================
 			// git urlのセット
+			//============================================================
 			$url = $this->protocol . "://" . urlencode($options->git->username) . ":" . urlencode($options->git->password) . "@" . $this->host . $this->path;
 			
 			// initしたリポジトリに名前を付ける
 			$command = 'git remote add ' . define::GIT_REMOTE_NAME .  ' ' . $url;
 			$ret = $this->main->common()->command_execute($command, false);
-			if ($ret['return']) {
+			if ($ret['return'] !== 0 ) {
 				// 戻り値が0以外の場合
+				$logstr = "**コマンド実行エラー**" . "\r\n";
+				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+				
+				chdir($current_dir);
 				throw new \Exception('Git pull command error. url:' . $url);
 			}
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ コマンド実行結果1：' . $ret['return']);
+			$logstr = "**コマンド実行成功**";
+			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
+			//============================================================
 			// git fetch（リモートリポジトリの指定ブランチの情報をローカルブランチへ反映）
+			//============================================================
 			$command = 'git fetch ' . define::GIT_REMOTE_NAME .  ' ' . $branch_name;
 			$ret = $this->main->common()->command_execute($command, false);
-			if ($ret['return']) {
+			if ($ret['return'] !== 0 ) {
 				// 戻り値が0以外の場合
-				throw new \Exception('Git pull command error. branch_name:' . $branch_name);
-			}
-
-			// git pull（リモート取得ブランチを任意のローカルブランチにマージするコマンド）
-			$command = 'git pull ' . define::GIT_REMOTE_NAME .  ' ' . $branch_name;
-			$ret = $this->main->common()->command_execute($command, false);
-			if ($ret['return']) {
-				// 戻り値が0以外の場合
-
+				$logstr = "**コマンド実行エラー**" . "\r\n";
+				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+				
 				chdir($current_dir);
 				throw new \Exception('Git pull command error. branch_name:' . $branch_name);
 			}
+			$logstr = "**コマンド実行成功**";
+			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+
+			//============================================================
+			// git pull（リモート取得ブランチを任意のローカルブランチにマージするコマンド）
+			//============================================================
+			$command = 'git pull ' . define::GIT_REMOTE_NAME .  ' ' . $branch_name;
+			$ret = $this->main->common()->command_execute($command, false);
+			if ($ret['return'] !== 0 ) {
+				// 戻り値が0以外の場合
+				$logstr = "**コマンド実行エラー**" . "\r\n";
+				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+				
+				chdir($current_dir);
+				throw new \Exception('Git pull command error. branch_name:' . $branch_name);
+			}
+			$logstr = "**コマンド実行成功**";
+			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		} else {
 			throw new \Exception('Git file copy failed. Move directory not found. ' . $dir_real_path);
