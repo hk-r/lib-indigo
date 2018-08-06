@@ -434,7 +434,7 @@ class main
 				$logstr = $error_message . "\r\n";
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
-				$msg = nl2br(error_message);
+				$msg = nl2br($error_message);
 
 
 				// エラーメッセージ表示
