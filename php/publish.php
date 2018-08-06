@@ -57,7 +57,7 @@ class publish
 		// 開始日時（GMT）
 		$start_datetime = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 
-		// 予約公開の場合
+		// クーロン実行で、予約公開データが存在しない場合は処理を終了する
 		if ($publish_type == define::PUBLISH_TYPE_RESERVE) {
 
 			//============================================================
@@ -77,13 +77,6 @@ class publish
 				return $result;
 			}
 		}
-
-
-		$logstr = "===============================================" . "\r\n";
-		$logstr .= "公開予約処理実施" . "\r\n";
-		$logstr .= "===============================================" . "\r\n";
-		$this->main->common()->put_process_log_block($logstr);
-		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
 		$backup_dirname;
 
