@@ -37,6 +37,7 @@ class tsOutput
 	 * 公開処理結果エンティティのカラム定義
 	 */
 	const OUTPUT_ENTITY_ID_SEQ 			= 'output_id_seq';			// ID
+	const OUTPUT_ENTITY_BACKUP_ID 		= 'backup_id';				// バックアップID
 	const OUTPUT_ENTITY_RESERVE 		= 'reserve_datetime';		// 公開予約日時（タイムゾーン日時）
 	const OUTPUT_ENTITY_RESERVE_DISP 	= 'reserve_datetime_disp';	// 公開予約日時（表示用フォーマット）
 	const OUTPUT_ENTITY_BRANCH 			= 'branch_name';			// ブランチ名
@@ -280,6 +281,9 @@ class tsOutput
 		// ID
 		$entity[self::OUTPUT_ENTITY_ID_SEQ] = $array[self::TS_OUTPUT_ID_SEQ];
 
+		// バックアップID
+		$entity[self::OUTPUT_ENTITY_BACKUP_ID] = $array[self::TS_OUTPUT_BACKUP_ID];
+
 		// 公開予約日時（タイムゾーン日時）
 		$tz_datetime = $this->main->common()->convert_to_timezone_datetime($array[self::TS_OUTPUT_RESERVE]);
 		$entity[self::OUTPUT_ENTITY_RESERVE] 		 = $tz_datetime;
@@ -327,15 +331,15 @@ class tsOutput
 		$ret = '';
 
 		if ($status == define::PUBLISH_STATUS_RUNNING) {
-			$ret =  '▲（処理中）';
+			$ret =  '★(処理中)';
 		} else if ($status == define::PUBLISH_STATUS_SUCCESS) {
-			$ret =  '〇（公開成功）';
+			$ret =  '〇(成功)';
 		} else if ($status == define::PUBLISH_STATUS_ALERT) {
-			$ret =  '△（警告あり）';
+			$ret =  '△(警告あり)';
 		} else if ($status == define::PUBLISH_STATUS_FAILED) {
-			$ret =  '×（公開失敗）';
+			$ret =  '×(失敗)';
 		} else if ($status == define::PUBLISH_STATUS_SKIP) {
-			$ret =  '-（スキップ）';
+			$ret =  '-(スキップ)';
 		}
 
 		return $ret;

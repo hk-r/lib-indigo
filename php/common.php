@@ -6,7 +6,6 @@ class common
 {
 
 	private $main;
-	// private $fs;
 
 	const DIR_PERMISSION_0757 = 0757;
 
@@ -18,14 +17,6 @@ class common
 	public function __construct ($main){
 
 		$this->main = $main;
-
-		// $this->fs = new \tomk79\filesystem(array(
-		//   'file_default_permission' => define::FILE_DEFAULT_PERMISSION,
-		//   'dir_default_pefrmission' => define::DIR_DEFAULT_PERMISSION,
-		//   'filesystem_encoding' => define::FILESYSTEM_ENCODING
-		// ));
-
-
 	}
 
 	/**
@@ -165,19 +156,19 @@ class common
 
 		if ($publish_type == define::PUBLISH_TYPE_RESERVE) {
 		
-			$ret =  '予約公開';
+			$ret =  '予約';
 		
 		} else if ($publish_type == define::PUBLISH_TYPE_MANUAL_RESTORE) {
 			
-			$ret =  '手動復元公開';
+			$ret =  '手動復元';
 
 		} else if ($publish_type == define::PUBLISH_TYPE_IMMEDIATE) {
 			
-			$ret =  '即時公開';
+			$ret =  '即時';
 
  		} else if ($publish_type == define::PUBLISH_TYPE_AUTO_RESTORE) {
 			
-			$ret =  '自動復元公開';
+			$ret =  '自動復元';
 
 		}
 
@@ -185,35 +176,35 @@ class common
 	}
 
 
-	/**
-	 * ディレクトリが存在しない場合はディレクトリを作成する
-	 *	 
-	 * @param $dirpath = ディレクトリパス
-	 *	 
-	 * @return true:成功、false：失敗
-	 */
-	public function is_exists_mkdir($dirpath) {
+	// /**
+	//  * ディレクトリが存在しない場合はディレクトリを作成する
+	//  *	 
+	//  * @param $dirpath = ディレクトリパス
+	//  *	 
+	//  * @return true:成功、false：失敗
+	//  */
+	// public function is_exists_mkdir($dirpath) {
 
-		// $this->put_process_log(__METHOD__, __LINE__, '■ is_exists_mkdir start');
+	// 	// $this->put_process_log(__METHOD__, __LINE__, '■ is_exists_mkdir start');
 
-		$ret = true;
+	// 	$ret = true;
 
-		if ($dirpath) {
-			if ( !file_exists($dirpath) ) {
-				// ディレクトリ作成
-				if ( !mkdir($dirpath, self::DIR_PERMISSION_0757)) {
-					$ret = false;
-				}
-			}
-		} else {
-			$ret = false;
-		}
+	// 	if ($dirpath) {
+	// 		if ( !file_exists($dirpath) ) {
+	// 			// ディレクトリ作成
+	// 			if ( !mkdir($dirpath, self::DIR_PERMISSION_0757)) {
+	// 				$ret = false;
+	// 			}
+	// 		}
+	// 	} else {
+	// 		$ret = false;
+	// 	}
 
-		// $this->put_process_log(__METHOD__, __LINE__, '　□ return：' . $ret);
-		// $this->put_process_log(__METHOD__, __LINE__, '■ is_exists_mkdir end');
+	// 	// $this->put_process_log(__METHOD__, __LINE__, '　□ return：' . $ret);
+	// 	// $this->put_process_log(__METHOD__, __LINE__, '■ is_exists_mkdir end');
 
-		return $ret;
-	}
+	// 	return $ret;
+	// }
 
 	/**
 	 * ディレクトリの存在有無にかかわらず、ディレクトリを再作成する（存在しているものは削除する）
@@ -238,7 +229,8 @@ class common
 
 		// デプロイ先のディレクトリを作成
 		if ( !file_exists($dirpath)) {
-			if ( !mkdir($dirpath, self::DIR_PERMISSION_0757) ) {
+			// if ( !mkdir($dirpath, self::DIR_PERMISSION_0757) ) {
+			if ( !$this->main->fs()->mkdir($dirpath) ) {
 				return false;
 			}
 		} else {
@@ -252,73 +244,72 @@ class common
 
 
 
-	/**
-	 * 本番サーバの絶対パス取得（複数サーバ対応（※作成中））
-	 *	 
-	 * @param $path = 作成ディレクトリ名
-	 *	 
-	 * @return ソート後の配列
-	 */
-	public function get_server_real_path($options) {
+	// /**
+	//  * 本番サーバの絶対パス取得（複数サーバ対応（※作成中））
+	//  *	 
+	//  * @param $path = 作成ディレクトリ名
+	//  *	 
+	//  * @return ソート後の配列
+	//  */
+	// public function get_server_real_path($options) {
 	
-		$this->put_process_log(__METHOD__, __LINE__, '■ get_server_real_path start');
+	// 	$this->put_process_log(__METHOD__, __LINE__, '■ get_server_real_path start');
 
 
-		$server_list = $options->server;
+	// 	$server_list = $options->server;
 
-		$server_real_path = array();
+	// 	$server_real_path = array();
 
-		foreach ( (array)$server_list as $server ) {
+	// 	foreach ( (array)$server_list as $server ) {
 			
-			// 本番環境ディレクトリの絶対パスを取得。
-			$server_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($server->real_path . "/"));
-			break; // 現時点では最初の1つのみ有効
-		}
+	// 		// 本番環境ディレクトリの絶対パスを取得。
+	// 		$server_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($server->real_path . "/"));
+	// 		break; // 現時点では最初の1つのみ有効
+	// 	}
 
-		$this->put_process_log(__METHOD__, __LINE__, '　□ server_real_path：' . $server_real_path);
+	// 	$this->put_process_log(__METHOD__, __LINE__, '　□ server_real_path：' . $server_real_path);
 
-		$this->put_process_log(__METHOD__, __LINE__, '■ get_server_real_path end');
+	// 	$this->put_process_log(__METHOD__, __LINE__, '■ get_server_real_path end');
 
-	    return $server_real_path;
-	}
+	//     return $server_real_path;
+	// }
 
 
-	/**
-	 * 作業用ディレクトリの絶対パス取得
-	 *	 
-	 * @param $path = 作成ディレクトリ名
-	 *	 
-	 * @return ソート後の配列
-	 */
-	public function get_realpath_workdir($options, $realpath_array) {
+	// /**
+	//  * 作業用ディレクトリの絶対パス取得
+	//  *	 
+	//  * @param $path = 作成ディレクトリ名
+	//  *	 
+	//  * @return ソート後の配列
+	//  */
+	// public function get_realpath_workdir($options, $realpath_array) {
 	
-		$logstr = "get_realpath_workdir() start";
-		$this->put_process_log(__METHOD__, __LINE__, $logstr);
+	// 	$logstr = "get_realpath_workdir() start";
+	// 	$this->put_process_log(__METHOD__, __LINE__, $logstr);
 
-		// 本番環境ディレクトリの絶対パスを取得。（配列1番目のサーバを設定）
-		$realpath_array['realpath_server'] = $this->get_server_real_path($options);
-		// $realpath_array['realpath_server'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->server_real_path . "/"));
 
-		// backupディレクトリの絶対パスを取得。
-		$realpath_array['realpath_backup'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->workdir_relativepath . define::PATH_BACKUP));
+	// 	// $realpath_array['realpath_server'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->server_real_path . "/"));
 
-		// waitingディレクトリの絶対パスを取得。
-		$realpath_array['realpath_waiting'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->workdir_relativepath . define::PATH_WAITING));
+	// 	// backupディレクトリの絶対パスを取得。
+	// 	$realpath_array['realpath_backup'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_BACKUP));
 
-		// runningディレクトリの絶対パスを取得。
-		$realpath_array['realpath_running'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->workdir_relativepath . define::PATH_RUNNING));
+	// 	// waitingディレクトリの絶対パスを取得。
+	// 	$realpath_array['realpath_waiting'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_WAITING));
 
-		// releasedディレクトリの絶対パスを取得。
-		$realpath_array['realpath_released'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->workdir_relativepath . define::PATH_RELEASED));
+	// 	// runningディレクトリの絶対パスを取得。
+	// 	$realpath_array['realpath_running'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_RUNNING));
 
-		// logディレクトリの絶対パスを取得。
-		$realpath_array['realpath_log'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->workdir_relativepath . define::PATH_LOG));
+	// 	// releasedディレクトリの絶対パスを取得。
+	// 	$realpath_array['realpath_released'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_RELEASED));
 
-		$logstr = "get_realpath_workdir() end";
-		$this->put_process_log(__METHOD__, __LINE__, $logstr);
+	// 	// logディレクトリの絶対パスを取得。
+	// 	$realpath_array['realpath_log'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_LOG));
 
-	    return json_encode($realpath_array);
-	}
+	// 	$logstr = "get_realpath_workdir() end";
+	// 	$this->put_process_log(__METHOD__, __LINE__, $logstr);
+
+	//     return json_encode($realpath_array);
+	// }
 
 
 	/**
@@ -341,6 +332,7 @@ class common
 
 		return error_log( $str, 3, $this->main->process_log_path );
 	}
+
 	/**
 	 * エラーログを出力する。
 	 *
@@ -351,13 +343,7 @@ class common
 		$datetime = $this->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 
 		$str = "[" . $datetime . "]" . " " .
-			   // "[pid:" . getmypid() . "]" . " " .
-			   // "[userid:" . $this->main->options->user_id . "]" . " " .
-			   // "[" . $method . "]" . " " .
-			   // "[line:" . $line . "]" . " " .
 			   $text . "\r\n";
-
-		// file_put_contents($path, $str, FILE_APPEND);
 
 		return error_log( $str, 3, $this->main->error_log_path );
 	}
@@ -372,5 +358,24 @@ class common
 		$str = "\r\n" . $text . "\r\n";
 
 		return error_log( $str, 3, $this->main->process_log_path );
+	}
+
+	/**
+	 * 公開確認用のログを出力する。
+	 *
+	 * @return ログ出力
+	 */
+	public function put_publish_log($method, $line, $text, $path){
+		
+		$datetime = $this->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
+
+		$str = "[" . $datetime . "]" . " " .
+			   "[pid:" . getmypid() . "]" . " " .
+			   "[userid:" . $this->main->options->user_id . "]" . " " .
+			   "[" . $method . "]" . " " .
+			   "[line:" . $line . "]" . " " .
+			   $text . "\r\n";
+
+		return error_log( $str, 3, $path );
 	}
 }

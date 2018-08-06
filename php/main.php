@@ -35,7 +35,7 @@ class main
 
 	/**
 	 * コンストラクタ
-	 * @param $options = オプション
+	 * @param $this->options = オプション
 	 */
 	public function __construct($options) {
 
@@ -64,10 +64,10 @@ class main
 		//============================================================
 		// エラーログ出力登録
 		//============================================================	
-		
 		// ログパス
-		$this->error_log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->workdir_relativepath . define::PATH_LOG)) . 'error.log';
+		$this->error_log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_LOG . 'error.log'));
 
+		// 致命的なエラーのエラーハンドラ登録
 		register_shutdown_function(
 		    function(){
 		        $e = error_get_last();
@@ -83,30 +83,90 @@ class main
 		            
 		            echo "エラーが発生しました。管理者にお問い合わせください。";
 
-					$logstr =  "***** エラー発生 *****" . "\r\n";
-					$logstr .= "[ERROR]" . "\r\n";
-					$logstr .= $e['file'] . " in " . $e['line'] . "\r\n";
-					$logstr .= "Error message:" . $e['message'] . "\r\n";
-					$this->common()->put_error_log($logstr);
+					if (file_exists($this->error_log_path)) {
+					
+						$logstr =  "***** エラー発生 *****" . "\r\n";
+						$logstr .= "[ERROR]" . "\r\n";
+						$logstr .= $e['file'] . " in " . $e['line'] . "\r\n";
+						$logstr .= "Error message:" . $e['message'] . "\r\n";
+						$this->common()->put_error_log($logstr);
+					
+					} else {
+						echo $e['file'] . " in " . $e['line'] . "\r\n";
+						echo "Error message:" . $e['message'] . "\r\n";
+					}
+
 		        }
 		    }
 		);
 
+
+		// 致命的なエラー以外のエラーハンドラ登録
+		set_error_handler(function($errno, $errstr, $errfile, $errline) {
+			throw new \ErrorException($errstr, $errno, 0, $errfile, $errline);
+		});
+
+		//============================================================
+		// 作業ディレクトリ絶対パス格納
+		//============================================================
+		// 本番環境ディレクトリの絶対パスを取得。（配列1番目のサーバを設定）
+		foreach ( (array)$this->options->server as $server ) {
+			$realpath_array['realpath_server'] = $this->fs()->normalize_path($this->fs()->get_realpath($server->real_path . "/"));
+			break; // 現時点では最初の1つのみ有効なのでブレイク
+		}
+
+		// backupディレクトリの絶対パスを取得。
+		$realpath_array['realpath_backup'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_BACKUP));
+
+		// waitingディレクトリの絶対パスを取得。
+		$realpath_array['realpath_waiting'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_WAITING));
+
+		// runningディレクトリの絶対パスを取得。
+		$realpath_array['realpath_running'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_RUNNING));
+
+		// releasedディレクトリの絶対パスを取得。
+		$realpath_array['realpath_released'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_RELEASED));
+
+		// logディレクトリの絶対パスを取得。
+		$realpath_array['realpath_log'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_LOG));
+
+		// 変数へログ情報を格納
+		$this->realpath_array = json_decode(json_encode($realpath_array));
+
+
+		//============================================================
+		// 作業ディレクトリ作成
+		//============================================================
+		$current_dir = realpath('.');
+		if (chdir($this->options->realpath_workdir)) {
+
+			// logファイルディレクトリが存在しない場合は作成
+			$this->fs()->mkdir($this->realpath_array->realpath_log);
+			// backupディレクトリが存在しない場合は作成
+			$this->fs()->mkdir($this->realpath_array->realpath_backup);
+			// waitingディレクトリが存在しない場合は作成
+			$this->fs()->mkdir($this->realpath_array->realpath_waiting);
+			// runningディレクトリが存在しない場合は作成
+			$this->fs()->mkdir($this->realpath_array->realpath_running);
+			// releasedディレクトリが存在しない場合は作成
+			$this->fs()->mkdir($this->realpath_array->realpath_released);
+
+		} else {
+			// ディレクトリ移動に失敗
+			chdir($current_dir);
+			throw new \Exception('Move to indigo work directory failed.');
+		}
+		chdir($current_dir);
+
+
 		//============================================================
 		// 通常ログ出力登録
 		//============================================================	
-		
 		// ログファイル名
 		$log_dirname = $this->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT_YMD);
 
 		// ログパス
-		$this->process_log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->workdir_relativepath . define::PATH_LOG)) . 'log_process_' . $log_dirname . '.log';
-
-		// $logstr = "起動パラメタ：" . $this->options;
-		// $this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-
-		// 作業用ディレクトリの絶対パスを取得
-		$this->realpath_array = json_decode($this->common()->get_realpath_workdir($this->options, $this->realpath_array));
+		$this->process_log_path = $this->realpath_array->realpath_log . 'log_process_' . $log_dirname . '.log';
 
 		$logstr = "realpath_server：" . $this->realpath_array->realpath_server . "\r\n";
 		$logstr .= "realpath_backup：" . $this->realpath_array->realpath_backup . "\r\n";
@@ -115,24 +175,6 @@ class main
 		$logstr .= "realpath_released：" . $this->realpath_array->realpath_released . "\r\n";
 		$logstr .= "realpath_log：" . $this->realpath_array->realpath_log;
 		$this->common()->put_process_log_block($logstr);
-
-		//============================================================
-		// タイムゾーンの設定
-		//============================================================
-		$time_zone = $this->options->time_zone;
-		if (!$time_zone) {
-			throw new \Exception('Parameter of timezone not found.');
-		}
-		date_default_timezone_set($time_zone);
-
-		$logstr = "設定タイムゾーン：" . $time_zone;
-		$this->common()->put_process_log_block($logstr);
-
-		//============================================================
-		// 作業用ディレクトリの作成（既にある場合は作成しない）
-		//============================================================
-		$this->create_indigo_work_dir();
-
 	}
 
 	/**
@@ -142,11 +184,6 @@ class main
 		
 		$logstr = "run() start";
 		$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-
-		// 致命的なエラー以外のエラーハンドラ登録
-		set_error_handler(function($errno, $errstr, $errfile, $errline) {
-			throw new \ErrorException($errstr, $errno, 0, $errfile, $errline);
-		});
 
 		// 画面表示
 		$disp = '';  
@@ -173,6 +210,18 @@ class main
 			// $i = 5/0;
 			// asdf();
 			// $status = define::PUBLISH_STATUS_RUNNNG;
+
+			//============================================================
+			// タイムゾーンの設定
+			//============================================================
+			$time_zone = $this->options->time_zone;
+			if (!$time_zone) {
+				throw new \Exception('Parameter of timezone not found.');
+			}
+			date_default_timezone_set($time_zone);
+
+			$logstr = "設定タイムゾーン：" . $time_zone;
+			$this->common()->put_process_log_block($logstr);
 
 			//============================================================
 			// データベース接続
@@ -202,6 +251,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 		
 				$result = json_decode($this->initScn->do_disp_add_dialog());
+				$error_message = $result->message;
 
 			} elseif (isset($this->options->_POST->add_check)) {
 				// 新規ダイアログの「確認」ボタン押下
@@ -210,7 +260,8 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_check_add());
-				
+				$error_message = $result->message;
+
 			} elseif (isset($this->options->_POST->add_confirm)) {
 				// 新規確認ダイアログの「確定」ボタン押下
 				
@@ -218,6 +269,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 		
 				$result = json_decode($this->initScn->do_confirm_add());	
+				$error_message = $result->message;
 
 			} elseif (isset($this->options->_POST->add_back)) {
 				// 新規確認ダイアログの「戻る」ボタン押下
@@ -226,6 +278,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 		
 				$result = json_decode($this->initScn->do_back_add_dialog());
+				$error_message = $result->message;
 
 			//============================================================
 			// 変更関連処理
@@ -237,7 +290,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_disp_update_dialog());
-
+				$error_message = $result->message;
 
 			} elseif (isset($this->options->_POST->update_check)) {
 				// 変更ダイアログの「確認」ボタン押下
@@ -246,6 +299,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_check_update());
+				$error_message = $result->message;
 
 			} elseif (isset($this->options->_POST->update_confirm)) {
 				// 変更確認ダイアログの「確定」ボタン押下
@@ -254,6 +308,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_confirm_update());	
+				$error_message = $result->message;
 
 			} elseif (isset($this->options->_POST->update_back)) {
 				// 変更確認ダイアログの「戻る」ボタン押下	
@@ -262,7 +317,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_back_update_dialog());
-
+				$error_message = $result->message;
 
 			//============================================================
 			// 削除処理
@@ -275,7 +330,7 @@ class main
 			
 				// Gitファイルの削除
 				$result = json_decode($this->initScn->do_delete());
-
+				$error_message = $result->message;
 
 			//============================================================
 			// 復元処理
@@ -288,7 +343,7 @@ class main
 			
 				// Gitファイルの削除
 				$result = json_decode($this->backupScn->do_restore_publish());
-
+				$error_message = $result->message;
 
 			//============================================================
 			// 即時公開処理
@@ -300,7 +355,8 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_disp_immediate_dialog());
-
+				$error_message = $result->message;
+								$error_message = $result->message;
 			} elseif (isset($this->options->_POST->immediate_check)) {
 				// 即時公開ダイアログの「確認」ボタン押下
 				
@@ -308,6 +364,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_check_immediate());
+				$error_message = $result->message;
 
 			} elseif (isset($this->options->_POST->immediate_confirm)) {
 				// 即時公開確認ダイアログの「確定」ボタン押下	
@@ -316,6 +373,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_immediate_publish());
+				$error_message = $result->message;
 
 				if ( !$result->status ) {
 					// 処理失敗の場合、復元処理
@@ -335,7 +393,7 @@ class main
 						$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 						// 画面アラート用のメッセージ
-						$result->message = $error_message . "[復元公開処理]" . $result->message;
+						$error_message .= $error_message . "[復元公開処理]" . $result->message;
 					}
 
 				}
@@ -347,7 +405,8 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_back_immediate_dialog());
-			
+				$error_message = $result->message;
+
 			//============================================================
 			// ログ表示処理
 			//============================================================
@@ -358,10 +417,11 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->historyScn->do_disp_log_dialog());
+				$error_message = $result->message;
 			}
 
 
-			if ( !$result->status ) {
+			if ( $error_message ) {
 				// 処理失敗の場合
 
 				// $error_message .=  $result->message;
@@ -371,16 +431,16 @@ class main
 				$logstr .= "**********************************************************************************" . "\r\n";
 				$this->common()->put_process_log_block($logstr);
 
-				$logstr = $result->message . "\r\n";
+				$logstr = $error_message . "\r\n";
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
-				$msg = nl2br($result->message);
+				$msg = nl2br($error_message);
 
 
 				// エラーメッセージ表示
 				$dialog_disp = '
 				<script type="text/javascript">
-					console.error(' . "'" . $result->message . "'" . ');
+					console.error(' . "'" . $error_message . "'" . ');
 					alert(' . "'" . $msg . "'" . ');
 				</script>';
 
@@ -423,13 +483,20 @@ class main
 
 		} catch (\ErrorException $e) {
 
-		    echo "例外エラーが発生しました。管理者にお問い合わせください。";
+		    echo "例外エラーが発生しました。管理者にお問い合わせください。". "\r\n";
+		    // echo $this->error_log_path. "\r\n";
+		    // echo file_exists($this->error_log_path). "\r\n";
+			if (file_exists($this->error_log_path)) {
+				$logstr =  "***** エラー発生 *****" . "\r\n";
+				$logstr .= "[ERROR]" . "\r\n";
+				$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
+				$logstr .= "Error message:" . $e->getMessage() . "\r\n";
+				$this->common()->put_error_log($logstr);
+			} else {
+				echo $e->getFile() . " in " . $e->getLine() . "\r\n";
+				echo "Error message:" . $e->getMessage() . "\r\n";
+			}
 
-			$logstr =  "***** エラー発生 *****" . "\r\n";
-			$logstr .= "[ERROR]" . "\r\n";
-			$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
-			$logstr .= "Error message:" . $e->getMessage() . "\r\n";
-			$this->common()->put_error_log($logstr);
 
 		} catch (\Exception $e) {
 
@@ -535,7 +602,7 @@ class main
 			$logstr .= "予約公開処理異常終了（例外キャッチ）" . "\r\n";
 			$logstr .= "===============================================" . "\r\n";
 			$logstr .= "日時：" . $this->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT) . "\r\n";
-			$logstr .= $e->getMessage(). "\r\n";
+			$logstr .= $e->getMessage();
 			$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 			return;
@@ -549,57 +616,13 @@ class main
 		$logstr .= "予約公開処理終了" . "\r\n";
 		$logstr .= "===============================================" . "\r\n";
 		$logstr .= "日時：" . $this->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT) . "\r\n";
+		$logstr .= $result->message;
 		$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		$this->common()->put_process_log(__METHOD__, __LINE__, '■ [cron] run end');
 
 		return;
     }
-
-	/**
-	 * 作業用ディレクトリの作成（既にある場合は作成しない）
-	 *	
-	 * @return ソート後の配列
-	 */
-	function create_indigo_work_dir() {
-	
-		$logstr = "create_indigo_work_dir() start";
-		$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-
-		$ret = true;
-
-		// logファイルディレクトリが存在しない場合は作成
-		if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_log) ) {
-			$ret = false;
-		}
-
-		// backupディレクトリが存在しない場合は作成
-		if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_backup) ) {
-			$ret = false;
-		}
-
-		// waitingディレクトリが存在しない場合は作成
-		if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_waiting) ) {
-			$ret = false;
-		}
-
-		// runningディレクトリが存在しない場合は作成
-		if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_running) ) {
-			$ret = false;
-		}
-
-		// releasedディレクトリが存在しない場合は作成
-		if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_released) ) {
-			$ret = false;
-		}
-
-		$logstr = "$ret = " . $ret;
-		$logstr = "create_indigo_work_dir() end";
-		$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-
-		return $ret;
-	}
-
 
 	/**
 	 * `$fs` オブジェクトを取得する。
@@ -641,51 +664,12 @@ class main
 	}
 
 	/**
-	 * response status code を取得する。
+	 * `$dbh` オブジェクトを取得する。
 	 *
-	 * `$px->set_status()` で登録した情報を取り出します。
-	 *
-	 * @return int ステータスコード (100〜599の間の数値)
+	 * @return object $dbh オブジェクト
 	 */
 	public function get_dbh(){
 		return $this->dbh;
-	}
-
-
-	/**
-	 * response status code を取得する。
-	 *
-	 * `$px->set_status()` で登録した情報を取り出します。
-	 *
-	 * @return int ステータスコード (100〜599の間の数値)
-	 */
-	// public function put_process_log($path, $text){
-		
-	// 	file_put_contents($path, $text, FILE_APPEND);
-	// }
-
-	// /**
-	//  * response status code を取得する。
-	//  *
-	//  * `$px->set_status()` で登録した情報を取り出します。
-	//  *
-	//  * @return int ステータスコード (100〜599の間の数値)
-	//  */
-	// public function put_process_log($text){
-		
-	// 	$datetime = $this->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
-
-	// 	$str = "[" . $datetime . "]" . " " . $text . "\r\n";
-
-	// 	// file_put_contents($path, $str, FILE_APPEND);
-
-	// 	return error_log( $str, 3, $this->process_log_path );
-	// }
-
-
-	function my_error_handler ( $errno, $errstr, $errfile, $errline, $errcontext ) {
-	     // echo "[$errno] $errstr $errfile($errline)\n";
-		echo "エラー！";
 	}
 
 }

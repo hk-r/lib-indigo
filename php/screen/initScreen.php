@@ -25,15 +25,6 @@ class initScreen
 	private $input_error_message = '';
 
 	/**
-	 * 画像パス定義
-	 */
-	// 右矢印
-	const IMG_ARROW_RIGHT = '/images/arrow_right.png';
-	// エラーアイコン
-	const IMG_ERROR_ICON = '/images/error_icon.png';
-
-
-	/**
 	 * 入力モード
 	 */
 	// 追加モード
@@ -811,22 +802,15 @@ class initScreen
 			}
 		}
 
-        // masterディレクトリの絶対パス
-        // $workdir_relativepath = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->options->workdir_relativepath));
-
-		// mainクラス呼び出しディレクトリの相対パス
-        $param_relativepath = $this->main->options->param_relativepath;
-        
-		// indigo作業ディレクトリ
-        $workdir_relativepath = $this->main->options->workdir_relativepath;
-
 		$ret .= '<form method="post">';
 
 		// hidden項目
 		$ret .= '<input type="hidden" name="selected_id" value="' . $form['selected_id'] . '"/>';
 		$ret .= '<input type="hidden" name="ver_no" value="' . $form['ver_no'] . '"/>';
-		$ret .= '<input type="hidden" id="param_relativepath" value="' . $param_relativepath . '"/>';
-		$ret .= '<input type="hidden" id="workdir_relativepath" value="' . $workdir_relativepath . '"/>';
+		// ajax呼出クラス絶対パス
+		$ret .= '<input type="hidden" id="realpath_ajax_call" value="' . $this->main->options->realpath_ajax_call . '"/>';
+		// indigo作業用ディレクトリ絶対パス
+		$ret .= '<input type="hidden" id="realpath_workdir" value="' . $this->main->options->realpath_workdir . '"/>';
 
 		
 		$ret .= '<table class="table table-striped">'
@@ -1043,10 +1027,9 @@ class initScreen
 	
 			// 画面入力された日時を結合し、GMTへ変換する
 			$before_gmt_reserve_datetime = $this->combine_to_gmt_date_and_time($before_reserve_date, $before_reserve_time);
-		
 		}
 
-		$img_filename = $this->main->options->resdir_relativepath . self::IMG_ARROW_RIGHT;
+		$img_filename = $this->main->options->relativepath_resourcedir . "/images/arrow_right.png";
 
 		$ret = '<div class="dialog" id="modal_dialog">'
 			. '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
@@ -1262,9 +1245,6 @@ class initScreen
 		*/ 
 		$data_list = $this->tsReserve->get_ts_reserve_list();
 	
-		// 画面入力された日時を結合し、GMTへ変換する
-		$gmt_reserve_datetime = $this->combine_to_gmt_date_and_time($form['reserve_date'], $form['reserve_time']);
-
 		// 必須チェック
 		if (!$this->check->is_null_branch($form['branch_select_value'])) {
 			$ret .= '<p class="error_message">ブランチを選択してください。</p>';
@@ -1291,16 +1271,22 @@ class initScreen
 				// 日付の妥当性チェック
 				if (!$this->check->check_date($form['reserve_date'])) {
 					$ret .= '<p class="error_message">「公開予約日時」の日付が有効ではありません。</p>';
-				}
+				// 以下、日付の妥当性チェックがOKの場合にのみチェックする
+				} else {
 
-				// 未来の日付であるかチェック
-				if (!$this->check->check_future_date($gmt_reserve_datetime)) {
-					$ret .= '<p class="error_message">「公開予約日時」は未来日時を設定してください。</p>';
-				}
+					// 画面入力された日時を結合し、GMTへ変換する
+					$gmt_reserve_datetime = $this->combine_to_gmt_date_and_time($form['reserve_date'], $form['reserve_time']);
 
-				// 公開予約日時の重複チェック
-				if (!$this->check->check_exist_reserve($data_list, $gmt_reserve_datetime, $form['selected_id'])) {
-					$ret .= '<p class="error_message">入力された日時はすでに公開予約が作成されています。</p>';
+
+					// 未来の日付であるかチェック
+					if (!$this->check->check_future_date($gmt_reserve_datetime)) {
+						$ret .= '<p class="error_message">「公開予約日時」は未来日時を設定してください。</p>';
+					}
+
+					// 公開予約日時の重複チェック
+					if (!$this->check->check_exist_reserve($data_list, $gmt_reserve_datetime, $form['selected_id'])) {
+						$ret .= '<p class="error_message">入力された日時はすでに公開予約が作成されています。</p>';
+					}
 				}
 			}
 			

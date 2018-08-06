@@ -127,12 +127,12 @@ class tsBackup
 
 		// foreach ( (array) $get_array as $data) {
 			// $ret_array = array_shift($data);
-			$conv_ret_array = $this->convert_ts_backup_entity($ret_array);
+			// $conv_ret_array = $this->convert_ts_backup_entity($ret_array);
 		// }
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup end');
 
-		return $conv_ret_array;
+		return $ret_array;
 	}
 
 	/**
@@ -163,12 +163,12 @@ class tsBackup
 
 		// foreach ( (array) $get_array as $data) {
 			// $ret_array = array_shift($data);
-			$conv_ret_array = $this->convert_ts_backup_entity($ret_array);
+			// $conv_ret_array = $this->convert_ts_backup_entity($ret_array);
 		// }
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup_by_output_id end');
 
-		return $conv_ret_array;
+		return $ret_array;
 	}
 
 	/**

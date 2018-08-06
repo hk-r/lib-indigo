@@ -30,7 +30,7 @@ class ajax
         $log_dirname = gmdate("Ymd", time());
 
         // ログパス
-        $this->ajax_log_path = $this->fs->normalize_path($this->fs->get_realpath($this->options->workdir_relativepath . define::PATH_LOG)) . 'log_ajax_' . $log_dirname . '.log';
+        $this->ajax_log_path = $this->fs->normalize_path($this->fs->get_realpath($this->options->realpath_workdir . define::PATH_LOG)) . 'log_ajax_' . $log_dirname . '.log';
     }
 
     /**
@@ -48,10 +48,10 @@ class ajax
 
         $current_dir = realpath('.');
 
-        if (isset($this->options->branch_name) && isset($this->options->workdir_relativepath)) {
+        if (isset($this->options->branch_name) && isset($this->options->realpath_workdir)) {
 
             // masterディレクトリの絶対パス
-            $master_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->options->workdir_relativepath . define::PATH_MASTER));
+            $master_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->options->realpath_workdir . define::PATH_MASTER));
 
             if ( $master_real_path ) {
 
@@ -95,11 +95,9 @@ class ajax
     }
 
     /**
-     * response status code を取得する。
-     *
-     * `$px->set_status()` で登録した情報を取り出します。
-     *
-     * @return int ステータスコード (100〜599の間の数値)
+     * ajax用のログ書き込み
+     * 
+     * @return 成功した場合に TRUE を、失敗した場合に FALSEを返却
      */
     private function put_ajax_log($text){
         
@@ -111,8 +109,6 @@ class ajax
                "[" . __METHOD__ . "]" . " " .
                "[line:" . __LINE__ . "]" . " " .
                $text . "\r\n";
-
-        // file_put_contents($path, $str, FILE_APPEND);
 
         return error_log( $str, 3, $this->ajax_log_path );
     }

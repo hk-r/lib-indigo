@@ -17,18 +17,17 @@ $(function($){
 
 			} else {
 
-				var param_relativepath = document.getElementById('param_relativepath').value;
-				var workdir_relativepath = document.getElementById('workdir_relativepath').value;
-				// alert(workdir_relativepath);
-				// alert(current_path);
+				var realpath_ajax_call = document.getElementById('realpath_ajax_call').value;
+				var realpath_workdir = document.getElementById('realpath_workdir').value;
+
 				$.ajax ({
 					type: 'GET',
 					// "url": "./../vendor/pickles2/lib-indigo/php/jquery.php",
 					// url: path + "php/ajax.php",
-					url: param_relativepath + "ajax.php",
+					url: realpath_ajax_call,
 					
 					data: { 'branch_name': branch_name, 
-							'workdir_relativepath': workdir_relativepath
+							'realpath_workdir': realpath_workdir
 						},
 					dataType: 'json',
 				    success: function(data, dataType) {

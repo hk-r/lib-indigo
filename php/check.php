@@ -22,11 +22,10 @@ class check
 	/**
 	 * ブランチの必須チェック
 	 *	 
-	 * @param $datetime       = 公開予約日時の日付
+	 * @param $branch_select_value = 選択ブランチ
 	 *	 
 	 * @return 
-	 *  未来日である：true
-	 *  未来日でない：false
+	 *  チェックOK：true、チェックNG：false
 	 */
 	public function is_null_branch($branch_select_value) {
 
@@ -45,11 +44,10 @@ class check
 	/**
 	 * コミットの必須チェック
 	 *	 
-	 * @param $datetime       = 公開予約日時の日付
+	 * @param $commit_hash = 入力コミットハッシュ値
 	 *	 
 	 * @return 
-	 *  未来日である：true
-	 *  未来日でない：false
+	 *  チェックOK：true、チェックNG：false
 	 */
 	public function is_null_commit_hash($commit_hash) {
 
@@ -68,11 +66,10 @@ class check
 	/**
 	 * 公開予約日付の必須チェック
 	 *	 
-	 * @param $datetime       = 公開予約日時の日付
+	 * @param $reserve_date = 入力公開予約日時の日付
 	 *	 
 	 * @return 
-	 *  未来日である：true
-	 *  未来日でない：false
+	 *  チェックOK：true、チェックNG：false
 	 */
 	public function is_null_reserve_date($reserve_date) {
 
@@ -91,11 +88,10 @@ class check
 	/**
 	 * 公開予約時刻の必須チェック
 	 *	 
-	 * @param $datetime       = 公開予約日時の日付
+	 * @param $reserve_time = 入力公開予約日時の時刻
 	 *	 
 	 * @return 
-	 *  未来日である：true
-	 *  未来日でない：false
+	 *  チェックOK：true、チェックNG：false
 	 */
 	public function is_null_reserve_time($reserve_time) {
 
@@ -114,11 +110,10 @@ class check
 	/**
 	 * 公開予約の最大件数チェック
 	 *	 
-	 * @param $data_list       = データリスト
+	 * @param $data_list = 現状の予約件数
 	 *	 
 	 * @return 
-	 *  チェックOK：true
-	 *  チェックNG：false
+	 *  チェックOK：true、チェックNG：false
 	 */
 	public function check_reserve_max_record($data_list) {
 
@@ -126,8 +121,8 @@ class check
 
 		$ret = true;
 
-		// TODO:定数化
-		$max = 10;
+		// パラメタの最大予約件数
+		$max = $this->main->options->max_reserve_record;
 
 		if ($max <= count($data_list)) {
 			$ret = false;
@@ -141,11 +136,10 @@ class check
 	/**
 	 * 日付の妥当性チェック
 	 *	 
-	 * @param $reserve_date  = 公開予約日時
+	 * @param $reserve_date = 入力公開予約日時の日付
 	 *	 
 	 * @return 
-	 *  チェックOK：true
-	 *  チェックNG：false
+	 *  チェックOK：true、チェックNG：false
 	 */
 	public function check_date($reserve_date) {
 
@@ -168,11 +162,10 @@ class check
 	/**
 	 * 未来日付チェック
 	 *	 
-	 * @param $datetime       = 公開予約日時の日付
+	 * @param $datetime = 入力公開予約日時
 	 *	 
 	 * @return 
-	 *  未来日である：true
-	 *  未来日でない：false
+	 *  未来日である：true、未来日でない：false
 	 */
 	public function check_future_date($datetime) {
 
@@ -198,11 +191,10 @@ class check
 	 *	 
 	 * @param $data_list       = データリスト
 	 * @param $selected_branch = 選択されたブランチ
-	 * @param $selected_id     = 変更ID
+	 * @param $selected_id     = チェックデータ自身のID
 	 *	 
 	 * @return 
-	 *  重複なし：true
-	 *  重複あり：false
+	 *  重複なし：true、重複あり：false
 	 */
 	public function check_exist_branch($data_list, $selected_branch, $selected_id) {
 
@@ -212,6 +204,7 @@ class check
 
 		foreach ((array)$data_list as $array) {
 			
+			// 自身以外に重複ブランチが存在する場合はエラーとする
 			if (($array[tsReserve::RESERVE_ENTITY_ID_SEQ] != $selected_id) && ($array[tsReserve::RESERVE_ENTITY_BRANCH] == $selected_branch)) {
 				$ret = false;
 				break;
@@ -228,24 +221,20 @@ class check
 	 *	 
 	 * @param $data_list     = データリスト
 	 * @param $input_reserve = 入力された日時
-	 * @param $selected_id   = 変更ID
+	 * @param $selected_id   = チェックデータ自身のID
 	 *	 
 	 * @return 
-	 *  重複なし：true
-	 *  重複あり：false
+	 *  重複なし：true、重複あり：false
 	 */
 	public function check_exist_reserve($data_list, $input_reserve, $selected_id) {
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_exist_reserve start');
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '□ 入力日時：' . $input_reserve);
-
 		$ret = true;
 
 		foreach ((array)$data_list as $array) {
 
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, '□ 比較日時：' . $array[tsReserve::RESERVE_ENTITY_RESERVE_GMT]);
-
+			// 自身以外に同日時が存在する場合はエラーとする
 			if (($array[tsReserve::RESERVE_ENTITY_ID_SEQ] != $selected_id) &&
 				($array[tsReserve::RESERVE_ENTITY_RESERVE_GMT] == $input_reserve)) {
 				$ret = false;

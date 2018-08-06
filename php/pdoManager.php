@@ -44,7 +44,7 @@ class pdoManager
 		$db_pass;
 		$option;
 
-		$db_type = $this->main->options->db_type;
+		$db_type = $this->main->options->db->db_type;
 
 		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ db_type');
 		// $this->main->common()->put_process_log(__METHOD__, __LINE__, $db_type);
@@ -56,13 +56,13 @@ class pdoManager
 			/**
 			 * mysqlの場合
 			 */
-			$db_name = $this->main->options->mysql_db_name;		// データベース名
-			$db_host = $this->main->options->mysql_db_host;		// ホスト名
+			$db_name = $this->main->options->db->mysql_db_name;		// データベース名
+			$db_host = $this->main->options->db->mysql_db_host;		// ホスト名
 
 			$dsn = "mysql:dbname=" . $db_name . ";host=" . $db_host. ";charset=utf8";
 
-			$db_user = $this->main->options->mysql_db_user;
-			$db_pass = $this->main->options->mysql_db_pass;
+			$db_user = $this->main->options->db->mysql_db_user;
+			$db_pass = $this->main->options->db->mysql_db_pass;
 
 			$option = array(
 						\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES '. SELF::UTF
@@ -77,15 +77,15 @@ class pdoManager
 			 * sqliteの場合 
 			 */
 			// dbディレクトリの絶対パス
-			$db_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->options->workdir_relativepath . self::SQLITE_DB_PATH));
+			$db_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->options->realpath_workdir . self::SQLITE_DB_PATH));
 
 			// $this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ db_real_path：' . $db_real_path);
 
 			// DBディレクトリが存在しない場合は作成
-			if ( !$this->main->common()->is_exists_mkdir($db_real_path) ) {
+			if ( !$this->main->fs()->mkdir($db_real_path) ) {
 
 					// エラー処理
-					throw new \Exception('Creation of sqlite directory failed.');
+					throw new \Exception('Creation of sqlite directory failed. path = ' . $db_real_path);
 			}
 
 			$dsn = "sqlite:" . $db_real_path . self::SQLITE_DB_NAME;

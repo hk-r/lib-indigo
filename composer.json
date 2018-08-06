@@ -26,7 +26,6 @@
             "php/main.php",
             "php/publish.php",
             "php/gitManager.php",
-            "php/fileManager.php",
             "php/pdoManager.php",
             "php/db/tsReserve.php",
             "php/db/tsOutput.php",

@@ -3,6 +3,7 @@
 namespace indigo\screen;
 
 use indigo\db\tsOutput as tsOutput;
+use indigo\db\tsBackup as tsBackup;
 use indigo\define as define;
 
 class historyScreen
@@ -10,7 +11,7 @@ class historyScreen
 	private $main;
 
 	private $tsOutput;
-
+	private $tsBackup;
 
 	/**
 	 * コンストラクタ
@@ -21,6 +22,7 @@ class historyScreen
 		$this->main = $main;
 
 		$this->tsOutput = new tsOutput($this->main);
+		$this->tsBackup = new tsBackup($this->main);
 	}
 	
 
@@ -36,9 +38,7 @@ class historyScreen
 		$ret = "";
 
 		// 公開処理結果一覧を取得
-		$data_list = $this->tsOutput->get_ts_output_list(null);
-
-		$ret -
+		$output_list = $this->tsOutput->get_ts_output_list(null);
 
 		$ret .= '<div style="overflow:hidden">'
 			. '<form id="form_table" method="post">'
@@ -55,32 +55,47 @@ class historyScreen
 			. '</div>';
 
 		// ヘッダー
-		$ret .= '<table name="list_tbl" class="table table-striped">'
+		$ret .= '<table name="list_tbl" class="table table-striped" style="table-layout:fixed;width:100%;">'
 				. '<thead>'
 				. '<tr>'
-				. '<th scope="row"></th>'
-				. '<th scope="row">状態</th>'
-				. '<th scope="row">公開種別</th>'
-				. '<th scope="row">公開予約日時</th>'
-				. '<th scope="row">コミット</th>'
-				. '<th scope="row">ブランチ</th>'
-				. '<th scope="row">コメント</th>'
-				. '<th scope="row">処理開始日時</th>'
-				. '<th scope="row">処理完了日時</th>'
-				. '<th scope="row">実行ユーザ</th>'
+				. '<th width="3%" scope="row"></th>'
+				. '<th width="8%" scope="row">状態</th>'
+				. '<th width="8%" scope="row">公開種別</th>'
+				. '<th width="10%" scope="row">公開予約日時</th>'
+				. '<th width="10%" scope="row">バックアップ日時</th>'
+				. '<th width="7%" scope="row">コミット</th>'
+				. '<th width="14%" scope="row">ブランチ</th>'
+				. '<th width="12%" scope="row">コメント</th>'
+				. '<th width="10%" scope="row">処理開始日時</th>'
+				. '<th width="10%" scope="row">処理完了日時</th>'
+				. '<th width="8%" scope="row">実行ユーザ</th>'
 				. '</tr>'
 				. '</thead>'
 				. '<tbody>';
 
 		// データリスト
-		foreach ((array)$data_list as $array) {
+		foreach ((array)$output_list as $array) {
 			
+			$backup_datetime_disp = '';
+
+			if ($array[tsOutput::OUTPUT_ENTITY_BACKUP_ID]) {
+				// バックアップ情報の取得
+				$backup_ret = $this->tsBackup->get_selected_ts_backup($array[tsOutput::OUTPUT_ENTITY_BACKUP_ID]);
+
+				if ($backup_ret && $backup_ret[tsBackup::TS_BACKUP_DATETIME]) {
+					$tz_datetime = $this->main->common()->convert_to_timezone_datetime($backup_ret[tsBackup::TS_BACKUP_DATETIME]);
+					$backup_datetime_disp = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
+				}
+				
+			}
+
 			$ret .= '<tr>'
 				. '<td class="p-center">
 				  <input type="radio" name="target" value="' . $array[tsOutput::OUTPUT_ENTITY_ID_SEQ] . '"/></td>'
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_STATUS_DISP] . '</td>'
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_PUBLISH_TYPE] . '</td>'
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_RESERVE_DISP] . '</td>'
+				. '<td class="p-center">' . $backup_datetime_disp . '</td>'
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_COMMIT_HASH] . '</td>'
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_BRANCH] . '</td>'
 				. '<td>' 				  . $array[tsOutput::OUTPUT_ENTITY_COMMENT] . '</td>'
@@ -128,6 +143,7 @@ class historyScreen
 
 			// 公開処理結果情報の取得
 			$selected_ret = $this->tsOutput->get_selected_ts_output($selected_id);
+
 			// ダイアログHTMLの作成
 			$result['dialog_disp'] = $this->create_log_dialog_html($selected_ret);
 
