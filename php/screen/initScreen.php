@@ -1271,21 +1271,22 @@ class initScreen
 				// 日付の妥当性チェック
 				if (!$this->check->check_date($form['reserve_date'])) {
 					$ret .= '<p class="error_message">「公開予約日時」の日付が有効ではありません。</p>';
-				}
+				// 以下、日付の妥当性チェックがOKの場合にのみチェックする
+				} else {
+
+					// 画面入力された日時を結合し、GMTへ変換する
+					$gmt_reserve_datetime = $this->combine_to_gmt_date_and_time($form['reserve_date'], $form['reserve_time']);
 
 
-				// 画面入力された日時を結合し、GMTへ変換する
-				$gmt_reserve_datetime = $this->combine_to_gmt_date_and_time($form['reserve_date'], $form['reserve_time']);
+					// 未来の日付であるかチェック
+					if (!$this->check->check_future_date($gmt_reserve_datetime)) {
+						$ret .= '<p class="error_message">「公開予約日時」は未来日時を設定してください。</p>';
+					}
 
-
-				// 未来の日付であるかチェック
-				if (!$this->check->check_future_date($gmt_reserve_datetime)) {
-					$ret .= '<p class="error_message">「公開予約日時」は未来日時を設定してください。</p>';
-				}
-
-				// 公開予約日時の重複チェック
-				if (!$this->check->check_exist_reserve($data_list, $gmt_reserve_datetime, $form['selected_id'])) {
-					$ret .= '<p class="error_message">入力された日時はすでに公開予約が作成されています。</p>';
+					// 公開予約日時の重複チェック
+					if (!$this->check->check_exist_reserve($data_list, $gmt_reserve_datetime, $form['selected_id'])) {
+						$ret .= '<p class="error_message">入力された日時はすでに公開予約が作成されています。</p>';
+					}
 				}
 			}
 			
