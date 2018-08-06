@@ -431,16 +431,16 @@ class main
 				$logstr .= "**********************************************************************************" . "\r\n";
 				$this->common()->put_process_log_block($logstr);
 
-				$logstr = $result->message . "\r\n";
+				$logstr = $error_message . "\r\n";
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
-				$msg = nl2br($result->message);
+				$msg = nl2br(error_message);
 
 
 				// エラーメッセージ表示
 				$dialog_disp = '
 				<script type="text/javascript">
-					console.error(' . "'" . $result->message . "'" . ');
+					console.error(' . "'" . $error_message . "'" . ');
 					alert(' . "'" . $msg . "'" . ');
 				</script>';
 
