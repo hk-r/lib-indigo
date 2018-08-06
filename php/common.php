@@ -360,4 +360,22 @@ class common
 		return error_log( $str, 3, $this->main->process_log_path );
 	}
 
+	/**
+	 * 公開確認用のログを出力する。
+	 *
+	 * @return ログ出力
+	 */
+	public function put_publish_log($method, $line, $text, $path){
+		
+		$datetime = $this->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
+
+		$str = "[" . $datetime . "]" . " " .
+			   "[pid:" . getmypid() . "]" . " " .
+			   "[userid:" . $this->main->options->user_id . "]" . " " .
+			   "[" . $method . "]" . " " .
+			   "[line:" . $line . "]" . " " .
+			   $text . "\r\n";
+
+		return error_log( $str, 3, $path );
+	}
 }
