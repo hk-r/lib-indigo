@@ -37,9 +37,6 @@ class publish
 		
 		$this->path_lockdir = $main->fs()->get_realpath( $this->main->options->realpath_workdir . 'applock/' );
 		$this->path_lockfile = $this->path_lockdir .'applock.txt';
-
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ path_lockdir：' . $this->path_lockdir);
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ path_lockdir：' . $this->path_lockfile);
 	}
 
 
@@ -50,17 +47,36 @@ class publish
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ exec_publish start');
 
-		$logstr = "===============================================" . "\r\n";
-		$logstr .= "公開処理開始" . "\r\n";
-		$logstr .= "===============================================";
-		$this->main->common()->put_process_log_block($logstr);
-
 		$output = "";
 		$result = array('status' => true,
 						'message' => '',
 						'dialog_disp' => '',
 						'output_id' => '',
 						'backup_id' => '');
+
+		// 予約公開の場合
+		if ($publish_type == define::PUBLISH_TYPE_RESERVE) {
+
+			//============================================================
+			// 公開予約テーブルより、公開対象データの取得
+			//============================================================
+			$reserve_data_list = $this->tsReserve->get_ts_reserve_publish_list($start_datetime);
+			
+			if (!$reserve_data_list) {
+				$this->main->common()->put_process_log(__METHOD__, __LINE__, 'Cron Publish data does not exist.');
+
+				$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ exec_publish end');
+
+				return $result;
+			}
+		}
+
+
+		$logstr = "===============================================" . "\r\n";
+		$logstr .= "公開予約処理実施" . "\r\n";
+		$logstr .= "===============================================" . "\r\n";
+		$this->main->common()->put_process_log_block($logstr);
+		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
 		$backup_dirname;
 
@@ -134,31 +150,31 @@ class publish
 					$this->main->common()->put_process_log_block($logstr);
 					$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-					//============================================================
-					// 公開予約テーブルより、公開対象データの取得
-					//============================================================
-					$data_list = $this->tsReserve->get_ts_reserve_publish_list($start_datetime);
+					// //============================================================
+					// // 公開予約テーブルより、公開対象データの取得
+					// //============================================================
+					// $reserve_data_list = $this->tsReserve->get_ts_reserve_publish_list($start_datetime);
 					
-					if (!$data_list) {
-						$this->main->common()->put_process_log(__METHOD__, __LINE__, 'Target data does not exist.');
-						$this->main->common()->put_publish_log(__METHOD__, __LINE__, 'Target data does not exist.', $this->realpath_tracelog);
+					// if (!$reserve_data_list) {
+					// 	$this->main->common()->put_process_log(__METHOD__, __LINE__, 'Target data does not exist.');
+					// 	$this->main->common()->put_publish_log(__METHOD__, __LINE__, 'Target data does not exist.', $this->realpath_tracelog);
 
-						$logstr = "===============================================" . "\r\n";
-						$logstr .= "ロック解除" . "\r\n";
-						$logstr .= "===============================================" . "\r\n";
-						$this->main->common()->put_process_log_block($logstr);
-						$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
+					// 	$logstr = "===============================================" . "\r\n";
+					// 	$logstr .= "ロック解除" . "\r\n";
+					// 	$logstr .= "===============================================" . "\r\n";
+					// 	$this->main->common()->put_process_log_block($logstr);
+					// 	$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-						$this->unlock();//ロック解除
+					// 	$this->unlock();//ロック解除
 
-						$logstr = "===============================================" . "\r\n";
-						$logstr .= "公開処理完了" . "\r\n";
-						$logstr .= "===============================================" . "\r\n";
-						$this->main->common()->put_process_log_block($logstr);
-						$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
+					// 	$logstr = "===============================================" . "\r\n";
+					// 	$logstr .= "公開処理完了" . "\r\n";
+					// 	$logstr .= "===============================================" . "\r\n";
+					// 	$this->main->common()->put_process_log_block($logstr);
+					// 	$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-						return $result;
-					}
+					// 	return $result;
+					// }
 
 					$cnt = 1;
 					$status = define::PUBLISH_STATUS_RUNNING;
@@ -168,7 +184,7 @@ class publish
 					$this->main->get_dbh()->beginTransaction();
 
 					// 複数件取れてきた場合は、最新データ以外はスキップデータとして公開処理結果テーブルへ登録する
-					foreach ( (array) $data_list as $data ) {
+					foreach ( (array) $reserve_data_list as $data ) {
 
 						$logstr = "-----------------------------------------------" . "\r\n";
 						$logstr .= "公開予約取得データ" . "\r\n";
@@ -724,6 +740,9 @@ class publish
 			$logstr .= "===============================================" . "\r\n";
 			$this->main->common()->put_process_log_block($logstr);
 			$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
+
+
+			$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ exec_publish end');
 
 			return $result;
 		}
