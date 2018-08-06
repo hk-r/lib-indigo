@@ -54,6 +54,9 @@ class publish
 						'output_id' => '',
 						'backup_id' => '');
 
+		// 開始日時（GMT）
+		$start_datetime = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
+
 		// 予約公開の場合
 		if ($publish_type == define::PUBLISH_TYPE_RESERVE) {
 
@@ -63,8 +66,12 @@ class publish
 			$reserve_data_list = $this->tsReserve->get_ts_reserve_publish_list($start_datetime);
 			
 			if (!$reserve_data_list) {
-				$this->main->common()->put_process_log(__METHOD__, __LINE__, 'Cron Publish data does not exist.');
 
+				$logstr = 'Cron Publish data does not exist.' . "\r\n";
+				$result['message'] = $logstr;
+
+				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+				
 				$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ exec_publish end');
 
 				return $result;
@@ -89,8 +96,7 @@ class publish
 		// 作業用ディレクトリの絶対パスを取得
 		$realpath_array = $this->main->realpath_array;
 		
-		// GMT現在日時を取得し、ディレクトリ名用にフォーマット変換
-		$start_datetime = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
+		// GMT現在日時をディレクトリ名用にフォーマット変換
 		$running_dirname = $this->main->common()->format_gmt_datetime($start_datetime, define::DATETIME_FORMAT_SAVE);
 
 		// 同期ログ（履歴表示画面のログダイアログに表示）
