@@ -612,51 +612,6 @@ class main
 		return;
     }
 
-	// /**
-	//  * 作業用ディレクトリの作成（既にある場合は作成しない）
-	//  *	
-	//  * @return ソート後の配列
-	//  */
-	// function create_indigo_work_dir() {
-	
-	// 	$logstr = "create_indigo_work_dir() start";
-	// 	$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-
-	// 	$ret = true;
-
-	// 	// logファイルディレクトリが存在しない場合は作成
-	// 	if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_log) ) {
-	// 		$ret = false;
-	// 	}
-
-	// 	// backupディレクトリが存在しない場合は作成
-	// 	if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_backup) ) {
-	// 		$ret = false;
-	// 	}
-
-	// 	// waitingディレクトリが存在しない場合は作成
-	// 	if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_waiting) ) {
-	// 		$ret = false;
-	// 	}
-
-	// 	// runningディレクトリが存在しない場合は作成
-	// 	if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_running) ) {
-	// 		$ret = false;
-	// 	}
-
-	// 	// releasedディレクトリが存在しない場合は作成
-	// 	if ( !$this->common()->is_exists_mkdir($this->realpath_array->realpath_released) ) {
-	// 		$ret = false;
-	// 	}
-
-	// 	$logstr = "$ret = " . $ret;
-	// 	$logstr = "create_indigo_work_dir() end";
-	// 	$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-
-	// 	return $ret;
-	// }
-
-
 	/**
 	 * `$fs` オブジェクトを取得する。
 	 *
@@ -697,45 +652,12 @@ class main
 	}
 
 	/**
-	 * response status code を取得する。
+	 * `$dbh` オブジェクトを取得する。
 	 *
-	 * `$px->set_status()` で登録した情報を取り出します。
-	 *
-	 * @return int ステータスコード (100〜599の間の数値)
+	 * @return object $dbh オブジェクト
 	 */
 	public function get_dbh(){
 		return $this->dbh;
 	}
-
-
-	/**
-	 * response status code を取得する。
-	 *
-	 * `$px->set_status()` で登録した情報を取り出します。
-	 *
-	 * @return int ステータスコード (100〜599の間の数値)
-	 */
-	// public function put_process_log($path, $text){
-		
-	// 	file_put_contents($path, $text, FILE_APPEND);
-	// }
-
-	// /**
-	//  * response status code を取得する。
-	//  *
-	//  * `$px->set_status()` で登録した情報を取り出します。
-	//  *
-	//  * @return int ステータスコード (100〜599の間の数値)
-	//  */
-	// public function put_process_log($text){
-		
-	// 	$datetime = $this->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
-
-	// 	$str = "[" . $datetime . "]" . " " . $text . "\r\n";
-
-	// 	// file_put_contents($path, $str, FILE_APPEND);
-
-	// 	return error_log( $str, 3, $this->process_log_path );
-	// }
 
 }

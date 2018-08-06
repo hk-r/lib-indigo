@@ -95,11 +95,9 @@ class ajax
     }
 
     /**
-     * response status code を取得する。
-     *
-     * `$px->set_status()` で登録した情報を取り出します。
-     *
-     * @return int ステータスコード (100〜599の間の数値)
+     * ajax用のログ書き込み
+     * 
+     * @return 成功した場合に TRUE を、失敗した場合に FALSEを返却
      */
     private function put_ajax_log($text){
         
@@ -111,8 +109,6 @@ class ajax
                "[" . __METHOD__ . "]" . " " .
                "[line:" . __LINE__ . "]" . " " .
                $text . "\r\n";
-
-        // file_put_contents($path, $str, FILE_APPEND);
 
         return error_log( $str, 3, $this->ajax_log_path );
     }

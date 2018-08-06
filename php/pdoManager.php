@@ -82,7 +82,7 @@ class pdoManager
 			// $this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ db_real_path：' . $db_real_path);
 
 			// DBディレクトリが存在しない場合は作成
-			if ( !$this->main->common()->is_exists_mkdir($db_real_path) ) {
+			if ( !$this->main->fs()->mkdir($db_real_path) ) {
 
 					// エラー処理
 					throw new \Exception('Creation of sqlite directory failed. path = ' . $db_real_path);

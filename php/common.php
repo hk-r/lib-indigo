@@ -6,7 +6,6 @@ class common
 {
 
 	private $main;
-	// private $fs;
 
 	const DIR_PERMISSION_0757 = 0757;
 
@@ -18,14 +17,6 @@ class common
 	public function __construct ($main){
 
 		$this->main = $main;
-
-		// $this->fs = new \tomk79\filesystem(array(
-		//   'file_default_permission' => define::FILE_DEFAULT_PERMISSION,
-		//   'dir_default_pefrmission' => define::DIR_DEFAULT_PERMISSION,
-		//   'filesystem_encoding' => define::FILESYSTEM_ENCODING
-		// ));
-
-
 	}
 
 	/**
@@ -185,35 +176,35 @@ class common
 	}
 
 
-	/**
-	 * ディレクトリが存在しない場合はディレクトリを作成する
-	 *	 
-	 * @param $dirpath = ディレクトリパス
-	 *	 
-	 * @return true:成功、false：失敗
-	 */
-	public function is_exists_mkdir($dirpath) {
+	// /**
+	//  * ディレクトリが存在しない場合はディレクトリを作成する
+	//  *	 
+	//  * @param $dirpath = ディレクトリパス
+	//  *	 
+	//  * @return true:成功、false：失敗
+	//  */
+	// public function is_exists_mkdir($dirpath) {
 
-		// $this->put_process_log(__METHOD__, __LINE__, '■ is_exists_mkdir start');
+	// 	// $this->put_process_log(__METHOD__, __LINE__, '■ is_exists_mkdir start');
 
-		$ret = true;
+	// 	$ret = true;
 
-		if ($dirpath) {
-			if ( !file_exists($dirpath) ) {
-				// ディレクトリ作成
-				if ( !mkdir($dirpath, self::DIR_PERMISSION_0757)) {
-					$ret = false;
-				}
-			}
-		} else {
-			$ret = false;
-		}
+	// 	if ($dirpath) {
+	// 		if ( !file_exists($dirpath) ) {
+	// 			// ディレクトリ作成
+	// 			if ( !mkdir($dirpath, self::DIR_PERMISSION_0757)) {
+	// 				$ret = false;
+	// 			}
+	// 		}
+	// 	} else {
+	// 		$ret = false;
+	// 	}
 
-		// $this->put_process_log(__METHOD__, __LINE__, '　□ return：' . $ret);
-		// $this->put_process_log(__METHOD__, __LINE__, '■ is_exists_mkdir end');
+	// 	// $this->put_process_log(__METHOD__, __LINE__, '　□ return：' . $ret);
+	// 	// $this->put_process_log(__METHOD__, __LINE__, '■ is_exists_mkdir end');
 
-		return $ret;
-	}
+	// 	return $ret;
+	// }
 
 	/**
 	 * ディレクトリの存在有無にかかわらず、ディレクトリを再作成する（存在しているものは削除する）
@@ -238,7 +229,8 @@ class common
 
 		// デプロイ先のディレクトリを作成
 		if ( !file_exists($dirpath)) {
-			if ( !mkdir($dirpath, self::DIR_PERMISSION_0757) ) {
+			// if ( !mkdir($dirpath, self::DIR_PERMISSION_0757) ) {
+			if ( !$this->main->fs()->mkdir($dirpath) ) {
 				return false;
 			}
 		} else {

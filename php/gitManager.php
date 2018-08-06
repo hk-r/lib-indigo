@@ -195,7 +195,7 @@ class gitManager
 		if ( $master_real_path ) {
 
 			// デプロイ先のディレクトリが無い場合は作成
-			if ( !$this->main->common()->is_exists_mkdir( $master_real_path ) ) {
+			if ( !$this->main->fs()->mkdir( $master_real_path ) ) {
 				// ディレクトリ作成に失敗
 				throw new \Exception('Failed to get git master. Creation of master directory failed.');
 			}
