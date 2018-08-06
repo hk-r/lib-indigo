@@ -36,9 +36,7 @@ class historyScreen
 		$ret = "";
 
 		// 公開処理結果一覧を取得
-		$data_list = $this->tsOutput->get_ts_output_list(null);
-
-		$ret -
+		$output_list = $this->tsOutput->get_ts_output_list(null);
 
 		$ret .= '<div style="overflow:hidden">'
 			. '<form id="form_table" method="post">'
@@ -74,15 +72,28 @@ class historyScreen
 				. '<tbody>';
 
 		// データリスト
-		foreach ((array)$data_list as $array) {
+		foreach ((array)$output_list as $array) {
 			
+			$backup_datetime_disp = '';
+
+			if ($array[tsOutput::OUTPUT_ENTITY_BACKUP_ID]) {
+				// バックアップ情報の取得
+				$backup_ret = $this->tsBackup->get_selected_ts_backup($array[tsOutput::OUTPUT_ENTITY_BACKUP_ID]);
+
+				if ($backup_ret && $backup_ret[tsBackup::TS_BACKUP_DATETIME]) {
+					$tz_datetime = $this->main->common()->convert_to_timezone_datetime($backup_ret[tsBackup::TS_BACKUP_DATETIME]);
+					$backup_datetime_disp = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
+				}
+				
+			}
+
 			$ret .= '<tr>'
 				. '<td class="p-center">
 				  <input type="radio" name="target" value="' . $array[tsOutput::OUTPUT_ENTITY_ID_SEQ] . '"/></td>'
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_STATUS_DISP] . '</td>'
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_PUBLISH_TYPE] . '</td>'
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_RESERVE_DISP] . '</td>'
-				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_RESERVE_DISP] . '</td>'
+				. '<td class="p-center">' . $backup_datetime_disp . '</td>'
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_COMMIT_HASH] . '</td>'
 				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_BRANCH] . '</td>'
 				. '<td>' 				  . $array[tsOutput::OUTPUT_ENTITY_COMMENT] . '</td>'
@@ -130,6 +141,7 @@ class historyScreen
 
 			// 公開処理結果情報の取得
 			$selected_ret = $this->tsOutput->get_selected_ts_output($selected_id);
+
 			// ダイアログHTMLの作成
 			$result['dialog_disp'] = $this->create_log_dialog_html($selected_ret);
 
