@@ -19,9 +19,11 @@ class gitManager
 
 		$this->main = $main;
 
-		$this->protocol = parse_url($main->options->git->giturl, PHP_URL_SCHEME);
-		$this->host = parse_url($main->options->git->giturl, PHP_URL_HOST);
-		$this->path = parse_url($main->options->git->giturl, PHP_URL_PATH);
+		if (isset($main->options->git)) {
+			$this->protocol = parse_url($main->options->git->giturl, PHP_URL_SCHEME);
+			$this->host = parse_url($main->options->git->giturl, PHP_URL_HOST);
+			$this->path = parse_url($main->options->git->giturl, PHP_URL_PATH);
+		}
 	}
 
 	/**
