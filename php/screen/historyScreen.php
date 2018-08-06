@@ -3,6 +3,7 @@
 namespace indigo\screen;
 
 use indigo\db\tsOutput as tsOutput;
+use indigo\db\tsBackup as tsBackup;
 use indigo\define as define;
 
 class historyScreen
@@ -10,7 +11,7 @@ class historyScreen
 	private $main;
 
 	private $tsOutput;
-
+	private $tsBackup;
 
 	/**
 	 * コンストラクタ
@@ -21,6 +22,7 @@ class historyScreen
 		$this->main = $main;
 
 		$this->tsOutput = new tsOutput($this->main);
+		$this->tsBackup = new tsBackup($this->main);
 	}
 	
 
