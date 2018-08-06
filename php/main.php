@@ -251,6 +251,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 		
 				$result = json_decode($this->initScn->do_disp_add_dialog());
+				$error_message = $result->message;
 
 			} elseif (isset($this->options->_POST->add_check)) {
 				// 新規ダイアログの「確認」ボタン押下
@@ -259,7 +260,8 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_check_add());
-				
+				$error_message = $result->message;
+
 			} elseif (isset($this->options->_POST->add_confirm)) {
 				// 新規確認ダイアログの「確定」ボタン押下
 				
@@ -267,6 +269,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 		
 				$result = json_decode($this->initScn->do_confirm_add());	
+				$error_message = $result->message;
 
 			} elseif (isset($this->options->_POST->add_back)) {
 				// 新規確認ダイアログの「戻る」ボタン押下
@@ -275,6 +278,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 		
 				$result = json_decode($this->initScn->do_back_add_dialog());
+				$error_message = $result->message;
 
 			//============================================================
 			// 変更関連処理
@@ -286,7 +290,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_disp_update_dialog());
-
+				$error_message = $result->message;
 
 			} elseif (isset($this->options->_POST->update_check)) {
 				// 変更ダイアログの「確認」ボタン押下
@@ -295,6 +299,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_check_update());
+				$error_message = $result->message;
 
 			} elseif (isset($this->options->_POST->update_confirm)) {
 				// 変更確認ダイアログの「確定」ボタン押下
@@ -303,6 +308,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_confirm_update());	
+				$error_message = $result->message;
 
 			} elseif (isset($this->options->_POST->update_back)) {
 				// 変更確認ダイアログの「戻る」ボタン押下	
@@ -311,7 +317,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_back_update_dialog());
-
+				$error_message = $result->message;
 
 			//============================================================
 			// 削除処理
@@ -324,7 +330,7 @@ class main
 			
 				// Gitファイルの削除
 				$result = json_decode($this->initScn->do_delete());
-
+				$error_message = $result->message;
 
 			//============================================================
 			// 復元処理
@@ -337,7 +343,7 @@ class main
 			
 				// Gitファイルの削除
 				$result = json_decode($this->backupScn->do_restore_publish());
-
+				$error_message = $result->message;
 
 			//============================================================
 			// 即時公開処理
@@ -349,7 +355,8 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_disp_immediate_dialog());
-
+				$error_message = $result->message;
+								$error_message = $result->message;
 			} elseif (isset($this->options->_POST->immediate_check)) {
 				// 即時公開ダイアログの「確認」ボタン押下
 				
@@ -357,6 +364,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_check_immediate());
+				$error_message = $result->message;
 
 			} elseif (isset($this->options->_POST->immediate_confirm)) {
 				// 即時公開確認ダイアログの「確定」ボタン押下	
@@ -365,6 +373,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_immediate_publish());
+				$error_message = $result->message;
 
 				if ( !$result->status ) {
 					// 処理失敗の場合、復元処理
@@ -384,7 +393,7 @@ class main
 						$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 						// 画面アラート用のメッセージ
-						$result->message = $error_message . "[復元公開処理]" . $result->message;
+						$error_message .= $error_message . "[復元公開処理]" . $result->message;
 					}
 
 				}
@@ -396,7 +405,8 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_back_immediate_dialog());
-			
+				$error_message = $result->message;
+
 			//============================================================
 			// ログ表示処理
 			//============================================================
@@ -407,10 +417,11 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->historyScn->do_disp_log_dialog());
+				$error_message = $result->message;
 			}
 
 
-			if ( !$result->status ) {
+			if ( $error_message ) {
 				// 処理失敗の場合
 
 				// $error_message .=  $result->message;
