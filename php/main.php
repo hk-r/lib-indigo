@@ -65,7 +65,7 @@ class main
 		// エラーログ出力登録
 		//============================================================	
 		// ログパス
-		$this->error_log_path = $this->realpath_array->realpath_log . 'error.log';
+		$this->error_log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_LOG . 'error.log'));
 
 		// 致命的なエラーのエラーハンドラ登録
 		register_shutdown_function(
