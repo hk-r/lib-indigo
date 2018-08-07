@@ -784,12 +784,6 @@ class publish
 			// 戻り値が0以外の場合
 
 			$logstr = "**コマンド実行エラー**" . "\r\n";
-			$logstr = $command . "\r\n";
-
-			foreach ((array)$ret['output'] as $key => $value) {
-				$logstr .= $value . "\r\n";
-			}
-
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
@@ -821,12 +815,6 @@ class publish
 			// 戻り値が0以外の場合
 					
 			$logstr = "**コマンド実行エラー**" . "\r\n";
-			$logstr = $command . "\r\n";
-
-			foreach ((array)$ret['output'] as $key => $value) {
-				$logstr .= $value . "\r\n";
-			}
-
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
@@ -857,7 +845,6 @@ class publish
 			// 戻り値が0以外の場合
 
 			$logstr = "**移動コマンド実行エラー**" . "\r\n";
-			$logstr = $command;
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
@@ -886,7 +873,6 @@ class publish
 			// 戻り値が0以外の場合
 
 			$logstr = "**削除コマンド実行エラー**" . "\r\n";
-			$logstr = $command;
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
