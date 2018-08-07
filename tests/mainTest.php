@@ -17,7 +17,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 	private $fs;
 
 	public function setup(){
-		echo 
+
 		$this->fs = new tomk79\filesystem();
 
 		// mb_language('Japanese');
