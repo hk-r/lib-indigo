@@ -18,12 +18,11 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 	public function setup(){
 
-		$this->fs = new tomk79\filesystem();
+		// $this->fs = new tomk79\filesystem();
 
-		// mb_language('Japanese');
-		mb_internal_encoding('UTF-8');
+		// mb_internal_encoding('UTF-8');
 
-		require_once(__DIR__.'/libs/simple_html_dom.php');
+		// require_once(__DIR__.'/libs/simple_html_dom.php');
 
 		// $this->options = array(
 		// 		'_POST' => array(),
