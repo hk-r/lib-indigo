@@ -82,279 +82,279 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		);
 	}
 
-	// private function clear_indigo_dir(){
-	// 	$this->chmod_r();//パーミッションを変えないと削除できない
-	// 	if( !$this->fs->rm(__DIR__.'/testdata/indigo_dir/') ){
-	// 		var_dump('Failed to cleaning test data directory.');
-	// 	}
-	// 	clearstatcache();
-	// 	$this->fs->mkdir_r(__DIR__.'/testdata/indigo_dir/');
-	// 	touch(__DIR__.'/testdata/indigo_dir/.gitkeep');
-	// 	clearstatcache();
-	// }
-	// private function chmod_r($path = null){
-	// 	$base = __DIR__.'/testdata/indigo_dir';
-	// 	// var_dump($base.'/'.$path);
-	// 	$this->fs->chmod($base.'/'.$path , 0777);
-	// 	if(is_dir($base.'/'.$path)){
-	// 		$ls = $this->fs->ls($base.'/'.$path);
-	// 		foreach($ls as $basename){
-	// 			$this->chmod_r($path.'/'.$basename);
-	// 		}
-	// 	}
-	// }
-
-	public function testEqual() {
-	    // 期待値
-	    $expected = 5;
-	    // 実際の値
-	    $actual = 2 + 4;
-	    // チェック
-	    $this->assertEquals($expected, $actual);
+	private function clear_indigo_dir(){
+		$this->chmod_r();//パーミッションを変えないと削除できない
+		if( !$this->fs->rm(__DIR__.'/testdata/indigo_dir/') ){
+			var_dump('Failed to cleaning test data directory.');
+		}
+		clearstatcache();
+		$this->fs->mkdir_r(__DIR__.'/testdata/indigo_dir/');
+		touch(__DIR__.'/testdata/indigo_dir/.gitkeep');
+		clearstatcache();
+	}
+	private function chmod_r($path = null){
+		$base = __DIR__.'/testdata/indigo_dir';
+		// var_dump($base.'/'.$path);
+		$this->fs->chmod($base.'/'.$path , 0777);
+		if(is_dir($base.'/'.$path)){
+			$ls = $this->fs->ls($base.'/'.$path);
+			foreach($ls as $basename){
+				$this->chmod_r($path.'/'.$basename);
+			}
+		}
 	}
 
-	// /**
-	//  * 画面表示
-	//  */
-	// public function testDisp(){
-
-	// 	// var_dump($this->fs);
-
-	// 	$this->clear_indigo_dir();
-
-	// 	//============================================================
-	// 	// 初期表示画面表示
-	// 	//============================================================
-	// 	$options = $this->options;
-		
-	// 	$indigo = new indigo\main( $options );
-	// 	$stdout = $indigo->run();
-
-	// 	$html = str_get_html( $stdout, true, true, DEFAULT_TARGET_CHARSET, false, DEFAULT_BR_TEXT, DEFAULT_SPAN_TEXT );
-	// 	// var_dump($stdout) . "\n";
-
-	// 	$this->assertEquals( 6, count($html->find('div')) );
-
-	// 	$this->assertEquals( 1, count($html->find('form')) );
-	// 	$this->assertEquals( 2, count($html->find('ul')) );
-	// 	$this->assertEquals( 6, count($html->find('li')) );
-	// 	$this->assertEquals( 6, count($html->find('input')) );
-
-	// 	$this->assertEquals( 1, count($html->find('table')) );
-	// 	$this->assertEquals( 1, count($html->find('thead')) );
-	// 	$this->assertEquals( 1, count($html->find('tr')) );
-	// 	$this->assertEquals( 9, count($html->find('tr',0)->find('th')) );
-	// 	$this->assertEquals( '公開予約日時', $html->find('tr',0)->childNodes(1)->innertext );
-	// 	$this->assertEquals( 0, count($html->find('td')) );
-
-	// 	$this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/waiting/' ) );
-	// 	$this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/backup/' ) );
-	// 	$this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) );
-	// 	$this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/released/' ) );
-	// 	$this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/log/' ) );
-
-	// 	$date = gmdate("Ymd", time());
-	// 	$this->assertTrue( is_file( __DIR__.'/testdata/indigo_dir/log/log_process_' . $date . '.log') );
-
-	// 	$this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/master_repository/' ) );
-	// 	$this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/master_repository/.git/' ) );
-
-	// 	$this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/sqlite/' ) );
-	// 	$this->assertTrue( is_file( __DIR__.'/testdata/indigo_dir/sqlite/indigo.db' ) );
-
-	// 	//============================================================
-	// 	// 履歴一覧画面表示
-	// 	//============================================================
-	// 	$options = $this->options;
-	// 	$options['_POST'] = array('history' => 1);
-
-	// 	$indigo = new indigo\main( $options );
-
-	// 	$stdout = $indigo->run();
-
-	// 	$html = str_get_html( $stdout, true, true, DEFAULT_TARGET_CHARSET, false, DEFAULT_BR_TEXT, DEFAULT_SPAN_TEXT );
-	// 	var_dump($stdout) . "\n";
-
-	// 	$this->assertEquals( 7, count($html->find('div')) );
-
-	// 	$this->assertEquals( 1, count($html->find('form')) );
-	// 	$this->assertEquals( 3, count($html->find('ul')) );
-	// 	$this->assertEquals( 3, count($html->find('li')) );
-	// 	// $this->assertEquals( 2, count($html->find('input')) );
-
-	// 	$this->assertEquals( 1, count($html->find('table')) );
-	// 	$this->assertEquals( 1, count($html->find('thead')) );
-	// 	// $this->assertEquals( 1, count($html->find('tr')) );
-	// 	// $this->assertEquals( 11, count($html->find('tr',0)->find('th')) );
-	// 	// $this->assertEquals( '状態', $html->find('tr',0)->childNodes(1)->innertext );
-	// 	// $this->assertEquals( 0, count($html->find('td')) );
-
-	// 	//============================================================
-	// 	// バックアップ一覧表示
-	// 	//============================================================
-	// 	$options = $this->options;
-	// 	$options['_POST'] = array('backup' => 1);
-
-	// 	$indigo = new indigo\main( $options );
-
-	// 	$stdout = $indigo->run();
-
-	// 	$html = str_get_html( $stdout, true, true, DEFAULT_TARGET_CHARSET, false, DEFAULT_BR_TEXT, DEFAULT_SPAN_TEXT );
-	// 	// var_dump($stdout) . "\n";
-
-	// 	$this->assertEquals( 7, count($html->find('div')) );
-
-	// 	$this->assertEquals( 1, count($html->find('form')) );
-	// 	$this->assertEquals( 3, count($html->find('ul')) );
-	// 	$this->assertEquals( 3, count($html->find('li')) );
-	// 	$this->assertEquals( 2, count($html->find('input')) );
-
-	// 	$this->assertEquals( 1, count($html->find('table')) );
-	// 	$this->assertEquals( 1, count($html->find('thead')) );
-	// 	$this->assertEquals( 1, count($html->find('tr')) );
-	// 	$this->assertEquals( 8, count($html->find('tr',0)->find('th')) );
-	// 	$this->assertEquals( 'バックアップ日時', $html->find('tr',0)->childNodes(1)->innertext );
-	// 	$this->assertEquals( 0, count($html->find('td')) );
-
+	// public function testEqual() {
+	//     // 期待値
+	//     $expected = 5;
+	//     // 実際の値
+	//     $actual = 2 + 4;
+	//     // チェック
+	//     $this->assertEquals($expected, $actual);
 	// }
 
+	/**
+	 * 画面表示
+	 */
+	public function testDisp(){
 
-	// /**
-	//  * 即時公開処理処理
-	//  */
-	// public function testImmediatePublish(){
+		// var_dump($this->fs);
 
-	// 	// var_dump($this->fs);
+		$this->clear_indigo_dir();
 
-	// 	// $this->clear_indigo_dir();
-
-	// 	//============================================================
-	// 	// 即時公開処理（失敗）
-	// 	//============================================================
-	// 	$options = $this->options;
-	// 	$options['_POST'] = array('immediate_confirm' => 1);	
-
-	// 	$main = new indigo\main( $options );
+		//============================================================
+		// 初期表示画面表示
+		//============================================================
+		$options = $this->options;
 		
-	// 	// var_dump($indigo->options);
+		$indigo = new indigo\main( $options );
+		$stdout = $indigo->run();
 
-	// 	$publish = new indigo\publish( $main );
+		$html = str_get_html( $stdout, true, true, DEFAULT_TARGET_CHARSET, false, DEFAULT_BR_TEXT, DEFAULT_SPAN_TEXT );
+		// var_dump($stdout) . "\n";
+
+		$this->assertEquals( 6, count($html->find('div')) );
+
+		$this->assertEquals( 1, count($html->find('form')) );
+		$this->assertEquals( 2, count($html->find('ul')) );
+		$this->assertEquals( 6, count($html->find('li')) );
+		$this->assertEquals( 6, count($html->find('input')) );
+
+		$this->assertEquals( 1, count($html->find('table')) );
+		$this->assertEquals( 1, count($html->find('thead')) );
+		$this->assertEquals( 1, count($html->find('tr')) );
+		$this->assertEquals( 9, count($html->find('tr',0)->find('th')) );
+		$this->assertEquals( '公開予約日時', $html->find('tr',0)->childNodes(1)->innertext );
+		$this->assertEquals( 0, count($html->find('td')) );
+
+		$this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/waiting/' ) );
+		$this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/backup/' ) );
+		$this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) );
+		$this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/released/' ) );
+		$this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/log/' ) );
+
+		$date = gmdate("Ymd", time());
+		$this->assertTrue( is_file( __DIR__.'/testdata/indigo_dir/log/log_process_' . $date . '.log') );
+
+		$this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/master_repository/' ) );
+		$this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/master_repository/.git/' ) );
+
+		$this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/sqlite/' ) );
+		$this->assertTrue( is_file( __DIR__.'/testdata/indigo_dir/sqlite/indigo.db' ) );
+
+		//============================================================
+		// 履歴一覧画面表示
+		//============================================================
+		$options = $this->options;
+		$options['_POST'] = array('history' => 1);
+
+		$indigo = new indigo\main( $options );
+
+		$stdout = $indigo->run();
+
+		$html = str_get_html( $stdout, true, true, DEFAULT_TARGET_CHARSET, false, DEFAULT_BR_TEXT, DEFAULT_SPAN_TEXT );
+		var_dump($stdout) . "\n";
+
+		$this->assertEquals( 7, count($html->find('div')) );
+
+		$this->assertEquals( 1, count($html->find('form')) );
+		$this->assertEquals( 3, count($html->find('ul')) );
+		$this->assertEquals( 3, count($html->find('li')) );
+		// $this->assertEquals( 2, count($html->find('input')) );
+
+		$this->assertEquals( 1, count($html->find('table')) );
+		$this->assertEquals( 1, count($html->find('thead')) );
+		// $this->assertEquals( 1, count($html->find('tr')) );
+		// $this->assertEquals( 11, count($html->find('tr',0)->find('th')) );
+		// $this->assertEquals( '状態', $html->find('tr',0)->childNodes(1)->innertext );
+		// $this->assertEquals( 0, count($html->find('td')) );
+
+		//============================================================
+		// バックアップ一覧表示
+		//============================================================
+		$options = $this->options;
+		$options['_POST'] = array('backup' => 1);
+
+		$indigo = new indigo\main( $options );
+
+		$stdout = $indigo->run();
+
+		$html = str_get_html( $stdout, true, true, DEFAULT_TARGET_CHARSET, false, DEFAULT_BR_TEXT, DEFAULT_SPAN_TEXT );
+		// var_dump($stdout) . "\n";
+
+		$this->assertEquals( 7, count($html->find('div')) );
+
+		$this->assertEquals( 1, count($html->find('form')) );
+		$this->assertEquals( 3, count($html->find('ul')) );
+		$this->assertEquals( 3, count($html->find('li')) );
+		$this->assertEquals( 2, count($html->find('input')) );
+
+		$this->assertEquals( 1, count($html->find('table')) );
+		$this->assertEquals( 1, count($html->find('thead')) );
+		$this->assertEquals( 1, count($html->find('tr')) );
+		$this->assertEquals( 8, count($html->find('tr',0)->find('th')) );
+		$this->assertEquals( 'バックアップ日時', $html->find('tr',0)->childNodes(1)->innertext );
+		$this->assertEquals( 0, count($html->find('td')) );
+
+	}
 
 
-	// 	$define = new indigo\define();
-	// 	// var_dump($define);
+	/**
+	 * 即時公開処理処理
+	 */
+	public function testImmediatePublish(){
 
-	// 	$result = $publish->exec_publish(2, null);
+		// var_dump($this->fs);
 
-	// 	var_dump($main->get_dbh());
+		// $this->clear_indigo_dir();
 
-	// 	// $output = $this->passthru( [
-	// 	// 	// $result['status'],
-	// 	// 	$result['message']
-	// 	// 	// __DIR__.'/testData/standard/.px_execute.php' ,
-	// 	// 	// '/?PX=publish.run' ,
-	// 	// ] );
-	// 	// var_dump($result);
+		//============================================================
+		// 即時公開処理（失敗）
+		//============================================================
+		$options = $this->options;
+		$options['_POST'] = array('immediate_confirm' => 1);	
 
-	// 	$this->assertTrue( !$result['status'] );
-	// 	$this->assertEquals( '公開処理が失敗しました。', $result['message'] );
-	// 	// $this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) )
-
-
-	// 	//============================================================
-	// 	// 即時公開処理（成功）
-	// 	//============================================================
-	// 	$options = $this->options;
-	// 	$options['_POST'] = array('immediate_confirm' => 1,	
-	// 							'branch_select_value' => 'release/2018-04-01',	
-	// 							'reserve_date' => null,
-	// 							'reserve_time' => null,	
-	// 							'commit_hash' => 'f9fd330',	
-	// 							'comment' => 'phpUnitテスト001',	
-	// 							'ver_no' => null,	
-	// 							'selected_id' => null
-	// 						);
-
-	// 	$indigo = new indigo\main( $options );
+		$main = new indigo\main( $options );
 		
-	// 	$publish = new indigo\publish( $indigo );
+		// var_dump($indigo->options);
 
-	// 	$define = new indigo\define();
-
-	// 	// 即時公開
-	// 	$result = $publish->exec_publish(2, null);
+		$publish = new indigo\publish( $main );
 
 
-	// 	$this->assertTrue( $result['status'] );
-	// 	$this->assertEquals( '', $result['message'] );
-	// 	$this->assertTrue( isset($result['output_id']) );
-	// 	// $this->assertTrue( !isset($result['backup_id']) );
-	// 	// $this->assertTrue( $result['status'] );
-	// 	// $this->assertEquals( '', $result['message'] );
+		$define = new indigo\define();
+		// var_dump($define);
 
-	// }
+		$result = $publish->exec_publish(2, null);
 
-	// /**
-	//  * 新規ダイアログ表示処理
-	//  */
-	// public function testInsertReserve(){
+		var_dump($main->get_dbh());
 
-	// 	// var_dump($this->fs);
+		// $output = $this->passthru( [
+		// 	// $result['status'],
+		// 	$result['message']
+		// 	// __DIR__.'/testData/standard/.px_execute.php' ,
+		// 	// '/?PX=publish.run' ,
+		// ] );
+		// var_dump($result);
 
-	// 	// $this->clear_indigo_dir();
-
-	// 	//============================================================
-	// 	// 初期表示画面表示
-	// 	//============================================================
-	// 	$options = $this->options;
-	// 	$options['_POST'] = array('add' => 1);	
-
-	// 	$indigo = new indigo\main( $options );
+		$this->assertTrue( !$result['status'] );
+		$this->assertEquals( '公開処理が失敗しました。', $result['message'] );
+		// $this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) )
 
 
-	// 	$stdout = $indigo->run();
+		//============================================================
+		// 即時公開処理（成功）
+		//============================================================
+		$options = $this->options;
+		$options['_POST'] = array('immediate_confirm' => 1,	
+								'branch_select_value' => 'release/2018-04-01',	
+								'reserve_date' => null,
+								'reserve_time' => null,	
+								'commit_hash' => 'f9fd330',	
+								'comment' => 'phpUnitテスト001',	
+								'ver_no' => null,	
+								'selected_id' => null
+							);
 
-	// 	$html = str_get_html( $stdout, true, true, DEFAULT_TARGET_CHARSET, false, DEFAULT_BR_TEXT, DEFAULT_SPAN_TEXT );
-	// 	// var_dump($stdout) . "\n";
+		$indigo = new indigo\main( $options );
+		
+		$publish = new indigo\publish( $indigo );
 
-	// 	// ダイアログの表示確認		
-	// 	$this->assertEquals( 6, count($html->find('.dialog div')) );
+		$define = new indigo\define();
 
-	// 	$this->assertEquals( 1, count($html->find('.dialog h4')) );
-	// 	$this->assertEquals( '新規', $html->find('.dialog h4',0)->plaintext );
-
-	// 	$this->assertEquals( 1, count($html->find('.dialog form')) );
-
-	// 	$this->assertEquals( 1, count($html->find('.dialog ul')) );
-	// 	$this->assertEquals( 2, count($html->find('.dialog li')) );
-	// 	$this->assertEquals( 10, count($html->find('.dialog input')) );
-
-	// 	$this->assertEquals( 1, count($html->find('.dialog table')) );
-	// 	$this->assertEquals( 0, count($html->find('.dialog thead')) );
-	// 	$this->assertEquals( 4, count($html->find('.dialog tr')) );
-	// 	$this->assertEquals( 0, count($html->find('.dialog tr',0)->find('th')) );
-	// 	$this->assertEquals( 2, count($html->find('.dialog tr',0)->find('td')) );
-	// 	$this->assertEquals( 'ブランチ', $html->find('.dialog tr',0)->childNodes(0)->innertext );
+		// 即時公開
+		$result = $publish->exec_publish(2, null);
 
 
-	// 	// ダイアログ裏で表示する初期表示画面の表示確認		
-	// 	$this->assertEquals( 3, count($html->find('.scr_content div')) );
+		$this->assertTrue( $result['status'] );
+		$this->assertEquals( '', $result['message'] );
+		$this->assertTrue( isset($result['output_id']) );
+		// $this->assertTrue( !isset($result['backup_id']) );
+		// $this->assertTrue( $result['status'] );
+		// $this->assertEquals( '', $result['message'] );
 
-	// 	$this->assertEquals( 1, count($html->find('.scr_content form')) );
-	// 	$this->assertEquals( 2, count($html->find('.scr_content ul')) );
-	// 	$this->assertEquals( 6, count($html->find('.scr_content li')) );
-	// 	$this->assertEquals( 6, count($html->find('.scr_content input')) );
+	}
 
-	// 	$this->assertEquals( 1, count($html->find('.scr_content table')) );
-	// 	$this->assertEquals( 1, count($html->find('.scr_content thead')) );
-	// 	$this->assertEquals( 1, count($html->find('.scr_content tr')) );
-	// 	$this->assertEquals( 9, count($html->find('.scr_content tr',0)->find('th')) );
-	// 	$this->assertEquals( '公開予約日時', $html->find('.scr_content tr',0)->childNodes(1)->innertext );
-	// 	$this->assertEquals( 0, count($html->find('.scr_content td')) );
+	/**
+	 * 新規ダイアログ表示処理
+	 */
+	public function testInsertReserve(){
 
-	// 	// ダイアログ裏で表示する初期表示画面の表示確認		
-	// 	$this->assertEquals( 1, count($html->find('#loader-bg div')) );
-	// }
+		// var_dump($this->fs);
+
+		// $this->clear_indigo_dir();
+
+		//============================================================
+		// 初期表示画面表示
+		//============================================================
+		$options = $this->options;
+		$options['_POST'] = array('add' => 1);	
+
+		$indigo = new indigo\main( $options );
+
+
+		$stdout = $indigo->run();
+
+		$html = str_get_html( $stdout, true, true, DEFAULT_TARGET_CHARSET, false, DEFAULT_BR_TEXT, DEFAULT_SPAN_TEXT );
+		// var_dump($stdout) . "\n";
+
+		// ダイアログの表示確認		
+		$this->assertEquals( 6, count($html->find('.dialog div')) );
+
+		$this->assertEquals( 1, count($html->find('.dialog h4')) );
+		$this->assertEquals( '新規', $html->find('.dialog h4',0)->plaintext );
+
+		$this->assertEquals( 1, count($html->find('.dialog form')) );
+
+		$this->assertEquals( 1, count($html->find('.dialog ul')) );
+		$this->assertEquals( 2, count($html->find('.dialog li')) );
+		$this->assertEquals( 10, count($html->find('.dialog input')) );
+
+		$this->assertEquals( 1, count($html->find('.dialog table')) );
+		$this->assertEquals( 0, count($html->find('.dialog thead')) );
+		$this->assertEquals( 4, count($html->find('.dialog tr')) );
+		$this->assertEquals( 0, count($html->find('.dialog tr',0)->find('th')) );
+		$this->assertEquals( 2, count($html->find('.dialog tr',0)->find('td')) );
+		$this->assertEquals( 'ブランチ', $html->find('.dialog tr',0)->childNodes(0)->innertext );
+
+
+		// ダイアログ裏で表示する初期表示画面の表示確認		
+		$this->assertEquals( 3, count($html->find('.scr_content div')) );
+
+		$this->assertEquals( 1, count($html->find('.scr_content form')) );
+		$this->assertEquals( 2, count($html->find('.scr_content ul')) );
+		$this->assertEquals( 6, count($html->find('.scr_content li')) );
+		$this->assertEquals( 6, count($html->find('.scr_content input')) );
+
+		$this->assertEquals( 1, count($html->find('.scr_content table')) );
+		$this->assertEquals( 1, count($html->find('.scr_content thead')) );
+		$this->assertEquals( 1, count($html->find('.scr_content tr')) );
+		$this->assertEquals( 9, count($html->find('.scr_content tr',0)->find('th')) );
+		$this->assertEquals( '公開予約日時', $html->find('.scr_content tr',0)->childNodes(1)->innertext );
+		$this->assertEquals( 0, count($html->find('.scr_content td')) );
+
+		// ダイアログ裏で表示する初期表示画面の表示確認		
+		$this->assertEquals( 1, count($html->find('#loader-bg div')) );
+	}
 
 
 
