@@ -18,68 +18,68 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 	public function setup(){
 
-		// $this->fs = new tomk79\filesystem();
+		$this->fs = new tomk79\filesystem();
 
-		mb_internal_encoding('UTF-8');
+		// mb_internal_encoding('UTF-8');
 
-		// require_once(__DIR__.'/libs/simple_html_dom.php');
+		require_once(__DIR__.'/libs/simple_html_dom.php');
 
-		// $this->options = array(
-		// 		'_POST' => array(),
-		// 		'_GET' => array(),
-		// 	// indigo作業用ディレクトリ（絶対パス）
-		// 	'realpath_workdir'	 	=> __DIR__.'/testdata/indigo_dir/',
+		$this->options = array(
+				'_POST' => array(),
+				'_GET' => array(),
+			// indigo作業用ディレクトリ（絶対パス）
+			'realpath_workdir'	 	=> __DIR__.'/testdata/indigo_dir/',
 
-		// 	// リソースディレクトリ（ドキュメントルートからの相対パス）
-		// 	'relativepath_resourcedir'	=> __DIR__.'/../res/',
+			// リソースディレクトリ（ドキュメントルートからの相対パス）
+			'relativepath_resourcedir'	=> __DIR__.'/../res/',
 
-		// 	// ajax呼出クラス（ドキュメントルートからの相対パス）
-		// 	'realpath_ajax_call'		=> './ajax.php',
+			// ajax呼出クラス（ドキュメントルートからの相対パス）
+			'realpath_ajax_call'		=> './ajax.php',
 
-		// 	// 画面表示上のタイムゾーン
-		// 	'time_zone' => 'Asia/Tokyo',
+			// 画面表示上のタイムゾーン
+			'time_zone' => 'Asia/Tokyo',
 
-		// 	// ユーザID
-		// 	'user_id' => 'user01',
+			// ユーザID
+			'user_id' => 'user01',
 
-		// 	// DB設定
-		// 	'db' => array(
-		// 		// 'mysql' or null（nullの場合はSQLite3を使用する）
-		// 		'db_type' => null,
-		// 		'mysql_db_name' => '',
-		// 		'mysql_db_host' => '',
-		// 		'mysql_db_user' => '',
-		// 		'mysql_db_pass' => ''
-		// 	),
+			// DB設定
+			'db' => array(
+				// 'mysql' or null（nullの場合はSQLite3を使用する）
+				'db_type' => null,
+				'mysql_db_name' => '',
+				'mysql_db_host' => '',
+				'mysql_db_user' => '',
+				'mysql_db_pass' => ''
+			),
 
-		// 	// 予約最大件数
-		// 	'max_reserve_record' => 10,
+			// 予約最大件数
+			'max_reserve_record' => 10,
 
-		// 	// 本番環境パス（同期先）※バージョン0.1.0時点では先頭の設定内容のみ有効
-		// 	'server' => array(
-		// 			array(
-		// 					'name' => 'server1',
-		// 					'real_path' => __DIR__.'/testdata/honban1/'
-		// 			),
-		// 			array(
-		// 					'name' => 'server2',
-		// 					'real_path' => __DIR__.'/testdata/honban2/'
-		// 			)
-		// 	),
+			// 本番環境パス（同期先）※バージョン0.1.0時点では先頭の設定内容のみ有効
+			'server' => array(
+					array(
+							'name' => 'server1',
+							'real_path' => __DIR__.'/testdata/honban1/'
+					),
+					array(
+							'name' => 'server2',
+							'real_path' => __DIR__.'/testdata/honban2/'
+					)
+			),
 
-		// 	// 同期除外ディレクトリ、またはファイル
-		// 	'ignore' => array(
-		// 		'.git',
-		// 		'.htaccess'
-		// 	),
+			// 同期除外ディレクトリ、またはファイル
+			'ignore' => array(
+				'.git',
+				'.htaccess'
+			),
 
-		// 	// Git情報定義
-		// 	'git' => array(
-		// 		'giturl' => 'https://github.com/gk-r/indigo-test-project.git',
-		// 		'username' => 'hoge',
-		// 		'password' => 'fuga'
-		// 	)
-		// );
+			// Git情報定義
+			'git' => array(
+				'giturl' => 'https://github.com/gk-r/indigo-test-project.git',
+				'username' => 'hoge',
+				'password' => 'fuga'
+			)
+		);
 	}
 
 	// private function clear_indigo_dir(){
