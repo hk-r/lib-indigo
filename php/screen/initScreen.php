@@ -101,7 +101,7 @@ class initScreen
 		// 		. '</form>';
 		// }
 
-		$ret .= '<div class="button_contents_box">'
+		$ret .= '<div class="scr_content">'
 			. '<form id="form_table" method="post">'
 			. '<div class="button_contents" style="float:left">'
 			. '<ul>'
