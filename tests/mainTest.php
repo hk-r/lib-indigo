@@ -106,8 +106,9 @@ class mainTest extends PHPUnit_Framework_TestCase{
 	}
 
 
+
 	/**
-	 * 履歴表示画面表示
+	 * 画面表示
 	 */
 	public function testDisp(){
 
@@ -156,7 +157,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$this->assertTrue( is_file( __DIR__.'/testdata/indigo_dir/sqlite/indigo.db' ) );
 
 		//============================================================
-		// 履歴表示
+		// 履歴一覧画面表示
 		//============================================================
 		$options = $this->options;
 		$options['_POST'] = array('history' => 1);
@@ -173,14 +174,14 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$this->assertEquals( 1, count($html->find('form')) );
 		$this->assertEquals( 3, count($html->find('ul')) );
 		$this->assertEquals( 3, count($html->find('li')) );
-		$this->assertEquals( 2, count($html->find('input')) );
+		// $this->assertEquals( 2, count($html->find('input')) );
 
 		$this->assertEquals( 1, count($html->find('table')) );
 		$this->assertEquals( 1, count($html->find('thead')) );
-		$this->assertEquals( 1, count($html->find('tr')) );
-		$this->assertEquals( 11, count($html->find('tr',0)->find('th')) );
-		$this->assertEquals( '状態', $html->find('tr',0)->childNodes(1)->innertext );
-		$this->assertEquals( 0, count($html->find('td')) );
+		// $this->assertEquals( 1, count($html->find('tr')) );
+		// $this->assertEquals( 11, count($html->find('tr',0)->find('th')) );
+		// $this->assertEquals( '状態', $html->find('tr',0)->childNodes(1)->innertext );
+		// $this->assertEquals( 0, count($html->find('td')) );
 
 		//============================================================
 		// バックアップ一覧表示
@@ -193,7 +194,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$stdout = $indigo->run();
 
 		$html = str_get_html( $stdout, true, true, DEFAULT_TARGET_CHARSET, false, DEFAULT_BR_TEXT, DEFAULT_SPAN_TEXT );
-		var_dump($stdout) . "\n";
+		// var_dump($stdout) . "\n";
 
 		$this->assertEquals( 7, count($html->find('div')) );
 
@@ -210,6 +211,154 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$this->assertEquals( 0, count($html->find('td')) );
 
 	}
+
+
+	/**
+	 * 即時公開処理処理
+	 */
+	public function testImmediatePublish(){
+
+		// var_dump($this->fs);
+
+		// $this->clear_indigo_dir();
+
+		//============================================================
+		// 即時公開処理（失敗）
+		//============================================================
+		$options = $this->options;
+		$options['_POST'] = array('immediate_confirm' => 1);	
+
+		$main = new indigo\main( $options );
+		
+		// var_dump($indigo->options);
+
+		$publish = new indigo\publish( $main );
+
+
+		$define = new indigo\define();
+		// var_dump($define);
+
+		$result = $publish->exec_publish(2, null);
+
+		var_dump($main->get_dbh());
+
+		// $output = $this->passthru( [
+		// 	// $result['status'],
+		// 	$result['message']
+		// 	// __DIR__.'/testData/standard/.px_execute.php' ,
+		// 	// '/?PX=publish.run' ,
+		// ] );
+		// var_dump($result);
+
+		$this->assertTrue( !$result['status'] );
+		$this->assertEquals( '公開処理が失敗しました。', $result['message'] );
+		// $this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) )
+
+
+		//============================================================
+		// 即時公開処理（成功）
+		//============================================================
+		$options = $this->options;
+		$options['_POST'] = array('immediate_confirm' => 1,	
+								'branch_select_value' => 'release/2018-04-01',	
+								'reserve_date' => null,
+								'reserve_time' => null,	
+								'commit_hash' => 'f9fd330',	
+								'comment' => 'phpUnitテスト001',	
+								'ver_no' => null,	
+								'selected_id' => null
+							);
+
+		$indigo = new indigo\main( $options );
+		
+		$publish = new indigo\publish( $indigo );
+
+		$define = new indigo\define();
+
+		// 即時公開
+		$result = $publish->exec_publish(2, null);
+
+
+		$this->assertTrue( $result['status'] );
+		$this->assertEquals( '', $result['message'] );
+		$this->assertTrue( isset($result['output_id']) );
+		// $this->assertTrue( !isset($result['backup_id']) );
+		// $this->assertTrue( $result['status'] );
+		// $this->assertEquals( '', $result['message'] );
+
+	}
+
+	/**
+	 * 新規ダイアログ表示処理
+	 */
+	public function testInsertReserve(){
+
+		// var_dump($this->fs);
+
+		// $this->clear_indigo_dir();
+
+		//============================================================
+		// 初期表示画面表示
+		//============================================================
+		$options = $this->options;
+		$options['_POST'] = array('add' => 1);	
+
+		$indigo = new indigo\main( $options );
+
+
+		$stdout = $indigo->run();
+
+		$html = str_get_html( $stdout, true, true, DEFAULT_TARGET_CHARSET, false, DEFAULT_BR_TEXT, DEFAULT_SPAN_TEXT );
+		// var_dump($stdout) . "\n";
+
+		// ダイアログの表示確認		
+		$this->assertEquals( 6, count($html->find('.dialog div')) );
+
+		$this->assertEquals( 1, count($html->find('.dialog h4')) );
+		$this->assertEquals( '新規', $html->find('.dialog h4',0)->plaintext );
+
+		$this->assertEquals( 1, count($html->find('.dialog form')) );
+
+		$this->assertEquals( 1, count($html->find('.dialog ul')) );
+		$this->assertEquals( 2, count($html->find('.dialog li')) );
+		$this->assertEquals( 10, count($html->find('.dialog input')) );
+
+		$this->assertEquals( 1, count($html->find('.dialog table')) );
+		$this->assertEquals( 0, count($html->find('.dialog thead')) );
+		$this->assertEquals( 4, count($html->find('.dialog tr')) );
+		$this->assertEquals( 0, count($html->find('.dialog tr',0)->find('th')) );
+		$this->assertEquals( 2, count($html->find('.dialog tr',0)->find('td')) );
+		$this->assertEquals( 'ブランチ', $html->find('.dialog tr',0)->childNodes(0)->innertext );
+
+
+		// ダイアログ裏で表示する初期表示画面の表示確認		
+		$this->assertEquals( 3, count($html->find('.scr_content div')) );
+
+		$this->assertEquals( 1, count($html->find('.scr_content form')) );
+		$this->assertEquals( 2, count($html->find('.scr_content ul')) );
+		$this->assertEquals( 6, count($html->find('.scr_content li')) );
+		$this->assertEquals( 6, count($html->find('.scr_content input')) );
+
+		$this->assertEquals( 1, count($html->find('.scr_content table')) );
+		$this->assertEquals( 1, count($html->find('.scr_content thead')) );
+		$this->assertEquals( 1, count($html->find('.scr_content tr')) );
+		$this->assertEquals( 9, count($html->find('.scr_content tr',0)->find('th')) );
+		$this->assertEquals( '公開予約日時', $html->find('.scr_content tr',0)->childNodes(1)->innertext );
+		$this->assertEquals( 0, count($html->find('.scr_content td')) );
+
+		// ダイアログ裏で表示する初期表示画面の表示確認		
+		$this->assertEquals( 1, count($html->find('#loader-bg div')) );
+	}
+
+
+
+
+
+
+
+
+
+
  // public function testEqual() {
  //    // 期待値
  //    $expected = 5;
@@ -378,4 +527,23 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 	// }
 
+	/**
+	 * コマンドを実行し、標準出力値を返す
+	 * @param array $ary_command コマンドのパラメータを要素として持つ配列
+	 * @return string コマンドの標準出力値
+	 */
+	private function passthru( $ary_command ){
+		set_time_limit(60*10);
+		$cmd = array();
+		foreach( $ary_command as $row ){
+			$param = escapeshellcmd($row);
+			array_push( $cmd, $param );
+		}
+		$cmd = implode( ' ', $cmd );
+		ob_start();
+		passthru( $cmd );
+		$bin = ob_get_clean();
+		set_time_limit(30);
+		return $bin;
+	}
 }
