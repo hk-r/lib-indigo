@@ -103,7 +103,13 @@ class mainTest extends PHPUnit_Framework_TestCase{
 			}
 		}
 	}
-
+	private function create_honban_dir(){
+		
+		$this->fs->mkdir_r(__DIR__.'/testdata/honban1/');
+		// touch(__DIR__.'/testdata/indigo_dir/.gitkeep');
+		// clearstatcache();
+	}
+	
 	// public function testEqual() {
 	//     // 期待値
 	//     $expected = 5;
@@ -121,6 +127,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		// var_dump($this->fs);
 
 		$this->clear_indigo_dir();
+		$this->create_honban_dir();
 
 		//============================================================
 		// 初期表示画面表示
