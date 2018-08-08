@@ -83,27 +83,27 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		);
 	}
 
-	private function clear_indigo_dir(){
-		$this->chmod_r();//パーミッションを変えないと削除できない
-		if( !$this->fs->rm(__DIR__.'/testdata/indigo_dir/') ){
-			var_dump('Failed to cleaning test data directory.');
-		}
-		clearstatcache();
-		$this->fs->mkdir_r(__DIR__.'/testdata/indigo_dir/');
-		touch(__DIR__.'/testdata/indigo_dir/.gitkeep');
-		clearstatcache();
-	}
-	private function chmod_r($path = null){
-		$base = __DIR__.'/testdata/indigo_dir';
-		// var_dump($base.'/'.$path);
-		$this->fs->chmod($base.'/'.$path , 0777);
-		if(is_dir($base.'/'.$path)){
-			$ls = $this->fs->ls($base.'/'.$path);
-			foreach($ls as $basename){
-				$this->chmod_r($path.'/'.$basename);
-			}
-		}
-	}
+	// private function clear_indigo_dir(){
+	// 	$this->chmod_r();//パーミッションを変えないと削除できない
+	// 	if( !$this->fs->rm(__DIR__.'/testdata/indigo_dir/') ){
+	// 		var_dump('Failed to cleaning test data directory.');
+	// 	}
+	// 	clearstatcache();
+	// 	$this->fs->mkdir_r(__DIR__.'/testdata/indigo_dir/');
+	// 	touch(__DIR__.'/testdata/indigo_dir/.gitkeep');
+	// 	clearstatcache();
+	// }
+	// private function chmod_r($path = null){
+	// 	$base = __DIR__.'/testdata/indigo_dir';
+	// 	// var_dump($base.'/'.$path);
+	// 	$this->fs->chmod($base.'/'.$path , 0777);
+	// 	if(is_dir($base.'/'.$path)){
+	// 		$ls = $this->fs->ls($base.'/'.$path);
+	// 		foreach($ls as $basename){
+	// 			$this->chmod_r($path.'/'.$basename);
+	// 		}
+	// 	}
+	// }
 
 	public function testEqual() {
 	    // 期待値
