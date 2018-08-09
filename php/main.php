@@ -219,7 +219,7 @@ class main
 		$disp = '';  
 
 		// エラーメッセージ表示
-		$error_message = '';
+		$alert_message = '';
 
 		// ダイアログの表示
 		$dialog_disp = '';
@@ -251,7 +251,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 		
 				$result = json_decode($this->initScn->do_disp_add_dialog());
-				$error_message = $result->message;
+				$alert_message = $result->message;
 
 			} elseif (isset($this->options->_POST->add_check)) {
 				// 新規ダイアログの「確認」ボタン押下
@@ -260,7 +260,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_check_add());
-				$error_message = $result->message;
+				$alert_message = $result->message;
 
 			} elseif (isset($this->options->_POST->add_confirm)) {
 				// 新規確認ダイアログの「確定」ボタン押下
@@ -269,7 +269,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 		
 				$result = json_decode($this->initScn->do_confirm_add());	
-				$error_message = $result->message;
+				$alert_message = $result->message;
 
 			} elseif (isset($this->options->_POST->add_back)) {
 				// 新規確認ダイアログの「戻る」ボタン押下
@@ -278,7 +278,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 		
 				$result = json_decode($this->initScn->do_back_add_dialog());
-				$error_message = $result->message;
+				$alert_message = $result->message;
 
 			//============================================================
 			// 変更関連処理
@@ -290,7 +290,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_disp_update_dialog());
-				$error_message = $result->message;
+				$alert_message = $result->message;
 
 			} elseif (isset($this->options->_POST->update_check)) {
 				// 変更ダイアログの「確認」ボタン押下
@@ -299,7 +299,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_check_update());
-				$error_message = $result->message;
+				$alert_message = $result->message;
 
 			} elseif (isset($this->options->_POST->update_confirm)) {
 				// 変更確認ダイアログの「確定」ボタン押下
@@ -308,7 +308,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_confirm_update());	
-				$error_message = $result->message;
+				$alert_message = $result->message;
 
 			} elseif (isset($this->options->_POST->update_back)) {
 				// 変更確認ダイアログの「戻る」ボタン押下	
@@ -317,7 +317,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_back_update_dialog());
-				$error_message = $result->message;
+				$alert_message = $result->message;
 
 			//============================================================
 			// 削除処理
@@ -330,7 +330,7 @@ class main
 			
 				// Gitファイルの削除
 				$result = json_decode($this->initScn->do_delete());
-				$error_message = $result->message;
+				$alert_message = $result->message;
 
 			//============================================================
 			// 復元処理
@@ -343,7 +343,29 @@ class main
 			
 				// Gitファイルの削除
 				$result = json_decode($this->backupScn->do_restore_publish());
-				$error_message = $result->message;
+
+				// 画面アラート用のメッセージ			
+				$alert_message = "≪手動復元公開処理≫" . $result->message;
+
+				if ( !$result->status ) {
+					// 処理失敗の場合、復元処理
+
+					$logstr = "※手動復元公開処理エラー終了";
+					$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+
+					$result = json_decode($this->initScn->do_restore_publish_failure($result->output_id));
+
+					// 画面アラート用のメッセージ			
+					$alert_message .= "≪自動復元公開処理≫" . $result->message;
+
+					if ( !$result->status ) {
+						// 処理失敗の場合、復元処理
+						
+						$logstr = "※手動復元公開処理エラー終了";
+						$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+					}
+
+				}
 
 			//============================================================
 			// 即時公開処理
@@ -355,8 +377,8 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_disp_immediate_dialog());
-				$error_message = $result->message;
-								$error_message = $result->message;
+				$alert_message = $result->message;
+								$alert_message = $result->message;
 			} elseif (isset($this->options->_POST->immediate_check)) {
 				// 即時公開ダイアログの「確認」ボタン押下
 				
@@ -364,7 +386,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_check_immediate());
-				$error_message = $result->message;
+				$alert_message = $result->message;
 
 			} elseif (isset($this->options->_POST->immediate_confirm)) {
 				// 即時公開確認ダイアログの「確定」ボタン押下	
@@ -373,7 +395,9 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_immediate_publish());
-				$error_message = $result->message;
+
+				// 画面アラート用のメッセージ			
+				$alert_message = "≪即時公開処理≫" . $result->message;
 
 				if ( !$result->status ) {
 					// 処理失敗の場合、復元処理
@@ -381,19 +405,16 @@ class main
 					$logstr = "※即時公開処理エラー終了";
 					$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
-					// 画面アラート用のメッセージ			
-					$error_message = "[即時公開処理]" . $result->message . " ";
-
 					$result = json_decode($this->initScn->do_restore_publish_failure($result->output_id));
+
+					// 画面アラート用のメッセージ			
+					$alert_message .= "≪自動復元公開処理≫" . $result->message;
 
 					if ( !$result->status ) {
 						// 処理失敗の場合、復元処理
 						
 						$logstr = "※復元公開処理エラー終了";
 						$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-
-						// 画面アラート用のメッセージ
-						$error_message .= $error_message . "[復元公開処理]" . $result->message;
 					}
 
 				}
@@ -405,7 +426,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->initScn->do_back_immediate_dialog());
-				$error_message = $result->message;
+				$alert_message = $result->message;
 
 			//============================================================
 			// ログ表示処理
@@ -417,31 +438,35 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$result = json_decode($this->historyScn->do_disp_log_dialog());
-				$error_message = $result->message;
+				$alert_message = $result->message;
 			}
-
-
-			if ( $error_message ) {
+					// $alert_message .= 'これはテストです。\n改行のテストなのです。\nよろしいですか？' ;
+			if ( $alert_message ) {
 				// 処理失敗の場合
 
-				// $error_message .=  $result->message;
+				// $alert_message .=  $result->message;
 
 				$logstr = "**********************************************************************************" . "\r\n";
 				$logstr .= " ステータスエラー " . "\r\n";
 				$logstr .= "**********************************************************************************" . "\r\n";
 				$this->common()->put_process_log_block($logstr);
 
-				$logstr = $error_message . "\r\n";
+				$logstr = $alert_message . "\r\n";
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
-				$msg = nl2br($error_message);
+				$msg = nl2br($alert_message);
 
+
+				// エラーメッセージ表示
+				// $dialog_disp = '
+				// <script type="text/javascript">
+				// 	alert(' . $alert_message . ');
+				// </script>';
 
 				// エラーメッセージ表示
 				$dialog_disp = '
 				<script type="text/javascript">
-					console.error(' . "'" . $error_message . "'" . ');
-					alert(' . "'" . $msg . "'" . ');
+					alert("'.  $alert_message . '");
 				</script>';
 
 			} else {
@@ -475,7 +500,7 @@ class main
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$disp = $this->initScn->do_disp_init_screen();
-
+ 
 			}
 
 			// 画面ロック用
@@ -578,7 +603,7 @@ class main
 				$logstr .= $result->message . "\r\n";
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
-				// $error_message = $result->message . " ";
+				// $alert_message = $result->message . " ";
 				$result = json_decode(json_encode($this->publish->exec_publish(define::PUBLISH_TYPE_AUTO_RESTORE, $result->output_id)));
 
 				// $result = $this->publish->exec_publish(define::PUBLISH_TYPE_AUTO_RESTORE, $output_id);

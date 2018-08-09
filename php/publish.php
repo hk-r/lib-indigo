@@ -119,8 +119,12 @@ class publish
 			// $logstr .= 'exit.'."\n";
 			// $this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
-			// エラー処理
-			throw new \Exception('公開ロック中となっております。しばらくお待ちいただいてもロックが解除されない場合は、管理者にお問い合わせください。');
+			// // エラー処理
+			// throw new \Exception('公開ロック中となっております。しばらくお待ちいただいてもロックが解除されない場合は、管理者にお問い合わせください。');
+
+			$result['message'] = '公開ロック中となっております。しばらくお待ちいただいてもロックが解除されない場合は、管理者にお問い合わせください。';
+
+			return $result;
 		}
 
 		// $logstr = "5秒スリープ" . "\r\n";
@@ -747,6 +751,7 @@ class publish
 		}
 
 		$result['status'] = true;
+		$result['message'] = '公開処理が成功しました。';
 
 		// ロック解除処理
 		$this->unlock();
@@ -787,7 +792,7 @@ class publish
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-			throw new \Exception('Command error.');
+			throw new \Exception('Command error.' . $command);
 		}
 
 		// rsyncコマンド実行ログ配列を、履歴一覧画面のダイアログ表示用にファイル保持しておく
@@ -818,7 +823,7 @@ class publish
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-			throw new \Exception('Command error.');
+			throw new \Exception('Command error.' . $command);
 		}
 
 		$logstr = "**コマンド実行成功**";
@@ -848,7 +853,7 @@ class publish
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-			throw new \Exception('Command error.');
+			throw new \Exception('Command error.' . $command);
 		}
 
 		$logstr = "**移動コマンド実行成功**";
@@ -876,7 +881,7 @@ class publish
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-			throw new \Exception('Command error.');
+			throw new \Exception('Command error.' . $command);
 		}
 
 		$logstr = "**削除コマンド実行成功**";
