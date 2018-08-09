@@ -1298,10 +1298,15 @@ class initScreen
 			}
 		}
 
-		if ($input_mode == self::INPUT_MODE_ADD &&
+		if ($input_mode == self::INPUT_MODE_ADD ||
 			$input_mode == self::INPUT_MODE_ADD_CHECK) {
+
+
+			// パラメタの最大予約件数
+			$max = $this->main->options->max_reserve_record;
+
 			// 公開予約の最大件数チェック
-			if (!$this->check->check_reserve_max_record($data_list)) {
+			if (!$this->check->check_reserve_max_record($data_list, $max)) {
 				$ret .= '<p class="error_message">公開予約は最大' . $max . '件までの登録になります。</p>';
 			}
 		}

@@ -115,16 +115,13 @@ class check
 	 * @return 
 	 *  チェックOK：true、チェックNG：false
 	 */
-	public function check_reserve_max_record($data_list) {
+	public function check_reserve_max_record($data_list, $max) {
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_reserve_max_record start');
 
 		$ret = true;
 
-		// パラメタの最大予約件数
-		$max = $this->main->options->max_reserve_record;
-
-		if ($max <= count($data_list)) {
+		if (isset($max) && $max <= count($data_list)) {
 			$ret = false;
 		}
 
