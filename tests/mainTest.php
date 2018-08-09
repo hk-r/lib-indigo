@@ -203,6 +203,201 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 
 	/**
+	 * 予約公開ロック確認
+	 */
+	public function testReservePublishLock(){
+
+		//============================================================
+		// ロック処理
+		//============================================================
+		clearstatcache();
+		$this->fs->mkdir_r(__DIR__.'/testdata/indigo_dir/applock/');
+		touch(__DIR__.'/testdata/indigo_dir/applock/applock.txt');
+		clearstatcache();
+
+		//============================================================
+		// 予約公開実行
+		//============================================================
+		$options = $this->options;
+
+		// $date = ;
+		// 画面入力項目の設定
+		$options['_POST'] = array('branch_select_value' => 'release/2018-04-01',	
+								'gmt_reserve_datetime' => gmdate("Y-m-d H:i:s", time()),
+								'commit_hash' => 'f9fd330',	
+								'comment' => '予約登録テスト',	
+								'ver_no' => null,
+								'selected_id' => null
+							);
+
+		$main = new indigo\main( $options );
+		$tsReserve = new indigo\db\tsReserve( $main );
+		// var_dump($options);
+		//============================================================
+		// 入力情報を公開予約テーブルへ登録
+		//============================================================
+		$result = $tsReserve->insert_ts_reserve(json_decode(json_encode($options)));
+
+
+		//============================================================
+		// 予約公開実行
+		//============================================================
+		$publish = new indigo\publish( $main );
+
+		$result = $publish->exec_publish(1, null);
+
+		$this->assertEquals( "公開ロック中となっております。しばらくお待ちいただいてもロックが解除されない場合は、管理者にお問い合わせください。" , $result['message']);
+
+
+		//============================================================
+		// ロック解除
+		//============================================================
+		clearstatcache();
+		if( !$this->fs->rm(__DIR__.'/testdata/indigo_dir/applock/') ){
+			var_dump('Failed to cleaning test data directory.');
+		}
+		clearstatcache();
+	}
+
+	/**
+	 * 即時公開ロック確認
+	 */
+	public function testImmediatePublishLock(){
+
+		//============================================================
+		// ロック処理
+		//============================================================
+		clearstatcache();
+		$this->fs->mkdir_r(__DIR__.'/testdata/indigo_dir/applock/');
+		touch(__DIR__.'/testdata/indigo_dir/applock/applock.txt');
+		clearstatcache();
+
+		//============================================================
+		// 即時公開実行
+		//============================================================
+		$options = $this->options;
+
+		// 画面入力項目の設定
+		$options['_POST'] = array('branch_select_value' => 'release/2018-04-01',	
+								'reserve_date' => null,
+								'reserve_time' => null,	
+								'commit_hash' => 'f9fd330',	
+								'comment' => 'phpUnitテスト001',	
+								'ver_no' => null,	
+								'selected_id' => null
+							);
+
+		$main = new indigo\main( $options );
+		$publish = new indigo\publish( $main );
+
+		$result = $publish->exec_publish(2, null);
+
+		$this->assertEquals( "公開ロック中となっております。しばらくお待ちいただいてもロックが解除されない場合は、管理者にお問い合わせください。" , $result['message']);
+
+
+		//============================================================
+		// ロック解除
+		//============================================================
+		clearstatcache();
+		if( !$this->fs->rm(__DIR__.'/testdata/indigo_dir/applock/') ){
+			var_dump('Failed to cleaning test data directory.');
+		}
+		clearstatcache();
+	}
+
+	/**
+	 * 手動復元公開ロック確認
+	 */
+	public function testManualRestorePublishLock(){
+
+		//============================================================
+		// ロック処理
+		//============================================================
+		clearstatcache();
+		$this->fs->mkdir_r(__DIR__.'/testdata/indigo_dir/applock/');
+		touch(__DIR__.'/testdata/indigo_dir/applock/applock.txt');
+		clearstatcache();
+
+		//============================================================
+		// 手動復元公開実行
+		//============================================================
+		$options = $this->options;
+
+		// 画面入力項目の設定
+		$options['_POST'] = array('branch_select_value' => 'release/2018-04-01',	
+								'reserve_date' => null,
+								'reserve_time' => null,	
+								'commit_hash' => 'f9fd330',	
+								'comment' => 'phpUnitテスト001',	
+								'ver_no' => null,	
+								'selected_id' => null
+							);
+
+		$main = new indigo\main( $options );
+		$publish = new indigo\publish( $main );
+
+		$result = $publish->exec_publish(3, null);
+
+		$this->assertEquals( "公開ロック中となっております。しばらくお待ちいただいてもロックが解除されない場合は、管理者にお問い合わせください。" , $result['message']);
+
+
+		//============================================================
+		// ロック解除
+		//============================================================
+		clearstatcache();
+		if( !$this->fs->rm(__DIR__.'/testdata/indigo_dir/applock/') ){
+			var_dump('Failed to cleaning test data directory.');
+		}
+		clearstatcache();
+	}
+
+
+	/**
+	 * 自動復元公開ロック確認
+	 */
+	public function testAutoRestorePublishLock(){
+
+		//============================================================
+		// ロック処理
+		//============================================================
+		clearstatcache();
+		$this->fs->mkdir_r(__DIR__.'/testdata/indigo_dir/applock/');
+		touch(__DIR__.'/testdata/indigo_dir/applock/applock.txt');
+		clearstatcache();
+
+		//============================================================
+		// 自動復元公開実行
+		//============================================================
+		$options = $this->options;
+
+		// 画面入力項目の設定
+		$options['_POST'] = array('branch_select_value' => 'release/2018-04-01',	
+								'reserve_date' => null,
+								'reserve_time' => null,	
+								'commit_hash' => 'f9fd330',	
+								'comment' => 'phpUnitテスト001',	
+								'ver_no' => null,	
+								'selected_id' => null
+							);
+
+		$main = new indigo\main( $options );
+		$publish = new indigo\publish( $main );
+
+		$result = $publish->exec_publish(4, null);
+
+		$this->assertEquals( "公開ロック中となっております。しばらくお待ちいただいてもロックが解除されない場合は、管理者にお問い合わせください。" , $result['message']);
+
+
+		//============================================================
+		// ロック解除
+		//============================================================
+		clearstatcache();
+		if( !$this->fs->rm(__DIR__.'/testdata/indigo_dir/applock/') ){
+			var_dump('Failed to cleaning test data directory.');
+		}
+		clearstatcache();
+	}
+	/**
 	 * 即時公開処理処理
 	 */
 	public function testImmediatePublish(){
@@ -246,58 +441,10 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$result = $publish->exec_publish(2, null);
 
 		$this->assertTrue( $result['status'] );
-		$this->assertEquals( '', $result['message'] );
+		$this->assertEquals( '公開処理が成功しました。', $result['message'] );
 		$this->assertTrue( isset($result['output_id']) );
 		// TODO:ログなどのアウトプットファイルも要確認
 		// $this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) )
-	}
-
-	/**
-	 * 即時公開ロック確認
-	 */
-	public function testImmediatePublishLock(){
-
-		//============================================================
-		// ロック処理
-		//============================================================
-		clearstatcache();
-		$this->fs->mkdir_r(__DIR__.'/testdata/indigo_dir/applock/');
-		touch(__DIR__.'/testdata/indigo_dir/applock/applock.txt');
-		clearstatcache();
-
-		//============================================================
-		// 即時公開処理（ロック中）
-		//============================================================
-		$options = $this->options;
-
-		// 画面入力項目の設定
-		$options['_POST'] = array('immediate_confirm' => 1,	
-								'branch_select_value' => 'release/2018-04-01',	
-								'reserve_date' => null,
-								'reserve_time' => null,	
-								'commit_hash' => 'f9fd330',	
-								'comment' => 'phpUnitテスト001',	
-								'ver_no' => null,	
-								'selected_id' => null
-							);
-
-		$main = new indigo\main( $options );
-		$publish = new indigo\publish( $main );
-
-		// 即時公開
-		$result = $publish->exec_publish(2, null);
-
-		$this->assertEquals( "公開ロック中となっております。しばらくお待ちいただいてもロックが解除されない場合は、管理者にお問い合わせください。" , $result['message']);
-
-
-		//============================================================
-		// ロック解除
-		//============================================================
-		clearstatcache();
-		if( !$this->fs->rm(__DIR__.'/testdata/indigo_dir/applock/') ){
-			var_dump('Failed to cleaning test data directory.');
-		}
-		clearstatcache();
 	}
 
 	/**
@@ -338,22 +485,22 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$this->assertEquals( 'ブランチ', $html->find('.dialog tr',0)->childNodes(0)->innertext );
 
 
-		// ダイアログ裏で表示する初期表示画面の表示確認		
-		$this->assertEquals( 3, count($html->find('.scr_content div')) );
+		// // ダイアログ裏で表示する初期表示画面の表示確認		
+		// $this->assertEquals( 3, count($html->find('.scr_content div')) );
 
-		$this->assertEquals( 1, count($html->find('.scr_content form')) );
-		$this->assertEquals( 2, count($html->find('.scr_content ul')) );
-		$this->assertEquals( 6, count($html->find('.scr_content li')) );
-		$this->assertEquals( 6, count($html->find('.scr_content input')) );
+		// $this->assertEquals( 1, count($html->find('.scr_content form')) );
+		// $this->assertEquals( 2, count($html->find('.scr_content ul')) );
+		// $this->assertEquals( 6, count($html->find('.scr_content li')) );
+		// $this->assertEquals( 6, count($html->find('.scr_content input')) );
 
-		$this->assertEquals( 1, count($html->find('.scr_content table')) );
-		$this->assertEquals( 1, count($html->find('.scr_content thead')) );
-		$this->assertEquals( 1, count($html->find('.scr_content tr')) );
-		$this->assertEquals( 9, count($html->find('.scr_content tr',0)->find('th')) );
-		$this->assertEquals( '公開予約日時', $html->find('.scr_content tr',0)->childNodes(1)->innertext );
-		$this->assertEquals( 0, count($html->find('.scr_content td')) );
+		// $this->assertEquals( 1, count($html->find('.scr_content table')) );
+		// $this->assertEquals( 1, count($html->find('.scr_content thead')) );
+		// $this->assertEquals( 1, count($html->find('.scr_content tr')) );
+		// $this->assertEquals( 9, count($html->find('.scr_content tr',0)->find('th')) );
+		// $this->assertEquals( '公開予約日時', $html->find('.scr_content tr',0)->childNodes(1)->innertext );
+		// $this->assertEquals( 0, count($html->find('.scr_content td')) );
 
-		// ダイアログ裏で表示する初期表示画面の表示確認		
-		$this->assertEquals( 1, count($html->find('#loader-bg div')) );
+		// // ダイアログ裏で表示する初期表示画面の表示確認		
+		// $this->assertEquals( 1, count($html->find('#loader-bg div')) );
 	}
 }
