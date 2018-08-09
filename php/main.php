@@ -179,14 +179,17 @@ class main
 		//============================================================
 		// タイムゾーンの設定
 		//============================================================
-		$time_zone = $this->options->time_zone;
-		if (!$time_zone) {
-			throw new \Exception('Parameter of timezone not found.');
-		}
-		date_default_timezone_set($time_zone);
+		if (property_exists($this->options, 'time_zone')) {
 
-		$logstr = "設定タイムゾーン：" . $time_zone;
-		$this->common()->put_process_log_block($logstr);
+			$time_zone = $this->options->time_zone;
+			if (!$time_zone) {
+				throw new \Exception('Parameter of timezone not found.');
+			}
+			date_default_timezone_set($time_zone);
+
+			$logstr = "設定タイムゾーン：" . $time_zone;
+			$this->common()->put_process_log_block($logstr);
+		}
 
 		//============================================================
 		// データベース接続
