@@ -84,8 +84,9 @@ $ mkdir -m 767 yourProject/[directoryName(ex. indigo_dir)]
 
 #### 5. 同期先の本番環境ディレクトリのパーミッションを変更する。
 apache（その他）ユーザに書き込み権限を付与します。
+※-Rオプション・・・指定ディレクトリ以下に存在するディレクトリ・ファイルも全て再帰的に権限変更を行う。
 ```
-$ chmod o+w honbanProject/[directoryName(ex. indigo_dir)]
+$ chmod -R o+w honbanProject/[directoryName(ex. indigo-test-project)]
 ```
 
 
@@ -293,11 +294,11 @@ echo $indigo->cron_run();
 ```
 
 ## 更新履歴 - Change log
-### lib-indigo x.x (yyyy年mm月dd日)
+### lib-indigo 0.1.0 (2018年08月06日)
 - Initial Release.
 
 ## ライセンス - License
 MIT License
 
 ## 作者 - Author
-- (C)Kyota Hiyoshi hiyoshi-kyota@imjp.co.jp
+- (C)Natsuki Gushikawa natsuki.gushikawa@imjp.co.jp
