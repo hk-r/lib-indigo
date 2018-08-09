@@ -397,7 +397,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		}
 		clearstatcache();
 	}
-	
+
 	/**
 	 * 即時公開処理処理
 	 */
@@ -443,26 +443,24 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		// 即時公開
 		$result = $publish->exec_publish(2, null);
 
-		$path = '';
-		// 本番環境ディレクトリの絶対パスを取得。（配列1番目のサーバを設定）
-		foreach ( (array)$options['server'] as $server ) {
-			$path = $this->fs->normalize_path($this->fs->get_realpath($server['real_path'] . "/"));
-			break; // 現時点では最初の1つのみ有効なのでブレイク
-		}
-		// echo $path;
-		// echo "\n";
-		$current_branch_name = $this->get_current_branch_name($path);
-		// echo $current_branch_name;
-		// echo "\n";
-
-		$this->assertEquals( $branch_name, $current_branch_name );
-		
 		$this->assertTrue( $result['status'] );
 		$this->assertEquals( '公開処理が成功しました。', $result['message'] );
 		$this->assertTrue( isset($result['output_id']) );
 
 		// TODO:ログなどのアウトプットファイルも要確認
 		// $this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) )
+
+		
+		// $path = '';
+		// // 本番環境ディレクトリの絶対パスを取得。（配列1番目のサーバを設定）
+		// foreach ( (array)$options['server'] as $server ) {
+		// 	$path = $this->fs->normalize_path($this->fs->get_realpath($server['real_path'] . "/"));
+		// 	break; // 現時点では最初の1つのみ有効なのでブレイク
+		// }
+		// $current_branch_name = $this->get_current_branch_name($path);
+
+		// $this->assertEquals( $branch_name, $current_branch_name );
+		
 	}
 
 	/**
@@ -524,36 +522,36 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 
 
-	/**
-	 * 指定パス内のブランチ名取得
-	 * 
-	 * @return now_branch
-	 */
-	private function get_current_branch_name($path) {
+	// /**
+	//  * 指定パス内のブランチ名取得
+	//  * 
+	//  * @return now_branch
+	//  */
+	// private function get_current_branch_name($path) {
 
-		$current_dir = realpath('.');
+	// 	$current_dir = realpath('.');
 
-		$now_branch = "";
+	// 	$now_branch = "";
 
-		// ディレクトリ移動
-		if ( $this->fs->file_exists( $path . "/.git" ) && chdir( $path ) ) {
+	// 	// ディレクトリ移動
+	// 	if ( $this->fs->file_exists( $path . "/.git" ) && chdir( $path ) ) {
 
-			// 現在のブランチ取得
-			exec( 'git branch', $output);
+	// 		// 現在のブランチ取得
+	// 		exec( 'git branch', $output);
 
-			foreach ( $output as $value ) {
-				// 「*」の付いてるブランチを現在のブランチと判定
-				if ( strpos($value, '*') !== false ) {
+	// 		foreach ( $output as $value ) {
+	// 			// 「*」の付いてるブランチを現在のブランチと判定
+	// 			if ( strpos($value, '*') !== false ) {
 
-					$value = trim(str_replace("* ", "", $value));
-					$now_branch = $value;
-					break;
-				}
-			}
-		}
+	// 				$value = trim(str_replace("* ", "", $value));
+	// 				$now_branch = $value;
+	// 				break;
+	// 			}
+	// 		}
+	// 	}
 
-		chdir($current_dir);
+	// 	chdir($current_dir);
 
-		return $now_branch;		
-	}
+	// 	return $now_branch;		
+	// }
 }
