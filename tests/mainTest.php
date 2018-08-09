@@ -253,6 +253,54 @@ class mainTest extends PHPUnit_Framework_TestCase{
 	}
 
 	/**
+	 * 即時公開ロック確認
+	 */
+	public function testImmediatePublishLock(){
+
+		//============================================================
+		// ロック処理
+		//============================================================
+		clearstatcache();
+		$this->fs->mkdir_r(__DIR__.'/testdata/indigo_dir/applock/');
+		touch(__DIR__.'/testdata/indigo_dir/applock/applock.txt');
+		clearstatcache();
+
+		//============================================================
+		// 即時公開処理（ロック中）
+		//============================================================
+		$options = $this->options;
+
+		// 画面入力項目の設定
+		$options['_POST'] = array('immediate_confirm' => 1,	
+								'branch_select_value' => 'release/2018-04-01',	
+								'reserve_date' => null,
+								'reserve_time' => null,	
+								'commit_hash' => 'f9fd330',	
+								'comment' => 'phpUnitテスト001',	
+								'ver_no' => null,	
+								'selected_id' => null
+							);
+
+		$main = new indigo\main( $options );
+		$publish = new indigo\publish( $main );
+
+		// 即時公開
+		$result = $publish->exec_publish(2, null);
+
+		$this->assertEquals( "公開ロック中となっております。しばらくお待ちいただいてもロックが解除されない場合は、管理者にお問い合わせください。" , $result['message']);
+
+
+		//============================================================
+		// ロック解除
+		//============================================================
+		clearstatcache();
+		if( !$this->fs->rm(__DIR__.'/testdata/indigo_dir/applock/') ){
+			var_dump('Failed to cleaning test data directory.');
+		}
+		clearstatcache();
+	}
+
+	/**
 	 * 新規ダイアログ表示処理
 	 */
 	public function testInsertReserve(){
