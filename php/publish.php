@@ -780,7 +780,10 @@ class publish
 		 	$exclude_command .= "--exclude='" . $value . "' ";
 		}
 
-		$command = 'rsync --checksum -rvzP --delete ' . $exclude_command . $from_realpath . ' ' . $to_realpath . ' ' .
+		// $command = 'rsync --checksum -rvzP --delete ' . $exclude_command . $from_realpath . ' ' . $to_realpath . ' ' .
+		// 		   '--log-file=' . $this->realpath_tracelog;
+
+		$command = 'rsync --checksum -rv --delete ' . $exclude_command . $from_realpath . ' ' . $to_realpath . ' ' .
 				   '--log-file=' . $this->realpath_tracelog;
 
 		$ret = $this->main->common()->command_execute($command, true);
