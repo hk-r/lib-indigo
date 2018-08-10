@@ -40,6 +40,9 @@ class gitManager
 		// masterディレクトリの絶対パス
 		$master_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_MASTER));
 
+		// リストの先頭を空にする
+		$ret_array[] = "";
+
 		if ( chdir( $master_real_path )) {
 
 			// fetch
@@ -50,8 +53,6 @@ class gitManager
 			$command = 'git branch -r';
 			$ret = $this->main->common()->command_execute($command, false);
 
-			// リストの先頭を空にする
-			$output_array[] = "";
 
 			foreach ((array)$ret['output'] as $key => $value) {
 				if( strpos($value, '/HEAD') !== false ){
@@ -62,10 +63,8 @@ class gitManager
 				$findme   = '/';
 				$pos = strpos($value, $findme);
 				$trimed = substr($value, $pos + 1);
-				$output_array[] = trim($trimed);
+				$ret_array[] = trim($trimed);
 			}
-
-			$result['branch_list'] = $output_array;
 
 		} else {
 			// ディレクトリ移動に失敗
@@ -78,7 +77,7 @@ class gitManager
 		chdir($current_dir);
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_branch_list end');
-		return json_encode($result);
+		return $ret_array;
 	}
 
 	/**

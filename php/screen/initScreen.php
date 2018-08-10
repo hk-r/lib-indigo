@@ -821,8 +821,7 @@ class initScreen
 			  . '<td><select id="branch_list" class="form-control" name="branch_select_value">';
 
 				// ブランチリストを取得
-				$get_branch_ret = json_decode($this->main->gitMgr()->get_branch_list($this->main->options));
-				$branch_list = $get_branch_ret->branch_list;
+				$branch_list = $this->main->gitMgr()->get_branch_list($this->main->options);
 
 				foreach ((array)$branch_list as $branch) {
 					$ret .= '<option value="' . htmlspecialchars($branch) . '" ' . $this->compare_to_selected_value($form['branch_select_value'], $branch) . '>' . htmlspecialchars($branch) . '</option>';
