@@ -219,7 +219,7 @@ $indigo = new indigo\ajax(
 
 #### 7-2. ajax呼び出しを実行する
 
-`cron_run()` を実行します。
+`get_commit_hash()` を実行します。
 
 ```
 echo $indigo->get_commit_hash();
@@ -284,13 +284,23 @@ $indigo = new indigo\main(
 );
 ```
 
-#### 8-2. indigoを実行する
+#### 8-2. indigo(cron)を実行する
 
 `cron_run()` を実行します。
 
 ```
 // return: 結果ログ表示用
 echo $indigo->cron_run();
+```
+
+#### 8-3. indigo(cron)をサーバから一定の間隔で呼び出すようクーロン登録を行う
+apache権限でクーロン登録用コマンドを実行（root権限だとindigo内の一部動作時にエラーとなる）
+```
+$ crontab -u apache -e
+```
+何分間隔で呼び出すのかを設定する。クーロン用のログも出力させる場合は、以下のようにログディレクトリ・ログファイル名を記載する。
+```
+$ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/var/www/html/sample-lib-indigo/indigo_dir/log/cron.log 2>>/var/www/html/sample-lib-indigo/indigo_dir/log/cron-err.log
 ```
 
 ## 更新履歴 - Change log
