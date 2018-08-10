@@ -113,24 +113,10 @@ class publish
 		//============================================================
 		if( !$this->lock() ){//ロック
 
-			// $logstr = 'publish is now locked.'."\n";
-			// $logstr .= '  (lockfile updated: '.@date('Y-m-d H:i:s', filemtime($this->path_lockfile)).')'."\n";
-			// $logstr .= 'Try again later...'."\n";
-			// $logstr .= 'exit.'."\n";
-			// $this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-
-			// // エラー処理
-			// throw new \Exception('公開ロック中となっております。しばらくお待ちいただいてもロックが解除されない場合は、管理者にお問い合わせください。');
-
 			$result['message'] = '公開ロック中となっております。しばらくお待ちいただいてもロックが解除されない場合は、管理者にお問い合わせください。';
 
 			return $result;
 		}
-
-		// $logstr = "5秒スリープ" . "\r\n";
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-		// sleep(3);
-
 
 		try {
 
@@ -153,38 +139,16 @@ class publish
 					$this->main->common()->put_process_log_block($logstr);
 					$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-					// //============================================================
-					// // 公開予約テーブルより、公開対象データの取得
-					// //============================================================
-					// $reserve_data_list = $this->tsReserve->get_ts_reserve_publish_list($start_datetime);
-					
-					// if (!$reserve_data_list) {
-					// 	$this->main->common()->put_process_log(__METHOD__, __LINE__, 'Target data does not exist.');
-					// 	$this->main->common()->put_publish_log(__METHOD__, __LINE__, 'Target data does not exist.', $this->realpath_tracelog);
-
-					// 	$logstr = "===============================================" . "\r\n";
-					// 	$logstr .= "ロック解除" . "\r\n";
-					// 	$logstr .= "===============================================" . "\r\n";
-					// 	$this->main->common()->put_process_log_block($logstr);
-					// 	$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
-
-					// 	$this->unlock();//ロック解除
-
-					// 	$logstr = "===============================================" . "\r\n";
-					// 	$logstr .= "公開処理完了" . "\r\n";
-					// 	$logstr .= "===============================================" . "\r\n";
-					// 	$this->main->common()->put_process_log_block($logstr);
-					// 	$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
-
-					// 	return $result;
-					// }
-
 					$cnt = 1;
 					$status = define::PUBLISH_STATUS_RUNNING;
 					$set_start_datetime = $start_datetime;
 
 					/* トランザクションを開始する。オートコミットがオフになる */
 					$this->main->get_dbh()->beginTransaction();
+					
+					$logstr = "==========トランザクション開始==========";
+					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+					$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
 					// 複数件取れてきた場合は、最新データ以外はスキップデータとして公開処理結果テーブルへ登録する
 					foreach ( (array) $reserve_data_list as $data ) {
@@ -291,6 +255,10 @@ class publish
 					$this->main->get_dbh()->commit();
 					/* データベース接続はオートコミットモードに戻る */
 
+					$logstr = "==========コミット処理実行==========";
+					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+					$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
+
 					//============================================================
 					// 公開予約ディレクトリを「waiting」から「running」ディレクトリへ移動
 					//============================================================
@@ -383,8 +351,8 @@ class publish
 						}
 
 
+						// 復元公開時の公開処理結果テーブル設定情報
 						$output_dataArray = array(
-
 							tsOutput::TS_OUTPUT_RESERVE_ID 		=> null,
 							tsOutput::TS_OUTPUT_BACKUP_ID		=> $backup_id,
 							tsOutput::TS_OUTPUT_RESERVE 		=> null,
@@ -405,6 +373,7 @@ class publish
 						);
 
 					} elseif ($publish_type == define::PUBLISH_TYPE_IMMEDIATE) {
+						// 即時公開時の公開処理結果テーブル設定情報
 
 						$output_dataArray = array(
 
@@ -441,29 +410,6 @@ class publish
 					$logstr = "==========公開処理結果テーブルのINSERT実行==========";
 					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 					$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
-
-					// $reserve_id = null;
-
-					// $dataArray = array(
-
-					// 	tsOutput::TS_OUTPUT_RESERVE_ID 		=> null,
-					// 	tsOutput::TS_OUTPUT_BACKUP_ID		=> $backup_id,
-					// 	tsOutput::TS_OUTPUT_RESERVE 		=> null,
-					// 	tsOutput::TS_OUTPUT_BRANCH 			=> $this->main->options->_POST->branch_select_value,
-					// 	tsOutput::TS_OUTPUT_COMMIT_HASH 	=> $this->main->options->_POST->commit_hash,
-					// 	tsOutput::TS_OUTPUT_COMMENT 		=> $this->main->options->_POST->comment,
-					// 	tsOutput::TS_OUTPUT_PUBLISH_TYPE 	=> $publish_type,
-					// 	tsOutput::TS_OUTPUT_STATUS 			=> define::PUBLISH_STATUS_RUNNING,
-					// 	tsOutput::TS_OUTPUT_SRV_BK_DIFF_FLG => null,
-					// 	tsOutput::TS_OUTPUT_START 			=> $start_datetime,
-					// 	tsOutput::TS_OUTPUT_END 			=> null,
-					// 	tsOutput::TS_OUTPUT_GEN_DELETE_FLG 	=> define::DELETE_FLG_OFF,
-					// 	tsOutput::TS_OUTPUT_GEN_DELETE 		=> null,
-					// 	tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
-					// 	tsOutput::TS_OUTPUT_INSERT_USER_ID 	=> $this->main->options->user_id,
-					// 	tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
-					// 	tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> null
-					// );
 
 					// 公開処理結果テーブルの登録（インサートしたシーケンスIDをリターン値で取得）
 					$result['output_id'] = $this->tsOutput->insert_ts_output($output_dataArray);
@@ -698,11 +644,6 @@ class publish
 		    }
 
 		} catch (\Exception $e) {
-
-			// $logstr = "** exec_publish 例外キャッチ **" . "\r\n";
-			// $logstr .= $e->getMessage() . "\r\n";
-			// $this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-
 
 			$logstr =  "***** exec_publish 例外キャッチ *****" . "\r\n";
 			$logstr .= "[ERROR]" . "\r\n";
