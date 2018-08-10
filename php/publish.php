@@ -780,11 +780,8 @@ class publish
 		 	$exclude_command .= "--exclude='" . $value . "' ";
 		}
 
-		// $command = 'rsync --checksum -rvzP --delete ' . $exclude_command . $from_realpath . ' ' . $to_realpath . ' ' .
-		// 		   '--log-file=' . $this->realpath_tracelog;
-
-		$command = 'rsync --checksum -rv --delete ' . $exclude_command . $from_realpath . ' ' . $to_realpath . ' ' .
-				   '--log-file=' . $this->realpath_tracelog;
+		$command = 'rsync --checksum -rvzP --delete ' . $exclude_command . $from_realpath . ' ' . $to_realpath . ' ' .
+				   '--log-file=' . $this->realpath_copylog;
 
 		$ret = $this->main->common()->command_execute($command, true);
 
@@ -799,7 +796,7 @@ class publish
 		}
 
 		// rsyncコマンド実行ログ配列を、履歴一覧画面のダイアログ表示用にファイル保持しておく
-		file_put_contents($this->realpath_copylog, $ret['output'], FILE_APPEND);
+		file_put_contents($this->realpath_tracelog, $ret['output'], FILE_APPEND);
 	}
 
 	/**
