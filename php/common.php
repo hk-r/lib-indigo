@@ -7,12 +7,10 @@ class common
 
 	private $main;
 
-	const DIR_PERMISSION_0757 = 0757;
-
 	/**
 	 * Constructor
 	 *
-	 * @param object $px Picklesオブジェクト
+	 * @param object $mainオブジェクト
 	 */
 	public function __construct ($main){
 
@@ -22,13 +20,11 @@ class common
 	/**
 	 * GMTの現在時刻を取得
 	 *	 
-	 * @return 
-	 *  一致する場合：selected（文字列）
-	 *  一致しない場合：空文字
+	 * @param $format = フォーマット形式
+	 * @return GMTの現在日時
 	 */
 	public function get_current_datetime_of_gmt($format) {
 
-		// return gmdate(DATE_ATOM, time());
 		return gmdate($format, time());
 		
 	}
@@ -36,7 +32,8 @@ class common
 	/**
 	 * コマンド実行処理
 	 *	 
-	 * @param $path = 作成ディレクトリ名
+	 * @param $command = コマンド文字列
+	 * @param $captureStderr = 標準出力とエラー出力を出力するか
 	 *	 
 	 * @return ソート後の配列
 	 */
@@ -54,8 +51,6 @@ class common
 
 	    exec($command, $output, $return);
 
-		// $this->put_process_log(__METHOD__, __LINE__, '■ execute end');
-
 		$this->put_process_log(__METHOD__, __LINE__, "command_execute end");
 
 	    return array('output' => $output, 'return' => $return);
@@ -65,50 +60,40 @@ class common
 	/**
 	 * 日付のフォーマット変換（※設定タイムゾーン用）
 	 *	 
-	 * @param $path = 作成ディレクトリ名
+	 * @param $datetime = 日時
+	 * @param $format = フォーマット形式
 	 *	 
-	 * @return ソート後の配列
+	 * @return 変換後の日付
 	 */
 	public function format_datetime($datetime, $format) {
 	
-		// $this->put_process_log(__METHOD__, __LINE__, '■ format_datetime start');
-
 		$ret = '';
 
 		if ($datetime) {
 			$ret = date($format, strtotime($datetime));
 		}
 		
-		// $this->put_process_log(__METHOD__, __LINE__, '　★変換前の時刻：' . $datetime);
-		// $this->put_process_log(__METHOD__, __LINE__, '　★変換後の時刻：'. $ret);
-
-		// $this->put_process_log(__METHOD__, __LINE__, '■ format_datetime end');
-
 	    return $ret;
 	}
 
 	/**
-	 * 日付のフォーマット変換（※GMT用）
+	 * 引数日時のフォーマット変換（※GMT用）
 	 *	 
-	 * @param $path = 作成ディレクトリ名
+	 * @param $datetime = 日時
+	 * @param $format = フォーマット形式
 	 *	 
-	 * @return ソート後の配列
+	 * @return 変換後の日付
 	 */
 	public function format_gmt_datetime($datetime, $format) {
 	
-		// $this->put_process_log(__METHOD__, __LINE__, '■ format_gmt_datetime start');
-
 		$ret = '';
 
 		if ($datetime) {
 			
 			$t = new \DateTime($datetime, new \DateTimeZone('GMT'));
-
 			$ret = $t->format($format);
 		}
 		
-		// $this->put_process_log(__METHOD__, __LINE__, '■ format_gmt_datetime end');
-
 	    return $ret;
 	}
 
@@ -116,14 +101,12 @@ class common
 	/**
 	 * 引数日時を引数タイムゾーンの日時へ変換する（画面表示時の変換用）
 	 *	 
-	 * @param $path = 作成ディレクトリ名
+	 * @param $datetime = 日時
 	 *	 
-	 * @return ソート後の配列
+	 * @return 変換後の日時
 	 */
 	public function convert_to_timezone_datetime($datetime) {
 	
-		// $this->put_process_log(__METHOD__, __LINE__, '■ convert_to_timezone_datetime start');
-
 		$ret = '';
 
 		if ($datetime) {
@@ -131,14 +114,8 @@ class common
 			$timezone = date_default_timezone_get();
 			$t = new \DateTime($datetime, new \DateTimeZone('GMT'));
 			$t->setTimeZone(new \DateTimeZone($timezone));
-			// $ret = $t->format(DATE_ATOM);
 			$ret = $t->format(define::DATETIME_FORMAT);
 		}
-
-		// $this->put_process_log(__METHOD__, __LINE__, '　□変換前の時刻（GMT）：' . $datetime);
-		// $this->put_process_log(__METHOD__, __LINE__, '　□変換後の時刻：'. $ret);
-		
-		// $this->put_process_log(__METHOD__, __LINE__, '■ convert_to_timezone_datetime end');
 
 	    return $ret;
 	}
@@ -175,147 +152,14 @@ class common
 		return $ret;
 	}
 
-
-	// /**
-	//  * ディレクトリが存在しない場合はディレクトリを作成する
-	//  *	 
-	//  * @param $dirpath = ディレクトリパス
-	//  *	 
-	//  * @return true:成功、false：失敗
-	//  */
-	// public function is_exists_mkdir($dirpath) {
-
-	// 	// $this->put_process_log(__METHOD__, __LINE__, '■ is_exists_mkdir start');
-
-	// 	$ret = true;
-
-	// 	if ($dirpath) {
-	// 		if ( !file_exists($dirpath) ) {
-	// 			// ディレクトリ作成
-	// 			if ( !mkdir($dirpath, self::DIR_PERMISSION_0757)) {
-	// 				$ret = false;
-	// 			}
-	// 		}
-	// 	} else {
-	// 		$ret = false;
-	// 	}
-
-	// 	// $this->put_process_log(__METHOD__, __LINE__, '　□ return：' . $ret);
-	// 	// $this->put_process_log(__METHOD__, __LINE__, '■ is_exists_mkdir end');
-
-	// 	return $ret;
-	// }
-
-	/**
-	 * ディレクトリの存在有無にかかわらず、ディレクトリを再作成する（存在しているものは削除する）
-	 *	 
-	 * @param $dirpath = ディレクトリパス
-	 *	 
-	 * @return true:成功、false：失敗
-	 */
-	public function is_exists_remkdir($dirpath) {
-		
-		$this->put_process_log(__METHOD__, __LINE__, '■ is_exists_remkdir start');
-
-		if ( file_exists($dirpath) ) {
-			// 削除
-			$command = 'rm -rf --preserve-root '. $dirpath;
-			$ret = $this->command_execute($command, true);
-
-			if ( $ret['return'] !== 0 ) {
-				return false;
-			}
-		}
-
-		// デプロイ先のディレクトリを作成
-		if ( !file_exists($dirpath)) {
-			// if ( !mkdir($dirpath, self::DIR_PERMISSION_0757) ) {
-			if ( !$this->main->fs()->mkdir($dirpath) ) {
-				return false;
-			}
-		} else {
-			return false;
-		}
-	
-		$this->put_process_log(__METHOD__, __LINE__, '■ is_exists_remkdir end');
-
-		return true;
-	}
-
-
-
-	// /**
-	//  * 本番サーバの絶対パス取得（複数サーバ対応（※作成中））
-	//  *	 
-	//  * @param $path = 作成ディレクトリ名
-	//  *	 
-	//  * @return ソート後の配列
-	//  */
-	// public function get_server_real_path($options) {
-	
-	// 	$this->put_process_log(__METHOD__, __LINE__, '■ get_server_real_path start');
-
-
-	// 	$server_list = $options->server;
-
-	// 	$server_real_path = array();
-
-	// 	foreach ( (array)$server_list as $server ) {
-			
-	// 		// 本番環境ディレクトリの絶対パスを取得。
-	// 		$server_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($server->real_path . "/"));
-	// 		break; // 現時点では最初の1つのみ有効
-	// 	}
-
-	// 	$this->put_process_log(__METHOD__, __LINE__, '　□ server_real_path：' . $server_real_path);
-
-	// 	$this->put_process_log(__METHOD__, __LINE__, '■ get_server_real_path end');
-
-	//     return $server_real_path;
-	// }
-
-
-	// /**
-	//  * 作業用ディレクトリの絶対パス取得
-	//  *	 
-	//  * @param $path = 作成ディレクトリ名
-	//  *	 
-	//  * @return ソート後の配列
-	//  */
-	// public function get_realpath_workdir($options, $realpath_array) {
-	
-	// 	$logstr = "get_realpath_workdir() start";
-	// 	$this->put_process_log(__METHOD__, __LINE__, $logstr);
-
-
-	// 	// $realpath_array['realpath_server'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->server_real_path . "/"));
-
-	// 	// backupディレクトリの絶対パスを取得。
-	// 	$realpath_array['realpath_backup'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_BACKUP));
-
-	// 	// waitingディレクトリの絶対パスを取得。
-	// 	$realpath_array['realpath_waiting'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_WAITING));
-
-	// 	// runningディレクトリの絶対パスを取得。
-	// 	$realpath_array['realpath_running'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_RUNNING));
-
-	// 	// releasedディレクトリの絶対パスを取得。
-	// 	$realpath_array['realpath_released'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_RELEASED));
-
-	// 	// logディレクトリの絶対パスを取得。
-	// 	$realpath_array['realpath_log'] = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_LOG));
-
-	// 	$logstr = "get_realpath_workdir() end";
-	// 	$this->put_process_log(__METHOD__, __LINE__, $logstr);
-
-	//     return json_encode($realpath_array);
-	// }
-
-
 	/**
 	 * 通常ログを出力する。
 	 *
-	 * @return ログ出力
+	 * @param $method = クラス名::メソッド名
+	 * @param $line = 行数
+	 * @param $text = 出力文字列
+	 *
+	 * @return 通常ログ出力
 	 */
 	public function put_process_log($method, $line, $text){
 		
@@ -328,15 +172,15 @@ class common
 			   "[line:" . $line . "]" . " " .
 			   $text . "\r\n";
 
-		// file_put_contents($path, $str, FILE_APPEND);
-
 		return error_log( $str, 3, $this->main->process_log_path );
 	}
 
 	/**
 	 * エラーログを出力する。
 	 *
-	 * @return ログ出力
+	 * @param $text = 出力文字列
+	 *
+	 * @return エラーログ出力
 	 */
 	public function put_error_log($text){
 		
@@ -351,7 +195,9 @@ class common
 	/**
 	 * 区切り用のログを出力する。（日時などの詳細を出力しない）
 	 *
-	 * @return ログ出力
+	 * @param $text = 出力文字列
+	 *
+	 * @return 区切り用のログ出力
 	 */
 	public function put_process_log_block($text){
 		
@@ -363,7 +209,12 @@ class common
 	/**
 	 * 公開確認用のログを出力する。
 	 *
-	 * @return ログ出力
+	 * @param $method = クラス名::メソッド名
+	 * @param $line = 行数
+	 * @param $text = 出力文字列
+	 * @param $path = 出力先のパス
+	 *
+	 * @return 公開確認用ログ出力
 	 */
 	public function put_publish_log($method, $line, $text, $path){
 		
