@@ -94,9 +94,14 @@ class gitManager
 		set_time_limit(12*60*60);
 
 		// 公開日時ディレクトリの絶対パスを取得。
-		// すでに存在している場合は削除して再作成する。
+		// すでに存在している場合はエラーメッセージを表示する。
 		$dir_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($path . $dirname));
-		if ( !$this->main->common()->is_exists_remkdir($dir_real_path) ) {
+
+		if (file_exists($dir_real_path)) {
+			throw new \Exception('同日時に公開予定のGitファイルが既に存在しています。公開予約情報を確認してください。' . $dir_real_path);
+		}
+
+		if ( !$this->main->fs()->mkdir($dir_real_path) ) {
 			throw new \Exception('Git file copy failed. Creation of directory failed. ' . $dir_real_path);
 		}
 
@@ -106,7 +111,6 @@ class gitManager
 		if ( chdir($dir_real_path) ) {
 
 			// 指定ブランチ
-			// $branch_name = trim(str_replace("origin/", "", $options->_POST->branch_select_value));
 			$branch_name = trim($options->_POST->branch_select_value);
 
 			//============================================================
