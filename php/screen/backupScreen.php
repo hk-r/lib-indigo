@@ -129,6 +129,6 @@ class backupScreen
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_restore_publish end');
 
-		return json_encode($result);
+		return $result;
 	}
 }

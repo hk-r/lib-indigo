@@ -155,14 +155,14 @@ class historyScreen
 			$result['status'] = false;
 			$result['message'] = 'View log dialog failed. ' . $e->getMessage();
 
-			return json_encode($result);
+			return $result;
 		}
 
 		$result['status'] = true;
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_disp_log_dialog end');
 
-		return json_encode($result);
+		return $result;
 	}
 
 	/**

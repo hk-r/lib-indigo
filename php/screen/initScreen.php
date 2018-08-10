@@ -181,7 +181,7 @@ class initScreen
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_add_dialog end');
 
-		return json_encode($result);
+		return $result;
 	}
 
 
@@ -214,7 +214,7 @@ class initScreen
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_check_add end');
 
-		return json_encode($result);
+		return $result;
 	}
 
 	/**
@@ -246,7 +246,7 @@ class initScreen
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_confirm_add end');
 
-		return json_encode($result);
+		return $result;
 	}
 
 	/**
@@ -269,7 +269,7 @@ class initScreen
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_back_add_dialog end');
 
-		return json_encode($result);
+		return $result;
 	}
 
 	/**
@@ -291,7 +291,7 @@ class initScreen
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_update_dialog end');
 
-		return json_encode($result);
+		return $result;
 	}
 
 	/**
@@ -322,7 +322,7 @@ class initScreen
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_check_update end');
 
-		return json_encode($result);
+		return $result;
 	}
 
 	/**
@@ -354,7 +354,7 @@ class initScreen
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_confirm_update end');
 		
-		return json_encode($result);
+		return $result;
 	}
 
 	/**
@@ -377,7 +377,7 @@ class initScreen
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_back_update_dialog end');
 
-		return json_encode($result);
+		return $result;
 	}
 
 	/**
@@ -398,7 +398,7 @@ class initScreen
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_disp_immediate_dialog end');
 
-		return json_encode($result);
+		return $result;
 	}
 
 	/**
@@ -429,7 +429,7 @@ class initScreen
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_check_immediate end');
 
-		return json_encode($result);
+		return $result;
 	}
 
 	/**
@@ -460,7 +460,7 @@ class initScreen
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_immediate_publish end');
 
-		return json_encode($result);
+		return $result;
 	}
 
 	/**
@@ -483,7 +483,7 @@ class initScreen
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_back_immediate_dialog end');
 
-		return json_encode($result);
+		return $result;
 	}
 
 	/**
@@ -700,14 +700,14 @@ class initScreen
 			$result['status'] = false;
 			$result['message'] = 'Delete faild. ' . $e->getMessage();
 
-			return json_encode($result);
+			return $result;
 		}
 
 		$result['status'] = true;
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_delete end');
 
-		return json_encode($result);
+		return $result;
 	}
 
 	/**
@@ -726,7 +726,7 @@ class initScreen
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_restore_publish_failure end');
 
-		return json_encode($result);
+		return $result;
 	}
 
 	/**
