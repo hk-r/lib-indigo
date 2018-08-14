@@ -150,15 +150,15 @@ class initScreen
 		foreach ((array)$data_list as $array) {
 			
 			$ret .= '<tr>'
-				. '<td class="p-center"><input type="radio" name="target" value="' . $array[tsReserve::RESERVE_ENTITY_ID_SEQ] . '"/></td>'
-				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_RESERVE_DISP] . '</td>'
-				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_COMMIT_HASH] . '</td>'
-				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_BRANCH] . '</td>'
-				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_COMMENT] . '</td>'
-				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_INSERT_USER_ID] . '</td>'
-				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_INSERT_DATETIME] . '</td>'
-				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_UPDATE_USER_ID] . '</td>'
-				. '<td class="p-center">' . $array[tsReserve::RESERVE_ENTITY_UPDATE_DATETIME] . '</td>'
+				. '<td class="p-center"><input type="radio" name="target" value="' . htmlspecialchars($array[tsReserve::RESERVE_ENTITY_ID_SEQ]) . '"/></td>'
+				. '<td class="p-center">' . htmlspecialchars($array[tsReserve::RESERVE_ENTITY_RESERVE_DISP]) . '</td>'
+				. '<td class="p-center">' . htmlspecialchars($array[tsReserve::RESERVE_ENTITY_COMMIT_HASH]) . '</td>'
+				. '<td class="p-center">' . htmlspecialchars($array[tsReserve::RESERVE_ENTITY_BRANCH]) . '</td>'
+				. '<td class="p-center">' . htmlspecialchars($array[tsReserve::RESERVE_ENTITY_COMMENT]) . '</td>'
+				. '<td class="p-center">' . htmlspecialchars($array[tsReserve::RESERVE_ENTITY_INSERT_USER_ID]) . '</td>'
+				. '<td class="p-center">' . htmlspecialchars($array[tsReserve::RESERVE_ENTITY_INSERT_DATETIME]) . '</td>'
+				. '<td class="p-center">' . htmlspecialchars($array[tsReserve::RESERVE_ENTITY_UPDATE_USER_ID]) . '</td>'
+				. '<td class="p-center">' . htmlspecialchars($array[tsReserve::RESERVE_ENTITY_UPDATE_DATETIME]) . '</td>'
 				. '</tr>';
 		}
 
@@ -832,12 +832,12 @@ class initScreen
 		$ret .= '<form method="post">';
 
 		// hidden項目
-		$ret .= '<input type="hidden" name="selected_id" value="' . $form['selected_id'] . '"/>';
-		$ret .= '<input type="hidden" name="ver_no" value="' . $form['ver_no'] . '"/>';
+		$ret .= '<input type="hidden" name="selected_id" value="' . htmlspecialchars($form['selected_id']) . '"/>';
+		$ret .= '<input type="hidden" name="ver_no" value="' . htmlspecialchars($form['ver_no']) . '"/>';
 		// ajax呼出クラス絶対パス
-		$ret .= '<input type="hidden" id="realpath_ajax_call" value="' . $this->main->options->realpath_ajax_call . '"/>';
+		$ret .= '<input type="hidden" id="realpath_ajax_call" value="' . htmlspecialchars($this->main->options->realpath_ajax_call) . '"/>';
 		// indigo作業用ディレクトリ絶対パス
-		$ret .= '<input type="hidden" id="realpath_workdir" value="' . $this->main->options->realpath_workdir . '"/>';
+		$ret .= '<input type="hidden" id="realpath_workdir" value="' . htmlspecialchars($this->main->options->realpath_workdir) . '"/>';
 
 		
 		$ret .= '<table class="table table-striped">'
@@ -851,7 +851,7 @@ class initScreen
 				$branch_list = $this->main->gitMgr()->get_branch_list($this->main->options);
 
 				foreach ((array)$branch_list as $branch) {
-					$ret .= '<option value="' . htmlspecialchars($branch) . '" ' . $this->compare_to_selected_value($form['branch_select_value'], $branch) . '>' . htmlspecialchars($branch) . '</option>';
+					$ret .= '<option value="' . htmlspecialchars($branch) . '" ' . $this->compare_to_selected_value(htmlspecialchars($form['branch_select_value']), htmlspecialchars($branch)) . '>' . htmlspecialchars($branch) . '</option>';
 				}
 
 		$ret .= '</select></td>'
@@ -860,8 +860,8 @@ class initScreen
 		// 「コミット」項目
 		$ret .= '<tr>'
 			  . '<td class="dialog_thead">コミット</td>'
-			  . '<td id="result">' . $form['commit_hash'] . '</td>'
-			  . '<input type="hidden" id="commit_hash" name="commit_hash" value="' . $form['commit_hash'] . '"/>'
+			  . '<td id="result">' . htmlspecialchars($form['commit_hash']) . '</td>'
+			  . '<input type="hidden" id="commit_hash" name="commit_hash" value="' . htmlspecialchars($form['commit_hash']) . '"/>'
 			  . '</tr>';
 
 		// 「公開予約日時」項目
@@ -876,8 +876,8 @@ class initScreen
 
 			$ret .= '<tr>'
 				  . '<td class="dialog_thead">公開予約日時</td>'
-				  . '<td scope="row"><span style="margin-right:10px;"><input type="text" id="datepicker" name="reserve_date" value="'. $form['reserve_date'] . '" autocomplete="off" /></span>'
-				  . '<input type="time" id="reserve_time" name="reserve_time" value="'. $form['reserve_time'] . '" /></td>'
+				  . '<td scope="row"><span style="margin-right:10px;"><input type="text" id="datepicker" name="reserve_date" value="'. htmlspecialchars($form['reserve_date']) . '" autocomplete="off" /></span>'
+				  . '<input type="time" id="reserve_time" name="reserve_time" value="'. htmlspecialchars($form['reserve_time']) . '" /></td>'
 				  . '</tr>';
 		}
 
@@ -951,30 +951,30 @@ class initScreen
 			. '<table class="table table-striped">'
 
 			// hidden項目
-			. '<input type="hidden" name="ver_no" value="' . $form['ver_no'] . '"/>';
+			. '<input type="hidden" name="ver_no" value="' . htmlspecialchars($form['ver_no']) . '"/>';
 
 		// 「ブランチ」項目
 		$ret .= '<tr>'
 			. '<td class="dialog_thead">' . 'ブランチ' . '</td>'
-			. '<td>' . $form['branch_select_value']
-			. '<input type="hidden" name="branch_select_value" value="' . $form['branch_select_value'] . '"/>'
+			. '<td>' . htmlspecialchars($form['branch_select_value'])
+			. '<input type="hidden" name="branch_select_value" value="' . htmlspecialchars($form['branch_select_value']) . '"/>'
 			. '</td>'
 			. '</tr>';
 
 		// 「コミット」項目
 		$ret .= '<tr>'
 			. '<td class="dialog_thead">' . 'コミット' . '</td>'
-			. '<td>' . $form['commit_hash'] . '</td>'
-			. '<input type="hidden" name="commit_hash" value="' . $form['commit_hash'] . '"/>'
+			. '<td>' . htmlspecialchars($form['commit_hash']) . '</td>'
+			. '<input type="hidden" name="commit_hash" value="' . htmlspecialchars($form['commit_hash']) . '"/>'
 			. '</tr>';
 
 		// 「公開予約日時」項目
 		$ret .= '<tr>'
 			. '<td class="dialog_thead">' . '公開予約日時' . '</td>'
-			. '<td>' . $form['reserve_date'] . ' ' . $form['reserve_time']
-			. '<input type="hidden" name="reserve_date" value="' . $form['reserve_date'] . '"/>'
-			. '<input type="hidden" name="reserve_time" value="' . $form['reserve_time'] . '"/>'
-			. '<input type="hidden" name="gmt_reserve_datetime" value="' . $gmt_reserve_datetime . '"/>'
+			. '<td>' . htmlspecialchars($form['reserve_date']) . ' ' . htmlspecialchars($form['reserve_time'])
+			. '<input type="hidden" name="reserve_date" value="' . htmlspecialchars($form['reserve_date']) . '"/>'
+			. '<input type="hidden" name="reserve_time" value="' . htmlspecialchars($form['reserve_time']) . '"/>'
+			. '<input type="hidden" name="gmt_reserve_datetime" value="' . htmlspecialchars($gmt_reserve_datetime) . '"/>'
 			. '</td>'
 			. '</tr>';
 
@@ -1054,9 +1054,6 @@ class initScreen
 			// 画面入力された日時を結合し、GMTへ変換する
 			$before_gmt_reserve_datetime = $this->combine_to_gmt_date_and_time($before_reserve_date, $before_reserve_time);
 		}
-
-		$img_filename = $this->main->options->relativepath_resourcedir . "/images/arrow_right.png";
-
 		$ret = '<div class="dialog" id="modal_dialog">'
 			. '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
 			. '<div style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; background: rgb(0, 0, 0); opacity: 0.5;"></div>'
@@ -1073,70 +1070,70 @@ class initScreen
 		// 「ブランチ」項目（変更前）
 		$ret .= '<tr>'
 			. '<td class="dialog_thead">' . 'ブランチ' . '</td>'
-			. '<td>' . $before_branch_select_value . '</td>'
+			. '<td>' . htmlspecialchars($before_branch_select_value) . '</td>'
 			. '</tr>';
 		
 		// 「コミット」項目（変更前）
 		$ret .= '<tr>'
 			. '<td class="dialog_thead">' . 'コミット' . '</td>'
-			. '<td>' . $before_commit_hash . '</td>'
+			. '<td>' . htmlspecialchars($before_commit_hash) . '</td>'
 			. '</tr>';
 		
 		// 「公開予約日時」項目（変更前）
 		$ret .= '<tr>'
 			. '<td class="dialog_thead">' . '公開予約日時' . '</td>'
-			. '<td>' . $before_reserve_date . ' ' . $before_reserve_time . '</td>'
-			. '<input type="hidden" name="before_gmt_reserve_datetime" value="' . $before_gmt_reserve_datetime . '"/>'
+			. '<td>' . htmlspecialchars($before_reserve_date) . ' ' . htmlspecialchars($before_reserve_time) . '</td>'
+			. '<input type="hidden" name="before_gmt_reserve_datetime" value="' . htmlspecialchars($before_gmt_reserve_datetime) . '"/>'
 			. '</tr>';
 		
 		// 「コメント」項目（変更前）
 		$ret .= '<tr>'
 			. '<td class="dialog_thead">' . 'コメント' . '</td>'
-			. '<td>' . $before_comment . '</td>'
+			. '<td>' . htmlspecialchars($before_comment) . '</td>'
 			. '</tr>'
 			. '</tbody></table>'
 			
 		    . '</div>'
 
 		    . '<div class="center_box">'
-		    . '<img src="'. $img_filename .'"/>'
+		    . '<img src="'. $this->main->options->relativepath_resourcedir . "/images/arrow_right.png" .'"/>'
 		    . '</div>'
 
             . '<div class="right_box">'
 			. '<table class="table table-striped" style="width: 100%">'
 
 			// hidden項目
-		    . '<input type="hidden" name="selected_id" value="' . $form['selected_id'] . '"/>'
-			. '<input type="hidden" name="ver_no" value="' . $form['ver_no'] . '"/>'
+		    . '<input type="hidden" name="selected_id" value="' . htmlspecialchars($form['selected_id']) . '"/>'
+			. '<input type="hidden" name="ver_no" value="' . htmlspecialchars($form['ver_no']) . '"/>'
 
 			// 「ブランチ」項目（変更後）
 			. '<tr>'
 			. '<td class="dialog_thead">' . 'ブランチ' . '</td>'
-			. '<td>' . $form['branch_select_value'] . '</td>'
-			. '<input type="hidden" name="branch_select_value" value="' . $form['branch_select_value'] . '"/>'
+			. '<td>' . htmlspecialchars($form['branch_select_value']) . '</td>'
+			. '<input type="hidden" name="branch_select_value" value="' . htmlspecialchars($form['branch_select_value']) . '"/>'
 			. '</tr>'
 
 			// 「コミット」項目（変更後）			
 			. '<tr>'
 			. '<td class="dialog_thead">' . 'コミット' . '</td>'
-			. '<td>' . $form['commit_hash'] . '</td>'
-			. '<input type="hidden" name="commit_hash" value="' . $form['commit_hash'] . '"/>'	
+			. '<td>' . htmlspecialchars($form['commit_hash']) . '</td>'
+			. '<input type="hidden" name="commit_hash" value="' . htmlspecialchars($form['commit_hash']) . '"/>'	
 			. '</tr>'
 
 			// 「公開日時」項目（変更後）
 			. '<tr>'
 			. '<td class="dialog_thead">' . '公開予約日時' . '</td>'
-			. '<td>' . $form['reserve_date'] . ' ' . $form['reserve_time'] . '</td>'
-			. '<input type="hidden" name="reserve_date" value="' . $form['reserve_date'] . '"/>'
-			. '<input type="hidden" name="reserve_time" value="' . $form['reserve_time'] . '"/>'	 
-			. '<input type="hidden" name="gmt_reserve_datetime" value="' . $gmt_reserve_datetime . '"/>'
+			. '<td>' . htmlspecialchars($form['reserve_date']) . ' ' . htmlspecialchars($form['reserve_time']) . '</td>'
+			. '<input type="hidden" name="reserve_date" value="' . htmlspecialchars($form['reserve_date']) . '"/>'
+			. '<input type="hidden" name="reserve_time" value="' . htmlspecialchars($form['reserve_time']) . '"/>'	 
+			. '<input type="hidden" name="gmt_reserve_datetime" value="' . htmlspecialchars($gmt_reserve_datetime) . '"/>'
 			. '</tr>'
 
 			// 「コメント」項目（変更後）
 			. '<tr>'
 			. '<td class="dialog_thead">' . 'コメント' . '</td>'
-			. '<td>' . $form['comment'] . '</td>'
-			. '<input type="hidden" name="comment" value="' . $form['comment'] . '"/>'
+			. '<td>' . htmlspecialchars($form['comment']) . '</td>'
+			. '<input type="hidden" name="comment" value="' . htmlspecialchars($form['comment']) . '"/>'
 			. '</tr>'
 
 			. '</tbody></table>'
@@ -1191,16 +1188,16 @@ class initScreen
 		// 「ブランチ」項目
 		$ret .= '<tr>'
 			. '<td class="dialog_thead">' . 'ブランチ' . '</td>'
-			. '<td>' . $form['branch_select_value']
-			. '<input type="hidden" name="branch_select_value" value="' . $form['branch_select_value'] . '"/>'
+			. '<td>' . htmlspecialchars($form['branch_select_value'])
+			. '<input type="hidden" name="branch_select_value" value="' . htmlspecialchars($form['branch_select_value']) . '"/>'
 			. '</td>'
 			. '</tr>';
 
 		// 「コミット」項目
 		$ret .= '<tr>'
 			. '<td class="dialog_thead">' . 'コミット' . '</td>'
-			. '<td>' . $form['commit_hash'] . '</td>'
-			. '<input type="hidden" name="commit_hash" value="' . $form['commit_hash'] . '"/>'
+			. '<td>' . htmlspecialchars($form['commit_hash']) . '</td>'
+			. '<input type="hidden" name="commit_hash" value="' . htmlspecialchars($form['commit_hash']) . '"/>'
 			. '</tr>';
 
 		// 「公開予約日時」項目

@@ -91,17 +91,17 @@ class historyScreen
 
 			$ret .= '<tr>'
 				. '<td class="p-center">
-				  <input type="radio" name="target" value="' . $array[tsOutput::OUTPUT_ENTITY_ID_SEQ] . '"/></td>'
-				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_STATUS_DISP] . '</td>'
-				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_PUBLISH_TYPE] . '</td>'
-				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_RESERVE_DISP] . '</td>'
-				. '<td class="p-center">' . $backup_datetime_disp . '</td>'
-				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_COMMIT_HASH] . '</td>'
-				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_BRANCH] . '</td>'
-				. '<td>' 				  . $array[tsOutput::OUTPUT_ENTITY_COMMENT] . '</td>'
-				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_START_DISP] . '</td>'
-				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_END_DISP] . '</td>'
-				. '<td class="p-center">' . $array[tsOutput::OUTPUT_ENTITY_INSERT_USER_ID] . '</td>'
+				  <input type="radio" name="target" value="' . htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_ID_SEQ]) . '"/></td>'
+				. '<td class="p-center">' . htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_STATUS_DISP]) . '</td>'
+				. '<td class="p-center">' . htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_PUBLISH_TYPE]) . '</td>'
+				. '<td class="p-center">' . htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_RESERVE_DISP]) . '</td>'
+				. '<td class="p-center">' . htmlspecialchars($backup_datetime_disp) . '</td>'
+				. '<td class="p-center">' . htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_COMMIT_HASH]) . '</td>'
+				. '<td class="p-center">' . htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_BRANCH]) . '</td>'
+				. '<td>' 				  . htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_COMMENT]) . '</td>'
+				. '<td class="p-center">' . htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_START_DISP]) . '</td>'
+				. '<td class="p-center">' . htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_END_DISP]) . '</td>'
+				. '<td class="p-center">' . htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_INSERT_USER_ID]) . '</td>'
 				. '</tr>';
 		}
 		
@@ -204,12 +204,12 @@ class historyScreen
 			}
 
 
-		$ret .= '<p>User ID：' . $selected_ret[tsOutput::OUTPUT_ENTITY_INSERT_USER_ID] . '</p>'
-			  . '<p>公開開始日時：' . $selected_ret[tsOutput::OUTPUT_ENTITY_START_DISP] . '</p>'
-			  . '<p>公開終了日時：' . $selected_ret[tsOutput::OUTPUT_ENTITY_END_DISP] . '</p>'
+		$ret .= '<p>User ID：' . htmlspecialchars($selected_ret[tsOutput::OUTPUT_ENTITY_INSERT_USER_ID]) . '</p>'
+			  . '<p>公開開始日時：' . htmlspecialchars($selected_ret[tsOutput::OUTPUT_ENTITY_START_DISP]) . '</p>'
+			  . '<p>公開終了日時：' . htmlspecialchars($selected_ret[tsOutput::OUTPUT_ENTITY_END_DISP]) . '</p>'
 			  // . '<p>-----------------------------------------------------</p>'
 			  . '<p>公開同期ログ：</p>'
-			  . '<p>' . nl2br($content) .'</p>';
+			  . '<p>' . htmlspecialchars(nl2br($content)) .'</p>';
 			  // . '<p>-----------------------------------------------------</p>';
 
 		$ret .=  '<div class="button_contents_box">'
