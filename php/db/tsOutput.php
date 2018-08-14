@@ -94,7 +94,7 @@ class tsOutput
 		$stmt = $this->main->dbh()->prepare($select_sql);
 
 		// SELECT実行
-		$ret_array = $this->main->pdoMgr()->execute($this->main->dbh(), $stmt);
+		$ret_array = $this->main->pdoMgr()->execute_select($this->main->dbh(), $stmt);
 
 		$conv_ret_array = null;
 		foreach ((array)$ret_array as $array) {
@@ -278,6 +278,8 @@ class tsOutput
 	
 		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ convert_ts_output_entity start');
 
+		$conv_array = array();
+		
 		// ID
 		$conv_array[self::OUTPUT_ENTITY_ID_SEQ] = $array[self::TS_OUTPUT_ID_SEQ];
 
