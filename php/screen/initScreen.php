@@ -10,14 +10,23 @@ use indigo\define as define;
 
 class initScreen
 {
-	/** mainオブジェクト */
+	/** indigo\mainオブジェクト */
 	public $main;
 	
-	/**
-	 * オブジェクト
-	 * @access private
-	 */
-	private $tsReserve, $tsOutput, $tsBackup, $check, $publish;
+	/** indigo\db\tsReserve のインスタンス */
+	private $tsReserve;
+
+	/** indigo\db\tsOutput のインスタンス */
+	private $tsOutput;
+
+	/** indigo\db\tsBackup のインスタンス */
+	private $tsBackup;
+
+	/** indigo\check のインスタンス */
+	private $check;
+
+	/** indigo\publish のインスタンス */
+	private $publish;
 
 	/**
 	 * 入力画面のエラーメッセージ
@@ -509,7 +518,7 @@ class initScreen
 	 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ -----Gitのファイルコピー処理-----');
 			
 			// waitingディレクトリの絶対パスを取得。
-			$realpath_waiting = $this->main->realpath_array->realpath_waiting;
+			$realpath_waiting = $this->main->realpath_array['realpath_waiting'];
 
 			// 公開予約ディレクトリ名の取得
 			$dirname = $this->main->common()->format_gmt_datetime($this->main->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE);
@@ -534,7 +543,13 @@ class initScreen
 		} catch (\Exception $e) {
 
 			$result['status'] = false;
-			$result['message'] = 'Add confirm faild. ' . $e->getMessage();
+			$result['message'] = '追加処理が失敗しました。';
+
+			$logstr =  "***** エラー発生 *****" . "\r\n";
+			$logstr .= "[ERROR]" . "\r\n";
+			$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
+			$logstr .= "Error message:" . $e->getMessage() . "\r\n";
+			$this->main->common()->put_error_log($logstr);
 
 			return $result;
 		}
@@ -564,7 +579,7 @@ class initScreen
 		try {
 
 			// waitingディレクトリの絶対パスを取得。
-			$realpath_waiting = $this->main->realpath_array->realpath_waiting;
+			$realpath_waiting = $this->main->realpath_array['realpath_waiting'];
 
 			//============================================================
 			// 「waiting」ディレクトリの変更前の公開ソースディレクトリを削除
@@ -617,7 +632,13 @@ class initScreen
 		} catch (\Exception $e) {
 
 			$result['status'] = false;
-			$result['message'] = 'Update confirm faild. ' . $e->getMessage();
+			$result['message'] = '変更処理が失敗しました。';
+
+			$logstr =  "***** エラー発生 *****" . "\r\n";
+			$logstr .= "[ERROR]" . "\r\n";
+			$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
+			$logstr .= "Error message:" . $e->getMessage() . "\r\n";
+			$this->main->common()->put_error_log($logstr);
 
 			return $result;
 		}
@@ -649,13 +670,13 @@ class initScreen
 			$selected_id =  $this->main->options->_POST->selected_id;
 
 			// waitingディレクトリの絶対パスを取得。
-			$realpath_waiting = $this->main->realpath_array->realpath_waiting;
+			$realpath_waiting = $this->main->realpath_array['realpath_waiting'];
 
 
 			try {
 
 				/* トランザクションを開始する。オートコミットがオフになる */
-				$this->main->get_dbh()->beginTransaction();
+				$this->main->dbh()->beginTransaction();
 
 				//============================================================
 				// 公開予約情報の論理削除
@@ -684,13 +705,13 @@ class initScreen
 
 
 				/* 変更をコミットする */
-				$this->main->get_dbh()->commit();
+				$this->main->dbh()->commit();
 				/* データベース接続はオートコミットモードに戻る */
 
 		    } catch (\Exception $e) {
 		    
 		      /* 変更をロールバックする */
-		      $this->main->get_dbh()->rollBack();
+		      $this->main->dbh()->rollBack();
 		 
 		      throw $e;
 		    }
@@ -698,7 +719,13 @@ class initScreen
 		} catch (\Exception $e) {
 
 			$result['status'] = false;
-			$result['message'] = 'Delete faild. ' . $e->getMessage();
+			$result['message'] = '削除処理が失敗しました。';
+
+			$logstr =  "***** エラー発生 *****" . "\r\n";
+			$logstr .= "[ERROR]" . "\r\n";
+			$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
+			$logstr .= "Error message:" . $e->getMessage() . "\r\n";
+			$this->main->common()->put_error_log($logstr);
 
 			return $result;
 		}

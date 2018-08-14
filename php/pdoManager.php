@@ -159,7 +159,7 @@ class pdoManager
 		//============================================================
 		$create_sql = 'CREATE TABLE IF NOT EXISTS TS_RESERVE ('
 			  . tsReserve::TS_RESERVE_ID_SEQ		. ' INTEGER PRIMARY KEY AUTOINCREMENT,
-			' . tsReserve::TS_RESERVE_RESERVE		. ' TEXT,
+			' . tsReserve::TS_RESERVE_DATETIME		. ' TEXT,
 			' . tsReserve::TS_RESERVE_BRANCH		. ' TEXT,
 			' . tsReserve::TS_RESERVE_COMMIT_HASH	. ' TEXT,
 			' . tsReserve::TS_RESERVE_COMMENT 		. ' TEXT,
@@ -292,7 +292,6 @@ class pdoManager
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ selectOne start');
 
 		$ret_array = null;
-		$stmt = null;
 
 		// 実行
 		if ($stmt = $dbh->query($sql)) {
@@ -301,9 +300,7 @@ class pdoManager
 			while ($row = $stmt->fetch(\PDO::FETCH_BOTH)) {
 				$ret_array = $row;
 			}
-		}
-
-		if (!$stmt) {	
+		} else {	
 			// エラー情報表示
 			throw new \Exception($dbh->errorInfo());
 		}
@@ -315,25 +312,102 @@ class pdoManager
 
 
 	/**
-	 * INSERT、UPDATE、DELETE処理関数
+	 * 引数のバインド指定によるPDOセレクト処理メソッド
 	 *	 
-	 * @param $sql    = SQL文
-	 * @param $params = パラメータ
+	 * 取得結果を配列に格納して返却します。
+	 * 該当データが存在しない場合はnullを返却します。
+	 *
+	 * @param PDO $dbh DB接続情報
+	 * @param PDOStatement $stmt ステートメント
 	 *	 
-	 * @return 画面表示用のステータス情報
+	 * @return array[] $ret_array 取得データ格納配列
+	 *
+	 * @throws Exception PDOによるセレクトエラーが発生した場合
 	 */
-	public function execute ($dbh, $sql, $params) {
+	public function execute_select ($dbh, $stmt) {
+
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ execute_select start');
+
+		$ret_array = null;
+
+		// 実行
+		if ($stmt->execute()) {
+			// 取得したデータを配列に格納して返す
+			while ($row = $stmt->fetch(\PDO::FETCH_BOTH)) {
+				$ret_array[] = $row;
+			}
+		} else {	
+			// エラー情報表示
+			throw new \Exception($dbh->errorInfo());
+		}
+
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ execute_select end');
+
+		return $ret_array;
+	}
+
+	/**
+	 * 引数のバインド指定によるPDOセレクト処理メソッド（1件のみ）
+	 *	 
+	 * 取得結果を配列に格納して返却します。
+	 * 該当データが存在しない場合はnullを返却します。
+	 *
+	 * @param PDO $dbh DB接続情報
+	 * @param PDOStatement $stmt ステートメント
+	 *	 
+	 * @return array[] $ret_array 取得データ格納配列
+	 *
+	 * @throws Exception PDOによるセレクトエラーが発生した場合
+	 * @throws Exception データが2件以上取得された場合
+	 */
+	public function execute_select_one ($dbh, $stmt) {
+
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ execute_select start');
+
+		$ret_array = null;
+
+		$rowcount = 0;
+		// 実行
+		if ($stmt->execute()) {
+			// 取得したデータを配列に格納して返す
+			while ($row = $stmt->fetch(\PDO::FETCH_BOTH)) {
+				$ret_array = $row;
+				$rowcount++;
+			}
+		} else {	
+			// エラー情報表示
+			throw new \Exception($dbh->errorInfo());
+		}
+
+		if ($rowcount > 1) {
+			throw new \Exception('More than 2 items of data were acquired.');
+		}
+
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ execute_select end');
+
+		return $ret_array;
+	}
+
+	/**
+	 * PDO処理実行メソッド
+	 *	 
+	 * 主に、INSERT、UPDATE、DELETE処理に使用されます。
+	 *
+	 * @param PDO $dbh DB接続情報
+	 * @param PDOStatement $stmt ステートメント
+	 *	 
+	 * @return PDOStatement $stmt ステートメント処理結果
+	 *
+	 * @throws Exception PDOによる実行エラーが発生した場合
+	 */
+	public function execute ($dbh, $stmt) {
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ execute start');
 
-		// 前処理
-		$stmt = $dbh->prepare($sql);
-
 		// 実行
-		$stmt->execute($params);
+		$stmt->execute();
 
 		if (!$stmt) {
-			
 			// エラー情報表示
 			throw new \Exception($dbh->errorInfo());
 		}

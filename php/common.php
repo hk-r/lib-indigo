@@ -18,10 +18,13 @@ class common
 	}
 
 	/**
-	 * GMTの現在時刻を取得
-	 *	 
-	 * @param $format = フォーマット形式
-	 * @return GMTの現在日時
+	 * GMTの現在日時取得メソッド
+	 *
+	 * GMTの現在日時を引数で受け取ったフォーマットに変換して返却します
+	 *
+	 * @param  string $format フォーマット形式
+	 * @return string gmdate
+	 *			GMTの現在日時
 	 */
 	public function get_current_datetime_of_gmt($format) {
 
@@ -201,7 +204,7 @@ class common
 	 */
 	public function put_process_log_block($text){
 		
-		$str = "\r\n" . $text . "\r\n";
+		$str = $text . "\r\n";
 
 		return error_log( $str, 3, $this->main->process_log_path );
 	}

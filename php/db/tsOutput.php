@@ -88,7 +88,7 @@ class tsOutput
 				LIMIT " . define::LIMIT_LIST_RECORD;
 
 		// SELECT実行
-		$ret_array = $this->main->pdoMgr()->select($this->main->get_dbh(), $select_sql);
+		$ret_array = $this->main->pdoMgr()->select($this->main->dbh(), $select_sql);
 
 		foreach ((array)$ret_array as $array) {
 			$conv_ret_array[] = $this->convert_ts_output_entity($array);
@@ -122,7 +122,7 @@ class tsOutput
 			WHERE " . self::TS_OUTPUT_ID_SEQ . " = " . $selected_id . ";";
 
 			// SELECT実行
-			$ret_array = $this->main->pdoMgr()->selectOne($this->main->get_dbh(), $select_sql);
+			$ret_array = $this->main->pdoMgr()->selectOne($this->main->dbh(), $select_sql);
 
 			$conv_ret_array = $this->convert_ts_output_entity($ret_array);
 		}
@@ -133,9 +133,14 @@ class tsOutput
 	}
 
 	/**
-	 * 公開処理結果一覧テーブルの登録処理
+	 * 公開処理結果テーブル登録処理メソッド
 	 *
-	 * @return なし
+	 * 公開処理結果情報を1件登録します。
+	 *
+	 * @param  array $dataArray 公開処理結果情報
+	 * @return int   $insert_id 登録発行されたシーケンスID
+	 * 
+	 * @throws Exception パラメタの値が正しく設定されていない場合
 	 */
 	public function insert_ts_output($dataArray) {
 
@@ -161,106 +166,86 @@ class tsOutput
 		. self::TS_OUTPUT_UPDATE_DATETIME . ","
 		. self::TS_OUTPUT_UPDATE_USER_ID
 
-		. ") VALUES (" .
+		. ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
-		 ":" . self::TS_OUTPUT_RESERVE_ID . "," .
-		 ":" . self::TS_OUTPUT_BACKUP_ID . "," .
-		 ":" . self::TS_OUTPUT_RESERVE . "," .
-		 ":" . self::TS_OUTPUT_BRANCH . "," .
-		 ":" . self::TS_OUTPUT_COMMIT_HASH . "," .
-		 ":" . self::TS_OUTPUT_COMMENT . "," .
-		 ":" . self::TS_OUTPUT_PUBLISH_TYPE . "," .
-		 ":" . self::TS_OUTPUT_STATUS . "," .
-		 ":" . self::TS_OUTPUT_SRV_BK_DIFF_FLG . "," .
-		 ":" . self::TS_OUTPUT_START . "," .
-		 ":" . self::TS_OUTPUT_END . "," .
-		 ":" . self::TS_OUTPUT_GEN_DELETE_FLG . "," .
-		 ":" . self::TS_OUTPUT_GEN_DELETE . "," .
-		 ":" . self::TS_OUTPUT_INSERT_DATETIME . "," .
-		 ":" . self::TS_OUTPUT_INSERT_USER_ID . "," .
-		 ":" . self::TS_OUTPUT_UPDATE_DATETIME . "," .
-		 ":" . self::TS_OUTPUT_UPDATE_USER_ID
+		// 前処理
+		$stmt = $this->main->dbh()->prepare($insert_sql);
 
-		. ");";
-
-
-		// 現在時刻
+		// 現在日時
 		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, $now);
-		// パラメータ作成
-		$params = array(
-			":" . self::TS_OUTPUT_RESERVE_ID		=> $dataArray[self::TS_OUTPUT_RESERVE_ID],
-			":" . self::TS_OUTPUT_BACKUP_ID	 		=> $dataArray[self::TS_OUTPUT_BACKUP_ID],
-			":" . self::TS_OUTPUT_RESERVE 			=> $dataArray[self::TS_OUTPUT_RESERVE],
-			":" . self::TS_OUTPUT_BRANCH 			=> $dataArray[self::TS_OUTPUT_BRANCH],
-			":" . self::TS_OUTPUT_COMMIT_HASH 		=> $dataArray[self::TS_OUTPUT_COMMIT_HASH],
-			":" . self::TS_OUTPUT_COMMENT 			=> $dataArray[self::TS_OUTPUT_COMMENT],
-			":" . self::TS_OUTPUT_PUBLISH_TYPE 		=> $dataArray[self::TS_OUTPUT_PUBLISH_TYPE],
-			":" . self::TS_OUTPUT_STATUS 			=> $dataArray[self::TS_OUTPUT_STATUS],
-			":" . self::TS_OUTPUT_SRV_BK_DIFF_FLG 	=> $dataArray[self::TS_OUTPUT_SRV_BK_DIFF_FLG],
-			":" . self::TS_OUTPUT_START 			=> $dataArray[self::TS_OUTPUT_START],
-			":" . self::TS_OUTPUT_END 				=> $dataArray[self::TS_OUTPUT_END],
-			":" . self::TS_OUTPUT_GEN_DELETE_FLG 	=> $dataArray[self::TS_OUTPUT_GEN_DELETE_FLG],
-			":" . self::TS_OUTPUT_GEN_DELETE 		=> $dataArray[self::TS_OUTPUT_GEN_DELETE],
-			":" . self::TS_OUTPUT_INSERT_DATETIME	=> $now,
-			":" . self::TS_OUTPUT_INSERT_USER_ID	=> $dataArray[self::TS_OUTPUT_INSERT_USER_ID],
-			":" . self::TS_OUTPUT_UPDATE_DATETIME	=> null,
-			":" . self::TS_OUTPUT_UPDATE_USER_ID	=> null
-		);
+
+		// バインド引数設定
+		$stmt->bindParam(1, $dataArray[self::TS_OUTPUT_RESERVE_ID], \PDO::PARAM_STR);
+		$stmt->bindParam(2, $dataArray[self::TS_OUTPUT_BACKUP_ID], \PDO::PARAM_STR);
+		$stmt->bindParam(3, $dataArray[self::TS_OUTPUT_RESERVE], \PDO::PARAM_STR);
+		$stmt->bindParam(4, $dataArray[self::TS_OUTPUT_BRANCH], \PDO::PARAM_STR);
+		$stmt->bindParam(5, $dataArray[self::TS_OUTPUT_COMMIT_HASH], \PDO::PARAM_STR);
+		$stmt->bindParam(6, $dataArray[self::TS_OUTPUT_COMMENT], \PDO::PARAM_STR);
+		$stmt->bindParam(7, $dataArray[self::TS_OUTPUT_PUBLISH_TYPE], \PDO::PARAM_STR);
+		$stmt->bindParam(8, $dataArray[self::TS_OUTPUT_STATUS], \PDO::PARAM_STR);
+		$stmt->bindParam(9, $dataArray[self::TS_OUTPUT_SRV_BK_DIFF_FLG], \PDO::PARAM_STR);
+		$stmt->bindParam(10, $dataArray[self::TS_OUTPUT_START], \PDO::PARAM_STR);
+		$stmt->bindParam(11, $dataArray[self::TS_OUTPUT_END], \PDO::PARAM_STR);
+		$stmt->bindParam(12, $dataArray[self::TS_OUTPUT_GEN_DELETE_FLG], \PDO::PARAM_STR);
+		$stmt->bindParam(13, $dataArray[self::TS_OUTPUT_GEN_DELETE], \PDO::PARAM_STR);
+		$stmt->bindParam(14, $now, \PDO::PARAM_STR);
+		$stmt->bindParam(15, $dataArray[self::TS_OUTPUT_INSERT_USER_ID], \PDO::PARAM_STR);
+		$stmt->bindValue(16, null, \PDO::PARAM_STR);
+		$stmt->bindValue(17, null, \PDO::PARAM_STR);
 
 		// INSERT実行
-		$this->main->pdoMgr()->execute($this->main->get_dbh(), $insert_sql, $params);
+		$stmt = $this->main->pdoMgr()->execute($this->main->dbh(), $stmt);
 
 		// 登録したシーケンスIDを取得
-		$insert_id = $this->main->get_dbh()->lastInsertId();
+		$insert_id = $this->main->dbh()->lastInsertId();
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ insert_id：' . $insert_id);
-
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ insert_ts_output end');
 
 		return $insert_id;
 	}
 
 	/**
-	 * 公開処理結果一覧テーブルの更新処理
+	 * 公開処理結果テーブル登録処理メソッド
 	 *
-	 * @return なし
+	 * 引数の公開予約IDを条件に、公開処理結果情報を1件更新します。
+	 *
+	 * @param  int   $output_id 公開処理結果ID
+	 * @param  array $dataArray 公開処理結果情報
+	 * @return null
 	 */
-	public function update_ts_output($id, $dataArray) {
+	public function update_ts_output($output_id, $dataArray) {
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ update_ts_output start');
 
-		if (!$id) {
-			throw new \Exception('更新対象のIDが取得できませんでした。 ');
+		if (!$output_id) {
+			throw new \Exception('更新対象の公開処理結果IDが取得できませんでした。 ');
 		}
 
 		// UPDATE文作成
 		$update_sql = "UPDATE TS_OUTPUT SET " .
-			self::TS_OUTPUT_STATUS 				. "= :" . self::TS_OUTPUT_STATUS . "," .
-			self::TS_OUTPUT_SRV_BK_DIFF_FLG 	. "= :" . self::TS_OUTPUT_SRV_BK_DIFF_FLG . "," .
-			self::TS_OUTPUT_END 				. "= :" . self::TS_OUTPUT_END . "," .
-			self::TS_OUTPUT_UPDATE_DATETIME 	. "= :" . self::TS_OUTPUT_UPDATE_DATETIME . "," .
-			self::TS_OUTPUT_UPDATE_USER_ID 		. "= :" . self::TS_OUTPUT_UPDATE_USER_ID .
-			" WHERE " . self::TS_OUTPUT_ID_SEQ 	. "= :" . self::TS_OUTPUT_ID_SEQ . ";";
+			self::TS_OUTPUT_STATUS 				. " = ?, " .
+			self::TS_OUTPUT_SRV_BK_DIFF_FLG 	. " = ?, " .
+			self::TS_OUTPUT_END 				. " = ?, " .
+			self::TS_OUTPUT_UPDATE_DATETIME 	. " = ?, " .
+			self::TS_OUTPUT_UPDATE_USER_ID 		. " = ? " .
+			" WHERE " . self::TS_OUTPUT_ID_SEQ 	. " = ?;";
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ update_sql');
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, $update_sql);
+		// 前処理
+		$stmt = $this->main->dbh()->prepare($update_sql);
 
-		// 現在時刻
+		// 現在日時
 		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
-
-		// パラメータ作成
-		$params = array(
-			":" . self::TS_OUTPUT_STATUS 			=> $dataArray[self::TS_OUTPUT_STATUS],
-			":" . self::TS_OUTPUT_SRV_BK_DIFF_FLG 	=> $dataArray[self::TS_OUTPUT_SRV_BK_DIFF_FLG],
-			":" . self::TS_OUTPUT_END 				=> $dataArray[self::TS_OUTPUT_END],
-			":" . self::TS_OUTPUT_UPDATE_DATETIME	=> $now,
-			":" . self::TS_OUTPUT_UPDATE_USER_ID	=> $dataArray[self::TS_OUTPUT_UPDATE_USER_ID],
-			":" . self::TS_OUTPUT_ID_SEQ			=> $id
-		);
+		
+		// バインド引数設定
+		$stmt->bindParam(1, $dataArray[self::TS_OUTPUT_STATUS], \PDO::PARAM_STR);
+		$stmt->bindParam(2, $dataArray[self::TS_OUTPUT_SRV_BK_DIFF_FLG], \PDO::PARAM_STR);
+		$stmt->bindParam(3, $dataArray[self::TS_OUTPUT_END], \PDO::PARAM_STR);
+		$stmt->bindParam(4, $now, \PDO::PARAM_STR);
+		$stmt->bindParam(5, $dataArray[self::TS_OUTPUT_UPDATE_USER_ID], \PDO::PARAM_STR);
+		$stmt->bindParam(6, $output_id, \PDO::PARAM_INT);
 
 		// UPDATE実行
-		$this->main->pdoMgr()->execute($this->main->get_dbh(), $update_sql, $params);
+		$stmt = $this->main->pdoMgr()->execute($this->main->dbh(), $stmt);
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ update_ts_output end');
 	}

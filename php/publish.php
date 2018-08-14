@@ -94,10 +94,10 @@ class publish
 
 		// 同期ログ（履歴表示画面のログダイアログに表示）
 		$this->realpath_copylog = $this->main->fs()->normalize_path($this->main->fs()->get_realpath(
-			$realpath_array->realpath_log . $running_dirname . "/")) . 'pub_copy_' . $running_dirname . '.log';
+			$realpath_array['realpath_log'] . $running_dirname . "/")) . 'pub_copy_' . $running_dirname . '.log';
 		// 公開処理実行ログ
 		$this->realpath_tracelog = $this->main->fs()->normalize_path($this->main->fs()->get_realpath(
-			$realpath_array->realpath_log . $running_dirname . "/")) . 'pub_trace_' . $running_dirname . '.log';
+			$realpath_array['realpath_log'] . $running_dirname . "/")) . 'pub_trace_' . $running_dirname . '.log';
 
 		// ログファイルの上位ディレクトリを作成
 		if( !@is_dir( dirname( $this->realpath_copylog ) ) ){
@@ -124,8 +124,8 @@ class publish
 
 			$logstr = "公開種別：" . $publish_type . "\r\n";
 			$logstr .= "公開処理開始日時：" . $start_datetime . "\r\n";
-			$logstr .= "公開日時ディレクトリ名：" . $running_dirname . "\r\n";
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+			$logstr .= "公開日時ディレクトリ名：" . $running_dirname;
+			$this->main->common()->put_process_log_block($logstr);
 			$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
 			try {
@@ -134,8 +134,8 @@ class publish
 				if ($publish_type == define::PUBLISH_TYPE_RESERVE) {
 
 					$logstr = "===============================================" . "\r\n";
-					$logstr .= "公開予約処理実施" . "\r\n";
-					$logstr .= "===============================================" . "\r\n";
+					$logstr .= "[予約公開]公開処理" . "\r\n";
+					$logstr .= "===============================================";
 					$this->main->common()->put_process_log_block($logstr);
 					$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
@@ -144,7 +144,7 @@ class publish
 					$set_start_datetime = $start_datetime;
 
 					/* トランザクションを開始する。オートコミットがオフになる */
-					$this->main->get_dbh()->beginTransaction();
+					$this->main->dbh()->beginTransaction();
 					
 					$logstr = "==========トランザクション開始==========";
 					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
@@ -153,31 +153,28 @@ class publish
 					// 複数件取れてきた場合は、最新データ以外はスキップデータとして公開処理結果テーブルへ登録する
 					foreach ( (array) $reserve_data_list as $data ) {
 
-						$logstr = "-----------------------------------------------" . "\r\n";
-						$logstr .= "公開予約取得データ" . "\r\n";
-						$logstr .= "-----------------------------------------------" . "\r\n";
-						$this->main->common()->put_process_log_block($logstr);
-						$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
-
 						//============================================================
 						// 公開処理結果テーブルの登録処理
 						//============================================================
 						$logstr = "===============================================" . "\r\n";
 						$logstr .= "[予約公開]公開処理結果テーブルの登録処理" . "\r\n";
-						$logstr .= "===============================================" . "\r\n";
+						$logstr .= "===============================================";
+						$this->main->common()->put_process_log_block($logstr);
 
 						if ($cnt != 1) {
-							$logstr .= "-----------------------------------------------" . "\r\n";
+							$logstr = "-----------------------------------------------" . "\r\n";
 							$logstr .= "スキップ処理" . "\r\n";
 							$logstr .= "-----------------------------------------------" . "\r\n";
+							$this->main->common()->put_process_log_block($logstr);
 						}
 
-						$logstr .= "公開予約ID" . $data[tsReserve::RESERVE_ENTITY_ID_SEQ] . "\r\n";
-						$logstr .= "公開予約日時(GMT)：" . $data[tsReserve::RESERVE_ENTITY_RESERVE_GMT] . "\r\n";
-						$logstr .= "ブランチ名：" . $data[tsReserve::RESERVE_ENTITY_BRANCH] . "\r\n";
-						$logstr .= "コミット：" . $data[tsReserve::RESERVE_ENTITY_COMMIT_HASH] . "\r\n";
-						$logstr .= "コメント：" . $data[tsReserve::RESERVE_ENTITY_COMMENT] . "\r\n";
-						$logstr .= "ユーザID：" . $this->main->options->user_id . "\r\n";
+						$logstr = "== 公開予約データ ==" . "\r\n";
+						$logstr .= "公開予約ID" . $data[tsReserve::TS_RESERVE_ID_SEQ] . "\r\n";
+						$logstr .= "公開予約日時(GMT)：" . $data[tsReserve::TS_RESERVE_DATETIME] . "\r\n";
+						$logstr .= "ブランチ名：" . $data[tsReserve::TS_RESERVE_BRANCH] . "\r\n";
+						$logstr .= "コミット：" . $data[tsReserve::TS_RESERVE_COMMIT_HASH] . "\r\n";
+						$logstr .= "コメント：" . $data[tsReserve::TS_RESERVE_COMMENT] . "\r\n";
+						$logstr .= "ユーザID：" . $this->main->options->user_id;
 						$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 						$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
@@ -185,12 +182,12 @@ class publish
 						$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 
 						$dataArray = array(
-							tsOutput::TS_OUTPUT_RESERVE_ID 		=> $data[tsReserve::RESERVE_ENTITY_ID_SEQ],
+							tsOutput::TS_OUTPUT_RESERVE_ID 		=> $data[tsReserve::TS_RESERVE_ID_SEQ],
 							tsOutput::TS_OUTPUT_BACKUP_ID 		=> null,
-							tsOutput::TS_OUTPUT_RESERVE 		=> $data[tsReserve::RESERVE_ENTITY_RESERVE_GMT],
-							tsOutput::TS_OUTPUT_BRANCH 			=> $data[tsReserve::RESERVE_ENTITY_BRANCH],
-							tsOutput::TS_OUTPUT_COMMIT_HASH 	=> $data[tsReserve::RESERVE_ENTITY_COMMIT_HASH],
-							tsOutput::TS_OUTPUT_COMMENT 		=> $data[tsReserve::RESERVE_ENTITY_COMMENT],
+							tsOutput::TS_OUTPUT_RESERVE 		=> $data[tsReserve::TS_RESERVE_DATETIME],
+							tsOutput::TS_OUTPUT_BRANCH 			=> $data[tsReserve::TS_RESERVE_BRANCH],
+							tsOutput::TS_OUTPUT_COMMIT_HASH 	=> $data[tsReserve::TS_RESERVE_COMMIT_HASH],
+							tsOutput::TS_OUTPUT_COMMENT 		=> $data[tsReserve::TS_RESERVE_COMMENT],
 							tsOutput::TS_OUTPUT_PUBLISH_TYPE 	=> define::PUBLISH_TYPE_RESERVE,
 							tsOutput::TS_OUTPUT_STATUS 			=> $status,
 							tsOutput::TS_OUTPUT_SRV_BK_DIFF_FLG => null,
@@ -219,7 +216,7 @@ class publish
 							$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 							$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-							$reserve_dirname = $this->main->common()->format_gmt_datetime($data[tsReserve::RESERVE_ENTITY_RESERVE_GMT], define::DATETIME_FORMAT_SAVE);
+							$reserve_dirname = $this->main->common()->format_gmt_datetime($data[tsReserve::TS_RESERVE_DATETIME], define::DATETIME_FORMAT_SAVE);
 
 							if (!$reserve_dirname) {
 								// エラー処理
@@ -246,13 +243,13 @@ class publish
 						$this->main->common()->put_process_log_block($logstr);
 						$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-						$this->tsReserve->update_ts_reserve_status($data[tsReserve::RESERVE_ENTITY_ID_SEQ], $data[tsReserve::RESERVE_ENTITY_VER_NO]);
+						$this->tsReserve->update_ts_reserve_status($data[tsReserve::TS_RESERVE_ID_SEQ], $data[tsReserve::TS_RESERVE_VER_NO]);
 						
 						$cnt++;
 					}
 
 			 		/* 変更をコミットする */
-					$this->main->get_dbh()->commit();
+					$this->main->dbh()->commit();
 					/* データベース接続はオートコミットモードに戻る */
 
 					$logstr = "==========コミット処理実行==========";
@@ -268,8 +265,8 @@ class publish
 					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 					$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-					$from_realpath = $realpath_array->realpath_waiting . $reserve_dirname . '/';
-					$to_realpath = $realpath_array->realpath_running . $running_dirname . '/';
+					$from_realpath = $realpath_array['realpath_waiting'] . $reserve_dirname . '/';
+					$to_realpath = $realpath_array['realpath_running'] . $running_dirname . '/';
 
 					$this->exec_sync_move($from_realpath, $to_realpath);
 
@@ -398,7 +395,7 @@ class publish
 					}
 
 					/* トランザクションを開始する。オートコミットがオフになる */
-					$this->main->get_dbh()->beginTransaction();
+					$this->main->dbh()->beginTransaction();
 
 					$logstr = "==========トランザクション開始==========";
 					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
@@ -416,7 +413,7 @@ class publish
 
 
 			 		/* 変更をコミットする */
-					$this->main->get_dbh()->commit();
+					$this->main->dbh()->commit();
 
 					$logstr = "==========コミット処理実行==========";
 					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
@@ -437,7 +434,7 @@ class publish
 						$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
 						// Git情報のコピー処理
-						$this->main->gitMgr()->git_file_copy($this->main->options, $realpath_array->realpath_running, $running_dirname);
+						$this->main->gitMgr()->git_file_copy($this->main->options, $realpath_array['realpath_running'], $running_dirname);
 
 					} elseif (($publish_type == define::PUBLISH_TYPE_MANUAL_RESTORE) || 
 							  ($publish_type == define::PUBLISH_TYPE_AUTO_RESTORE)) {
@@ -449,8 +446,8 @@ class publish
 						$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 						$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-						$from_realpath = $realpath_array->realpath_backup . $backup_dirname . '/';
-						$to_realpath = $realpath_array->realpath_running . $running_dirname . '/';
+						$from_realpath = $realpath_array['realpath_backup'] . $backup_dirname . '/';
+						$to_realpath = $realpath_array['realpath_running'] . $running_dirname . '/';
 						
 						$logstr = "backupディレクトリ --> " . $from_realpath . "\r\n";
 						$logstr .= "runningディレクトリ --> " . $to_realpath;
@@ -470,7 +467,7 @@ class publish
 				// $this->main->common()->put_process_log(__METHOD__, __LINE__, $this->realpath_tracelog, $logstr);
 
 			 //    /* 変更をロールバックする */
-			 //    $this->main->get_dbh()->rollBack();
+			 //    $this->main->dbh()->rollBack();
 		 
 		     	throw $e;
 		    }
@@ -481,7 +478,7 @@ class publish
 				try {
 
 					/* トランザクションを開始する。オートコミットがオフになる */
-					$this->main->get_dbh()->beginTransaction();
+					$this->main->dbh()->beginTransaction();
 						
 					$logstr = "==========トランザクション開始==========";
 					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
@@ -513,8 +510,8 @@ class publish
 					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 					$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-					$from_realpath = $realpath_array->realpath_server;
-					$to_realpath = $realpath_array->realpath_backup . $backup_dirname . '/';
+					$from_realpath = $realpath_array['realpath_server'];
+					$to_realpath = $realpath_array['realpath_backup'] . $backup_dirname . '/';
 
 					$logstr = "本番環境ディレクトリ --> " . $from_realpath . "\r\n";
 					$logstr .= "backupディレクトリ --> " . $to_realpath;
@@ -525,7 +522,7 @@ class publish
 					$this->exec_sync_copy($from_realpath, $to_realpath);
 
 			 		// 変更をコミットする
-					$this->main->get_dbh()->commit();
+					$this->main->dbh()->commit();
 					/* データベース接続はオートコミットモードに戻る */
 
 					$logstr = "==========コミット処理実行==========";
@@ -543,7 +540,7 @@ class publish
 					$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
 				    /* 変更をロールバックする */
-				    $this->main->get_dbh()->rollBack();
+				    $this->main->dbh()->rollBack();
 			 
 			     	throw $e;
 			    }
@@ -552,7 +549,7 @@ class publish
 			try {
 			
 				/* トランザクションを開始する。オートコミットがオフになる */
-				$this->main->get_dbh()->beginTransaction();
+				$this->main->dbh()->beginTransaction();
 
 				$logstr = "==========トランザクション開始==========";
 				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
@@ -589,8 +586,8 @@ class publish
 				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 				$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-				$from_realpath = $realpath_array->realpath_running . $running_dirname . '/';
-				$to_realpath = $realpath_array->realpath_server;
+				$from_realpath = $realpath_array['realpath_running'] . $running_dirname . '/';
+				$to_realpath = $realpath_array['realpath_server'];
 
 				$logstr = "runningディレクトリ --> " . $from_realpath . "\r\n";
 				$logstr .= "本番環境ディレクトリ --> " . $to_realpath;
@@ -606,8 +603,8 @@ class publish
 				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 				$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-				$from_realpath = $realpath_array->realpath_running . $running_dirname . '/';
-				$to_realpath = $realpath_array->realpath_released . $running_dirname . '/';
+				$from_realpath = $realpath_array['realpath_running'] . $running_dirname . '/';
+				$to_realpath = $realpath_array['realpath_released'] . $running_dirname . '/';
 
 				$logstr = "runningディレクトリ --> " . $from_realpath . "\r\n";
 				$logstr .= "releasedディレクトリ： --> " . $to_realpath;
@@ -618,7 +615,7 @@ class publish
 				$this->exec_sync_move($from_realpath, $to_realpath);
 
 		 		/* 変更をコミットする */
-				$this->main->get_dbh()->commit();
+				$this->main->dbh()->commit();
 				/* データベース接続はオートコミットモードに戻る */
 
 				$logstr = "==========コミット処理実行==========";
@@ -638,7 +635,7 @@ class publish
 				$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
 		    	/* 変更をロールバックする */
-		    	$this->main->get_dbh()->rollBack();
+		    	$this->main->dbh()->rollBack();
 		 
 		    	throw $e;
 		    }
@@ -681,7 +678,7 @@ class publish
 
 			$logstr = "===============================================" . "\r\n";
 			$logstr .= "公開処理中止" . "\r\n";
-			$logstr .= "===============================================" . "\r\n";
+			$logstr .= "===============================================";
 			$this->main->common()->put_process_log_block($logstr);
 			$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
@@ -877,7 +874,7 @@ class publish
 		$src = '';
 		$src .= 'ProcessID='.getmypid()."\r\n";
 		// $src .= @date( 'Y-m-d H:i:s' , time() )."\r\n";
-		$src .= 'Date='.@gmdate( 'Y-m-d H:i:s' , time() );
+		$src .= 'Date='. $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 		$rtn = $this->main->fs()->save_file( $lockfilepath , $src );
 
 		$logstr = "ロックファイル作成結果：rtn=" . $rtn . "\r\n";

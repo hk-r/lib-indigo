@@ -188,7 +188,7 @@ class historyScreen
 
 
 			// logディレクトリの絶対パスを取得。
-			$realpath_log = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->realpath_array->realpath_log . $dirname . "/"));
+			$realpath_log = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->realpath_array['realpath_log'] . $dirname . "/"));
 		
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ $realpath_log:' . $realpath_log);
 

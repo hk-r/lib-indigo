@@ -88,7 +88,7 @@ class tsBackup
 				LIMIT " . define::LIMIT_LIST_RECORD;
 
 		// SELECT実行
-		$ret_array = $this->main->pdoMgr()->select($this->main->get_dbh(), $select_sql);
+		$ret_array = $this->main->pdoMgr()->select($this->main->dbh(), $select_sql);
 
 		foreach ((array)$ret_array as $array) {
 			$conv_ret_array[] = $this->convert_ts_backup_entity($array);
@@ -123,7 +123,7 @@ class tsBackup
 
 		// SELECT実行
 		// $get_array = array_shift($this->main->pdoMgr()->select($dbh, $select_sql));
-		$ret_array = $this->main->pdoMgr()->selectOne($this->main->get_dbh(), $select_sql);
+		$ret_array = $this->main->pdoMgr()->selectOne($this->main->dbh(), $select_sql);
 
 		// foreach ( (array) $get_array as $data) {
 			// $ret_array = array_shift($data);
@@ -159,7 +159,7 @@ class tsBackup
 		WHERE " . self::TS_BACKUP_OUTPUT_ID . " = " . $output_id . ";";
 
 		// SELECT実行
-		$ret_array = $this->main->pdoMgr()->selectOne($this->main->get_dbh(), $select_sql);
+		$ret_array = $this->main->pdoMgr()->selectOne($this->main->dbh(), $select_sql);
 
 		// foreach ( (array) $get_array as $data) {
 			// $ret_array = array_shift($data);
@@ -223,10 +223,10 @@ class tsBackup
 		);
 	
 		// INSERT実行
-		$this->main->pdoMgr()->execute($this->main->get_dbh(), $insert_sql, $params);
+		$this->main->pdoMgr()->execute($this->main->dbh(), $insert_sql, $params);
 
 		// 登録したシーケンスIDを取得
-		$insert_id = $this->main->get_dbh()->lastInsertId();
+		$insert_id = $this->main->dbh()->lastInsertId();
 		
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ insert_id：' . $insert_id);
 
