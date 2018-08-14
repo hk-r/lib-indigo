@@ -236,18 +236,6 @@ class tsBackup
 		$stmt->bindValue(7, null, \PDO::PARAM_STR);
 		$stmt->bindValue(8, null, \PDO::PARAM_STR);
 
-		// // パラメータ作成
-		// $params = array(
-		// 	":" . self::TS_BACKUP_OUTPUT_ID 			=> $output_id,
-		// 	":" . self::TS_BACKUP_DATETIME 				=> $backup_datetime,
-		// 	":" . self::TS_BACKUP_GEN_DELETE_FLG 		=> define::DELETE_FLG_OFF,
-		// 	":" . self::TS_BACKUP_GEN_DELETE_DATETIME 	=> null, 
-		// 	":" . self::TS_BACKUP_INSERT_DATETIME 		=> $now,
-		// 	":" . self::TS_BACKUP_INSERT_USER_ID 		=> $options->user_id,
-		// 	":" . self::TS_BACKUP_UPDATE_DATETIME 		=> null,
-		// 	":" . self::TS_BACKUP_UPDATE_USER_ID		=> null
-		// );
-	
 		// INSERT実行
 		$this->main->pdoMgr()->execute($this->main->dbh(), $stmt);
 
@@ -272,7 +260,7 @@ class tsBackup
 
 		// ID
 		$conv_array[self::BACKUP_ENTITY_ID_SEQ] = $array[self::BACKUP_ENTITY_ID_SEQ];
-		
+
 		// バックアップ日時（GMT日時）
 		$conv_array[self::BACKUP_ENTITY_DATETIME_GMT] = $array[self::BACKUP_ENTITY_DATETIME];
 		// バックアップ日時（タイムゾーン日時）

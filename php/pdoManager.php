@@ -31,7 +31,13 @@ class pdoManager
 
 	/**
 	 * データベースへ接続する
-	 *	 
+	 * 
+	 * mainオプションのDBタイプによって接続方法が異なります。
+	 * バージョン0.1.0時点ではmysqlの動作確認は行っておりません。
+	 * sqliteについては動作確認済みです。
+	 * 
+	 * @throws Exception sqlite格納用のディレクトリ作成が失敗した場合
+	 * @throws Exception Pdo接続処理が失敗した場合
 	 */
 	public function connect() {
 	
@@ -46,12 +52,7 @@ class pdoManager
 
 		$db_type = $this->main->options->db->db_type;
 
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ db_type');
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, $db_type);
-
 		if ($db_type && $db_type == 'mysql') {
-
-			// $this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ mysql');
 
 			/**
 			 * mysqlの場合
@@ -68,24 +69,18 @@ class pdoManager
 						\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES '. SELF::UTF
 					);
 
-	
 		} else {
-
-			// $this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ sqlite');
 
 			/**
 			 * sqliteの場合 
 			 */
-			// dbディレクトリの絶対パス
+			// sqliteディレクトリの絶対パス
 			$db_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->options->realpath_workdir . self::SQLITE_DB_PATH));
 
-			// $this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ db_real_path：' . $db_real_path);
-
-			// DBディレクトリが存在しない場合は作成
+			// sqliteディレクトリが存在しない場合は作成
 			if ( !$this->main->fs()->mkdir($db_real_path) ) {
-
-					// エラー処理
-					throw new \Exception('Creation of sqlite directory failed. path = ' . $db_real_path);
+				// エラー処理
+				throw new \Exception('Creation of sqlite directory failed. path = ' . $db_real_path);
 			}
 
 			$dsn = "sqlite:" . $db_real_path . self::SQLITE_DB_NAME;
@@ -94,9 +89,9 @@ class pdoManager
 			$db_pass = null;
 
 			$option = array(
-						\PDO::ATTR_PERSISTENT => false, // ←これをtrueにすると、"持続的な接続" になる
-						\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,	// エラー表示の設定
-						\PDO::ATTR_EMULATE_PREPARES => false 			// prepareを利用する
+						\PDO::ATTR_PERSISTENT => false, // trueの場合、"持続的な接続" となる
+						\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,	// エラー設定。PDOExceptionをスローする
+						\PDO::ATTR_EMULATE_PREPARES => false 			// falseの場合、prepareを利用する設定となる
 					);
 		}
 			
@@ -110,9 +105,8 @@ class pdoManager
 	  		);
 
 		} catch (\PDOException $e) {
-	  		echo 'Connection failed: ' . $e->getMessage();
-	  		// // 強制終了
-	  		// die();
+			// エラー情報表示
+			throw new \Exception("Pdo connection failed");
 		}
 			
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ connect end');
@@ -123,32 +117,25 @@ class pdoManager
 
 	/**
 	 * データベースの接続を閉じる
-	 *	 
+	 * 
+	 * @throws Exception Pdo接続クローズ処理が失敗した場合
 	 */
 	public function close() {
 	
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ close start');
-
 		try {
-
 			// データベースの接続を閉じる
 			$this->main->dbh = null;
-
-
 		} catch (\PDOException $e) {
-	  		echo 'Connection failed: ' . $e->getMessage();
-	  		// // 強制終了
-	  		// die();
+			// エラー情報表示
+			throw new \Exception("Pdo connection close failed");
 		}
-		
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ close end');
-
 	}
 
 
 	/**
 	 * CREATE処理関数
-	 *	 
+	 *
+	 * @throws Exception 各テーブルCREATE時にエラーが発生した場合
 	 */
 	public function create_table() {
 
@@ -179,8 +166,6 @@ class pdoManager
 			// エラー情報表示
 			throw new \Exception($this->main->dbh->errorInfo());
 		}
-
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ 公開予約テーブル作成完了');
 
 		//============================================================
 		// 公開処理結果テーブル作成
@@ -214,8 +199,6 @@ class pdoManager
 			throw new \Exception($this->main->dbh->errorInfo());
 		}
 
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ 公開処理結果テーブル作成完了');
-
 		//============================================================
 		// バックアップテーブル作成
 		//============================================================
@@ -239,77 +222,8 @@ class pdoManager
 			throw new \Exception($this->main->dbh->errorInfo());
 		}
 
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ バックアップテーブル作成完了');
-
 		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ create_table end');
-
-		return;
 	}
-
-
-	// /**
-	//  * SELECT処理関数
-	//  *	 
-	//  * @param $sql = SQL文
-	//  *	 
-	//  * @return 取得データ配列
-	//  */
-	// public function select($dbh, $sql) {
-
-	// 	$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ select start');
-
-	// 	$ret_array = null;
-	// 	$stmt = null;
-
-	// 	// 実行
-	// 	if ($stmt = $dbh->query($sql)) {
-	// 		// 取得したデータを配列に格納して返す
-	// 		while ($row = $stmt->fetch(\PDO::FETCH_BOTH)) {
-	// 			$ret_array[] = $row;
-	// 		}
-	// 	}
-
-	// 	if (!$stmt) {	
-	// 		// エラー情報表示
-	// 		throw new \Exception($dbh->errorInfo());
-	// 	}
-		
-	// 	$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ select end');
-
-	// 	return $ret_array;
-	// }
-
-
-	// /**
-	//  * SELECT処理関数
-	//  *	 
-	//  * @param $sql = SQL文
-	//  *	 
-	//  * @return 取得データ配列
-	//  */
-	// public function selectOne($dbh, $sql) {
-
-	// 	$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ selectOne start');
-
-	// 	$ret_array = null;
-
-	// 	// 実行
-	// 	if ($stmt = $dbh->query($sql)) {
-
-	// 		// 取得したデータを配列に格納して返す
-	// 		while ($row = $stmt->fetch(\PDO::FETCH_BOTH)) {
-	// 			$ret_array = $row;
-	// 		}
-	// 	} else {	
-	// 		// エラー情報表示
-	// 		throw new \Exception($dbh->errorInfo());
-	// 	}
-		
-	// 	$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ selectOne end');
-
-	// 	return $ret_array;
-	// }
-
 
 	/**
 	 * 引数のバインド指定によるPDOセレクト処理メソッド
@@ -391,7 +305,7 @@ class pdoManager
 	/**
 	 * PDO処理実行メソッド
 	 *	 
-	 * 主に、INSERT、UPDATE、DELETE処理に使用されます。
+	 * INSERT、UPDATE、DELETE処理に使用しています。
 	 *
 	 * @param PDO $dbh DB接続情報
 	 * @param PDOStatement $stmt ステートメント
