@@ -67,29 +67,36 @@ class tsOutput
 		$this->main = $main;
 	}
 
+
 	/**
-	 * 公開処理結果一覧テーブルからリストを取得する
+	 * 公開処理結果一覧リストの取得メソッド
 	 *
-	 * @param $now = 現在時刻
-	 * @return データリスト
+	 * 公開処理結果テーブルから未削除データをリストで取得します。
+	 * 履歴表示画面表示用に使用しており、フォーマット変換を行い配列を返却します。
+	 * 該当データが存在しない場合はnullを返却します。
+	 * 
+	 * ページング処理が実装されていないため、暫定処理として最大1,000件の取得としている。
+	 *
+	 * @return array[] $conv_ret_array
+	 * 				公開処理結果リスト
 	 */
-	public function get_ts_output_list($now) {
+	public function get_ts_output_list() {
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_ts_output_list start');
 
-		$ret_array = array();
-		$conv_ret_array = array();
-
-		// 公開処理結果テーブルから未世代削除のデータを取得
 		$select_sql = "
 				SELECT * FROM TS_OUTPUT
-				WHERE " . self::TS_OUTPUT_GEN_DELETE_FLG . " = '0' 
-				ORDER BY " . self::TS_OUTPUT_ID_SEQ . " DESC 
-				LIMIT " . define::LIMIT_LIST_RECORD;
+				WHERE " . self::TS_OUTPUT_GEN_DELETE_FLG . " = '0' " .	// 0:未削除
+				"ORDER BY " . self::TS_OUTPUT_ID_SEQ . " DESC "	.		// 処理結果ID 降順
+				"LIMIT " . define::LIMIT_LIST_RECORD;					// 最大1,000件までの取得
+
+		// 前処理
+		$stmt = $this->main->dbh()->prepare($select_sql);
 
 		// SELECT実行
-		$ret_array = $this->main->pdoMgr()->select($this->main->dbh(), $select_sql);
+		$ret_array = $this->main->pdoMgr()->select($this->main->dbh(), $stmt);
 
+		$conv_ret_array = null;
 		foreach ((array)$ret_array as $array) {
 			$conv_ret_array[] = $this->convert_ts_output_entity($array);
 		}
@@ -98,34 +105,44 @@ class tsOutput
 
 		return $conv_ret_array;
 	}
-	
+
+
 	/**
-	 * 公開処理結果テーブルから、選択された処理結果情報を取得する
+	 * 公開処理結果情報取得メソッド
 	 *
-	 * @return 選択行の情報
+	 * 引数の公開処理結果IDを条件に、公開処理結果情報を1件取得します。
+	 * フォーマット変換を行い返却します。
+	 * 該当データが存在しない場合はnullを返却します。
+	 *
+	 * @param  string  $selected_id 公開処理結果ID
+	 * @return array $conv_ret_array 変換後の公開処理結果情報
+	 * 
+	 * @throws Exception パラメタの値が正しく設定されていない場合
 	 */
 	public function get_selected_ts_output($selected_id) {
 
-
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_output start');
 
-		$ret_array = null;
-
-		$conv_ret_array = null;
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '[パラメタ]selected_id：' . $selected_id);
 
 		if (!$selected_id) {
-			throw new \Exception('選択されたIDが取得できませんでした。 ');
-		} else {
-
-			// SELECT文作成
-			$select_sql = "SELECT * from TS_OUTPUT 
-			WHERE " . self::TS_OUTPUT_ID_SEQ . " = " . $selected_id . ";";
-
-			// SELECT実行
-			$ret_array = $this->main->pdoMgr()->selectOne($this->main->dbh(), $select_sql);
-
-			$conv_ret_array = $this->convert_ts_output_entity($ret_array);
+			throw new \Exception('対象の公開処理結果IDが正しく取得できませんでした。');
 		}
+
+		// SELECT文作成
+		$select_sql = "SELECT * from TS_OUTPUT 
+		WHERE " . self::TS_OUTPUT_ID_SEQ  . " = ?;";
+
+		// 前処理
+		$stmt = $this->main->dbh()->prepare($select_sql);
+
+		// バインド引数設定
+		$stmt->bindParam(1, $selected_id, \PDO::PARAM_INT);
+
+		// SELECT実行
+		$ret_array = $this->main->pdoMgr()->selectOne($this->main->dbh(), $stmt);
+
+		$conv_ret_array = $this->convert_ts_output_entity($ret_array);
 		
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_output end');
 
@@ -139,8 +156,6 @@ class tsOutput
 	 *
 	 * @param  array $dataArray 公開処理結果情報
 	 * @return int   $insert_id 登録発行されたシーケンスID
-	 * 
-	 * @throws Exception パラメタの値が正しく設定されていない場合
 	 */
 	public function insert_ts_output($dataArray) {
 
@@ -205,13 +220,15 @@ class tsOutput
 	}
 
 	/**
-	 * 公開処理結果テーブル登録処理メソッド
+	 * 公開処理結果テーブル更新処理メソッド
 	 *
 	 * 引数の公開予約IDを条件に、公開処理結果情報を1件更新します。
 	 *
 	 * @param  int   $output_id 公開処理結果ID
 	 * @param  array $dataArray 公開処理結果情報
 	 * @return null
+	 * 
+	 * @throws Exception パラメタの値が正しく設定されていない場合
 	 */
 	public function update_ts_output($output_id, $dataArray) {
 
@@ -250,57 +267,58 @@ class tsOutput
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ update_ts_output end');
 	}
 
+
 	/**
 	 * 公開処理結果テーブルの情報を変換する
-	 *	 
-	 * @param $path = 作成ディレクトリ名
-	 *	 
-	 * @return ソート後の配列
+	 *
+	 * @param  array $array 公開処理結果テーブル情報
+	 * @return array $conv_array 変換後の公開処理結果テーブル情報
 	 */
 	private function convert_ts_output_entity($array) {
 	
 		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ convert_ts_output_entity start');
 
-		$entity = array();
-
 		// ID
-		$entity[self::OUTPUT_ENTITY_ID_SEQ] = $array[self::TS_OUTPUT_ID_SEQ];
+		$conv_array[self::OUTPUT_ENTITY_ID_SEQ] = $array[self::TS_OUTPUT_ID_SEQ];
 
 		// バックアップID
-		$entity[self::OUTPUT_ENTITY_BACKUP_ID] = $array[self::TS_OUTPUT_BACKUP_ID];
+		$conv_array[self::OUTPUT_ENTITY_BACKUP_ID] = $array[self::TS_OUTPUT_BACKUP_ID];
 
 		// 公開予約日時（タイムゾーン日時）
 		$tz_datetime = $this->main->common()->convert_to_timezone_datetime($array[self::TS_OUTPUT_RESERVE]);
-		$entity[self::OUTPUT_ENTITY_RESERVE] 		 = $tz_datetime;
-		$entity[self::OUTPUT_ENTITY_RESERVE_DISP] = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
+		$conv_array[self::OUTPUT_ENTITY_RESERVE] 		 = $tz_datetime;
+		$conv_array[self::OUTPUT_ENTITY_RESERVE_DISP] = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
+
 		// 処理開始日時（GMT日時）
-		$entity[self::OUTPUT_ENTITY_START_GMT] 	= $array[self::TS_OUTPUT_START];
+		$conv_array[self::OUTPUT_ENTITY_START_GMT] 	= $array[self::TS_OUTPUT_START];
 		// 処理開始日時（タイムゾーン日時）
 		$tz_datetime = $this->main->common()->convert_to_timezone_datetime($array[self::TS_OUTPUT_START]);
-		$entity[self::OUTPUT_ENTITY_START]		   = $tz_datetime;
-		$entity[self::OUTPUT_ENTITY_START_DISP] = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
+		$conv_array[self::OUTPUT_ENTITY_START]		   = $tz_datetime;
+		$conv_array[self::OUTPUT_ENTITY_START_DISP] = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
+
 		// 処理終了日時（タイムゾーン日時）
 		$tz_datetime = $this->main->common()->convert_to_timezone_datetime($array[self::TS_OUTPUT_END]);
-		$entity[self::OUTPUT_ENTITY_END]	     = $tz_datetime;
-		$entity[self::OUTPUT_ENTITY_END_DISP] = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
+		$conv_array[self::OUTPUT_ENTITY_END]	     = $tz_datetime;
+		$conv_array[self::OUTPUT_ENTITY_END_DISP] = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
+
 		// ブランチ名
-		$entity[self::OUTPUT_ENTITY_BRANCH] = $array[self::TS_OUTPUT_BRANCH];
+		$conv_array[self::OUTPUT_ENTITY_BRANCH] = $array[self::TS_OUTPUT_BRANCH];
 		// コミット
-		$entity[self::OUTPUT_ENTITY_COMMIT_HASH] = $array[self::TS_OUTPUT_COMMIT_HASH];
+		$conv_array[self::OUTPUT_ENTITY_COMMIT_HASH] = $array[self::TS_OUTPUT_COMMIT_HASH];
 		// コメント
-		$entity[self::OUTPUT_ENTITY_COMMENT] = $array[self::TS_OUTPUT_COMMENT];
+		$conv_array[self::OUTPUT_ENTITY_COMMENT] = $array[self::TS_OUTPUT_COMMENT];
 		// 状態
-		$entity[self::OUTPUT_ENTITY_STATUS] = $array[self::TS_OUTPUT_STATUS];
+		$conv_array[self::OUTPUT_ENTITY_STATUS] = $array[self::TS_OUTPUT_STATUS];
 		// 状態
-		$entity[self::OUTPUT_ENTITY_STATUS_DISP] = $this->convert_status($array[self::TS_OUTPUT_STATUS]);
+		$conv_array[self::OUTPUT_ENTITY_STATUS_DISP] = $this->convert_status($array[self::TS_OUTPUT_STATUS]);
 		// 公開種別
-		$entity[self::OUTPUT_ENTITY_PUBLISH_TYPE] = $this->main->common()->convert_publish_type($array[self::TS_OUTPUT_PUBLISH_TYPE]);
+		$conv_array[self::OUTPUT_ENTITY_PUBLISH_TYPE] = $this->main->common()->convert_publish_type($array[self::TS_OUTPUT_PUBLISH_TYPE]);
 		// 登録ユーザID
-		$entity[self::OUTPUT_ENTITY_INSERT_USER_ID] = $array[self::TS_OUTPUT_INSERT_USER_ID];
+		$conv_array[self::OUTPUT_ENTITY_INSERT_USER_ID] = $array[self::TS_OUTPUT_INSERT_USER_ID];
 
 		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ convert_ts_output_entity end');
 
-	    return $entity;
+	    return $conv_array;
 	}
 
 

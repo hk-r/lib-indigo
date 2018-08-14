@@ -9,7 +9,6 @@ class tsBackup
 
 	private $main;
 
-	
 	/**
 	 * バックアップテーブルのカラム定義
 	 */
@@ -23,8 +22,6 @@ class tsBackup
 	const TS_BACKUP_UPDATE_DATETIME 	= 'update_datetime';		// 更新日時
 	const TS_BACKUP_UPDATE_USER_ID 		= 'update_user_id';			// 更新ユーザID
 	
-
-
 	/**
 	 * バックアップエンティティのカラム定義
 	 */
@@ -55,20 +52,25 @@ class tsBackup
 		$this->main = $main;
 	}
 
+
 	/**
-	 * バックアップ一覧テーブルからリストを取得する
+	 * バックアップ一覧リストの取得メソッド
 	 *
-	 * @param $now = 現在時刻
-	 * @return データリスト
+	 * バックアップテーブルから未削除データをリストで取得します。
+	 * バックアップ一覧画面表示用に使用しており、フォーマット変換を行い配列を返却します。
+	 * 該当データが存在しない場合はnullを返却します。
+	 *
+	 * 公開処理結果テーブルと公開処理結果IDをキーに外部結合して情報を取得しています。
+	 * 
+	 * ページング処理が実装されていないため、暫定処理として最大1,000件の取得としている。
+	 *
+	 * @return array[] $conv_ret_array
+	 * 				バックアップリスト
 	 */
 	public function get_ts_backup_list() {
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_ts_backup_list start');
 
-		$ret_array = null;
-		$conv_ret_array = null;
-
-		// バックアップテーブル 外部結合 公開処理結果テーブル
 		$select_sql = "
 				SELECT 
 				  TS_BACKUP." . self::TS_BACKUP_ID_SEQ 				. " as " . self::BACKUP_ENTITY_ID_SEQ . ",
@@ -81,15 +83,16 @@ class tsBackup
 				  TS_OUTPUT." . tsOutput::TS_OUTPUT_PUBLISH_TYPE 	. " as " . self::BACKUP_ENTITY_PUBLISH_TYPE . ",
 				  TS_OUTPUT." . tsOutput::TS_OUTPUT_STATUS			. "	as " . self::BACKUP_ENTITY_STATUS .  
 				" FROM TS_BACKUP 
-				LEFT OUTER JOIN TS_OUTPUT
-					ON TS_BACKUP." 	. self::TS_BACKUP_OUTPUT_ID . " = TS_OUTPUT." . tsOutput::TS_OUTPUT_ID_SEQ .
-				" WHERE TS_BACKUP." . self::TS_BACKUP_GEN_DELETE_FLG . " = '0' " .
-				" ORDER BY TS_BACKUP." . self::TS_BACKUP_DATETIME . " DESC 
-				LIMIT " . define::LIMIT_LIST_RECORD;
+				LEFT OUTER JOIN TS_OUTPUT " . // 外部結合：公開処理結果テーブル
+				" 	ON TS_BACKUP." 	. self::TS_BACKUP_OUTPUT_ID . " = TS_OUTPUT." . tsOutput::TS_OUTPUT_ID_SEQ .
+				" WHERE TS_BACKUP." . self::TS_BACKUP_GEN_DELETE_FLG . " = '0' " .	// 0:未削除
+				" ORDER BY TS_BACKUP." . self::TS_BACKUP_DATETIME . " DESC " .		// バックアップ日時 降順
+				" LIMIT " . define::LIMIT_LIST_RECORD;								// 最大1,000件までの取得
 
 		// SELECT実行
 		$ret_array = $this->main->pdoMgr()->select($this->main->dbh(), $select_sql);
-
+		
+		$conv_ret_array = null;
 		foreach ((array)$ret_array as $array) {
 			$conv_ret_array[] = $this->convert_ts_backup_entity($array);
 		}
@@ -101,70 +104,80 @@ class tsBackup
 
 
 	/**
-	 * バックアップテーブルから、選択されたバックアップ情報を取得する
+	 * バックアップ情報取得メソッド
 	 *
-	 * @return 選択行の情報
+	 * 引数のバックアップIDを条件に、バックアップ情報を1件取得します。
+	 * 該当データが存在しない場合はnullを返却します。
+	 *
+	 * @param  string  $selected_id バックアップID
+	 * @return array $ret_array バックアップ情報
+	 * 
+	 * @throws Exception パラメタの値が正しく設定されていない場合
 	 */
 	public function get_selected_ts_backup($selected_id) {
 
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup start');
 
-		$ret_array = null;
-		$conv_ret_array = null;
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '[パラメタ]selected_id：' . $selected_id);
 
 		if (!$selected_id) {
-			throw new \Exception('選択されたIDが取得できませんでした。 ');
+			throw new \Exception('対象のバックアップIDが正しく取得できませんでした。 ');
 		}
 
 		// SELECT文作成
 		$select_sql = "SELECT * from TS_BACKUP 
-		WHERE " . self::TS_BACKUP_ID_SEQ . " = " . $selected_id . ";";
+		WHERE " . self::TS_BACKUP_ID_SEQ . " = ?;";
+
+		// 前処理
+		$stmt = $this->main->dbh()->prepare($select_sql);
+
+		// バインド引数設定
+		$stmt->bindParam(1, $selected_id, \PDO::PARAM_INT);
 
 		// SELECT実行
-		// $get_array = array_shift($this->main->pdoMgr()->select($dbh, $select_sql));
-		$ret_array = $this->main->pdoMgr()->selectOne($this->main->dbh(), $select_sql);
-
-		// foreach ( (array) $get_array as $data) {
-			// $ret_array = array_shift($data);
-			// $conv_ret_array = $this->convert_ts_backup_entity($ret_array);
-		// }
+		$ret_array = $this->main->pdoMgr()->execute_select_one($this->main->dbh(), $stmt);
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup end');
 
 		return $ret_array;
 	}
 
+
 	/**
-	 * バックアップテーブルから公開処理結果IDを条件に情報を取得する
+	 * バックアップ情報取得メソッド
 	 *
-	 * @return 選択行の情報
+	 * 引数の公開処理結果IDに紐づくバックアップ情報を1件取得します。
+	 * 該当データが存在しない場合はnullを返却します。
+	 *
+	 * @param  string  $output_id 公開処理結果ID
+	 * @return array $ret_array バックアップ情報
+	 * 
+	 * @throws Exception パラメタの値が正しく設定されていない場合
 	 */
 	public function get_selected_ts_backup_by_output_id($output_id) {
 
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup_by_output_id start');
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ output_id：' . $output_id);
-
-		$ret_array = null;
-		$conv_ret_array = null;
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　[パラメタ]output_id：' . $output_id);
 
 		if (!$output_id) {
-			throw new \Exception('復元対象の公開処理結果IDが取得できませんでした。 ');
+			throw new \Exception('対象の公開処理結果IDが取得できませんでした。 ');
 		}
 
 		// SELECT文作成
 		$select_sql = "SELECT * from TS_BACKUP 
-		WHERE " . self::TS_BACKUP_OUTPUT_ID . " = " . $output_id . ";";
+		WHERE " . self::TS_BACKUP_OUTPUT_ID . " = ?;";
+
+		// 前処理
+		$stmt = $this->main->dbh()->prepare($select_sql);
+
+		// バインド引数設定
+		$stmt->bindParam(1, $output_id, \PDO::PARAM_INT);
 
 		// SELECT実行
-		$ret_array = $this->main->pdoMgr()->selectOne($this->main->dbh(), $select_sql);
-
-		// foreach ( (array) $get_array as $data) {
-			// $ret_array = array_shift($data);
-			// $conv_ret_array = $this->convert_ts_backup_entity($ret_array);
-		// }
+		$ret_array = $this->main->pdoMgr()->selectOne($this->main->dbh(), $stmt);
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup_by_output_id end');
 
@@ -175,6 +188,17 @@ class tsBackup
 	 * バックアップテーブル登録処理
 	 *
 	 * @return なし
+	 */
+
+	/**
+	 * バックアップテーブル登録処理メソッド
+	 *
+	 * バックアップ情報を1件登録します。
+	 *
+	 * @param  array[] $options mainオプション情報
+	 * @param  string  $backup_datetime バックアップ日時
+	 * @param  int     $output_id 公開処理結果ID
+	 * @return int   $insert_id 登録発行されたシーケンスID
 	 */
 	public function insert_ts_backup($options, $backup_datetime, $output_id) {
 
@@ -191,91 +215,87 @@ class tsBackup
 		. self::TS_BACKUP_UPDATE_DATETIME . ","
 		. self::TS_BACKUP_UPDATE_USER_ID
 
-		. ") VALUES (" .
+		. ") VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
 
-		 ":" . self::TS_BACKUP_OUTPUT_ID . "," .
-		 ":" . self::TS_BACKUP_DATETIME . "," .
-		 ":" . self::TS_BACKUP_GEN_DELETE_FLG . "," .
-		 ":" . self::TS_BACKUP_GEN_DELETE_DATETIME . "," .
-		 ":" . self::TS_BACKUP_INSERT_DATETIME . "," .
-		 ":" . self::TS_BACKUP_INSERT_USER_ID . "," .
-		 ":" . self::TS_BACKUP_UPDATE_DATETIME . "," .
-		 ":" . self::TS_BACKUP_UPDATE_USER_ID
-
-		. ");";
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ insert_sql');
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, $insert_sql);
+		// 前処理
+		$stmt = $this->main->dbh()->prepare($insert_sql);
 
 		// 現在時刻
 		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 		
-		// パラメータ作成
-		$params = array(
-			":" . self::TS_BACKUP_OUTPUT_ID 			=> $output_id,
-			":" . self::TS_BACKUP_DATETIME 				=> $backup_datetime,
-			":" . self::TS_BACKUP_GEN_DELETE_FLG 		=> define::DELETE_FLG_OFF,
-			":" . self::TS_BACKUP_GEN_DELETE_DATETIME 	=> null, 
-			":" . self::TS_BACKUP_INSERT_DATETIME 		=> $now,
-			":" . self::TS_BACKUP_INSERT_USER_ID 		=> $options->user_id,
-			":" . self::TS_BACKUP_UPDATE_DATETIME 		=> null,
-			":" . self::TS_BACKUP_UPDATE_USER_ID		=> null
-		);
+				// バインド引数設定
+		$stmt->bindParam(1, $output_id, \PDO::PARAM_INT);
+		$stmt->bindParam(2, $backup_datetime, \PDO::PARAM_STR);
+		$stmt->bindValue(3, define::DELETE_FLG_OFF, \PDO::PARAM_STR);
+		$stmt->bindValue(4, null, \PDO::PARAM_STR);
+		$stmt->bindParam(5, $now, \PDO::PARAM_STR);
+		$stmt->bindParam(6, $options->user_id, \PDO::PARAM_STR);
+		$stmt->bindValue(7, null, \PDO::PARAM_STR);
+		$stmt->bindValue(8, null, \PDO::PARAM_STR);
+
+		// // パラメータ作成
+		// $params = array(
+		// 	":" . self::TS_BACKUP_OUTPUT_ID 			=> $output_id,
+		// 	":" . self::TS_BACKUP_DATETIME 				=> $backup_datetime,
+		// 	":" . self::TS_BACKUP_GEN_DELETE_FLG 		=> define::DELETE_FLG_OFF,
+		// 	":" . self::TS_BACKUP_GEN_DELETE_DATETIME 	=> null, 
+		// 	":" . self::TS_BACKUP_INSERT_DATETIME 		=> $now,
+		// 	":" . self::TS_BACKUP_INSERT_USER_ID 		=> $options->user_id,
+		// 	":" . self::TS_BACKUP_UPDATE_DATETIME 		=> null,
+		// 	":" . self::TS_BACKUP_UPDATE_USER_ID		=> null
+		// );
 	
 		// INSERT実行
-		$this->main->pdoMgr()->execute($this->main->dbh(), $insert_sql, $params);
+		$this->main->pdoMgr()->execute($this->main->dbh(), $stmt);
 
 		// 登録したシーケンスIDを取得
 		$insert_id = $this->main->dbh()->lastInsertId();
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ insert_id：' . $insert_id);
-
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ insert_ts_backup end');
 
 		return $insert_id;
 	}
 
+
 	/**
-	 * バックアップ一覧テーブルの情報を変換する
-	 *	 
-	 * @param $path = 作成ディレクトリ名
-	 *	 
-	 * @return ソート後の配列
+	 * バックアップテーブルの情報を変換する
+	 *
+	 * @param  array $array バックアップテーブル情報
+	 * @return array $conv_array 変換後のバックアップテーブル情報
 	 */
 	private function convert_ts_backup_entity($array) {
 	
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ convert_ts_backup_entity start');
 
-		$entity = array();
-
 		// ID
-		$entity[self::BACKUP_ENTITY_ID_SEQ] = $array[self::BACKUP_ENTITY_ID_SEQ];
+		$conv_array[self::BACKUP_ENTITY_ID_SEQ] = $array[self::BACKUP_ENTITY_ID_SEQ];
+		
 		// バックアップ日時（GMT日時）
-		$entity[self::BACKUP_ENTITY_DATETIME_GMT] = $array[self::BACKUP_ENTITY_DATETIME];
+		$conv_array[self::BACKUP_ENTITY_DATETIME_GMT] = $array[self::BACKUP_ENTITY_DATETIME];
 		// バックアップ日時（タイムゾーン日時）
 		$tz_datetime = $this->main->common()->convert_to_timezone_datetime($array[self::BACKUP_ENTITY_DATETIME]);
-		$entity[self::BACKUP_ENTITY_DATETIME] = $tz_datetime;
-		$entity[self::BACKUP_ENTITY_DATETIME_DISP] = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
+		$conv_array[self::BACKUP_ENTITY_DATETIME] = $tz_datetime;
+		$conv_array[self::BACKUP_ENTITY_DATETIME_DISP] = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
 
 		// 公開予約日時（タイムゾーン日時）
 		$tz_datetime = $this->main->common()->convert_to_timezone_datetime($array[self::BACKUP_ENTITY_RESERVE]);
-		$entity[self::BACKUP_ENTITY_RESERVE] = $tz_datetime;
-		$entity[self::BACKUP_ENTITY_RESERVE_DISP] = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
+		$conv_array[self::BACKUP_ENTITY_RESERVE] = $tz_datetime;
+		$conv_array[self::BACKUP_ENTITY_RESERVE_DISP] = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
 
 		// ブランチ名
-		$entity[self::BACKUP_ENTITY_BRANCH] = $array[self::BACKUP_ENTITY_BRANCH];
+		$conv_array[self::BACKUP_ENTITY_BRANCH] = $array[self::BACKUP_ENTITY_BRANCH];
 		// コミット
-		$entity[self::BACKUP_ENTITY_COMMIT_HASH] = $array[self::BACKUP_ENTITY_COMMIT_HASH];
+		$conv_array[self::BACKUP_ENTITY_COMMIT_HASH] = $array[self::BACKUP_ENTITY_COMMIT_HASH];
 		// コメント
-		$entity[self::BACKUP_ENTITY_COMMENT] = $array[self::BACKUP_ENTITY_COMMENT];
+		$conv_array[self::BACKUP_ENTITY_COMMENT] = $array[self::BACKUP_ENTITY_COMMENT];
 		// 公開種別
-		$entity[self::BACKUP_ENTITY_PUBLISH_TYPE] = $this->main->common()->convert_publish_type($array[self::BACKUP_ENTITY_PUBLISH_TYPE]);	
+		$conv_array[self::BACKUP_ENTITY_PUBLISH_TYPE] = $this->main->common()->convert_publish_type($array[self::BACKUP_ENTITY_PUBLISH_TYPE]);	
 		// 登録ユーザ
-		$entity[self::BACKUP_ENTITY_INSERT_USER_ID] = $array[self::BACKUP_ENTITY_INSERT_USER_ID];
+		$conv_array[self::BACKUP_ENTITY_INSERT_USER_ID] = $array[self::BACKUP_ENTITY_INSERT_USER_ID];
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ convert_ts_backup_entity end');
 
-	    return $entity;
+	    return $conv_array;
 	}
 
 

@@ -38,7 +38,7 @@ class historyScreen
 		$ret = "";
 
 		// 公開処理結果一覧を取得
-		$output_list = $this->tsOutput->get_ts_output_list(null);
+		$output_list = $this->tsOutput->get_ts_output_list();
 
 		$ret .= '<div style="overflow:hidden">'
 			. '<form id="form_table" method="post">'

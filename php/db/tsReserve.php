@@ -57,8 +57,8 @@ class tsReserve
 	/**
 	 * 公開予約一覧リストの取得メソッド
 	 *
-	 * 公開予約一覧テーブルから未処理、未削除データをリストで取得します。
-	 * 初期画面表示用に使用しており、フォーマット変換を行い配列を返却します。
+	 * 公開予約テーブルから未処理、未削除データをリストで取得します。
+	 * 初期表示画面表示用に使用しており、フォーマット変換を行い配列を返却します。
 	 * 該当データが存在しない場合はnullを返却します。
 	 *
 	 * @return array[] $conv_ret_array
@@ -131,11 +131,11 @@ class tsReserve
 	 * 公開予約情報取得メソッド
 	 *
 	 * 引数の公開予約IDを条件に、公開予約情報を1件取得します。
-	 * 初期画面表示用に使用しており、フォーマット変換を行い返却します。
+	 * フォーマット変換を行い返却します。
 	 * 該当データが存在しない場合はnullを返却します。
 	 *
 	 * @param  string  $selected_id 公開予約ID
-	 * @return array $ret_array 公開予約情報
+	 * @return array $conv_ret_array 変換後の公開予約情報
 	 * 
 	 * @throws Exception パラメタの値が正しく設定されていない場合
 	 */
@@ -349,7 +349,6 @@ class tsReserve
 	 * @return null
 	 * 
 	 * @throws Exception パラメタの値が正しく設定されていない場合
-	 * @throws Exception バージョンNOを確認し、すでに他ユーザにて情報が更新されている場合
 	 */
 	public function delete_reserve_table($options, $selected_id) {
 
@@ -357,19 +356,6 @@ class tsReserve
 
 		if (!$selected_id) {
 			throw new \Exception('更新対象の公開予約IDが取得できませんでした。 ');
-		}
-
-		// 他ユーザで更新されていないか確認
-		$selected_ret = $this->get_selected_ts_reserve($selected_id);
-
-		$logstr = "[排他確認]データ取得時のバージョンNO：" . $options->_POST->ver_no . "\r\n";
-		$logstr .= "[排他確認]現時点のバージョンNO：" . $selected_ret[self::RESERVE_ENTITY_VER_NO];
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-
-		if ($selected_ret &&
-			$selected_ret[self::RESERVE_ENTITY_VER_NO] != $options->_POST->ver_no) {
-
-			throw new \Exception('ユーザID [' . $selected_ret[self::RESERVE_ENTITY_UPDATE_USER_ID] . '] にて公開予約情報が更新されております。');
 		}
 
 		// UPDATE文作成
@@ -401,7 +387,7 @@ class tsReserve
 	 * 公開予約テーブルの情報を変換する
 	 *
 	 * @param  array $array 公開予約テーブル情報
-	 * @return array $$conv_array 変換後の公開予約テーブル情報
+	 * @return array $conv_array 変換後の公開予約テーブル情報
 	 */
 	private function convert_ts_reserve_entity($array) {
 	
