@@ -90,7 +90,7 @@ class tsBackup
 				" LIMIT " . define::LIMIT_LIST_RECORD;								// 最大1,000件までの取得
 
 		// SELECT実行
-		$ret_array = $this->main->pdoMgr()->select($this->main->dbh(), $select_sql);
+		$ret_array = $this->main->pdoMgr()->execute_select($this->main->dbh(), $select_sql);
 		
 		$conv_ret_array = null;
 		foreach ((array)$ret_array as $array) {
@@ -177,7 +177,7 @@ class tsBackup
 		$stmt->bindParam(1, $output_id, \PDO::PARAM_INT);
 
 		// SELECT実行
-		$ret_array = $this->main->pdoMgr()->selectOne($this->main->dbh(), $stmt);
+		$ret_array = $this->main->pdoMgr()->execute_select_one($this->main->dbh(), $stmt);
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup_by_output_id end');
 

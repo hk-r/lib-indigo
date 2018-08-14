@@ -247,68 +247,68 @@ class pdoManager
 	}
 
 
-	/**
-	 * SELECT処理関数
-	 *	 
-	 * @param $sql = SQL文
-	 *	 
-	 * @return 取得データ配列
-	 */
-	public function select($dbh, $sql) {
+	// /**
+	//  * SELECT処理関数
+	//  *	 
+	//  * @param $sql = SQL文
+	//  *	 
+	//  * @return 取得データ配列
+	//  */
+	// public function select($dbh, $sql) {
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ select start');
+	// 	$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ select start');
 
-		$ret_array = null;
-		$stmt = null;
+	// 	$ret_array = null;
+	// 	$stmt = null;
 
-		// 実行
-		if ($stmt = $dbh->query($sql)) {
-			// 取得したデータを配列に格納して返す
-			while ($row = $stmt->fetch(\PDO::FETCH_BOTH)) {
-				$ret_array[] = $row;
-			}
-		}
+	// 	// 実行
+	// 	if ($stmt = $dbh->query($sql)) {
+	// 		// 取得したデータを配列に格納して返す
+	// 		while ($row = $stmt->fetch(\PDO::FETCH_BOTH)) {
+	// 			$ret_array[] = $row;
+	// 		}
+	// 	}
 
-		if (!$stmt) {	
-			// エラー情報表示
-			throw new \Exception($dbh->errorInfo());
-		}
+	// 	if (!$stmt) {	
+	// 		// エラー情報表示
+	// 		throw new \Exception($dbh->errorInfo());
+	// 	}
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ select end');
+	// 	$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ select end');
 
-		return $ret_array;
-	}
+	// 	return $ret_array;
+	// }
 
 
-	/**
-	 * SELECT処理関数
-	 *	 
-	 * @param $sql = SQL文
-	 *	 
-	 * @return 取得データ配列
-	 */
-	public function selectOne($dbh, $sql) {
+	// /**
+	//  * SELECT処理関数
+	//  *	 
+	//  * @param $sql = SQL文
+	//  *	 
+	//  * @return 取得データ配列
+	//  */
+	// public function selectOne($dbh, $sql) {
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ selectOne start');
+	// 	$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ selectOne start');
 
-		$ret_array = null;
+	// 	$ret_array = null;
 
-		// 実行
-		if ($stmt = $dbh->query($sql)) {
+	// 	// 実行
+	// 	if ($stmt = $dbh->query($sql)) {
 
-			// 取得したデータを配列に格納して返す
-			while ($row = $stmt->fetch(\PDO::FETCH_BOTH)) {
-				$ret_array = $row;
-			}
-		} else {	
-			// エラー情報表示
-			throw new \Exception($dbh->errorInfo());
-		}
+	// 		// 取得したデータを配列に格納して返す
+	// 		while ($row = $stmt->fetch(\PDO::FETCH_BOTH)) {
+	// 			$ret_array = $row;
+	// 		}
+	// 	} else {	
+	// 		// エラー情報表示
+	// 		throw new \Exception($dbh->errorInfo());
+	// 	}
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ selectOne end');
+	// 	$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ selectOne end');
 
-		return $ret_array;
-	}
+	// 	return $ret_array;
+	// }
 
 
 	/**

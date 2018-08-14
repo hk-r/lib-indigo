@@ -94,7 +94,7 @@ class tsOutput
 		$stmt = $this->main->dbh()->prepare($select_sql);
 
 		// SELECT実行
-		$ret_array = $this->main->pdoMgr()->select($this->main->dbh(), $stmt);
+		$ret_array = $this->main->pdoMgr()->execute($this->main->dbh(), $stmt);
 
 		$conv_ret_array = null;
 		foreach ((array)$ret_array as $array) {
@@ -140,7 +140,7 @@ class tsOutput
 		$stmt->bindParam(1, $selected_id, \PDO::PARAM_INT);
 
 		// SELECT実行
-		$ret_array = $this->main->pdoMgr()->selectOne($this->main->dbh(), $stmt);
+		$ret_array = $this->main->pdoMgr()->execute_select_one($this->main->dbh(), $stmt);
 
 		$conv_ret_array = $this->convert_ts_output_entity($ret_array);
 		
