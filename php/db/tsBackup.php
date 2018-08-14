@@ -89,8 +89,11 @@ class tsBackup
 				" ORDER BY TS_BACKUP." . self::TS_BACKUP_DATETIME . " DESC " .		// バックアップ日時 降順
 				" LIMIT " . define::LIMIT_LIST_RECORD;								// 最大1,000件までの取得
 
+		// 前処理
+		$stmt = $this->main->dbh()->prepare($select_sql);
+
 		// SELECT実行
-		$ret_array = $this->main->pdoMgr()->execute_select($this->main->dbh(), $select_sql);
+		$ret_array = $this->main->pdoMgr()->execute_select($this->main->dbh(), $stmt);
 		
 		$conv_ret_array = null;
 		foreach ((array)$ret_array as $array) {
