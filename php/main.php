@@ -209,7 +209,7 @@ class main
 		// 作業ディレクトリ作成
 		//============================================================
 		$current_dir = realpath('.');
-		if (chdir($this->options->realpath_workdir)) {
+		if (chdir($this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir)))) {
 
 			// logファイルディレクトリが存在しない場合は作成
 			$this->fs()->mkdir($this->realpath_array['realpath_log']);
