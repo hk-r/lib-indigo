@@ -744,13 +744,10 @@ class publish
 		$command = 'rsync --checksum -rhvz --delete ' .
 					$exclude_command .
 					$from_realpath . ' ' . $to_realpath . ' ' .
-				   '--log-file=' . $this->realpath_copylog . ' ' .
-				   '--log-file=' . $this->realpath_tracelog;
+				   '--log-file=' . $this->realpath_tracelog . ' ' .
+				   '--log-file=' . $this->realpath_copylog;
 
 		$ret = $this->main->common()->command_execute($command, true);
-
-		// 同期の処理結果表示
-		// file_put_contents($this->realpath_tracelog, $ret['output'], FILE_APPEND);
 	}
 
 	/**
