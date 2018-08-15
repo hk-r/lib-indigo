@@ -716,7 +716,6 @@ class publish
 	 *
 	 * [使用オプション]
 	 *		-r 再帰的にコピー（指定ディレクトリ配下をすべて対象とする）
-	 *		-t 	タイムスタンプを維持して転送する
 	 *		-h ファイルサイズのbytesをKやMで出力
 	 *		-v 処理の経過を表示
 	 *		-z 転送中のデータを圧縮する
@@ -742,7 +741,7 @@ class publish
 		}
 
 		// --log-fileにて、コマンド実行時の出力内容を、履歴一覧画面のダイアログ表示用に出力しておく
-		$command = 'rsync --checksum -rhtvz --delete ' .
+		$command = 'rsync --checksum -rhvz --delete ' .
 					$exclude_command .
 					$from_realpath . ' ' . $to_realpath . ' ' .
 				   '--log-file=' . $this->realpath_copylog . ' ' .
