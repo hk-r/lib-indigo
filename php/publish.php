@@ -824,14 +824,18 @@ class publish
 		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
 		// TODO:空のディレクトリを再帰的に削除する（エラーとなる）
-		// $this->main->fs()->rmdir_r($from_realpath);
+		$this->main->fs()->rmdir_r($from_realpath);
 
 		// 空のディレクトリを再帰的に削除する
-		$command = 'find ' .  $from_realpath . ' -type d -empty -delete';
+		// $command = 'find ' .  $from_realpath . ' -type d -empty -delete';
 
-		$ret = $this->main->common()->command_execute($command, true);
+		// $command = 'rsync -rhtvz ' .
+		// 			$from_realpath . ' ' . $to_realpath . ' ' .
+		// 		   '--log-file=' . $this->realpath_tracelog;
+
+		// $ret = $this->main->common()->command_execute($command, true);
 // var_dump($ret);
-		$this->main->common()->put_publish_log(__METHOD__, __LINE__, implode(" " , $ret['output']), $this->realpath_tracelog);
+		// $this->main->common()->put_publish_log(__METHOD__, __LINE__, implode(" " , $ret['output']), $this->realpath_tracelog);
 
 	}
 
