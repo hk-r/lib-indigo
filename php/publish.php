@@ -26,7 +26,7 @@ class publish
 
 	/** ログ絶対パス（本番同期処理用） */
 	private $realpath_copylog;
-	
+
 	/** ログ絶対パス（公開処理全体用） */
 	private $realpath_tracelog;
 
@@ -713,6 +713,7 @@ class publish
 	 * rsyncコマンドにて公開処理を実施する
 	 *
 	 * runningディレクトリパスの最後にはスラッシュは付けない（スラッシュを付けると日付ディレクトリも含めて同期してしまう）
+	 * log出力するファイルは、履歴一覧画面のログダイアログ表示にて使用するため、この処理のみ異なるファイルに出力する。
 	 *
 	 * [使用オプション]
 	 *		-r 再帰的にコピー（指定ディレクトリ配下をすべて対象とする）
@@ -740,14 +741,12 @@ class publish
 		 	$exclude_command .= "--exclude='" . $value . "' ";
 		}
 
-		// --log-fileにて、コマンド実行時の出力内容を、履歴一覧画面のダイアログ表示用に出力しておく
 		$command = 'rsync --checksum -rhvz --delete ' .
 					$exclude_command .
 					$from_realpath . ' ' . $to_realpath . ' ' .
-				   '--log-file=' . $this->realpath_tracelog . ' ' .
 				   '--log-file=' . $this->realpath_copylog;
 
-		$ret = $this->main->common()->command_execute($command, true);
+		$this->main->common()->command_execute($command, true);
 	}
 
 	/**
@@ -761,10 +760,8 @@ class publish
 	 *		-z 転送中のデータを圧縮する
 	 *		--log-file ログ出力
 	 *
-	 * @param  string $from_realpath 	同期元の絶対パス
-	 * @param  string $to_realpath		同期先の絶対パス
-	 *
-	 * @return array $ret_array バックアップ情報
+	 * @param  string $from_realpath 	コピー元の絶対パス
+	 * @param  string $to_realpath		コピー先の絶対パス
 	 */
 	public function exec_sync_copy($from_realpath, $to_realpath) {
 
@@ -772,32 +769,32 @@ class publish
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-		$command = 'rsync -rhtvz' . ' ' . $from_realpath . ' ' . $to_realpath . ' ' .
+		$command = 'rsync -rhtvz' . ' ' .
+					$from_realpath . ' ' . $to_realpath . ' ' .
 				   '--log-file=' . $this->realpath_tracelog;
 		
-		// $logstr = "コマンド --> " . $command;
-		// $this->main->common()->put_process_log_block($logstr);
-
-		$ret = $this->main->common()->command_execute($command, true);
-
-		if ($ret['return'] !== 0 ) {
-			// 戻り値が0以外の場合
-					
-			$logstr = "**コマンド実行エラー**" . "\r\n";
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-			$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
-
-			throw new \Exception('Command error.' . $command);
-		}
-
-		$logstr = "**コマンド実行成功**";
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
+		$this->main->common()->command_execute($command, true);
 
 	}
 
 	/**
 	 * rsyncコマンド実行（ディレクトリ移動用）
+	 */
+
+	/**
+	 * rsyncコマンドにてディレクトリの移動を実施する
+	 *
+	 * [使用オプション]
+	 *		-r 再帰的にコピー（指定ディレクトリ配下をすべて対象とする）
+	 *		-h ファイルサイズのbytesをKやMで出力
+	 *		-t 	タイムスタンプを維持して転送する
+	 *		-v 処理の経過を表示
+	 *		-z 転送中のデータを圧縮する
+	 *		--remove-source-files 転送に成功したファイルは転送元から削除する (ディレクトリは残る)
+	 *		--log-file ログ出力
+	 *
+	 * @param  string $from_realpath 	移動元の絶対パス
+	 * @param  string $to_realpath		移動先の絶対パス
 	 */
 	public function exec_sync_move($from_realpath, $to_realpath) {
 
@@ -805,52 +802,24 @@ class publish
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-		$command = 'rsync -rtvzP --remove-source-files ' . $from_realpath . ' ' . $to_realpath . ' ' .
+		$command = 'rsync -rhtvz --remove-source-files ' .
+					$from_realpath . ' ' . $to_realpath . ' ' .
 				   '--log-file=' . $this->realpath_tracelog;
 
-		$ret = $this->main->common()->command_execute($command, true);
+		$this->main->common()->command_execute($command, true);
 
-		if ($ret['return'] !== 0 ) {
-			// 戻り値が0以外の場合
 
-			$logstr = "**移動コマンド実行エラー**" . "\r\n";
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-			$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
-
-			throw new \Exception('Command error.' . $command);
-		}
-
-		$logstr = "**移動コマンド実行成功**";
+		$logstr = "==========移動元の空ディレクトリ削除実行==========" . "\r\n";
+		$logstr = "削除ディレクトリ：" . $from_realpath;
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
+		// 空のディレクトリを削除する
+		$this->main->fs()->rmdir($from_realpath);
 
-		$logstr = "==========rsyncコマンドによる移動元の空ディレクトリ削除==========";
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
+		// $command = 'find ' .  $from_realpath . ' -type d -empty -delete' ;
 
-
-		$logstr .= "移動元ディレクトリ --> " . $from_realpath;
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
-
-		$command = 'find ' .  $from_realpath . ' -type d -empty -delete' ;
-
-		$ret = $this->main->common()->command_execute($command, true);
-
-		if ($ret['return'] !== 0 ) {
-			// 戻り値が0以外の場合
-
-			$logstr = "**削除コマンド実行エラー**" . "\r\n";
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-			$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
-
-			throw new \Exception('Command error.' . $command);
-		}
-
-		$logstr = "**削除コマンド実行成功**";
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
+		$this->main->common()->command_execute($command, true);
 	}
 
 
