@@ -8,18 +8,25 @@ use indigo\db\tsBackup as tsBackup;
 
 class publish
 {
+
+	/** indigo\main のインスタンス */
 	private $main;
 
-	private $tsReserve, $tsOutput, $tsBackup;
+	/** indigo\db\tsReserve のインスタンス */
+	private $tsReserve;
 
-	/** ロックファイルの格納パス */
+	/** indigo\db\tsOutput のインスタンス */
+	private $tsOutput;
+
+	/** indigo\db\tsBackup のインスタンス */
+	private $tsBackup;
+
+	/** 公開ロックファイルの格納パス */
 	private $path_lockfile;
-
-	/** パス設定 */
-	private $path_lockdir;
 
 	/** ログ絶対パス（本番同期処理用） */
 	private $realpath_copylog;
+	
 	/** ログ絶対パス（公開処理全体用） */
 	private $realpath_tracelog;
 
@@ -35,8 +42,8 @@ class publish
 		$this->tsOutput = new tsOutput($this->main);
 		$this->tsBackup = new tsBackup($this->main);
 		
-		$this->path_lockdir = $main->fs()->get_realpath( $this->main->options->realpath_workdir . 'applock/' );
-		$this->path_lockfile = $this->path_lockdir .'applock.txt';
+		$path_lockdir = $main->fs()->get_realpath( $this->main->options->realpath_workdir . 'applock/' );
+		$this->path_lockfile = $path_lockdir .'applock.txt';
 	}
 
 
@@ -67,7 +74,7 @@ class publish
 			
 			if (!$reserve_data_list) {
 
-				$logstr = 'Cron Publish data does not exist.' . "\r\n";
+				$logstr = 'Cron Publish data does not exist.';
 				$result['message'] = $logstr;
 
 				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
@@ -133,11 +140,11 @@ class publish
 				// 予約公開の場合
 				if ($publish_type == define::PUBLISH_TYPE_RESERVE) {
 
-					$logstr = "===============================================" . "\r\n";
-					$logstr .= "[予約公開]公開処理" . "\r\n";
-					$logstr .= "===============================================";
-					$this->main->common()->put_process_log_block($logstr);
-					$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
+					// $logstr = "===============================================" . "\r\n";
+					// $logstr .= "[予約公開]公開処理" . "\r\n";
+					// $logstr .= "===============================================";
+					// $this->main->common()->put_process_log_block($logstr);
+					// $this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
 					$cnt = 1;
 					$status = define::PUBLISH_STATUS_RUNNING;
@@ -150,16 +157,8 @@ class publish
 					$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 					$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-					// 複数件取れてきた場合は、最新データ以外はスキップデータとして公開処理結果テーブルへ登録する
+					// 複数件取れてきた場合、最新（先頭）データ以降はスキップデータとして公開処理結果テーブルへ登録する
 					foreach ( (array) $reserve_data_list as $data ) {
-
-						//============================================================
-						// 公開処理結果テーブルの登録処理
-						//============================================================
-						$logstr = "===============================================" . "\r\n";
-						$logstr .= "[予約公開]公開処理結果テーブルの登録処理" . "\r\n";
-						$logstr .= "===============================================";
-						$this->main->common()->put_process_log_block($logstr);
 
 						if ($cnt != 1) {
 							$logstr = "-----------------------------------------------" . "\r\n";
@@ -168,7 +167,7 @@ class publish
 							$this->main->common()->put_process_log_block($logstr);
 						}
 
-						$logstr = "== 公開予約データ ==" . "\r\n";
+						$logstr = "== 公開予約データ" . $cnt . "件目 ==" . "\r\n";
 						$logstr .= "公開予約ID" . $data[tsReserve::TS_RESERVE_ID_SEQ] . "\r\n";
 						$logstr .= "公開予約日時(GMT)：" . $data[tsReserve::TS_RESERVE_DATETIME] . "\r\n";
 						$logstr .= "ブランチ名：" . $data[tsReserve::TS_RESERVE_BRANCH] . "\r\n";
@@ -200,6 +199,11 @@ class publish
 							tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
 							tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> null
 						);
+
+						$logstr = "-----------------------------------------------" . "\r\n";
+						$logstr .= "[予約公開]公開処理結果テーブルの登録処理" . "\r\n";
+						$logstr .= "-----------------------------------------------";
+						$this->main->common()->put_process_log_block($logstr);
 
 						// 公開処理結果テーブルの登録（インサートしたシーケンスIDをリターン値で取得）
 						$insert_id = $this->tsOutput->insert_ts_output($dataArray);
@@ -708,25 +712,49 @@ class publish
 	/**
 	 * rsyncコマンド実行（公開処理用）
 	 */
-	public function exec_sync($ignore, $from_realpath, $to_realpath) {
 
-		// ※runningディレクトリパスの後ろにはスラッシュは付けない（スラッシュを付けると日付ディレクトリも含めて同期してしまう）
-			
-		// 同期除外コマンドの作成
+
+	/**
+	 * rsyncコマンドにて公開処理を実施する
+	 *
+	 * runningディレクトリパスの最後にはスラッシュは付けない（スラッシュを付けると日付ディレクトリも含めて同期してしまう）
+	 *
+	 * [使用オプション]
+	 *		-r 再帰的にコピー（指定ディレクトリ配下をすべて対象とする）
+	 *		-h ファイルサイズのbytesをKやMで出力
+	 *		-v 処理の経過を表示
+	 *		-z 転送中のデータを圧縮する
+	 *		--checksum ファイルの中身に差分があるファイルを対象とする
+	 *		--delete   転送元に存在しないファイルは削除
+	 *		--exclude  同期から除外する対象を指定
+	 *		--log-file ログ出力
+	 *
+	 * @param  array  $ignore 			同期除外ファイル、ディレクトリ名
+	 * @param  string $from_realpath 	同期元の絶対パス
+	 * @param  string $to_realpath		同期先の絶対パス
+	 * @return array $ret_array バックアップ情報
+	 * 
+	 * @throws Exception コマンド実行が異常終了した場合
+	 */
+	public function exec_sync($ignore, $from_realpath, $to_realpath) {
+	
+		// 除外コマンドの作成
 		$exclude_command = '';
 		foreach ($ignore as $key => $value) {
 		 	$exclude_command .= "--exclude='" . $value . "' ";
 		}
 
-		$command = 'rsync --checksum -rvzP --delete ' . $exclude_command . $from_realpath . ' ' . $to_realpath . ' ' .
+		$command = 'rsync --checksum -rhvz --delete ' .
+					$exclude_command .
+					$from_realpath . ' ' . $to_realpath . ' ' .
 				   '--log-file=' . $this->realpath_copylog;
 
 		$ret = $this->main->common()->command_execute($command, true);
 
 		if ($ret['return'] !== 0 ) {
-			// 戻り値が0以外の場合
+			// 異常終了の場合
 
-			$logstr = "**コマンド実行エラー**" . "\r\n";
+			$logstr = "**コマンド実行エラー**";
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 			$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 

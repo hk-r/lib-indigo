@@ -29,23 +29,27 @@ class common
 	public function get_current_datetime_of_gmt($format) {
 
 		return gmdate($format, time());
-		
 	}
 
 	/**
 	 * コマンド実行処理
 	 *	 
-	 * @param $command = コマンド文字列
-	 * @param $captureStderr = 標準出力とエラー出力を出力するか
+	 * @param string $command 		実行コマンド文字列
+	 * @param string $captureStderr true:標準出力とエラー出力を両方受け取る、false：標準出力のみ受け取る
 	 *	 
-	 * @return ソート後の配列
+	 * @return array 
+	 * 			['output'] コマンド実行時の出力情報
+	 * 			['return'] 実行結果（0:正常終了、0以外:異常終了）
 	 */
 	public function command_execute($command, $captureStderr) {
 	
-		$this->put_process_log(__METHOD__, __LINE__, "command_execute start");
+		$ret = array(
+					'output' => array(),
+					'return' => 0
+			  	  );
+
+		$this->put_process_log(__METHOD__, __LINE__, "■ command_execute start");
 		$this->put_process_log(__METHOD__, __LINE__, "command --> " . $command);
-	    $output = array();
-	    $return = 0;
 
 	    // 標準出力とエラー出力を両方とも出力する
 	    if ($captureStderr === true) {
@@ -53,17 +57,44 @@ class common
 	    }
 
 	    exec($command, $output, $return);
+	    // exec('export LANG=ja_JP.UTF-8;' . $command, $output, $return);
 
-		$this->put_process_log(__METHOD__, __LINE__, "command_execute end");
+		if ($return !== 0 ) {
+			// 異常終了の場合
 
-	    return array('output' => $output, 'return' => $return);
+			$logstr = "**コマンド実行エラー**";
+			// $logstr = implode("\r\n" , $output_str);
+			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+			var_dump($output);
+			foreach ( $output as $value ) {
+				// 「*」の付いてるブランチを現在のブランチと判定
+				echo $value;
+			}
+
+			echo implode(" " , $output);
+			$message = 'Command error. ' . "\r\n" .
+					   '<command>' . "\r\n" .
+					   $command . "\r\n" .
+					   '<message>' . "\r\n" .
+					   implode(" " , $output);
+
+
+			throw new \Exception($message);
+		}
+
+		$ret['output'] = $output;
+		$ret['return'] = $return;
+
+		$this->put_process_log(__METHOD__, __LINE__, "■ command_execute end");
+
+	    return $ret;
 	}
 
 
 	/**
-	 * 日付のフォーマット変換（※設定タイムゾーン用）
+	 * 日付のフォーマット変換（※パラメタ設定タイムゾーン用）
 	 *	 
-	 * @param $datetime = 日時
+	 * @param string $datetime = 日時
 	 * @param $format = フォーマット形式
 	 *	 
 	 * @return 変換後の日付

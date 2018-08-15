@@ -284,8 +284,12 @@ class main
 
 	/**
 	 * 実行する
-	 * @return string
-	 *  		画面表示用のHTML
+	 *
+	 * ボタンイベントのname値を検知し、別クラスへ記載されている処理を呼び出す。
+	 * 各処理でエラーがキャッチされた場合は、$resultへ結果が格納されており、アラートメッセージの表示、エラーログへの書き込みを行う。
+	 * 例外がスローされてきた場合は、こちらでキャッチし、エラーログへの書き込みを行う。
+	 *
+	 * @return string HTMLソースコード
 	 */
 	public function run() {
 		
@@ -627,7 +631,12 @@ class main
 
 	/**
 	 * クーロン実行する
-	 * 
+	 *
+	 * サーバにて登録されたクーロン処理から呼び出されるメソッド。
+	 * 処理結果は$resultへ格納されており、エラーが発生した場合はエラーログへの書き込みを行う。
+	 * 例外がスローされてきた場合は、こちらでキャッチし、エラーログへの書き込みを行う。
+	 *
+	 * @return string HTMLソースコード
 	 */
     public function cron_run(){
 	
@@ -645,16 +654,13 @@ class main
 			$logstr .= "===============================================";
 			$this->common()->put_process_log_block($logstr);
 
-			//============================================================
-			// 公開処理実施
-			//============================================================
 			$result = $this->publish->exec_publish(define::PUBLISH_TYPE_RESERVE, null);
 	
 			if ( !$result['status'] ) {
-				// 処理失敗の場合、復元処理
+				// 予約公開処理失敗の場合
 
 				$logstr = "** 予約公開処理エラー終了 **" . "\r\n";
-				$logstr .= $result['message'] . "\r\n";
+				$logstr .= $result['message'];
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 				$logstr = "==========自動復元処理の呼び出し==========";
@@ -663,10 +669,10 @@ class main
 				$result = $this->publish->exec_publish(define::PUBLISH_TYPE_AUTO_RESTORE, $result['output_id']);
 
 				if ( !$result['status'] ) {
-					// 処理失敗の場合
+					// 自動復元処理失敗の場合
 
-					$logstr = "** 復元処理エラー終了 **" . "\r\n";
-					$logstr .= $result['message'] . "\r\n";
+					$logstr = "** 自動復元処理エラー終了 **" . "\r\n";
+					$logstr .= $result['message'];
 					$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 				}
 			}
@@ -713,12 +719,10 @@ class main
 		// データベース接続を閉じる
 		$this->pdoMgr->close();
 
-		$logstr = "\r\n";
+		$logstr = '□ $result->message: ' . $result['message'] . "\r\n";;
 		$logstr .= "===============================================" . "\r\n";
 		$logstr .= "予約公開処理終了" . "\r\n";
-		$logstr .= "===============================================" . "\r\n";
-		$logstr .= "日時：" . $this->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT) . "\r\n";
-		$logstr .= $result['message'];
+		$logstr .= "===============================================";
 		$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		$this->common()->put_process_log(__METHOD__, __LINE__, '■ [cron] run end');
