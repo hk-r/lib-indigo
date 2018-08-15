@@ -710,17 +710,13 @@ class publish
 	}
 
 	/**
-	 * rsyncコマンド実行（公開処理用）
-	 */
-
-
-	/**
 	 * rsyncコマンドにて公開処理を実施する
 	 *
 	 * runningディレクトリパスの最後にはスラッシュは付けない（スラッシュを付けると日付ディレクトリも含めて同期してしまう）
 	 *
 	 * [使用オプション]
 	 *		-r 再帰的にコピー（指定ディレクトリ配下をすべて対象とする）
+	 *		-t 	タイムスタンプを維持して転送する
 	 *		-h ファイルサイズのbytesをKやMで出力
 	 *		-v 処理の経過を表示
 	 *		-z 転送中のデータを圧縮する
@@ -732,41 +728,47 @@ class publish
 	 * @param  array  $ignore 			同期除外ファイル、ディレクトリ名
 	 * @param  string $from_realpath 	同期元の絶対パス
 	 * @param  string $to_realpath		同期先の絶対パス
-	 * @return array $ret_array バックアップ情報
-	 * 
-	 * @throws Exception コマンド実行が異常終了した場合
 	 */
 	public function exec_sync($ignore, $from_realpath, $to_realpath) {
-	
+
+		$logstr = "==========rsyncコマンドによるディレクトリの同期実行==========";
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
+
 		// 除外コマンドの作成
 		$exclude_command = '';
 		foreach ($ignore as $key => $value) {
 		 	$exclude_command .= "--exclude='" . $value . "' ";
 		}
 
-		$command = 'rsync --checksum -rhvz --delete ' .
+		// --log-fileにて、コマンド実行時の出力内容を、履歴一覧画面のダイアログ表示用に出力しておく
+		$command = 'rsync --checksum -rhtvz --delete ' .
 					$exclude_command .
 					$from_realpath . ' ' . $to_realpath . ' ' .
-				   '--log-file=' . $this->realpath_copylog;
+				   '--log-file=' . $this->realpath_copylog . ' ' .
+				   '--log-file=' . $this->realpath_tracelog;
 
 		$ret = $this->main->common()->command_execute($command, true);
 
-		if ($ret['return'] !== 0 ) {
-			// 異常終了の場合
-
-			$logstr = "**コマンド実行エラー**";
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-			$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
-
-			throw new \Exception('Command error.' . $command);
-		}
-
-		// rsyncコマンド実行ログ配列を、履歴一覧画面のダイアログ表示用にファイル保持しておく
-		file_put_contents($this->realpath_tracelog, $ret['output'], FILE_APPEND);
+		// 同期の処理結果表示
+		// file_put_contents($this->realpath_tracelog, $ret['output'], FILE_APPEND);
 	}
 
 	/**
-	 * rsyncコマンド実行（ディレクトリコピー用）
+	 * rsyncコマンドにてディレクトリのコピーを実施する
+	 *
+	 * [使用オプション]
+	 *		-r 再帰的にコピー（指定ディレクトリ配下をすべて対象とする）
+	 *		-h ファイルサイズのbytesをKやMで出力
+	 *		-t 	タイムスタンプを維持して転送する
+	 *		-v 処理の経過を表示
+	 *		-z 転送中のデータを圧縮する
+	 *		--log-file ログ出力
+	 *
+	 * @param  string $from_realpath 	同期元の絶対パス
+	 * @param  string $to_realpath		同期先の絶対パス
+	 *
+	 * @return array $ret_array バックアップ情報
 	 */
 	public function exec_sync_copy($from_realpath, $to_realpath) {
 
@@ -774,7 +776,7 @@ class publish
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-		$command = 'rsync -rtvzP' . ' ' . $from_realpath . ' ' . $to_realpath . ' ' .
+		$command = 'rsync -rhtvz' . ' ' . $from_realpath . ' ' . $to_realpath . ' ' .
 				   '--log-file=' . $this->realpath_tracelog;
 		
 		// $logstr = "コマンド --> " . $command;

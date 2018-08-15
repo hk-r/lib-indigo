@@ -40,6 +40,8 @@ class common
 	 * @return array 
 	 * 			['output'] コマンド実行時の出力情報
 	 * 			['return'] 実行結果（0:正常終了、0以外:異常終了）
+	 * 
+	 * @throws Exception コマンド実行が異常終了した場合
 	 */
 	public function command_execute($command, $captureStderr) {
 	
@@ -57,29 +59,18 @@ class common
 	    }
 
 	    exec($command, $output, $return);
-	    // exec('export LANG=ja_JP.UTF-8;' . $command, $output, $return);
 
 		if ($return !== 0 ) {
 			// 異常終了の場合
 
-			$logstr = "**コマンド実行エラー**";
-			// $logstr = implode("\r\n" , $output_str);
+			$logstr = "** コマンド実行エラー **";
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-			var_dump($output);
-			foreach ( $output as $value ) {
-				// 「*」の付いてるブランチを現在のブランチと判定
-				echo $value;
-			}
 
-			echo implode(" " , $output);
-			$message = 'Command error. ' . "\r\n" .
-					   '<command>' . "\r\n" .
-					   $command . "\r\n" .
-					   '<message>' . "\r\n" .
-					   implode(" " , $output);
+			$msg = 'Command error. ' . "\r\n" .
+					   '<command>' . "\r\n" . $command . "\r\n" .
+					   '<message>' . "\r\n" . implode(" " , $output);
 
-
-			throw new \Exception($message);
+			throw new \Exception($msg);
 		}
 
 		$ret['output'] = $output;
