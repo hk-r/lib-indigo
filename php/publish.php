@@ -827,8 +827,9 @@ class publish
 		// $this->main->fs()->rmdir_r($from_realpath);
 
 		// 空のディレクトリを再帰的に削除する
-		$command = 'find ' .  $from_realpath . ' -type d -empty -delete' . ' ' .
-				   '--log-file=' . $this->realpath_tracelog;
+		$ret = $command = 'find ' .  $from_realpath . ' -type d -empty -delete';
+
+		$this->main->common()->put_publish_log(__METHOD__, __LINE__, implode(" " , $ret['output']), $this->realpath_tracelog);
 
 		$this->main->common()->command_execute($command, true);
 	}
