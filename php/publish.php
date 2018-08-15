@@ -814,8 +814,8 @@ class publish
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-		// 空のディレクトリを削除する
-		$this->main->fs()->rmdir($from_realpath);
+		// 空のディレクトリを再帰的に削除する
+		$this->main->fs()->rmdir_r($from_realpath);
 
 		// $command = 'find ' .  $from_realpath . ' -type d -empty -delete' ;
 
