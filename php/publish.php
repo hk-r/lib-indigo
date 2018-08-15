@@ -828,7 +828,7 @@ class publish
 
 		// 空のディレクトリを再帰的に削除する
 		$ret = $command = 'find ' .  $from_realpath . ' -type d -empty -delete';
-
+		var_dump($ret);
 		$this->main->common()->put_publish_log(__METHOD__, __LINE__, implode(" " , $ret['output']), $this->realpath_tracelog);
 
 		$this->main->common()->command_execute($command, true);
