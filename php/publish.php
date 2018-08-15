@@ -810,12 +810,12 @@ class publish
 
 
 		$logstr = "==========移動元の空ディレクトリ削除実行==========" . "\r\n";
-		$logstr = "削除ディレクトリ：" . $from_realpath;
+		$logstr .= "削除ディレクトリ：" . $from_realpath;
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
 		// 空のディレクトリを再帰的に削除する
-		$this->main->fs()->rmdir_r($from_realpath);
+		// $this->main->fs()->rmdir_r($from_realpath);
 
 		// $command = 'find ' .  $from_realpath . ' -type d -empty -delete' ;
 
