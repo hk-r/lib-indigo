@@ -793,6 +793,15 @@ class publish
 	 *		--remove-source-files 転送に成功したファイルは転送元から削除する (ディレクトリは残る)
 	 *		--log-file ログ出力
 	 *
+	 * [使用オプション]
+	 *		-find 指定パスを探す
+	 *		-type d ディレクトリを検索
+	 *		-empty ディレクトリ内が空かどうか調べる
+	 *		-delete 削除する
+	 *		-z 転送中のデータを圧縮する
+	 *		--remove-source-files 転送に成功したファイルは転送元から削除する (ディレクトリは残る)
+	 *		--log-file ログ出力
+	 *
 	 * @param  string $from_realpath 	移動元の絶対パス
 	 * @param  string $to_realpath		移動先の絶対パス
 	 */
@@ -814,10 +823,12 @@ class publish
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-		// 空のディレクトリを再帰的に削除する
+		// TODO:空のディレクトリを再帰的に削除する（エラーとなる）
 		// $this->main->fs()->rmdir_r($from_realpath);
 
-		// $command = 'find ' .  $from_realpath . ' -type d -empty -delete' ;
+		// 空のディレクトリを再帰的に削除する
+		$command = 'find ' .  $from_realpath . ' -type d -empty -delete' . ' ' .
+				   '--log-file=' . $this->realpath_tracelog;
 
 		$this->main->common()->command_execute($command, true);
 	}
