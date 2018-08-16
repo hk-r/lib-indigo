@@ -444,15 +444,15 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		//============================================================
 		$options = $this->options;
 
-		$branch_name = 'release/2018-04-01';
+		$branch_name = 'release/2017-03-31';
 
 		// 画面入力項目の設定
 		$options['_POST'] = array('immediate_confirm' => 1,	
 								'branch_select_value' => $branch_name,	
 								'reserve_date' => null,
 								'reserve_time' => null,	
-								'commit_hash' => 'f9fd330',	
-								'comment' => 'phpUnitテスト001',	
+								'commit_hash' => '998e1bf',	
+								'comment' => 'phpUnitテスト_即時公開',	
 								'ver_no' => null,	
 								'selected_id' => null
 							);
