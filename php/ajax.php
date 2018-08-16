@@ -14,7 +14,8 @@ class ajax
 
     /**
      * コンストラクタ
-     * @param $options = オプション
+     *
+     * @param array $options パラメタ情報
      */
     public function __construct($options) {
 
@@ -35,6 +36,11 @@ class ajax
 
     /**
      * Gitブランチのコミットハッシュ値を取得
+     *
+     * @return json json_encode($ret) コミットハッシュ値(json変換)
+     * 
+     * @throws Exception ブランチ名、作業ディレクトリ名パラメタがGETから取得できなかった場合
+     * @throws Exception masterブランチディレクトリへの移動に失敗した場合
      */
     public function get_commit_hash() {
 

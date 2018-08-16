@@ -45,7 +45,7 @@ class tsBackup
 	/**
 	 * Constructor
 	 *
-	 * @param object $px Picklesオブジェクト
+	 * @param object $main mainオブジェクト
 	 */
 	public function __construct ($main){
 
@@ -198,7 +198,7 @@ class tsBackup
 	 *
 	 * バックアップ情報を1件登録します。
 	 *
-	 * @param  array[] $options mainオプション情報
+	 * @param  array   $options mainクラスのオプション情報
 	 * @param  string  $backup_datetime バックアップ日時
 	 * @param  int     $output_id 公開処理結果ID
 	 * @return int   $insert_id 登録発行されたシーケンスID

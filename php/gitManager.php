@@ -13,7 +13,8 @@ class gitManager
 
 	/**
 	 * コンストラクタ
-	 * @param $options = オプション
+	 *
+	 * @param object $main mainオブジェクト
 	 */
 	public function __construct($main) {
 
@@ -27,9 +28,12 @@ class gitManager
 	}
 
 	/**
-	 * ブランチリストを取得
-	 *	 
-	 * @return 指定リポジトリ内のブランチリストを返す
+	 * 指定リポジトリ内のブランチリストを返却する
+	 *	
+	 * @param  array   $options mainクラスのオプション情報
+	 * @return array[] $ret_array ブランチリスト
+	 * 
+	 * @throws Exception masterブランチディレクトリへの移動に失敗した場合
 	 */
 	public function get_branch_list($options) {
 
@@ -53,7 +57,6 @@ class gitManager
 			$command = 'git branch -r';
 			$ret = $this->main->common()->command_execute($command, false);
 
-
 			foreach ((array)$ret['output'] as $key => $value) {
 				if( strpos($value, '/HEAD') !== false ){
 					continue;
@@ -70,7 +73,6 @@ class gitManager
 			// ディレクトリ移動に失敗
 
 			chdir($current_dir);
-
 			throw new \Exception('Move to master directory failed.');
 		}
 
@@ -81,9 +83,16 @@ class gitManager
 	}
 
 	/**
-	 * 公開ソースディレクトリを作成し、Gitファイルのコピー
+	 * 公開ソースディレクトリを作成し、Gitファイルをコピーする
 	 *
-	 * @return なし
+	 * @param  array  $options 	mainクラスのオプション情報
+	 * @param  string $path 	コピー先親ディレクトリパス
+	 * @param  string $dirname  コピー先ディレクトリ名
+	 * 
+	 * @throws Exception 既に同名ディレクトリが存在した場合
+	 * @throws Exception ディレクトリの作成に失敗した場合
+	 * @throws Exception 作成したディレクトリへの移動に失敗した場合
+	 * @throws Exception コマンド実行が異常終了した場合
 	 */
 	public function git_file_copy($options, $path, $dirname) {
 
@@ -117,18 +126,7 @@ class gitManager
 			// git init
 			//============================================================
 			$command = 'git init';
-			$ret = $this->main->common()->command_execute($command, false);
-			if ($ret['return'] !== 0 ) {
-				// 戻り値が0以外の場合
-				$logstr = "**コマンド実行エラー**" . "\r\n";
-				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-				
-				chdir($current_dir);
-				throw new \Exception('Git init command error.');
-			}
-			$logstr = "**コマンド実行成功**";
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-
+			$this->main->common()->command_execute($command, false);
 
 			//============================================================
 			// git urlのセット
@@ -137,50 +135,20 @@ class gitManager
 			
 			// initしたリポジトリに名前を付ける
 			$command = 'git remote add ' . define::GIT_REMOTE_NAME .  ' ' . $url;
-			$ret = $this->main->common()->command_execute($command, false);
-			if ($ret['return'] !== 0 ) {
-				// 戻り値が0以外の場合
-				$logstr = "**コマンド実行エラー**" . "\r\n";
-				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-				
-				chdir($current_dir);
-				throw new \Exception('Git pull command error. url:' . $url);
-			}
-			$logstr = "**コマンド実行成功**";
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-
+			$this->main->common()->command_execute($command, false);
+			
 			//============================================================
 			// git fetch（リモートリポジトリの指定ブランチの情報をローカルブランチへ反映）
 			//============================================================
 			$command = 'git fetch ' . define::GIT_REMOTE_NAME .  ' ' . $branch_name;
-			$ret = $this->main->common()->command_execute($command, false);
-			if ($ret['return'] !== 0 ) {
-				// 戻り値が0以外の場合
-				$logstr = "**コマンド実行エラー**" . "\r\n";
-				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-				
-				chdir($current_dir);
-				throw new \Exception('Git pull command error. branch_name:' . $branch_name);
-			}
-			$logstr = "**コマンド実行成功**";
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-
+			$this->main->common()->command_execute($command, false);
+			
 			//============================================================
 			// git pull（リモート取得ブランチを任意のローカルブランチにマージするコマンド）
 			//============================================================
 			$command = 'git pull ' . define::GIT_REMOTE_NAME .  ' ' . $branch_name;
-			$ret = $this->main->common()->command_execute($command, false);
-			if ($ret['return'] !== 0 ) {
-				// 戻り値が0以外の場合
-				$logstr = "**コマンド実行エラー**" . "\r\n";
-				$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-				
-				chdir($current_dir);
-				throw new \Exception('Git pull command error. branch_name:' . $branch_name);
-			}
-			$logstr = "**コマンド実行成功**";
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-
+			$this->main->common()->command_execute($command, false);
+			
 		} else {
 			throw new \Exception('Git file copy failed. Move directory not found. ' . $dir_real_path);
 		}
@@ -193,7 +161,11 @@ class gitManager
 	/**
 	 * 公開ソースディレクトリをGitファイルごと削除
 	 *
-	 * @return なし
+	 * @param  string $path 	親ディレクトリパス
+	 * @param  string $dirname	ディレクトリ名
+	 * 
+	 * @throws Exception 削除対象のディレクトリが見つからない場合
+	 * @throws Exception 削除に失敗した場合
 	 */
 	public function file_delete($path, $dirname) {
 		
@@ -221,6 +193,11 @@ class gitManager
 
 	/**
 	 * Gitのmaster情報を取得
+	 *
+	 * @param  array  $options 	mainクラスのオプション情報
+	 * 
+	 * @throws Exception デプロイ先ディレクトリが見つからない場合
+	 * @throws Exception デプロイ先ディレクトリへの移動に失敗した場合
 	 */
 	public function get_git_master($options) {
 

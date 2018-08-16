@@ -10,7 +10,7 @@ class common
 	/**
 	 * Constructor
 	 *
-	 * @param object $mainオブジェクト
+	 * @param object $main mainオブジェクト
 	 */
 	public function __construct ($main){
 
@@ -23,8 +23,8 @@ class common
 	 * GMTの現在日時を引数で受け取ったフォーマットに変換して返却します
 	 *
 	 * @param  string $format フォーマット形式
-	 * @return string gmdate
-	 *			GMTの現在日時
+	 *
+	 * @return string gmdate  GMTの現在日時
 	 */
 	public function get_current_datetime_of_gmt($format) {
 
@@ -38,8 +38,8 @@ class common
 	 * @param string $captureStderr true:標準出力とエラー出力を両方受け取る、false：標準出力のみ受け取る
 	 *	 
 	 * @return array 
-	 * 			['output'] コマンド実行時の出力情報
-	 * 			['return'] 実行結果（0:正常終了、0以外:異常終了）
+	 * 			string ['output'] コマンド実行時の出力情報
+	 * 			int    ['return'] 実行結果（0:正常終了、0以外:異常終了）
 	 * 
 	 * @throws Exception コマンド実行が異常終了した場合
 	 */
@@ -85,10 +85,10 @@ class common
 	/**
 	 * 日付のフォーマット変換（※パラメタ設定タイムゾーン用）
 	 *	 
-	 * @param string $datetime = 日時
-	 * @param $format = フォーマット形式
+	 * @param string $datetime 日時
+	 * @param string $format   フォーマット形式
 	 *	 
-	 * @return 変換後の日付
+	 * @return string $ret 変換後の日時
 	 */
 	public function format_datetime($datetime, $format) {
 	
@@ -104,10 +104,10 @@ class common
 	/**
 	 * 引数日時のフォーマット変換（※GMT用）
 	 *	 
-	 * @param $datetime = 日時
-	 * @param $format = フォーマット形式
+	 * @param string $datetime 日時
+	 * @param string $format   フォーマット形式
 	 *	 
-	 * @return 変換後の日付
+	 * @return string $ret 変換後の日時
 	 */
 	public function format_gmt_datetime($datetime, $format) {
 	
@@ -126,9 +126,9 @@ class common
 	/**
 	 * 引数日時を引数タイムゾーンの日時へ変換する（画面表示時の変換用）
 	 *	 
-	 * @param $datetime = 日時
+	 * @param string $datetime 日時
 	 *	 
-	 * @return 変換後の日時
+	 * @return string $ret 変換後の日時
 	 */
 	public function convert_to_timezone_datetime($datetime) {
 	
@@ -148,9 +148,9 @@ class common
 	/**
 	 * 公開種別を画面表示用に変換し返却する
 	 *	 
-	 * @param $publish_type = 公開種別のコード値
+	 * @param string $publish_type 公開種別のコード値
 	 *	 
-	 * @return 画面表示用のステータス情報
+	 * @return string $ret コード変換後の公開種別
 	 */
 	public function convert_publish_type($publish_type) {
 
@@ -180,11 +180,11 @@ class common
 	/**
 	 * 通常ログを出力する。
 	 *
-	 * @param $method = クラス名::メソッド名
-	 * @param $line = 行数
-	 * @param $text = 出力文字列
+	 * @param string $method クラス名::メソッド名
+	 * @param string $line   行数
+	 * @param string $text   出力文字列
 	 *
-	 * @return 通常ログ出力
+	 * @return bool 成功時に `true`、失敗時に `false` を返します。
 	 */
 	public function put_process_log($method, $line, $text){
 		
@@ -203,9 +203,9 @@ class common
 	/**
 	 * エラーログを出力する。
 	 *
-	 * @param $text = 出力文字列
+	 * @param string $text 出力文字列
 	 *
-	 * @return エラーログ出力
+	 * @return bool 成功時に `true`、失敗時に `false` を返します。
 	 */
 	public function put_error_log($text){
 		
@@ -220,9 +220,9 @@ class common
 	/**
 	 * 区切り用のログを出力する。（日時などの詳細を出力しない）
 	 *
-	 * @param $text = 出力文字列
+	 * @param string $text 出力文字列
 	 *
-	 * @return 区切り用のログ出力
+	 * @return bool 成功時に `true`、失敗時に `false` を返します。
 	 */
 	public function put_process_log_block($text){
 		
@@ -234,12 +234,12 @@ class common
 	/**
 	 * 公開確認用のログを出力する。
 	 *
-	 * @param $method = クラス名::メソッド名
-	 * @param $line = 行数
-	 * @param $text = 出力文字列
-	 * @param $path = 出力先のパス
+	 * @param string $method クラス名::メソッド名
+	 * @param string $line 行数
+	 * @param string $text 出力文字列
+	 * @param string $path 出力先のパス
 	 *
-	 * @return 公開確認用ログ出力
+	 * @return bool 成功時に `true`、失敗時に `false` を返します。
 	 */
 	public function put_publish_log($method, $line, $text, $path){
 		
@@ -253,5 +253,54 @@ class common
 			   $text . "\r\n";
 
 		return error_log( $str, 3, $path );
+	}
+
+	/**
+	 * ステータスを画面表示用に変換し返却する
+	 *	 
+	 * @param string $status ステータスのコード値
+	 *	 
+	 * @return string $ret コード変換後のステータス
+	 */
+	public function convert_status($status) {
+
+		$ret = '';
+
+		if ($status == define::PUBLISH_STATUS_RUNNING) {
+			$ret =  '★(処理中)';
+		} else if ($status == define::PUBLISH_STATUS_SUCCESS) {
+			$ret =  '〇(成功)';
+		} else if ($status == define::PUBLISH_STATUS_ALERT) {
+			$ret =  '△(警告あり)';
+		} else if ($status == define::PUBLISH_STATUS_FAILED) {
+			$ret =  '×(失敗)';
+		} else if ($status == define::PUBLISH_STATUS_SKIP) {
+			$ret =  '-(スキップ)';
+		}
+
+		return $ret;
+	}
+
+
+	/**
+	 * 予約ディレクトリを命名し返却する
+	 *	 
+	 * @param string $status ステータスのコード値
+	 *	 
+	 * @return string $ret コード変換後のステータス
+	 */
+	public function get_reserve_dirname($datetime) {
+
+		$ret = '';
+
+		$conv_reserve_datetime = $this->main->common()->format_gmt_datetime($datetime, define::DATETIME_FORMAT_SAVE);
+
+		if (!$conv_reserve_datetime) {
+			throw new \Exception('Dirname create failed.');
+		} else {
+			$ret = $conv_reserve_datetime . define::DIR_NAME_RESERVE;
+		}
+
+		return $ret;
 	}
 }

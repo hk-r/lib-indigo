@@ -58,7 +58,8 @@ class initScreen
 
 	/**
 	 * コンストラクタ
-	 * @param $options = オプション
+	 *
+	 * @param object $main mainオブジェクト
 	 */
 	public function __construct($main) {
 
@@ -76,41 +77,16 @@ class initScreen
 	/**
 	 * 初期表示画面のHTML作成
 	 *	 
-	 * @return 初期表示の出力内容
+	 * @return string $ret HTMLソースコード
 	 */
 	public function do_disp_init_screen() {
 		
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_disp_init_screen start');
 
-		$ret = "";
-
 		// 公開予約一覧を取得
 		$data_list = $this->tsReserve->get_ts_reserve_list();
 
-		// // お知らせリストの取得
-		// $alert_list = $this->get_csv_alert_list();
-
-		// if (count($alert_list) != 0) {
-		// 	// お知らせリストの表示
-		// 	$ret .= '<form name="formA" method="post">'
-		// 		. '<div class="alert_box">'
-		// 		. '<p class="alert_title">お知らせ</p>';
-		// 	// データリスト
-		// 	foreach ($alert_list as $data) {
-				
-		// 		$ret .= '<p class="alert_content" style="vertical-align: middle;">'
-		// 			. '<span style="padding-right: 5px;"><img src="'. $this->img_error_icon . '"/></span>'
-		// 			. '<a onClick="document.formA.submit();return false;" >'
-		// 			. $data[TS_RESERVE_COLUMN_RESERVE] . '　' . $data['content']
-		// 			. '</a></p>';
-		// 	}
-
-		// 	$ret .=  '<input type="hidden" name="history" value="履歴">'
-		// 		. '</div>'
-		// 		. '</form>';
-		// }
-
-		$ret .= '<div class="scr_content">'
+		$ret = '<div class="scr_content">'
 			. '<form id="form_table" method="post">'
 			. '<div class="button_contents" style="float:left">'
 			. '<ul>'
@@ -125,7 +101,6 @@ class initScreen
 			. '<li><input type="submit" id="history_btn" name="history" class="px2-btn" value="履歴"/></li>'
 			. '<li><input type="submit" id="backup_btn" name="backup" class="px2-btn" value="バックアップ一覧"/></li>'
 			. '</ul>'
-			// . '</div>'
 			. '</div>';
 
 		// テーブルヘッダー
@@ -173,65 +148,58 @@ class initScreen
 	}
 
 	/**
-	 * 新規ダイアログの表示
+	 * 新規入力ダイアログの表示
 	 *	 
-	 * @return 新規ダイアログの出力内容
+	 * @return string $dialog_html 新規入力ダイアログHTML
 	 */
 	public function do_disp_add_dialog() {
 		
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_add_dialog start');
 
-		$result = array('status' => true,
-						'message' => '',
-						'dialog_disp' => '');
-
 		// ダイアログHTMLの作成
-		$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_ADD);
+		$dialog_html= $this->create_input_dialog_html(self::INPUT_MODE_ADD);
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_add_dialog end');
 
-		return $result;
+		return $dialog_html;
 	}
 
 
 	/**
 	 * 新規確認処理
-	 *	 
-	 * @param $error_message = エラーメッセージ出力内容
 	 *
-	 * @return 新規ダイアログの出力内容
+	 * @return string $dialog_html 新規入力ダイアログHTML、または、新規確認ダイアログHTML
 	 */
 	public function do_check_add() {
 		
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_check_add start');
 
+		$dialog_html;
+
 		// 入力チェック処理
 		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_ADD);
 
-		$result = array('status' => true,
-						'message' => '',
-						'dialog_disp' => '');
-
 		if ($this->input_error_message) {
 			// エラーがあるので入力ダイアログのまま
-			$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_ADD_BACK);
+			$dialog_html = $this->create_input_dialog_html(self::INPUT_MODE_ADD_BACK);
 
 		} else {
 			// エラーがないので確認ダイアログへ遷移
-			$result['dialog_disp'] = $this->create_check_add_dialog_html();
+			$dialog_html = $this->create_check_add_dialog_html();
 		}
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_check_add end');
 
-		return $result;
+		return $dialog_html;
 	}
 
 	/**
 	 * 新規ダイアログの確定処理
-	 *	 
-	 * @param $error_message = エラーメッセージ出力内容
 	 *
-	 * @return 新規ダイアログの出力内容
+	 * @return array $result
+	 * 			bool   $result['status'] 		処理成功時に `true`、失敗時に `false` を返します。
+	 * 			string $result['message'] 		メッセージを返します。
+	 * 			string $result['dialog_html'] 	ダイアログのHTMLを返します。
 	 */
 	public function do_confirm_add() {
 		
@@ -242,15 +210,18 @@ class initScreen
 
 		$result = array('status' => true,
 						'message' => '',
-						'dialog_disp' => '');
+						'dialog_html' => '');
 
 		if ($this->input_error_message) {
 			// エラーがあるので入力ダイアログへ戻る
-			$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_ADD_BACK);
+			$result['dialog_html'] = $this->create_input_dialog_html(self::INPUT_MODE_ADD_BACK);
 
 		} else {
 			// エラーがないので確定処理へ進む
-			$result = $this->confirm_add();
+			$ret = $this->confirm_add();
+			
+			$result['status'] = $ret['status'];
+			$result['message'] = $ret['message'];
 		}
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_confirm_add end');
@@ -259,87 +230,73 @@ class initScreen
 	}
 
 	/**
-	 * 新規ダイアログの戻り表示
+	 * 新規入力ダイアログへの戻り表示
 	 *	 
-	 * @param $error_message = エラーメッセージ出力内容
-	 *
-	 * @return 新規ダイアログの出力内容
+	 * @return string $dialog_html 新規入力ダイアログHTML
 	 */
 	public function do_back_add_dialog() {
 		
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_back_add_dialog start');
 
-		$result = array('status' => true,
-						'message' => '',
-						'dialog_disp' => '');
-
 		// 入力ダイアログへ戻る
-		$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_ADD_BACK);
+		$dialog_html = $this->create_input_dialog_html(self::INPUT_MODE_ADD_BACK);
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_back_add_dialog end');
 
-		return $result;
+		return $dialog_html;
 	}
 
 	/**
-	 * 変更ダイアログの表示
+	 * 変更入力ダイアログの表示
 	 *	 
-	 *
-	 * @return 変更ダイアログの出力内容
+	 * @return string $dialog_html 変更入力ダイアログHTML
 	 */
 	public function do_disp_update_dialog() {
 		
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_update_dialog start');
 
-		$result = array('status' => true,
-						'message' => '',
-						'dialog_disp' => '');
-
 		// 入力ダイアログHTMLの作成
-		$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_UPDATE);
+		$dialog_html = $this->create_input_dialog_html(self::INPUT_MODE_UPDATE);
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_update_dialog end');
 
-		return $result;
+		return $dialog_html;
 	}
 
 	/**
 	 * 変更確認処理
 	 *	 
-	 * @param $error_message = エラーメッセージ出力内容
-	 *
-	 * @return 新規ダイアログの出力内容
+	 * @return string $dialog_html 変更入力ダイアログHTML、または、変更確認ダイアログHTML
 	 */
 	public function do_check_update() {
 		
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_check_update start');
 
+		$dialog_html;
+
 		// 入力チェック処理
 		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_UPDATE);
 
-		$result = array('status' => true,
-						'message' => '',
-						'dialog_disp' => '');
-
 		if ($this->input_error_message) {
 			// エラーがあるので入力ダイアログのまま
-			$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_UPDATE_BACK);
+			$dialog_html = $this->create_input_dialog_html(self::INPUT_MODE_UPDATE_BACK);
 		} else {
 			// エラーがないので確認ダイアログへ遷移
-			$result['dialog_disp'] = $this->create_check_update_dialog_html();
+			$dialog_html = $this->create_check_update_dialog_html();
 		}
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_check_update end');
 
-		return $result;
+		return $dialog_html;
 	}
 
 	/**
 	 * 変更ダイアログの確定処理
-	 *	 
-	 * @param $error_message = エラーメッセージ出力内容
 	 *
-	 * @return 新規ダイアログの出力内容
+	 * @return array $result
+	 * 			bool   $result['status'] 		処理成功時に `true`、失敗時に `false` を返します。
+	 * 			string $result['message'] 		メッセージを返します。
+	 * 			string $result['dialog_html'] 	ダイアログのHTMLを返します。
 	 */
 	public function do_confirm_update() {
 		
@@ -350,15 +307,18 @@ class initScreen
 
 		$result = array('status' => true,
 						'message' => '',
-						'dialog_disp' => '');
+						'dialog_html' => '');
 
 		if ($this->input_error_message) {
 			// エラーがあるので入力ダイアログへ戻る
-			$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_UPDATE_BACK);
+			$result['dialog_html'] = $this->create_input_dialog_html(self::INPUT_MODE_UPDATE_BACK);
 
 		} else {
 			// エラーがないので確定処理へ進む
-			$result = $this->confirm_update();
+			$ret = $this->confirm_update();
+
+			$result['status'] = $ret['status'];
+			$result['message'] = $ret['message'];
 		}
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_confirm_update end');
@@ -367,86 +327,73 @@ class initScreen
 	}
 
 	/**
-	 * 変更ダイアログの戻り表示
+	 * 変更入力ダイアログへの戻り表示
 	 *	 
-	 * @param $error_message  = エラーメッセージ出力内容
-	 *
-	 * @return 変更ダイアログの出力内容
+	 * @return string $dialog_html 変更入力ダイアログHTML
 	 */
 	public function do_back_update_dialog() {
 		
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_back_update_dialog start');
 
-		$result = array('status' => true,
-						'message' => '',
-						'dialog_disp' => '');
-
 		// 入力ダイアログHTMLの作成
-		$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_UPDATE_BACK);
+		$dialog_html = $this->create_input_dialog_html(self::INPUT_MODE_UPDATE_BACK);
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_back_update_dialog end');
 
-		return $result;
+		return $dialog_html;
 	}
 
 	/**
-	 * 即時公開ダイアログの表示
+	 * 即時公開入力ダイアログの表示
 	 *	 
-	 * @return 即時公開ダイアログの出力内容
+	 * @return string $dialog_html 即時公開入力ダイアログHTML
 	 */
 	public function do_disp_immediate_dialog() {
 		
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_disp_immediate_dialog start');
 
-		$result = array('status' => true,
-						'message' => '',
-						'dialog_disp' => '');
-
 		// ダイアログHTMLの作成
-		$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_IMMEDIATE);
+		$dialog_html = $this->create_input_dialog_html(self::INPUT_MODE_IMMEDIATE);
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_disp_immediate_dialog end');
 
-		return $result;
+		return $dialog_html;
 	}
 
 	/**
 	 * 即時公開確認処理
 	 *	 
-	 * @param $error_message = エラーメッセージ出力内容
-	 *
-	 * @return 新規ダイアログの出力内容
+	 * @return string $dialog_html 即時公開入力ダイアログHTML、または、即時公開確認ダイアログHTML
 	 */
 	public function do_check_immediate() {
 		
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_check_immediate start');
 
+		$dialog_html;
+
 		// 入力チェック処理
 		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_IMMEDIATE);
 
-		$result = array('status' => true,
-						'message' => '',
-						'dialog_disp' => '');
-
 		if ($this->input_error_message) {
 			// エラーがあるので入力ダイアログのまま
-			$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_IMMEDIATE_BACK);
+			$dialog_html = $this->create_input_dialog_html(self::INPUT_MODE_IMMEDIATE_BACK);
 		} else {
 			// エラーがないので確認ダイアログへ遷移
-			$result['dialog_disp'] = $this->create_check_immediate_dialog_html();
+			$dialog_html = $this->create_check_immediate_dialog_html();
 		}
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_check_immediate end');
 
-		return $result;
+		return $dialog_html;
 	}
 
 	/**
 	 * 即時公開ボタン押下
 	 *	 
-	 * @param $error_message = エラーメッセージ出力内容
-	 *
-	 * @return 新規ダイアログの出力内容
+	 * @return array $result
+	 * 			bool   $result['status'] 		処理成功時に `true`、失敗時に `false` を返します。
+	 * 			string $result['message'] 		メッセージを返します。
+	 * 			string $result['dialog_html'] 	ダイアログのHTMLを返します。
 	 */
 	public function do_immediate_publish() {
 		
@@ -457,14 +404,17 @@ class initScreen
 
 		$result = array('status' => true,
 						'message' => '',
-						'dialog_disp' => '');
+						'dialog_html' => '');
 
 		if ($this->input_error_message) {
 			// エラーがあるので入力ダイアログへ戻る
-			$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_IMMEDIATE_BACK);
+			$result['dialog_html'] = $this->create_input_dialog_html(self::INPUT_MODE_IMMEDIATE_BACK);
 		} else {
 			// エラーがないので即時公開処理へ進む
-			$result = $this->publish->exec_publish(define::PUBLISH_TYPE_IMMEDIATE, null);
+			$ret = $this->publish->exec_publish(define::PUBLISH_TYPE_IMMEDIATE, null);
+
+			$result['status'] = $ret['status'];
+			$result['message'] = $ret['message'];
 		}
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_immediate_publish end');
@@ -473,41 +423,37 @@ class initScreen
 	}
 
 	/**
-	 * 即時ダイアログの戻り表示
+	 * 即時公開入力ダイアログへの戻り表示
 	 *	 
-	 * @param $error_message = エラーメッセージ出力内容
-	 *
-	 * @return 新規ダイアログの出力内容
+	 * @return string $dialog_html 即時公開入力ダイアログHTML
 	 */
 	public function do_back_immediate_dialog() {
 		
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_back_immediate_dialog start');
 
-		$result = array('status' => true,
-						'message' => '',
-						'dialog_disp' => '');
-
 		// 入力ダイアログHTMLの作成
-		$result['dialog_disp'] = $this->create_input_dialog_html(self::INPUT_MODE_IMMEDIATE_BACK);
+		$dialog_html = $this->create_input_dialog_html(self::INPUT_MODE_IMMEDIATE_BACK);
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_back_immediate_dialog end');
 
-		return $result;
+		return $dialog_html;
 	}
 
 	/**
 	 * 新規ダイアログの確定処理
 	 *	 
-	 * @return 確認ダイアログ出力内容
+	 * 公開予約データの登録と、予約ディレクトリを作成しGitの情報をコピーします。
+	 * 
+	 * @return array $result
+	 * 			bool   $result['status'] 		処理成功時に `true`、失敗時に `false` を返します。
+	 * 			string $result['message'] 		メッセージを返します。
 	 */
 	private function confirm_add() {
 		
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ confirm_add start');
 
-		$output = "";
 		$result = array('status' => true,
-						'message' => '',
-						'dialog_disp' => '');
+						'message' => '');
 
 		try {
 
@@ -521,14 +467,7 @@ class initScreen
 			$realpath_waiting = $this->main->realpath_array['realpath_waiting'];
 
 			// 公開予約ディレクトリ名の取得
-			$dirname = $this->main->common()->format_gmt_datetime($this->main->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE);
-
-			if (!$dirname) {
-				// エラー処理
-				throw new \Exception('Dirname create failed.');
-			} else {
-				$dirname .= define::DIR_NAME_RESERVE;
-			}
+			$dirname = $this->main->common()->get_reserve_dirname($this->main->options->_POST->gmt_reserve_datetime);
 
 			// コピー処理
 			$this->main->gitMgr()->git_file_copy($this->main->options, $realpath_waiting, $dirname);
@@ -565,16 +504,18 @@ class initScreen
 	/**
 	 * 変更ダイアログの確定処理
 	 *	 
-	 * @return 確認ダイアログ出力内容
+	 * 公開予約データの更新と、既存の予約ディレクトリを削除し、再作成後Gitの情報をコピーします。
+	 * 
+	 * @return array $result
+	 * 			bool   $result['status'] 		処理成功時に `true`、失敗時に `false` を返します。
+	 * 			string $result['message'] 		メッセージを返します。
 	 */
 	private function confirm_update() {
 		
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ confirm_update start');
 	
-		$output = "";
 		$result = array('status' => true,
-						'message' => '',
-						'dialog_disp' => '');
+						'message' => '');
 
 		try {
 
@@ -585,14 +526,7 @@ class initScreen
 			// 「waiting」ディレクトリの変更前の公開ソースディレクトリを削除
 			//============================================================
 			// 変更前の公開予約ディレクトリ名の取得
-			$before_dirname = $this->main->common()->format_gmt_datetime($this->main->options->_POST->before_gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE);
-			
-			if (!$before_dirname) {
-				// エラー処理
-				throw new \Exception('Dirname create failed.');
-			} else {
-				$before_dirname .= define::DIR_NAME_RESERVE;
-			}
+			$before_dirname = $this->main->common()->get_reserve_dirname($this->main->options->_POST->before_gmt_reserve_datetime);
 
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ 変更前の公開予約ディレクトリ：');
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, $before_dirname);
@@ -605,14 +539,7 @@ class initScreen
 			// 変更後ブランチのGit情報を「waiting」ディレクトリへコピー
 			//============================================================
 			// 公開予約ディレクトリ名の取得
-			$dirname = $this->main->common()->format_gmt_datetime($this->main->options->_POST->gmt_reserve_datetime, define::DATETIME_FORMAT_SAVE);
-
-			if (!$dirname) {
-				// エラー処理
-				throw new \Exception('Dirname create failed.');
-			} else {
-				$dirname .= define::DIR_NAME_RESERVE;
-			}
+			$dirname = $this->main->common()->get_reserve_dirname($this->main->options->_POST->gmt_reserve_datetime);
 
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ 変更後の公開予約ディレクトリ：');
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, $dirname);
@@ -653,16 +580,18 @@ class initScreen
 	/**
 	 * 削除処理
 	 *	 
-	 * @return 確認ダイアログ出力内容
+	 * 公開予約データの論理削除と、Gitコピーディレクトリの削除を行います。
+	 *	 
+	 * @return array $result
+	 * 			bool   $result['status'] 		処理成功時に `true`、失敗時に `false` を返します。
+	 * 			string $result['message'] 		メッセージを返します。
 	 */
 	public function do_delete() {
 		
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_delete start');
-	
-		$output = "";
+
 		$result = array('status' => true,
-						'message' => '',
-						'dialog_disp' => '');
+						'message' => '');
 
 		try {
 
@@ -691,14 +620,7 @@ class initScreen
 				//============================================================
 				// 公開予約ディレクトリ名の取得
 				$selected_ret = $this->tsReserve->get_selected_ts_reserve($selected_id);
-				$dirname = $this->main->common()->format_gmt_datetime($selected_ret[tsReserve::RESERVE_ENTITY_RESERVE_GMT], define::DATETIME_FORMAT_SAVE);
-				
-				if (!$dirname) {
-					// エラー処理
-					throw new \Exception('Dirname create failed.');
-				} else {
-					$dirname .= define::DIR_NAME_RESERVE;
-				}
+				$dirname = $this->main->common()->get_reserve_dirname($selected_ret[tsReserve::RESERVE_ENTITY_RESERVE_GMT]);
 				
 				// コピー処理
 				$this->main->gitMgr()->file_delete($realpath_waiting, $dirname);
@@ -738,30 +660,11 @@ class initScreen
 	}
 
 	/**
-	 * 公開復元処理
-	 */
-	public function do_restore_publish_failure($output_id) {
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_restore_publish_failure start');
-
-		$output = "";
-		$result = array('status' => true,
-						'message' => '',
-						'dialog_disp' => '');
-
-		$result = $this->publish->exec_publish(define::PUBLISH_TYPE_AUTO_RESTORE, $output_id);
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_restore_publish_failure end');
-
-		return $result;
-	}
-
-	/**
 	 * 新規・変更・即時公開の入力ダイアログHTMLの作成
 	 *	 
-	 * @param $input_mode = 入力モード
+	 * @param string $input_mode 入力モード
 	 *
-	 * @return ログ出力内容
+	 * @return string $ret ダイアログHTML
 	 */
 	private function create_input_dialog_html($input_mode) {
 		
@@ -775,7 +678,7 @@ class initScreen
 			  . '<div class="dialog_box">';
 
 		 if ($this->input_error_message) {
-		 // エラーメッセージの出力
+		 	// エラーメッセージの出力
 			$ret .= '<div class="alert_box">'
 				. $this->input_error_message
 				. '</div>';
@@ -804,11 +707,12 @@ class initScreen
 						'selected_id' => ''
 					);
 
-        // 引数の取得
+
 		if (($input_mode == self::INPUT_MODE_ADD_BACK) || 
 			($input_mode == self::INPUT_MODE_UPDATE_BACK) ||
 			($input_mode == self::INPUT_MODE_IMMEDIATE_BACK)) {
 
+        	// 戻り表示の場合のパラメタ取得
 			$form = $this->get_form_value();
 
 		} elseif ($input_mode == self::INPUT_MODE_UPDATE) {
@@ -927,7 +831,7 @@ class initScreen
 	/**
 	 * 新規確認ダイアログの表示
 	 *
-	 * @return 確認ダイアログ出力内容
+	 * @return string $ret ダイアログHTML
 	 */
 	private function create_check_add_dialog_html() {
 		
@@ -1020,7 +924,7 @@ class initScreen
 	/**
 	 * 変更確認ダイアログの表示
 	 *
-	 * @return 確認ダイアログ出力内容
+	 * @return string $ret ダイアログHTML
 	 */
 	private function create_check_update_dialog_html() {
 		
@@ -1165,7 +1069,7 @@ class initScreen
 	/**
 	 * 即時公開確認ダイアログの表示
 	 *
-	 * @return 確認ダイアログ出力内容
+	 * @return string $ret ダイアログHTML
 	 */
 	private function create_check_immediate_dialog_html() {
 		
@@ -1247,10 +1151,21 @@ class initScreen
 
 	/**
 	 * 入力チェック処理
-	 *	 
-	 * @param $input_mode = 入力モード
+	 *  
+	 * [入力チェックの内容]
+	 *  必須チェック：ブランチ
+	 *  必須チェック：コミット（ブランチ選択時にajaxにより自動取得されるため内部エラーが発生しない限りは入力されている）
+	 *  必須チェック：公開予約日付
+	 *  必須チェック：公開予約時刻
+	 *  重複チェック：ブランチ（予約データの中に、同名ブランチが存在していないか）
+	 *  重複チェック：公開予約日時（予約データの中に、同じ公開予約日時が存在していないか）
+	 *  公開予約の最大件数チェック（パラメタで設定された件数を超える場合エラーとする）
+	 *  日付の妥当性チェック（yyyy-mm-ddの形式となっているか、存在する日付であるか）
+	 *  未来日チェック（公開予約日時が未来時刻であるか）
+	 * 
+	 * @param string $input_mode 入力モード
 	 *
-	 * @return エラーメッセージHTML
+	 * @return string $ret エラーメッセージHTML
 	 */
 	private function do_validation_check($input_mode) {
 				
@@ -1340,14 +1255,14 @@ class initScreen
 	}
 
 	/**
-	 * プルダウンで選択状態とさせる値であるか比較する
+	 * プルダウンで選択状態(selected)となる値であるか比較する
 	 *	 
-	 * @param $selected = 選択状態とする値
-	 * @param $value    = 比較対象の値
+	 * @param string $selected 選択値
+	 * @param string $value    比較対象の値
 	 *	 
-	 * @return 
-	 *  一致する場合：selected（文字列）
-	 *  一致しない場合：空文字
+	 * @return  string $ret
+	 *  		一致する場合："selected"
+	 *  		一致しない場合：空文字
 	 */
 	private function compare_to_selected_value($selected, $value) {
 
@@ -1364,15 +1279,13 @@ class initScreen
 	/**
 	 * 引数の日付と日時を結合し、GMTの日時へ変換する
 	 *	 
-	 * @param $date = 設定タイムゾーンの日付
-	 * @param $time = 設定タイムゾーンの時刻
+	 * @param string $date 設定タイムゾーンの日付
+	 * @param string $time 設定タイムゾーンの時刻
 	 *	 
-	 * @return GMT日時
+	 * @return string $ret GMT変換された日時
 	 */
 	private function combine_to_gmt_date_and_time($date, $time) {
 	
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ combine_to_gmt_date_and_time start');
-
 		$ret = '';
 
 		if (isset($date) && isset($time)) {
@@ -1383,24 +1296,23 @@ class initScreen
 
 			// タイムゾーン変更
 			$t->setTimeZone(new \DateTimeZone('GMT'));
-		
-			// $ret = $t->format(DATE_ATOM);
 			$ret = $t->format(define::DATETIME_FORMAT);
-			// $this->main->common()->put_process_log(__METHOD__, __LINE__, '　□timezone：' . $timezone);
 		}
-		
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '　□変換前の時刻：' . $datetime);
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '　□変換後の時刻（GMT）：'. $ret);
-		
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ combine_to_gmt_date_and_time end');
-
+			
 	    return $ret;
 	}
 
 	/**
 	 * フォーム値の設定
 	 *	 
-	 * @return 新規ダイアログの出力内容
+	 * @return array $form
+	 * 			string $result['branch_select_value'] ブランチ名
+	 * 			string $result['reserve_date'] 	公開予約日付
+	 * 			string $result['reserve_time'] 	公開予約時刻
+	 * 			string $result['commit_hash'] 	コミットハッシュ値
+	 * 			string $result['comment']	 	コメント
+	 * 			string $result['ver_no'] 		バージョンNO
+	 * 			string $result['selected_id'] 	選択ID
 	 */
 	private function get_form_value() {
 

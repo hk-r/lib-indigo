@@ -20,7 +20,7 @@ class pdoManager
 	/**
 	 * Constructor
 	 *
-	 * @param object $px Picklesオブジェクト
+	 * @param object $main mainオブジェクト
 	 */
 	public function __construct ($main){
 
@@ -28,13 +28,14 @@ class pdoManager
 
 	}
 
-
 	/**
 	 * データベースへ接続する
 	 * 
 	 * mainオプションのDBタイプによって接続方法が異なります。
 	 * バージョン0.1.0時点ではmysqlの動作確認は行っておりません。
 	 * sqliteについては動作確認済みです。
+	 *	 
+	 * @return PDO $dbh PDOオブジェクト
 	 * 
 	 * @throws Exception sqlite格納用のディレクトリ作成が失敗した場合
 	 * @throws Exception Pdo接続処理が失敗した場合

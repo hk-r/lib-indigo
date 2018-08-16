@@ -47,7 +47,7 @@ class tsReserve
 	/**
 	 * Constructor
 	 *
-	 * @param object
+	 * @param object $main mainオブジェクト
 	 */
 	public function __construct ($main){
 

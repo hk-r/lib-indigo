@@ -60,7 +60,7 @@ class tsOutput
 	/**
 	 * Constructor
 	 *
-	 * @param object $px Picklesオブジェクト
+	 * @param object $main mainオブジェクト
 	 */
 	public function __construct ($main){
 
@@ -312,7 +312,7 @@ class tsOutput
 		// 状態
 		$conv_array[self::OUTPUT_ENTITY_STATUS] = $array[self::TS_OUTPUT_STATUS];
 		// 状態
-		$conv_array[self::OUTPUT_ENTITY_STATUS_DISP] = $this->convert_status($array[self::TS_OUTPUT_STATUS]);
+		$conv_array[self::OUTPUT_ENTITY_STATUS_DISP] = $this->main->common()->convert_status($array[self::TS_OUTPUT_STATUS]);
 		// 公開種別
 		$conv_array[self::OUTPUT_ENTITY_PUBLISH_TYPE] = $this->main->common()->convert_publish_type($array[self::TS_OUTPUT_PUBLISH_TYPE]);
 		// 登録ユーザID
@@ -322,33 +322,5 @@ class tsOutput
 
 	    return $conv_array;
 	}
-
-
-	/**
-	 * ステータスを画面表示用に変換し返却する
-	 *	 
-	 * @param $status = ステータスのコード値
-	 *	 
-	 * @return 画面表示用のステータス情報
-	 */
-	private function convert_status($status) {
-
-		$ret = '';
-
-		if ($status == define::PUBLISH_STATUS_RUNNING) {
-			$ret =  '★(処理中)';
-		} else if ($status == define::PUBLISH_STATUS_SUCCESS) {
-			$ret =  '〇(成功)';
-		} else if ($status == define::PUBLISH_STATUS_ALERT) {
-			$ret =  '△(警告あり)';
-		} else if ($status == define::PUBLISH_STATUS_FAILED) {
-			$ret =  '×(失敗)';
-		} else if ($status == define::PUBLISH_STATUS_SKIP) {
-			$ret =  '-(スキップ)';
-		}
-
-		return $ret;
-	}
-
 
 }

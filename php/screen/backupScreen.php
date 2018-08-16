@@ -23,7 +23,8 @@ class backupScreen
 
 	/**
 	 * コンストラクタ
-	 * @param $options = オプション
+	 *
+	 * @param object $main mainオブジェクト
 	 */
 	public function __construct($main) {
 
@@ -35,22 +36,20 @@ class backupScreen
 
 
 	/**
-	 * バックアップ一覧表示のコンテンツ作成
+	 * バックアップ一覧画面のHTML作成
 	 *	 
-	 * @return 初期表示の出力内容
+	 * @return string $ret HTMLソースコード
 	 */
 	public function disp_backup_screen() {
 		
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_backup_screen start');
 
-		$ret = "";
-
+		
 		// バックアップ一覧を取得
 		$data_list = $this->tsBackup->get_ts_backup_list();
 
-		$ret .= '<div style="overflow:hidden">'
+		$ret = '<div style="overflow:hidden">'
 			. '<form id="form_table" method="post">'
-			// . '<input type="hidden" name="selected_id" value="' . $this->main->options->_POST->selected_id . '"/>'
 			. '<div class="button_contents" style="float:left;">'
 			. '<ul>'
 			. '<li><h4>バックアップ一覧画面</h4></li>'
@@ -109,26 +108,5 @@ class backupScreen
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_backup_screen end');
 
 		return $ret;
-	}
-
-	/**
-	 * 復元ボタン押下
-	 *	 
-	 * @param $error_message = エラーメッセージ出力内容
-	 *
-	 * @return 新規ダイアログの出力内容
-	 */
-	public function do_restore_publish() {
-		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_restore_publish start');
-
-		$selected_id =  $this->main->options->_POST->selected_id;
-
-		// エラーがないので即時公開処理へ進む
-		$result = $this->publish->exec_publish(define::PUBLISH_TYPE_MANUAL_RESTORE, $selected_id);
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_restore_publish end');
-
-		return $result;
 	}
 }

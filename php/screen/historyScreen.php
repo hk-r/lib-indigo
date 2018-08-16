@@ -15,7 +15,8 @@ class historyScreen
 
 	/**
 	 * コンストラクタ
-	 * @param $options = オプション
+	 *
+	 * @param object $main mainオブジェクト
 	 */
 	public function __construct($main) {
 
@@ -27,20 +28,18 @@ class historyScreen
 	
 
 	/**
-	 * 履歴表示のコンテンツ作成
+	 * 履歴一覧画面のHTML作成
 	 *	 
-	 * @return 履歴表示の出力内容
+	 * @return string $ret HTMLソースコード
 	 */
 	public function disp_history_screen() {
 		
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_history_screen start');
 
-		$ret = "";
-
 		// 公開処理結果一覧を取得
 		$output_list = $this->tsOutput->get_ts_output_list();
 
-		$ret .= '<div style="overflow:hidden">'
+		$ret = '<div style="overflow:hidden">'
 			. '<form id="form_table" method="post">'
 			. '<div class="button_contents" style="float:left">'
 			. '<ul>'
@@ -126,53 +125,48 @@ class historyScreen
 	/**
 	 * ログダイアログの表示
 	 *	 
-	 * @return ログダイアログの出力内容
+	 * @return string $dialog_disp HTMLソースコード
 	 */
 	public function do_disp_log_dialog() {
 		
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_disp_log_dialog start');
 
-		$result = array('status' => true,
-						'message' => '',
-						'dialog_disp' => '');
-
-		try {
-
-			// 選択ID
-			$selected_id =  $this->main->options->_POST->selected_id;
-
-			// 公開処理結果情報の取得
-			$selected_ret = $this->tsOutput->get_selected_ts_output($selected_id);
-
-			// ダイアログHTMLの作成
-			$result['dialog_disp'] = $this->create_log_dialog_html($selected_ret);
-
-			// // ダイアログHTMLの作成
-			// $result['dialog_disp'] = $this->create_log_dialog_html();
-
-		} catch (\Exception $e) {
-
-			$result['status'] = false;
-			$result['message'] = 'View log dialog failed. ' . $e->getMessage();
-
-			return $result;
-		}
-
-		$result['status'] = true;
+		// ダイアログHTMLの作成
+		$dialog_disp = $this->create_log_dialog_html();
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_disp_log_dialog end');
 
-		return $result;
+		return $dialog_disp;
 	}
 
 	/**
-	 * ログダイアログHTMLの作成
+	 * ログダイアログのHTML作成
 	 *	 
-	 * @return ログダイアログ出力内容
+	 * @return string $ret ログダイアログHTML
 	 */
-	private function create_log_dialog_html($selected_ret) {
+	private function create_log_dialog_html() {
 		
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ create_log_dialog_html start');
+	
+			$selected_id =  $this->main->options->_POST->selected_id;
+			// 公開処理結果情報の取得
+			$selected_ret = $this->tsOutput->get_selected_ts_output($selected_id);
+
+			$start_datetime_gmt = $selected_ret[tsOutput::OUTPUT_ENTITY_START_GMT];
+			// 公開予約ディレクトリ名の取得
+			$dirname = $this->main->common()->format_gmt_datetime($start_datetime_gmt, define::DATETIME_FORMAT_SAVE);
+
+			// logディレクトリの絶対パスを取得。
+			$realpath_log = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->realpath_array['realpath_log'] . $dirname . "/"));
+		
+			// ファイルを変数に格納
+			$log_filename = $realpath_log . 'pub_copy_' . $dirname . '.log';
+
+			$content = "";
+			if (file_exists($log_filename)) {
+				// ファイルの読み込み
+				$content = file_get_contents($log_filename);
+			}
 
 		$ret = '<div class="dialog" id="modal_dialog">'
 			  . '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
@@ -180,37 +174,11 @@ class historyScreen
 			  . '<div style="position: absolute; left: 0px; top: 0px; padding-top: 4em; overflow: auto; width: 100%; height: 100%;">'
 			  . '<div class="dialog_box">';
 
-			
-			// 公開ディレクトリ名の取得
-			$start_datetime_gmt = $selected_ret[tsOutput::OUTPUT_ENTITY_START_GMT];
-			// 公開予約ディレクトリ名の取得
-			$dirname = $this->main->common()->format_gmt_datetime($start_datetime_gmt, define::DATETIME_FORMAT_SAVE);
-
-
-			// logディレクトリの絶対パスを取得。
-			$realpath_log = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->realpath_array['realpath_log'] . $dirname . "/"));
-		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ $realpath_log:' . $realpath_log);
-
-			// ファイルを変数に格納
-			$filename = $realpath_log . 'pub_copy_' . $dirname . '.log';
-
-			$content = "";
-			if (file_exists($filename)) {
-				$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ $filename:' . $filename);
-
-				// ファイルを読み込み変数に格納
-				$content = file_get_contents($filename);
-			}
-
-
 		$ret .= '<p>User ID：' . htmlspecialchars($selected_ret[tsOutput::OUTPUT_ENTITY_INSERT_USER_ID]) . '</p>'
 			  . '<p>公開開始日時：' . htmlspecialchars($selected_ret[tsOutput::OUTPUT_ENTITY_START_DISP]) . '</p>'
 			  . '<p>公開終了日時：' . htmlspecialchars($selected_ret[tsOutput::OUTPUT_ENTITY_END_DISP]) . '</p>'
-			  // . '<p>-----------------------------------------------------</p>'
 			  . '<p>公開同期ログ：</p>'
 			  . '<p>' . htmlspecialchars(nl2br($content)) .'</p>';
-			  // . '<p>-----------------------------------------------------</p>';
 
 		$ret .=  '<div class="button_contents_box">'
 			  . '<div class="button_contents">'

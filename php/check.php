@@ -12,7 +12,7 @@ class check
 	/**
 	 * Constructor
 	 *
-	 * @param object $px Picklesオブジェクト
+	 * @param object $main mainオブジェクト
 	 */
 	public function __construct ($main){
 
@@ -22,21 +22,18 @@ class check
 	/**
 	 * ブランチの必須チェック
 	 *	 
-	 * @param $branch_select_value = 選択ブランチ
+	 * @param string $branch_select_value ブランチ名
 	 *	 
-	 * @return 
-	 *  チェックOK：true、チェックNG：false
+	 * @return bool $ret チェックOKの場合は `true`、NGの場合は `false` を返します。
 	 */
 	public function is_null_branch($branch_select_value) {
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ is_null_branch start');
 
 		$ret = true;
 		if (!$branch_select_value) {
 			$ret = false;
 		}
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ is_null_branch end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '>>check is_null_branch:' . $ret);
 
 		return $ret;
 	}
@@ -44,21 +41,18 @@ class check
 	/**
 	 * コミットの必須チェック
 	 *	 
-	 * @param $commit_hash = 入力コミットハッシュ値
+	 * @param string $commit_hash コミットハッシュ値
 	 *	 
-	 * @return 
-	 *  チェックOK：true、チェックNG：false
+	 * @return bool $ret チェックOKの場合は `true`、NGの場合は `false` を返します。
 	 */
 	public function is_null_commit_hash($commit_hash) {
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ is_null_commit_hash start');
 
 		$ret = true;
 		if (!$commit_hash) {
 			$ret = false;
 		}
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ is_null_commit_hash end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '>>check is_null_commit_hash:' . $ret);
 
 		return $ret;
 	}
@@ -66,21 +60,18 @@ class check
 	/**
 	 * 公開予約日付の必須チェック
 	 *	 
-	 * @param $reserve_date = 入力公開予約日時の日付
+	 * @param string $reserve_date 公開予約日時の日付
 	 *	 
-	 * @return 
-	 *  チェックOK：true、チェックNG：false
+	 * @return bool $ret チェックOKの場合は `true`、NGの場合は `false` を返します。
 	 */
 	public function is_null_reserve_date($reserve_date) {
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ is_null_reserve_date start');
 
 		$ret = true;
 		if (!$reserve_date) {
 			$ret = false;
 		}
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ is_null_reserve_date end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '>>check is_null_reserve_date:' . $ret);
 
 		return $ret;
 	}
@@ -88,21 +79,18 @@ class check
 	/**
 	 * 公開予約時刻の必須チェック
 	 *	 
-	 * @param $reserve_time = 入力公開予約日時の時刻
+	 * @param strin $reserve_time 公開予約日時の時刻
 	 *	 
-	 * @return 
-	 *  チェックOK：true、チェックNG：false
+	 * @return bool $ret チェックOKの場合は `true`、NGの場合は `false` を返します。
 	 */
 	public function is_null_reserve_time($reserve_time) {
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ is_null_reserve_time start');
 
 		$ret = true;
 		if (!$reserve_time) {
 			$ret = false;
 		}
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ is_null_reserve_time end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '>>check is_null_reserve_time:' . $ret);
 
 		return $ret;
 	}
@@ -110,14 +98,12 @@ class check
 	/**
 	 * 公開予約の最大件数チェック
 	 *	 
-	 * @param $data_list = 現状の予約件数
+	 * @param array[] $data_list 公開予約リスト
+	 * @param string  $max       予約最大件数
 	 *	 
-	 * @return 
-	 *  チェックOK：true、チェックNG：false
+	 * @return bool $ret チェックOKの場合は `true`、NGの場合は `false` を返します。
 	 */
 	public function check_reserve_max_record($data_list, $max) {
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_reserve_max_record start');
 
 		$ret = true;
 
@@ -125,7 +111,7 @@ class check
 			$ret = false;
 		}
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_reserve_max_record end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '>>check check_reserve_max_record:' . $ret);
 
 		return $ret;
 	}
@@ -133,14 +119,11 @@ class check
 	/**
 	 * 日付の妥当性チェック
 	 *	 
-	 * @param $reserve_date = 入力公開予約日時の日付
+	 * @param string $reserve_date 公開予約日時の日付
 	 *	 
-	 * @return 
-	 *  チェックOK：true、チェックNG：false
+	 * @return bool $ret チェックOKの場合は `true`、NGの場合は `false` を返します。
 	 */
 	public function check_date($reserve_date) {
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_date start');
 
 		$ret = true;
 
@@ -151,7 +134,7 @@ class check
 			$ret = false;
 		}	
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_date end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '>>check check_date:' . $ret);
 
 		return $ret;
 	}
@@ -159,14 +142,11 @@ class check
 	/**
 	 * 未来日付チェック
 	 *	 
-	 * @param $datetime = 入力公開予約日時
+	 * @param string $datetime 公開予約日時
 	 *	 
-	 * @return 
-	 *  未来日である：true、未来日でない：false
+	 * @return bool $ret チェックOKの場合は `true`、NGの場合は `false` を返します。
 	 */
 	public function check_future_date($datetime) {
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_future_date start');
 
 		$ret = true;
 
@@ -177,7 +157,7 @@ class check
 			$ret = false;
 		}
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_future_date end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '>>check check_future_date:' . $ret);
 
 		return $ret;
 	}
@@ -186,16 +166,13 @@ class check
 	/**
 	 * 予約データの中に、同名ブランチが存在していないか重複チェック
 	 *	 
-	 * @param $data_list       = データリスト
-	 * @param $selected_branch = 選択されたブランチ
-	 * @param $selected_id     = チェックデータ自身のID
+	 * @param array[] $data_list        公開予約リスト
+	 * @param string  $selected_branch  選択されたブランチ名
+	 * @param int     $selected_id      チェックデータ自身の公開予約ID
 	 *	 
-	 * @return 
-	 *  重複なし：true、重複あり：false
+	 * @return bool $ret チェックOKの場合は `true`、NGの場合は `false` を返します。
 	 */
 	public function check_exist_branch($data_list, $selected_branch, $selected_id) {
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_exist_branch start');
 
 		$ret = true;
 
@@ -208,7 +185,7 @@ class check
 			}
 		}
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_exist_branch end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '>>check check_exist_branch:' . $ret);
 
 		return $ret;
 	}
@@ -216,16 +193,13 @@ class check
 	/**
 	 * 予約データの中に、同じ公開予約日時が存在していないか重複チェック
 	 *	 
-	 * @param $data_list     = データリスト
-	 * @param $input_reserve = 入力された日時
-	 * @param $selected_id   = チェックデータ自身のID
+	 * @param array[] $data_list        公開予約リスト
+	 * @param string  $input_reserve    入力された公開予約日時
+	 * @param int     $selected_id      チェックデータ自身の公開予約ID
 	 *	 
-	 * @return 
-	 *  重複なし：true、重複あり：false
+	 * @return bool $ret チェックOKの場合は `true`、NGの場合は `false` を返します。
 	 */
 	public function check_exist_reserve($data_list, $input_reserve, $selected_id) {
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_exist_reserve start');
 
 		$ret = true;
 
@@ -239,7 +213,7 @@ class check
 			}
 		}		
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ check_exist_reserve end');
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '>>check check_exist_reserve:' . $ret);
 
 		return $ret;
 	}
