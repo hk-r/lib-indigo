@@ -221,7 +221,7 @@ class publish
 						$backup_id = $backup_data[tsBackup::TS_BACKUP_ID_SEQ];
 						$backup_dirname = $this->main->common()->format_gmt_datetime($backup_data[tsBackup::TS_BACKUP_DATETIME], define::DATETIME_FORMAT_SAVE);
 						
-						if (!$result['backup_dirname']) {
+						if (!$backup_dirname) {
 							// エラー処理
 							throw new \Exception('Backup dirname not found.');
 						}

@@ -527,6 +527,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		// 即時公開
 		$result = $publish->exec_publish(3, null);
 
+		$this->assertTrue( isset($backup_id) );
+
 		$this->assertTrue( $result['status'] );
 		$this->assertEquals( '公開処理が成功しました。', $result['message'] );
 		$this->assertTrue( isset($result['output_id']) );

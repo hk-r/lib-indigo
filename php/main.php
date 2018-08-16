@@ -396,7 +396,6 @@ class main
 
 				// 画面アラート用のメッセージ			
 				$alert_message = "≪手動復元公開処理≫" . $result['message'];
-				$dialog_html   = $result['dialog_html'];
 
 				if ( !$result['status'] ) {
 					// 処理失敗の場合、復元処理
