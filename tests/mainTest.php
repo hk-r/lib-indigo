@@ -236,10 +236,10 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		//============================================================
 		// 入力情報を公開予約テーブルへ登録
 		//============================================================
-		$result = $tsReserve->insert_ts_reserve(json_decode(json_encode($options)));
+		$result = $tsReserve->confirm_add();
 
 		$this->assertTrue( $result['status'] );
-		
+
 		//============================================================
 		// 予約公開実行
 		//============================================================
@@ -462,7 +462,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		//============================================================
 		// 入力情報を公開予約テーブルへ登録
 		//============================================================
-		$result = $tsReserve->insert_ts_reserve(json_decode(json_encode($options)));
+		$result = $tsReserve->confirm_add();
 
 		$this->assertTrue( $result['status'] );
 
