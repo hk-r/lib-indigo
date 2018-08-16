@@ -417,6 +417,68 @@ class mainTest extends PHPUnit_Framework_TestCase{
     //     );
     // }
 
+
+	/**
+	 * 予約公開処理
+	 */
+	public function testReservePublish(){
+
+		//============================================================
+		// 即時公開処理（失敗）　画面入力項目nullの場合
+		//============================================================
+		$options = $this->options;
+		// $options['_POST'] = array('immediate_confirm' => 1);	
+
+		$main = new indigo\main( $options );
+		$publish = new indigo\publish( $main );
+
+		$result = $publish->exec_publish(1, null);
+
+		$this->assertTrue( !$result['status'] );
+		$this->assertEquals( '公開処理が失敗しました。', $result['message'] );
+		// TODO:ログなどのアウトプットファイルも要確認
+		// $this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) )
+
+
+		//============================================================
+		// 予約公開実行
+		//============================================================
+		$options = $this->options;
+
+		// $date = ;
+		// 画面入力項目の設定
+		$options['_POST'] = array('branch_select_value' => 'release/2018-07-01',	
+								'gmt_reserve_datetime' => gmdate("Y-m-d H:i:s", time()),
+								'commit_hash' => '7daab0b',	
+								'comment' => '予約登録テスト',	
+								'ver_no' => null,
+								'selected_id' => null
+							);
+
+		$main = new indigo\main( $options );
+		$tsReserve = new indigo\db\tsReserve( $main );
+		
+		//============================================================
+		// 入力情報を公開予約テーブルへ登録
+		//============================================================
+		$result = $tsReserve->insert_ts_reserve(json_decode(json_encode($options)));
+
+
+		//============================================================
+		// 予約公開実行
+		//============================================================
+		$publish = new indigo\publish( $main );
+
+		$result = $publish->exec_publish(1, null);
+
+		$this->assertTrue( $result['status'] );
+		$this->assertTrue( isset($result['output_id']) );
+		$this->assertTrue( isset($result['backup_id']) );
+		$this->assertEquals( '公開処理が成功しました。', $result['message'] );
+
+	}
+
+
 	/**
 	 * 即時公開処理処理
 	 *
@@ -467,7 +529,6 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$this->assertTrue( isset($result['output_id']) );
 		$this->assertTrue( isset($result['backup_id']) );
 		$this->assertEquals( '公開処理が成功しました。', $result['message'] );
-		$this->assertTrue( isset($result['output_id']) );
 
 		// TODO:ログなどのアウトプットファイルも要確認
 		// $this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) )
@@ -530,8 +591,9 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$this->assertTrue( isset($backup_id) );
 
 		$this->assertTrue( $result['status'] );
-		$this->assertEquals( '公開処理が成功しました。', $result['message'] );
 		$this->assertTrue( isset($result['output_id']) );
+		$this->assertTrue( isset($result['backup_id']) );
+		$this->assertEquals( '公開処理が成功しました。', $result['message'] );
 
 		// TODO:ログなどのアウトプットファイルも要確認
 		// $this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) )
