@@ -238,7 +238,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		//============================================================
 		$result = $tsReserve->insert_ts_reserve(json_decode(json_encode($options)));
 
-
+		$this->assertTrue( $result['status'] );
+		
 		//============================================================
 		// 予約公開実行
 		//============================================================
@@ -463,6 +464,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		//============================================================
 		$result = $tsReserve->insert_ts_reserve(json_decode(json_encode($options)));
 
+		$this->assertTrue( $result['status'] );
 
 		//============================================================
 		// 予約公開実行
