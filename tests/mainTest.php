@@ -132,8 +132,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$this->assertEquals( '公開予約日時', $html->find('tr',0)->childNodes(1)->innertext );
 		$this->assertEquals( 0, count($html->find('td')) );
 
-		$this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/waiting/' ) );
 		$this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/backup/' ) );
+		$this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/waiting/' ) );
 		$this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) );
 		$this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/released/' ) );
 		$this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/log/' ) );
@@ -398,8 +398,28 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		clearstatcache();
 	}
 
+    // public function reserveTestData()
+    // {
+    //     return array(
+    //       array(
+    //       	1,
+    //       	'2018-08-18 10:00:00',
+    //       	'release/2018-07-01	',
+    //       	'86daeb8',
+    //       	'ユニットテスト001',
+    //       	'0',
+    //       	'0',
+    //       	'2018-08-16 13:15:09',
+    //       	'user01',
+    //       	null,
+    //       	null,
+    //       	'0')
+    //     );
+    // }
+
 	/**
 	 * 即時公開処理処理
+	 *
 	 */
 	public function testImmediatePublish(){
 
@@ -444,6 +464,70 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$result = $publish->exec_publish(2, null);
 
 		$this->assertTrue( $result['status'] );
+		$this->assertTrue( isset($result['output_id']) );
+		$this->assertTrue( isset($result['backup_id']) );
+		$this->assertEquals( '公開処理が成功しました。', $result['message'] );
+		$this->assertTrue( isset($result['output_id']) );
+
+		// TODO:ログなどのアウトプットファイルも要確認
+		// $this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) )
+
+		
+		// $path = '';
+		// // 本番環境ディレクトリの絶対パスを取得。（配列1番目のサーバを設定）
+		// foreach ( (array)$options['server'] as $server ) {
+		// 	$path = $this->fs->normalize_path($this->fs->get_realpath($server['real_path'] . "/"));
+		// 	break; // 現時点では最初の1つのみ有効なのでブレイク
+		// }
+		// $current_branch_name = $this->get_current_branch_name($path);
+
+		// $this->assertEquals( $branch_name, $current_branch_name );
+		
+		return $result['backup_id'];
+	}
+
+	/**
+	 * 手動復元公開処理処理
+	 *
+	 * @depends testImmediatePublish
+	 */
+	public function testManualRestorePublish($backup_id){
+
+		//============================================================
+		// 復元公開処理（失敗）　画面入力項目nullの場合
+		//============================================================
+		$options = $this->options;
+		$options['_POST'] = array('restore' => 1);	
+
+		$main = new indigo\main( $options );
+		$publish = new indigo\publish( $main );
+
+		$result = $publish->exec_publish(3, null);
+
+		$this->assertTrue( !$result['status'] );
+		$this->assertEquals( '公開処理が失敗しました。', $result['message'] );
+		// TODO:ログなどのアウトプットファイルも要確認
+		// $this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) )
+
+		//============================================================
+		// 即時公開処理（成功）
+		//============================================================
+		$options = $this->options;
+
+		$branch_name = 'release/2018-04-01';
+
+		// 画面入力項目の設定
+		$options['_POST'] = array('immediate_confirm' => 1,	
+								'selected_id' => $backup_id
+							);
+
+		$main = new indigo\main( $options );
+		$publish = new indigo\publish( $main );
+
+		// 即時公開
+		$result = $publish->exec_publish(3, null);
+
+		$this->assertTrue( $result['status'] );
 		$this->assertEquals( '公開処理が成功しました。', $result['message'] );
 		$this->assertTrue( isset($result['output_id']) );
 
@@ -462,6 +546,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		// $this->assertEquals( $branch_name, $current_branch_name );
 		
 	}
+
 
 	/**
 	 * 新規ダイアログ表示処理
@@ -520,38 +605,4 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		// $this->assertEquals( 1, count($html->find('#loader-bg div')) );
 	}
 
-
-
-	// /**
-	//  * 指定パス内のブランチ名取得
-	//  * 
-	//  * @return now_branch
-	//  */
-	// private function get_current_branch_name($path) {
-
-	// 	$current_dir = realpath('.');
-
-	// 	$now_branch = "";
-
-	// 	// ディレクトリ移動
-	// 	if ( $this->fs->file_exists( $path . "/.git" ) && chdir( $path ) ) {
-
-	// 		// 現在のブランチ取得
-	// 		exec( 'git branch', $output);
-
-	// 		foreach ( $output as $value ) {
-	// 			// 「*」の付いてるブランチを現在のブランチと判定
-	// 			if ( strpos($value, '*') !== false ) {
-
-	// 				$value = trim(str_replace("* ", "", $value));
-	// 				$now_branch = $value;
-	// 				break;
-	// 			}
-	// 		}
-	// 	}
-
-	// 	chdir($current_dir);
-
-	// 	return $now_branch;		
-	// }
 }
