@@ -37,8 +37,6 @@ class gitManager
 	 */
 	public function get_branch_list($options) {
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_branch_list start');
-
 		$current_dir = realpath('.');
 
 		// masterディレクトリの絶対パス
@@ -78,7 +76,6 @@ class gitManager
 
 		chdir($current_dir);
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_branch_list end');
 		return $ret_array;
 	}
 

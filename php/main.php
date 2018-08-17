@@ -239,13 +239,14 @@ class main
 		// ログパス
 		$this->process_log_path = $this->realpath_array['realpath_log'] . 'log_process_' . $log_dirname . '.log';
 
-		$logstr = "realpath_server：" . $this->realpath_array['realpath_server'] . "\r\n";
-		$logstr .= "realpath_backup：" . $this->realpath_array['realpath_backup'] . "\r\n";
-		$logstr .= "realpath_waiting：" . $this->realpath_array['realpath_waiting'] . "\r\n";
-		$logstr .= "realpath_running：" . $this->realpath_array['realpath_running'] . "\r\n";
-		$logstr .= "realpath_released：" . $this->realpath_array['realpath_released'] . "\r\n";
-		$logstr .= "realpath_log：" . $this->realpath_array['realpath_log'];
-		$this->common()->put_process_log_block($logstr);
+		// $logstr = "[realpath]" . "\r\n";
+		// $logstr .= "server -> " . $this->realpath_array['realpath_server'] . "\r\n";
+		// $logstr .= "backup -> " . $this->realpath_array['realpath_backup'] . "\r\n";
+		// $logstr .= "waiting -> " . $this->realpath_array['realpath_waiting'] . "\r\n";
+		// $logstr .= "running -> " . $this->realpath_array['realpath_running'] . "\r\n";
+		// $logstr .= "released -> " . $this->realpath_array['realpath_released'] . "\r\n";
+		// $logstr .= "log -> " . $this->realpath_array['realpath_log'];
+		// $this->common()->put_process_log_block($logstr);
 
 		//============================================================
 		// タイムゾーンの設定
@@ -293,8 +294,7 @@ class main
 	 */
 	public function run() {
 		
-		$logstr = "run() start";
-		$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+		$this->common()->put_process_log(__METHOD__, __LINE__, "■ run start");
 
 		// 画面表示
 		$disp = '';  
@@ -580,8 +580,7 @@ class main
 		// データベース接続を閉じる
 		$this->pdoMgr->close();
 
-		$logstr = "run() end";
-		$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+		$this->common()->put_process_log(__METHOD__, __LINE__, "■ run() end");
 
 		// 画面表示
 		return $disp . $disp_lock . $dialog_html;

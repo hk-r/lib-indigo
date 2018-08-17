@@ -33,8 +33,6 @@ class check
 			$ret = false;
 		}
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '>>check is_null_branch:' . $ret);
-
 		return $ret;
 	}
 
@@ -51,9 +49,7 @@ class check
 		if (!$commit_hash) {
 			$ret = false;
 		}
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '>>check is_null_commit_hash:' . $ret);
-
+		
 		return $ret;
 	}
 
@@ -71,8 +67,6 @@ class check
 			$ret = false;
 		}
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '>>check is_null_reserve_date:' . $ret);
-
 		return $ret;
 	}
 
@@ -89,8 +83,6 @@ class check
 		if (!$reserve_time) {
 			$ret = false;
 		}
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '>>check is_null_reserve_time:' . $ret);
 
 		return $ret;
 	}
@@ -110,8 +102,6 @@ class check
 		if (isset($max) && $max <= count($data_list)) {
 			$ret = false;
 		}
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '>>check check_reserve_max_record:' . $ret);
 
 		return $ret;
 	}
@@ -134,8 +124,6 @@ class check
 			$ret = false;
 		}	
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '>>check check_date:' . $ret);
-
 		return $ret;
 	}
 
@@ -153,11 +141,9 @@ class check
 		// GMTの現在日時
 		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 
-		if (strtotime($now) > strtotime($datetime)) {
+		if (strtotime($now) < strtotime($datetime)) {
 			$ret = false;
 		}
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '>>check check_future_date:' . $ret);
 
 		return $ret;
 	}
@@ -185,8 +171,6 @@ class check
 			}
 		}
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '>>check check_exist_branch:' . $ret);
-
 		return $ret;
 	}
 
@@ -212,8 +196,6 @@ class check
 				break;
 			}
 		}		
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '>>check check_exist_reserve:' . $ret);
 
 		return $ret;
 	}

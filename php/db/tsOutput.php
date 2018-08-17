@@ -82,11 +82,8 @@ class tsOutput
 	 */
 	public function get_ts_output_list() {
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_ts_output_list start');
-
-		$select_sql = "
-				SELECT * FROM TS_OUTPUT
-				WHERE " . self::TS_OUTPUT_GEN_DELETE_FLG . " = '0' " .	// 0:未削除
+		$select_sql = "SELECT * FROM TS_OUTPUT " .
+				"WHERE " . self::TS_OUTPUT_GEN_DELETE_FLG . " = '0' " .	// 0:未削除
 				"ORDER BY " . self::TS_OUTPUT_ID_SEQ . " DESC "	.		// 処理結果ID 降順
 				"LIMIT " . define::LIMIT_LIST_RECORD;					// 最大1,000件までの取得
 
@@ -100,8 +97,6 @@ class tsOutput
 		foreach ((array)$ret_array as $array) {
 			$conv_ret_array[] = $this->convert_ts_output_entity($array);
 		}
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_ts_output_list end');
 
 		return $conv_ret_array;
 	}

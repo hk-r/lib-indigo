@@ -42,9 +42,6 @@ class backupScreen
 	 */
 	public function disp_backup_screen() {
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_backup_screen start');
-
-		
 		// バックアップ一覧を取得
 		$data_list = $this->tsBackup->get_ts_backup_list();
 
@@ -104,8 +101,6 @@ class backupScreen
 			. '</div>'
 			. '</form>'
 			. '</div>';
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_backup_screen end');
 
 		return $ret;
 	}

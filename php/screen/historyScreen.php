@@ -34,8 +34,6 @@ class historyScreen
 	 */
 	public function disp_history_screen() {
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_history_screen start');
-
 		// 公開処理結果一覧を取得
 		$output_list = $this->tsOutput->get_ts_output_list();
 
@@ -116,8 +114,6 @@ class historyScreen
 			. '</form>'
 			. '</div>';
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_history_screen end');
-
 		return $ret;
 	}
 
@@ -129,12 +125,8 @@ class historyScreen
 	 */
 	public function do_disp_log_dialog() {
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_disp_log_dialog start');
-
 		// ダイアログHTMLの作成
 		$dialog_disp = $this->create_log_dialog_html();
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_disp_log_dialog end');
 
 		return $dialog_disp;
 	}
@@ -145,28 +137,26 @@ class historyScreen
 	 * @return string $ret ログダイアログHTML
 	 */
 	private function create_log_dialog_html() {
-		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ create_log_dialog_html start');
+
+		$selected_id =  $this->main->options->_POST->selected_id;
+		// 公開処理結果情報の取得
+		$selected_ret = $this->tsOutput->get_selected_ts_output($selected_id);
+
+		$start_datetime_gmt = $selected_ret[tsOutput::OUTPUT_ENTITY_START_GMT];
+		// 公開予定ディレクトリ名の取得
+		$dirname = $this->main->common()->format_gmt_datetime($start_datetime_gmt, define::DATETIME_FORMAT_SAVE);
+
+		// logディレクトリの絶対パスを取得。
+		$realpath_log = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->realpath_array['realpath_log'] . $dirname . "/"));
 	
-			$selected_id =  $this->main->options->_POST->selected_id;
-			// 公開処理結果情報の取得
-			$selected_ret = $this->tsOutput->get_selected_ts_output($selected_id);
+		// ファイルを変数に格納
+		$log_filename = $realpath_log . 'pub_copy_' . $dirname . '.log';
 
-			$start_datetime_gmt = $selected_ret[tsOutput::OUTPUT_ENTITY_START_GMT];
-			// 公開予定ディレクトリ名の取得
-			$dirname = $this->main->common()->format_gmt_datetime($start_datetime_gmt, define::DATETIME_FORMAT_SAVE);
-
-			// logディレクトリの絶対パスを取得。
-			$realpath_log = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->realpath_array['realpath_log'] . $dirname . "/"));
-		
-			// ファイルを変数に格納
-			$log_filename = $realpath_log . 'pub_copy_' . $dirname . '.log';
-
-			$content = "";
-			if (file_exists($log_filename)) {
-				// ファイルの読み込み
-				$content = file_get_contents($log_filename);
-			}
+		$content = "";
+		if (file_exists($log_filename)) {
+			// ファイルの読み込み
+			$content = file_get_contents($log_filename);
+		}
 
 		$ret = '<div class="dialog" id="modal_dialog">'
 			  . '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
@@ -197,8 +187,6 @@ class historyScreen
 			  . '</div>'
 			  . '</div></div>';
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ create_log_dialog_html end');
-
 		return $ret;
 	}
 

@@ -50,8 +50,9 @@ class common
 					'return' => 0
 			  	  );
 
-		$this->put_process_log(__METHOD__, __LINE__, "■ command_execute start");
-		$this->put_process_log(__METHOD__, __LINE__, "command --> " . $command);
+
+		$this->main->common()->put_process_log_block('[command]');
+		$this->main->common()->put_process_log_block($command);
 
 	    // 標準出力とエラー出力を両方とも出力する
 	    if ($captureStderr === true) {
@@ -63,7 +64,7 @@ class common
 		if ($return !== 0 ) {
 			// 異常終了の場合
 
-			$logstr = "** コマンド実行エラー **";
+			$logstr = "** コマンド実行エラーが発生しました。詳細はエラーログを確認してください。 **";
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 			$msg = 'Command error. ' . "\r\n" .
@@ -75,8 +76,6 @@ class common
 
 		$ret['output'] = $output;
 		$ret['return'] = $return;
-
-		$this->put_process_log(__METHOD__, __LINE__, "■ command_execute end");
 
 	    return $ret;
 	}
@@ -218,7 +217,7 @@ class common
 	}
 
 	/**
-	 * 区切り用のログを出力する。（日時などの詳細を出力しない）
+	 * ブロックログを出力する。（日時などの詳細を出力しない）
 	 *
 	 * @param string $text 出力文字列
 	 *

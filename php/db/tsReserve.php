@@ -66,13 +66,11 @@ class tsReserve
 	 */
 	public function get_ts_reserve_list() {
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_ts_reserve_list start');
-
-		$select_sql = "
-				SELECT * FROM TS_RESERVE 
-				WHERE " . self::TS_RESERVE_STATUS . " = '0' " . 		// 0:未処理
+		$select_sql = "SELECT * FROM TS_RESERVE " . 
+				"WHERE " . self::TS_RESERVE_STATUS . " = '0' " . 		// 0:未処理
 				"  AND " . self::TS_RESERVE_DELETE_FLG . " = '0' " .	// 0:未削除
 				"ORDER BY " . self::TS_RESERVE_DATETIME . " ASC;";		// 公開予定日時 昇順
+
 
 		// 前処理
 		$stmt = $this->main->dbh()->prepare($select_sql);
@@ -85,8 +83,6 @@ class tsReserve
 			$conv_ret_array[] = $this->convert_ts_reserve_entity($array);
 		}
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_ts_reserve_list end');
-
 		return $conv_ret_array;
 	}
 
@@ -103,12 +99,9 @@ class tsReserve
 	 */
 	public function get_ts_reserve_publish_list($now) {
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_ts_reserve_publish_list start');
-
 		// SELECT文作成（削除フラグ = 0、公開予定日時>=現在日時、ソート順：公開予定日時の降順）
-		$select_sql = "
-				SELECT * FROM TS_RESERVE
-				WHERE " . self::TS_RESERVE_STATUS . " = '0' " . 		// 0:未処理
+		$select_sql = "SELECT * FROM TS_RESERVE " .
+				"WHERE " . self::TS_RESERVE_STATUS . " = '0' " . 		// 0:未処理
 				" AND " . self::TS_RESERVE_DATETIME . " <= ? " .		// 引数日時と同時刻、または過去日時
 				" AND " . self::TS_RESERVE_DELETE_FLG . " = '0' " . 	// 0:未削除
 				"ORDER BY " . self::TS_RESERVE_DATETIME . " DESC;";		// 公開予定日時 降順
@@ -119,10 +112,11 @@ class tsReserve
 		// バインド引数設定
 		$stmt->bindParam(1, $now, \PDO::PARAM_STR);
 
+		$this->main->common()->put_process_log_block('[Param]');
+		$this->main->common()->put_process_log_block(self::TS_RESERVE_DATETIME . " = " . $now);
+
 		// SELECT実行
-		$ret_array = $this->main->pdoMgr()->execute_select($this->main->dbh(), $stmt);
-		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_ts_reserve_publish_list end');
+		$ret_array = $this->main->pdoMgr()->execute_select($this->main->dbh(), $stmt);	
 
 		return $ret_array;
 	}
@@ -141,17 +135,12 @@ class tsReserve
 	 */
 	public function get_selected_ts_reserve($selected_id) {
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_reserve start');
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '[パラメタ]selected_id：' . $selected_id);
-
 		if (!$selected_id) {
 			throw new \Exception('対象の公開予定IDが正しく取得できませんでした。 ');
 		}
 
 		// SELECT文作成
-		$select_sql = "SELECT * from TS_RESERVE 
-		WHERE " . self::TS_RESERVE_ID_SEQ . " = ?;";
+		$select_sql = "SELECT * from TS_RESERVE WHERE " . self::TS_RESERVE_ID_SEQ . " = ?;";
 
 		// 前処理
 		$stmt = $this->main->dbh()->prepare($select_sql);
@@ -159,13 +148,14 @@ class tsReserve
 		// バインド引数設定
 		$stmt->bindParam(1, $selected_id, \PDO::PARAM_INT);
 
+		$this->main->common()->put_process_log_block('[Param]');
+		$this->main->common()->put_process_log_block(self::TS_RESERVE_ID_SEQ . " = " . $selected_id);
+
 		// SELECT実行
 		$ret_array = $this->main->pdoMgr()->execute_select_one($this->main->dbh(), $stmt);
 
 		$conv_ret_array = $this->convert_ts_reserve_entity($ret_array);
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_reserve end');
-
 		return $conv_ret_array;
 	}
 
@@ -174,12 +164,13 @@ class tsReserve
 	 *
 	 * 公開予定情報を1件登録します。
 	 *
-	 * @param  array[]  $options mainオプション情報
+	 * @param array  $form 		 フォーム格納配列
+	 * @param string $gmt_reserve_datetime GMT公開予定日時
+	 * @param string $user_id 	 ユーザID
+	 *
 	 * @return null
 	 */
-	public function insert_ts_reserve($options) {
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ insert_ts_reserve start');
+	public function insert_ts_reserve($form, $gmt_reserve_datetime, $user_id) {
 
 		// INSERT文作成
 		$insert_sql = "INSERT INTO TS_RESERVE ("
@@ -204,22 +195,20 @@ class tsReserve
 		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 		
 		// バインド引数設定
-		$stmt->bindParam(1, $options->_POST->gmt_reserve_datetime, \PDO::PARAM_STR);
-		$stmt->bindParam(2, $options->_POST->branch_select_value, \PDO::PARAM_STR);
-		$stmt->bindParam(3, $options->_POST->commit_hash, \PDO::PARAM_STR);
-		$stmt->bindParam(4, $options->_POST->comment, \PDO::PARAM_STR);
+		$stmt->bindParam(1, $gmt_reserve_datetime, \PDO::PARAM_STR);
+		$stmt->bindParam(2, $form['branch_select_value'], \PDO::PARAM_STR);
+		$stmt->bindParam(3, $form['commit_hash'], \PDO::PARAM_STR);
+		$stmt->bindParam(4, $form['comment'], \PDO::PARAM_STR);
 		$stmt->bindValue(5, '0', \PDO::PARAM_STR);
 		$stmt->bindValue(6, define::DELETE_FLG_OFF, \PDO::PARAM_STR);
 		$stmt->bindParam(7, $now, \PDO::PARAM_STR);
-		$stmt->bindParam(8, $options->user_id, \PDO::PARAM_STR);
+		$stmt->bindParam(8, $user_id, \PDO::PARAM_STR);
 		$stmt->bindValue(9, null, \PDO::PARAM_STR);
 		$stmt->bindValue(10, null, \PDO::PARAM_STR);
 		$stmt->bindValue(11, '0', \PDO::PARAM_STR);
 
 		// INSERT実行
 		$stmt = $this->main->pdoMgr()->execute($this->main->dbh(), $stmt);
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ insert_ts_reserve end');
 	}
 
 	/**
@@ -228,29 +217,31 @@ class tsReserve
 	 * 引数の公開予定IDを条件に、公開予定情報を1件更新します。
 	 *
 	 * @param  array[]  $options mainオプション情報
-	 * @param  string  $selected_id 公開予定ID
+	 * @param string $gmt_reserve_datetime GMT公開予定日時
+	 * @param string $user_id 	 ユーザID
+	 * 
 	 * @return null
 	 * 
 	 * @throws Exception パラメタの値が正しく設定されていない場合
 	 * @throws Exception バージョンNOを確認し、すでに他ユーザにて情報が更新されている場合
 	 */
-	public function update_ts_reserve($options, $selected_id) {
+	public function update_ts_reserve($form, $gmt_reserve_datetime, $user_id) {
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ update_ts_reserve start');
 
-		if (!$selected_id) {
+		if (!$form['selected_id']) {
 			throw new \Exception('更新対象の公開予定IDが取得できませんでした。 ');
 		}
 
 		// 他ユーザで更新されていないか確認
-		$selected_ret = $this->get_selected_ts_reserve($selected_id);
+		$selected_ret = $this->get_selected_ts_reserve($form['selected_id']);
 
-		$logstr = "[排他確認]データ取得時のバージョンNO：" . $options->_POST->ver_no . "\r\n";
+		$logstr = "[排他確認]データ取得時のバージョンNO：" . $form['ver_no'] . "\r\n";
 		$logstr .= "[排他確認]現時点のバージョンNO：" . $selected_ret[self::RESERVE_ENTITY_VER_NO];
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		if ($selected_ret &&
-			$selected_ret[self::RESERVE_ENTITY_VER_NO] != $options->_POST->ver_no) {
+			$selected_ret[self::RESERVE_ENTITY_VER_NO] != $form['ver_no']) {
 
 			throw new \Exception('ユーザID [' . $selected_ret[self::RESERVE_ENTITY_UPDATE_USER_ID] . '] にて公開予定情報が更新されております。');
 		}
@@ -273,13 +264,13 @@ class tsReserve
 		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 		
 		// バインド引数設定
-		$stmt->bindParam(1, $options->_POST->gmt_reserve_datetime, \PDO::PARAM_STR);
-		$stmt->bindParam(2, $options->_POST->branch_select_value, \PDO::PARAM_STR);
-		$stmt->bindParam(3, $options->_POST->commit_hash, \PDO::PARAM_STR);
-		$stmt->bindParam(4, $options->_POST->comment, \PDO::PARAM_STR);
+		$stmt->bindParam(1, $gmt_reserve_datetime, \PDO::PARAM_STR);
+		$stmt->bindParam(2, $form['branch_select_value'], \PDO::PARAM_STR);
+		$stmt->bindParam(3, $form['commit_hash'], \PDO::PARAM_STR);
+		$stmt->bindParam(4, $form['comment'], \PDO::PARAM_STR);
 		$stmt->bindParam(5, $now, \PDO::PARAM_STR);
-		$stmt->bindParam(6, $options->user_id, \PDO::PARAM_STR);
-		$stmt->bindValue(7, $options->_POST->ver_no + 1, \PDO::PARAM_STR);
+		$stmt->bindParam(6, $user_id, \PDO::PARAM_STR);
+		$stmt->bindValue(7, $form['ver_no'] + 1, \PDO::PARAM_STR);
 		$stmt->bindParam(8, $selected_id, \PDO::PARAM_INT);
 
 		// UPDATE実行
@@ -391,8 +382,6 @@ class tsReserve
 	 */
 	private function convert_ts_reserve_entity($array) {
 	
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ convert_ts_reserve_entity start');
-
 		// ID
 		$conv_array[self::RESERVE_ENTITY_ID_SEQ] 		= $array[self::TS_RESERVE_ID_SEQ];
 
@@ -426,8 +415,6 @@ class tsReserve
 
 		// バージョンNO
 		$conv_array[self::RESERVE_ENTITY_VER_NO] 	= $array[self::TS_RESERVE_VER_NO];
-
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ convert_ts_reserve_entity end');
 
 	    return $conv_array;
 	}

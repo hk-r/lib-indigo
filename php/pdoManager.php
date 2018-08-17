@@ -42,8 +42,6 @@ class pdoManager
 	 */
 	public function connect() {
 	
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ connect start');
-
 		$dbh = null; // 初期化
 
 		$dsn;
@@ -104,14 +102,16 @@ class pdoManager
 	  			$db_pass,
 	  			$option
 	  		);
+	
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ PDO connect success.');
 
 		} catch (\PDOException $e) {
+
+			$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ PDO connect failed.');
 			// エラー情報表示
 			throw new \Exception("Pdo connection failed");
 		}
-			
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ connect end');
-
+		
 		return $dbh;
 
 	}
@@ -241,9 +241,10 @@ class pdoManager
 	 */
 	public function execute_select ($dbh, $stmt) {
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ execute_select start');
-
 		$ret_array = null;
+
+		$this->main->common()->put_process_log_block('[SQL]');
+		$this->main->common()->put_process_log_block($stmt->queryString);
 
 		// 実行
 		if ($stmt->execute()) {
@@ -255,8 +256,6 @@ class pdoManager
 			// エラー情報表示
 			throw new \Exception($dbh->errorInfo());
 		}
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ execute_select end');
 
 		return $ret_array;
 	}
@@ -277,11 +276,12 @@ class pdoManager
 	 */
 	public function execute_select_one ($dbh, $stmt) {
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ execute_select start');
-
 		$ret_array = null;
-
 		$rowcount = 0;
+
+		$this->main->common()->put_process_log_block('[SQL]');
+		$this->main->common()->put_process_log_block($stmt->queryString);
+
 		// 実行
 		if ($stmt->execute()) {
 			// 取得したデータを配列に格納して返す
@@ -297,8 +297,6 @@ class pdoManager
 		if ($rowcount > 1) {
 			throw new \Exception('More than 2 items of data were acquired.');
 		}
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ execute_select end');
 
 		return $ret_array;
 	}
@@ -317,7 +315,8 @@ class pdoManager
 	 */
 	public function execute ($dbh, $stmt) {
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ execute start');
+		$this->main->common()->put_process_log_block('[SQL]');
+		$this->main->common()->put_process_log_block($stmt->queryString);
 
 		// 実行
 		$stmt->execute();
@@ -326,8 +325,6 @@ class pdoManager
 			// エラー情報表示
 			throw new \Exception($dbh->errorInfo());
 		}
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ execute end');
 
 		return $stmt;
 	}

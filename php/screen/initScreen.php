@@ -81,8 +81,6 @@ class initScreen
 	 */
 	public function do_disp_init_screen() {
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_disp_init_screen start');
-
 		// 公開予定一覧を取得
 		$data_list = $this->tsReserve->get_ts_reserve_list();
 
@@ -142,8 +140,6 @@ class initScreen
 			. '</form>'
 			. '</div>';
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_disp_init_screen end');
-
 		return $ret;
 	}
 
@@ -154,12 +150,8 @@ class initScreen
 	 */
 	public function do_disp_add_dialog() {
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_add_dialog start');
-
 		// ダイアログHTMLの作成
 		$dialog_html= $this->create_input_dialog_html(self::INPUT_MODE_ADD);
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_add_dialog end');
 
 		return $dialog_html;
 	}
@@ -172,12 +164,13 @@ class initScreen
 	 */
 	public function do_check_add() {
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_check_add start');
-
 		$dialog_html;
 
+		$form = $this->get_form_value();
+		$gmt_reserve_datetime = $this->combine_to_gmt_date_and_time($form['reserve_date'], $form['reserve_time']);
+
 		// 入力チェック処理
-		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_ADD);
+		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_ADD, $form, $gmt_reserve_datetime);
 
 		if ($this->input_error_message) {
 			// エラーがあるので入力ダイアログのまま
@@ -185,10 +178,8 @@ class initScreen
 
 		} else {
 			// エラーがないので確認ダイアログへ遷移
-			$dialog_html = $this->create_check_add_dialog_html();
+			$dialog_html = $this->create_check_add_dialog_html($form);
 		}
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_check_add end');
 
 		return $dialog_html;
 	}
@@ -203,10 +194,11 @@ class initScreen
 	 */
 	public function do_confirm_add() {
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_confirm_add start');
+		$form = $this->get_form_value();
+		$gmt_reserve_datetime = $this->combine_to_gmt_date_and_time($form['reserve_date'], $form['reserve_time']);
 
 		// 入力チェック処理
-		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_ADD_CHECK);
+		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_ADD_CHECK, $form, $gmt_reserve_datetime);
 
 		$result = array('status' => true,
 						'message' => '',
@@ -218,13 +210,11 @@ class initScreen
 
 		} else {
 			// エラーがないので確定処理へ進む
-			$ret = $this->confirm_add();
+			$ret = $this->confirm_add($form, $gmt_reserve_datetime);
 			
 			$result['status'] = $ret['status'];
 			$result['message'] = $ret['message'];
 		}
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_confirm_add end');
 
 		return $result;
 	}
@@ -236,12 +226,8 @@ class initScreen
 	 */
 	public function do_back_add_dialog() {
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_back_add_dialog start');
-
 		// 入力ダイアログへ戻る
 		$dialog_html = $this->create_input_dialog_html(self::INPUT_MODE_ADD_BACK);
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_back_add_dialog end');
 
 		return $dialog_html;
 	}
@@ -253,12 +239,8 @@ class initScreen
 	 */
 	public function do_disp_update_dialog() {
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_update_dialog start');
-
 		// 入力ダイアログHTMLの作成
 		$dialog_html = $this->create_input_dialog_html(self::INPUT_MODE_UPDATE);
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ disp_update_dialog end');
 
 		return $dialog_html;
 	}
@@ -269,23 +251,22 @@ class initScreen
 	 * @return string $dialog_html 変更入力ダイアログHTML、または、変更確認ダイアログHTML
 	 */
 	public function do_check_update() {
-		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_check_update start');
-
+	
 		$dialog_html;
 
+		$form = $this->get_form_value();
+		$gmt_reserve_datetime = $this->combine_to_gmt_date_and_time($form['reserve_date'], $form['reserve_time']);
+
 		// 入力チェック処理
-		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_UPDATE);
+		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_UPDATE, $form, $gmt_reserve_datetime);
 
 		if ($this->input_error_message) {
 			// エラーがあるので入力ダイアログのまま
 			$dialog_html = $this->create_input_dialog_html(self::INPUT_MODE_UPDATE_BACK);
 		} else {
 			// エラーがないので確認ダイアログへ遷移
-			$dialog_html = $this->create_check_update_dialog_html();
+			$dialog_html = $this->create_check_update_dialog_html($form);
 		}
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_check_update end');
 
 		return $dialog_html;
 	}
@@ -299,11 +280,12 @@ class initScreen
 	 * 			string $result['dialog_html'] 	ダイアログのHTMLを返します。
 	 */
 	public function do_confirm_update() {
-		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_confirm_update start');
+
+		$form = $this->get_form_value();
+		$gmt_reserve_datetime = $this->combine_to_gmt_date_and_time($form['reserve_date'], $form['reserve_time']);
 
 		// 入力チェック処理
-		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_UPDATE_CHECK);
+		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_UPDATE_CHECK, $form, $gmt_reserve_datetime);
 
 		$result = array('status' => true,
 						'message' => '',
@@ -315,14 +297,12 @@ class initScreen
 
 		} else {
 			// エラーがないので確定処理へ進む
-			$ret = $this->confirm_update();
+			$ret = $this->confirm_update($form, $gmt_reserve_datetime);
 
 			$result['status'] = $ret['status'];
 			$result['message'] = $ret['message'];
 		}
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_confirm_update end');
-		
 		return $result;
 	}
 
@@ -333,12 +313,8 @@ class initScreen
 	 */
 	public function do_back_update_dialog() {
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_back_update_dialog start');
-
 		// 入力ダイアログHTMLの作成
 		$dialog_html = $this->create_input_dialog_html(self::INPUT_MODE_UPDATE_BACK);
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_back_update_dialog end');
 
 		return $dialog_html;
 	}
@@ -349,13 +325,9 @@ class initScreen
 	 * @return string $dialog_html 即時公開入力ダイアログHTML
 	 */
 	public function do_disp_immediate_dialog() {
-		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_disp_immediate_dialog start');
-
+	
 		// ダイアログHTMLの作成
 		$dialog_html = $this->create_input_dialog_html(self::INPUT_MODE_IMMEDIATE);
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_disp_immediate_dialog end');
 
 		return $dialog_html;
 	}
@@ -367,22 +339,21 @@ class initScreen
 	 */
 	public function do_check_immediate() {
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_check_immediate start');
-
 		$dialog_html;
 
+		$form = $this->get_form_value();
+		$gmt_reserve_datetime = $this->combine_to_gmt_date_and_time($form['reserve_date'], $form['reserve_time']);
+
 		// 入力チェック処理
-		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_IMMEDIATE);
+		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_IMMEDIATE, $form, $gmt_reserve_datetime);
 
 		if ($this->input_error_message) {
 			// エラーがあるので入力ダイアログのまま
 			$dialog_html = $this->create_input_dialog_html(self::INPUT_MODE_IMMEDIATE_BACK);
 		} else {
 			// エラーがないので確認ダイアログへ遷移
-			$dialog_html = $this->create_check_immediate_dialog_html();
+			$dialog_html = $this->create_check_immediate_dialog_html($form);
 		}
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_check_immediate end');
 
 		return $dialog_html;
 	}
@@ -397,10 +368,10 @@ class initScreen
 	 */
 	public function do_immediate_publish() {
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_immediate_publish start');
+		$form = $this->get_form_value();
 
 		// 入力チェック処理
-		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_IMMEDIATE_CHECK);
+		$this->input_error_message = $this->do_validation_check(self::INPUT_MODE_IMMEDIATE_CHECK, $form, null);
 
 		$result = array('status' => true,
 						'message' => '',
@@ -417,8 +388,6 @@ class initScreen
 			$result['message'] = $ret['message'];
 		}
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_immediate_publish end');
-
 		return $result;
 	}
 
@@ -429,12 +398,8 @@ class initScreen
 	 */
 	public function do_back_immediate_dialog() {
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_back_immediate_dialog start');
-
 		// 入力ダイアログHTMLの作成
 		$dialog_html = $this->create_input_dialog_html(self::INPUT_MODE_IMMEDIATE_BACK);
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_back_immediate_dialog end');
 
 		return $dialog_html;
 	}
@@ -443,15 +408,16 @@ class initScreen
 	 * 新規ダイアログの確定処理
 	 *	 
 	 * 公開予定データの登録と、予定ディレクトリを作成しGitの情報をコピーします。
+	 *
+	 * @param array  $form 		 フォーム格納配列
+	 * @param string $gmt_reserve_datetime GMT公開予定日時
 	 * 
 	 * @return array $result
 	 * 			bool   $result['status'] 		処理成功時に `true`、失敗時に `false` を返します。
 	 * 			string $result['message'] 		メッセージを返します。
 	 */
-	private function confirm_add() {
+	private function confirm_add($form, $gmt_reserve_datetime) {
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ confirm_add start');
-
 		$result = array('status' => true,
 						'message' => '');
 
@@ -467,7 +433,7 @@ class initScreen
 			$realpath_waiting = $this->main->realpath_array['realpath_waiting'];
 
 			// 公開予定ディレクトリ名の取得
-			$dirname = $this->main->common()->get_reserve_dirname($this->main->options->_POST->gmt_reserve_datetime);
+			$dirname = $this->main->common()->get_reserve_dirname($gmt_reserve_datetime);
 
 			// コピー処理
 			$this->main->gitMgr()->git_file_copy($this->main->options, $realpath_waiting, $dirname);
@@ -477,7 +443,7 @@ class initScreen
 			//============================================================
 			// 入力情報を公開予定テーブルへ登録
 			//============================================================
-			$this->tsReserve->insert_ts_reserve($this->main->options);
+			$this->tsReserve->insert_ts_reserve($form, $gmt_reserve_datetime, $this->main->options->user_id);
 			
 		} catch (\Exception $e) {
 
@@ -495,8 +461,6 @@ class initScreen
 
 		$result['status'] = true;
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ confirm_add end');
-
 		return $result;
 	}
 
@@ -505,14 +469,15 @@ class initScreen
 	 * 変更ダイアログの確定処理
 	 *	 
 	 * 公開予定データの更新と、既存の予定ディレクトリを削除し、再作成後Gitの情報をコピーします。
+	 *
+	 * @param array  $form 		 フォーム格納配列
+	 * @param string $gmt_reserve_datetime GMT公開予定日時
 	 * 
 	 * @return array $result
 	 * 			bool   $result['status'] 		処理成功時に `true`、失敗時に `false` を返します。
 	 * 			string $result['message'] 		メッセージを返します。
 	 */
-	private function confirm_update() {
-		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ confirm_update start');
+	private function confirm_update($form, $gmt_reserve_datetime) {
 	
 		$result = array('status' => true,
 						'message' => '');
@@ -539,7 +504,7 @@ class initScreen
 			// 変更後ブランチのGit情報を「waiting」ディレクトリへコピー
 			//============================================================
 			// 公開予定ディレクトリ名の取得
-			$dirname = $this->main->common()->get_reserve_dirname($this->main->options->_POST->gmt_reserve_datetime);
+			$dirname = $this->main->common()->get_reserve_dirname($gmt_reserve_datetime);
 
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ 変更後の公開予定ディレクトリ：');
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, $dirname);
@@ -552,9 +517,7 @@ class initScreen
 			//============================================================
 			// 入力情報を公開予定テーブルへ更新
 			//============================================================
-			$selected_id =  $this->main->options->_POST->selected_id;
-
-			$this->tsReserve->update_ts_reserve($this->main->options, $selected_id);
+			$this->tsReserve->update_ts_reserve($form, $gmt_reserve_datetime, $this->main->options->user_id);
 			
 		} catch (\Exception $e) {
 
@@ -572,8 +535,6 @@ class initScreen
 
 		$result['status'] = true;
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ confirm_update end');
-
 		return $result;
 	}
 
@@ -588,8 +549,6 @@ class initScreen
 	 */
 	public function do_delete() {
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_delete start');
-
 		$result = array('status' => true,
 						'message' => '');
 
@@ -654,8 +613,6 @@ class initScreen
 
 		$result['status'] = true;
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_delete end');
-
 		return $result;
 	}
 
@@ -668,9 +625,6 @@ class initScreen
 	 */
 	private function create_input_dialog_html($input_mode) {
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ create_input_dialog_html start');
-
-
 		$ret = '<div class="dialog" id="modal_dialog">'
 			  . '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
 			  . '<div style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; background: rgb(0, 0, 0); opacity: 0.5;"></div>'
@@ -823,26 +777,18 @@ class initScreen
 			  . '</div>'
 			  . '</div></div>';
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ create_input_dialog_html end');
-
 		return $ret;
 	}
 
 	/**
 	 * 新規確認ダイアログの表示
-	 *
+	 *	 
+	 * @param array $form フォーム格納配列
+	 *	 
 	 * @return string $ret ダイアログHTML
 	 */
-	private function create_check_add_dialog_html() {
+	private function create_check_add_dialog_html($form) {
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ create_check_add_dialog_html start');
-
-		// フォームパラメタの設定
-		$form = $this->get_form_value();
-
-		// 画面入力された日時を結合し、GMTへ変換する
-		$gmt_reserve_datetime = $this->combine_to_gmt_date_and_time($form['reserve_date'], $form['reserve_time']);
-
 		$ret = '<div class="dialog" id="modal_dialog">'
 			. '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
 			. '<div style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; background: rgb(0, 0, 0); opacity: 0.5;"></div>'
@@ -878,7 +824,6 @@ class initScreen
 			. '<td>' . htmlspecialchars($form['reserve_date']) . ' ' . htmlspecialchars($form['reserve_time'])
 			. '<input type="hidden" name="reserve_date" value="' . htmlspecialchars($form['reserve_date']) . '"/>'
 			. '<input type="hidden" name="reserve_time" value="' . htmlspecialchars($form['reserve_time']) . '"/>'
-			. '<input type="hidden" name="gmt_reserve_datetime" value="' . htmlspecialchars($gmt_reserve_datetime) . '"/>'
 			. '</td>'
 			. '</tr>';
 
@@ -915,26 +860,18 @@ class initScreen
 			 . '</div>'
 			 . '</div></div></div>';
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ create_check_add_dialog_html end');
-
 		return $ret;
 	}
 
 
 	/**
 	 * 変更確認ダイアログの表示
-	 *
+	 *	 
+	 * @param array $form フォーム格納配列
+	 *	 
 	 * @return string $ret ダイアログHTML
 	 */
 	private function create_check_update_dialog_html() {
-		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ create_check_update_dialog_html start');
-
-		// フォームパラメタの設定
-		$form = $this->get_form_value();
-
-		// 画面入力された日時を結合し、GMTへ変換する
-		$gmt_reserve_datetime = $this->combine_to_gmt_date_and_time($form['reserve_date'], $form['reserve_time']);
 	
 		$before_branch_select_value = "";
 		$before_reserve_date = "";
@@ -954,10 +891,9 @@ class initScreen
 			$before_reserve_time = $selected_data[tsReserve::RESERVE_ENTITY_RESERVE_TIME];
 			$before_commit_hash = $selected_data[tsReserve::RESERVE_ENTITY_COMMIT_HASH];
 			$before_comment = $selected_data[tsReserve::RESERVE_ENTITY_COMMENT];
-	
-			// 画面入力された日時を結合し、GMTへ変換する
-			$before_gmt_reserve_datetime = $this->combine_to_gmt_date_and_time($before_reserve_date, $before_reserve_time);
+			$before_gmt_reserve_datetime = $selected_data[tsReserve::RESERVE_ENTITY_RESERVE_GMT];
 		}
+
 		$ret = '<div class="dialog" id="modal_dialog">'
 			. '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
 			. '<div style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; background: rgb(0, 0, 0); opacity: 0.5;"></div>'
@@ -1030,7 +966,6 @@ class initScreen
 			. '<td>' . htmlspecialchars($form['reserve_date']) . ' ' . htmlspecialchars($form['reserve_time']) . '</td>'
 			. '<input type="hidden" name="reserve_date" value="' . htmlspecialchars($form['reserve_date']) . '"/>'
 			. '<input type="hidden" name="reserve_time" value="' . htmlspecialchars($form['reserve_time']) . '"/>'	 
-			. '<input type="hidden" name="gmt_reserve_datetime" value="' . htmlspecialchars($gmt_reserve_datetime) . '"/>'
 			. '</tr>'
 
 			// 「コメント」項目（変更後）
@@ -1061,23 +996,18 @@ class initScreen
 			. '</div>'
 			. '</div></div>';
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ create_check_update_dialog_html end');
-
 		return $ret;
 	}
 
 	/**
 	 * 即時公開確認ダイアログの表示
 	 *
+	 * @param array  $form 		 フォーム格納配列
+	 *
 	 * @return string $ret ダイアログHTML
 	 */
-	private function create_check_immediate_dialog_html() {
+	private function create_check_immediate_dialog_html($form) {
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ create_check_immediate_dialog_html start');
-
-		// フォームパラメタの設定
-		$form = $this->get_form_value();
-
 		$ret = '<div class="dialog" id="modal_dialog">'
 			. '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
 			. '<div style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; background: rgb(0, 0, 0); opacity: 0.5;"></div>'
@@ -1143,8 +1073,6 @@ class initScreen
 			 . '</div>'
 			 . '</div></div></div>';
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ create_check_immediate_dialog_html end');
-
 		return $ret;
 	}
 
@@ -1164,25 +1092,23 @@ class initScreen
 	 *  未来日チェック（公開予定日時が未来時刻であるか）
 	 * 
 	 * @param string $input_mode 入力モード
+	 * @param array  $form 		 フォーム格納配列
+	 * @param string $gmt_reserve_datetime GMT公開予定日時
 	 *
 	 * @return string $ret エラーメッセージHTML
 	 */
-	private function do_validation_check($input_mode) {
-				
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_validation_check start');
-
+	private function do_validation_check($input_mode, $form, $gmt_reserve_datetime) {
+		
 		$ret = "";
 
 		$date_required_error = true;
 		$branch_required_error = true;
 
-		$form = $this->get_form_value();
-
 		/**
  		* 公開予定一覧を取得
 		*/ 
 		$data_list = $this->tsReserve->get_ts_reserve_list();
-	
+
 		// 必須チェック
 		if (!$this->check->is_null_branch($form['branch_select_value'])) {
 			$ret .= '<p class="error_message">ブランチを選択してください。</p>';
@@ -1213,12 +1139,12 @@ class initScreen
 				} else {
 
 					// 未来の日付であるかチェック
-					if (!$this->check->check_future_date($form['gmt_reserve_datetime'])) {
+					if (!$this->check->check_future_date($gmt_reserve_datetime)) {
 						$ret .= '<p class="error_message">「公開予定日時」は未来日時を設定してください。</p>';
 					}
 
 					// 公開予定日時の重複チェック
-					if (!$this->check->check_exist_reserve($data_list, $form['gmt_reserve_datetime'], $form['selected_id'])) {
+					if (!$this->check->check_exist_reserve($data_list, $gmt_reserve_datetime, $form['selected_id'])) {
 						$ret .= '<p class="error_message">入力された日時はすでに公開予定が作成されています。</p>';
 					}
 				}
@@ -1244,8 +1170,10 @@ class initScreen
 				$ret .= '<p class="error_message">公開予定は最大' . $max . '件までの登録になります。</p>';
 			}
 		}
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_validation_check end');
+		
+		if (!$ret) {
+			$this->main->common()->put_process_log(__METHOD__, __LINE__, '入力チェック結果 -->' . $ret);
+		}
 
 		return $ret;
 	}
@@ -1309,11 +1237,9 @@ class initScreen
 	 * 			string $result['comment']	 	コメント
 	 * 			string $result['ver_no'] 		バージョンNO
 	 * 			string $result['selected_id'] 	選択ID
-	 * 			string $result['gmt_reserve_datetime'] 	公開予定日時（GMT）
+	 * 			string $result['before_gmt_reserve_datetime'] 	変更前公開予定日時（GMT）
 	 */
 	private function get_form_value() {
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_form_value start');
 
 		$form = array('branch_select_value' => '',
 						'reserve_date' => '',
@@ -1321,8 +1247,7 @@ class initScreen
 						'commit_hash' => '',
 						'comment' => '',
 						'ver_no' => '',
-						'selected_id' => '',
-						'gmt_reserve_datetime'
+						'selected_id' => ''
 					);
 
 		// フォームパラメタが設定されている場合変数へ設定
@@ -1347,11 +1272,17 @@ class initScreen
 		if (isset($this->main->options->_POST->selected_id)) {
 			$form['selected_id'] = $this->main->options->_POST->selected_id;
 		}
-		if (isset($this->main->options->_POST->gmt_reserve_datetime)) {
-			$form['gmt_reserve_datetime'] = $this->main->options->_POST->gmt_reserve_datetime;
-		}
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_form_value end');
+
+		$this->main->common()->put_process_log_block('[form]');
+		$this->main->common()->put_process_log_block('branch_select_value:' .  $form['branch_select_value']);
+		$this->main->common()->put_process_log_block('reserve_date:' . $form['reserve_date']);
+		$this->main->common()->put_process_log_block('reserve_time:' . $form['reserve_time']);
+		$this->main->common()->put_process_log_block('commit_hash:' . $form['commit_hash']);
+		$this->main->common()->put_process_log_block('comment:' . $form['comment']);
+		$this->main->common()->put_process_log_block('ver_no:' . $form['ver_no']);
+		$this->main->common()->put_process_log_block('selected_id:' . $form['selected_id']);
+
 
 		return $form;
 	}
