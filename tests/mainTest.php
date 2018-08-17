@@ -462,13 +462,13 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		// 画面入力項目の設定
 		$options['_POST'] = array(
 								'add_confirm' => 1,	
-								'branch_select_value' => 'release/2018-07-01',	
+								'branch_select_value' => 'release/2018-05-01',	
 
 								'reserve_date' => date('Y-m-d', time()),
 								'reserve_time' => date('H:i:s', strtotime('-10 second', time())),
 								// 'gmt_reserve_datetime' => gmdate('Y-m-d H:i:s', strtotime('+10 second', $current_datetime)),
 
-								'commit_hash' => '7daab0b',	
+								'commit_hash' => '0c39b3d',	
 								'comment' => '予定登録テスト002',	
 								'ver_no' => null,
 								'selected_id' => null
@@ -536,10 +536,10 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 		// 画面入力項目の設定
 		$options['_POST'] = array('immediate_confirm' => 1,	
-								'branch_select_value' => 'release/2017-03-31',	
+								'branch_select_value' => 'release/2017-06-01',	
 								'reserve_date' => null,
 								'reserve_time' => null,	
-								'commit_hash' => '998e1bf',	
+								'commit_hash' => 'ee404da',	
 								'comment' => 'phpUnitテスト_即時公開',	
 								'ver_no' => null,	
 								'selected_id' => null
@@ -575,7 +575,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 	}
 
 	/**
-	 * 手動復元公開処理処理
+	 * 手動復元公開処理
 	 *
 	 * @depends testImmediatePublish
 	 */
@@ -603,8 +603,6 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		//============================================================
 		$options = $this->options;
 
-		$branch_name = 'release/2018-04-01';
-
 		// 画面入力項目の設定
 		$options['_POST'] = array('restore' => 1,	
 								'selected_id' => $backup_id
@@ -618,7 +616,6 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 
 		$this->assertEquals( '公開処理が成功しました。', $result['message'] );
-		$this->assertTrue( isset($backup_id) );
 
 		$this->assertTrue( $result['status'] );
 		
@@ -645,6 +642,41 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		
 	}
 
+
+	/**
+	 * [自動復元のテスト！]手動復元公開処理
+	 *
+	 * @depends testImmediatePublish
+	 */
+	public function testAutoRestorePublish($backup_id){
+
+		//============================================================
+		// 復元公開処理（成功）
+		//============================================================
+		$options = $this->options;
+
+		// 画面入力項目の設定
+		$options['_POST'] = array('restore' => 1,	
+								'selected_id' => $backup_id
+							);
+
+		$main = new indigo\main( $options );
+		$publish = new indigo\publish( $main );
+
+		// 手動復元公開
+		$result = $publish->exec_publish(4, 2);
+
+		$this->assertEquals( '公開処理が成功しました。', $result['message'] );
+
+		$this->assertTrue( $result['status'] );
+		
+		// 1,2は予約公開済みとスキップデータ、3は即時公開済みデータ、4は手動復元済みデータ
+		$this->assertEquals( 5, $result['output_id'] );
+
+		// 1は予約公開のバックアップデータ、2は即時公開のバックアップデータ、3は手動復元のバックアップデータ
+		$this->assertEquals( 4, $result['backup_id'] );
+		
+	}
 
 	/**
 	 * 新規ダイアログ表示処理
