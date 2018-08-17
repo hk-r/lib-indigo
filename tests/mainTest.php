@@ -207,6 +207,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 	 */
 	public function testReservePublishLock(){
 
+		sleep(1);
+
 		//============================================================
 		// ロック処理
 		//============================================================
@@ -276,6 +278,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 	 */
 	public function testImmediatePublishLock(){
 
+		sleep(1);
+
 		//============================================================
 		// ロック処理
 		//============================================================
@@ -321,6 +325,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 	 * 手動復元公開ロック確認
 	 */
 	public function testManualRestorePublishLock(){
+
+		sleep(1);
 
 		//============================================================
 		// ロック処理
@@ -368,6 +374,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 	 * 自動復元公開ロック確認
 	 */
 	public function testAutoRestorePublishLock(){
+
+		sleep(1);
 
 		//============================================================
 		// ロック処理
@@ -434,6 +442,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 	 * 予定公開処理
 	 */
 	public function testReservePublish(){
+
+		sleep(1);
 
 		// //============================================================
 		// // 即時公開処理（失敗）　画面入力項目nullの場合
@@ -510,6 +520,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 	 */
 	public function testImmediatePublish(){
 
+		sleep(1);
+
 		//============================================================
 		// 即時公開処理（失敗）　画面入力項目nullの場合
 		//============================================================
@@ -575,11 +587,13 @@ class mainTest extends PHPUnit_Framework_TestCase{
 	}
 
 	/**
-	 * [自動復元のテスト！]手動復元公開処理
+	 * 自動復元処理公開
 	 *
 	 * @depends testImmediatePublish
 	 */
 	public function testAutoRestorePublish($output_id){
+
+		sleep(1);
 
 		//============================================================
 		// 復元公開処理（成功）
@@ -614,6 +628,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 	 *
 	 */
 	public function testManualRestorePublish(){
+
+		sleep(1);
 
 		//============================================================
 		// 復元公開処理（失敗）　画面入力項目nullの場合
