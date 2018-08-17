@@ -75,7 +75,8 @@ class publish
 	public function exec_publish($publish_type, $p_output_id) {
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ exec_publish start');
-
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '□ 公開種別：' . $this->main->common()->convert_publish_type($publish_type));
+		
 		$current_dir = realpath('.');
 
 		$result = array('status' => true,
