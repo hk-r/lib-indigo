@@ -375,6 +375,8 @@ class initScreen
 
 		$result = array('status' => true,
 						'message' => '',
+						'output_id' => '',
+						'backup_id' => '',
 						'dialog_html' => '');
 
 		if ($this->input_error_message) {
@@ -386,6 +388,8 @@ class initScreen
 
 			$result['status'] = $ret['status'];
 			$result['message'] = $ret['message'];
+			$result['output_id'] = $ret['output_id'];
+			$result['backup_id'] = $ret['backup_id'];
 		}
 
 		return $result;

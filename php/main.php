@@ -400,24 +400,22 @@ class main
 				if ( !$result['status'] ) {
 					// 処理失敗の場合、復元処理
 
-					$logstr = "** 手動復元公開処理エラー終了 **";
-					$logstr .= $result['message'] . "\r\n";
-					$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+					$this->common()->put_process_log(__METHOD__, __LINE__, "** 手動復元公開処理エラー終了 **" . $result['message']);
 
-					$this->common()->put_process_log(__METHOD__, __LINE__, "==========自動復元処理の呼び出し==========");
-					$result = $this->publish->exec_publish(define::PUBLISH_TYPE_AUTO_RESTORE, $result['output_id']);
+					if ($result['backup_id']) {
+						// バックアップが作成されている場合
+						$this->common()->put_process_log(__METHOD__, __LINE__, "==========自動復元処理の呼び出し==========");
+						$result = $this->publish->exec_publish(define::PUBLISH_TYPE_AUTO_RESTORE, $result['output_id']);
 
-					// 画面アラート用のメッセージ			
-					$alert_message .= "≪自動復元公開処理≫" . $result['message'];
+						// 画面アラート用のメッセージ			
+						$alert_message .= "≪自動復元公開処理≫" . $result['message'];
 
-					if ( !$result['status'] ) {
-						// 処理失敗の場合、復元処理
-						
-						$logstr = "** 手動復元公開処理エラー終了 **";
-						$logstr .= $result['message'] . "\r\n";
-						$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+						if ( !$result['status'] ) {
+							// 処理失敗の場合、復元処理
+							
+							$this->common()->put_process_log(__METHOD__, __LINE__, "** 自動復元公開処理エラー終了 **" . $result['message']);
+						}
 					}
-
 				}
 
 			//============================================================
@@ -448,23 +446,24 @@ class main
 				if ( !$result['status'] ) {
 					// 処理失敗の場合、復元処理
 
-					$logstr = "** 即時公開処理エラー終了 **";
-					$logstr .= $result['message'] . "\r\n";
-					$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+					$this->common()->put_process_log(__METHOD__, __LINE__, "** 即時公開処理エラー終了 **" . $result['message']);
 
-					$this->common()->put_process_log(__METHOD__, __LINE__, "==========自動復元処理の呼び出し==========");
-					$result = $this->publish->exec_publish(define::PUBLISH_TYPE_AUTO_RESTORE, $result['output_id']);
+					if ($result['backup_id']) {
+						// バックアップが作成されている場合
+						$this->common()->put_process_log(__METHOD__, __LINE__, "==========自動復元処理の呼び出し==========");
+						$result = $this->publish->exec_publish(define::PUBLISH_TYPE_AUTO_RESTORE, $result['output_id']);
 
-					// 画面アラート用のメッセージ			
-					$alert_message .= "≪自動復元公開処理≫" . $result['message'];
+						// 画面アラート用のメッセージ			
+						$alert_message .= "≪自動復元公開処理≫" . $result['message'];
 
-					if ( !$result['status'] ) {
-						// 処理失敗の場合、復元処理
-						
-						$logstr = "** 復元公開処理エラー終了 **";
-						$logstr .= $result['message'] . "\r\n";
-						$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+						if ( !$result['status'] ) {
+							// 処理失敗の場合、復元処理
+							
+							$this->common()->put_process_log(__METHOD__, __LINE__, "** 自動復元公開処理エラー終了 **" . $result['message']);
+						}
 					}
+
+
 
 				}
 
@@ -616,21 +615,20 @@ class main
 			if ( !$result['status'] ) {
 				// 予定公開処理失敗の場合
 
-				$logstr = "** 予定公開処理エラー終了 **" . "\r\n";
-				$logstr .= $result['message'];
-				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+				$this->common()->put_process_log(__METHOD__, __LINE__, "** 予定公開処理エラー終了 **" . $result['message']);
 
-				$logstr = "==========自動復元処理の呼び出し==========";
-				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+				if ($result['backup_id']) {
+					// バックアップが作成されている場合
 
-				$result = $this->publish->exec_publish(define::PUBLISH_TYPE_AUTO_RESTORE, $result['output_id']);
+					$this->common()->put_process_log(__METHOD__, __LINE__, "==========自動復元処理の呼び出し==========");
 
-				if ( !$result['status'] ) {
-					// 自動復元処理失敗の場合
+					$result = $this->publish->exec_publish(define::PUBLISH_TYPE_AUTO_RESTORE, $result['output_id']);
 
-					$logstr = "** 自動復元処理エラー終了 **" . "\r\n";
-					$logstr .= $result['message'];
-					$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+					if ( !$result['status'] ) {
+						// 自動復元処理失敗の場合
+
+						$this->common()->put_process_log(__METHOD__, __LINE__, "** 自動復元公開処理エラー終了 **" . $result['message']);
+					}
 				}
 			}
 
