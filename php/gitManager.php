@@ -49,11 +49,11 @@ class gitManager
 
 			// fetch
 			$command = 'git fetch';
-			$this->main->common()->command_execute($command, false);
+			$this->main->common()->command_execute($command, true);
 
 			// ブランチの一覧取得
 			$command = 'git branch -r';
-			$ret = $this->main->common()->command_execute($command, false);
+			$ret = $this->main->common()->command_execute($command, true);
 
 			foreach ((array)$ret['output'] as $key => $value) {
 				if( strpos($value, '/HEAD') !== false ){
@@ -123,7 +123,7 @@ class gitManager
 			// git init
 			//============================================================
 			$command = 'git init';
-			$this->main->common()->command_execute($command, false);
+			$this->main->common()->command_execute($command, true);
 
 			//============================================================
 			// git urlのセット
@@ -132,19 +132,19 @@ class gitManager
 			
 			// initしたリポジトリに名前を付ける
 			$command = 'git remote add ' . define::GIT_REMOTE_NAME .  ' ' . $url;
-			$this->main->common()->command_execute($command, false);
+			$this->main->common()->command_execute($command, true);
 			
 			//============================================================
 			// git fetch（リモートリポジトリの指定ブランチの情報をローカルブランチへ反映）
 			//============================================================
 			$command = 'git fetch ' . define::GIT_REMOTE_NAME .  ' ' . $branch_name;
-			$this->main->common()->command_execute($command, false);
+			$this->main->common()->command_execute($command, true);
 			
 			//============================================================
 			// git pull（リモート取得ブランチを任意のローカルブランチにマージするコマンド）
 			//============================================================
 			$command = 'git pull ' . define::GIT_REMOTE_NAME .  ' ' . $branch_name;
-			$this->main->common()->command_execute($command, false);
+			$this->main->common()->command_execute($command, true);
 			
 		} else {
 			throw new \Exception('Git file copy failed. Move directory not found. ' . $dir_real_path);
@@ -222,21 +222,21 @@ class gitManager
 
 					// git セットアップ
 					$command = 'git init';
-					$this->main->common()->command_execute($command, false);
+					$this->main->common()->command_execute($command, true);
 
 					// git urlのセット
 					$url = $this->protocol . "://" . urlencode($options->git->username) . ":" . urlencode($options->git->password) . "@" . $this->host . $this->path;
 
 					$command = 'git remote add ' . define::GIT_REMOTE_NAME . ' ' . $url;
-					$this->main->common()->command_execute($command, false);
+					$this->main->common()->command_execute($command, true);
 
 					// git fetch
 					$command = 'git fetch ' . define::GIT_REMOTE_NAME;
-					$this->main->common()->command_execute($command, false);
+					$this->main->common()->command_execute($command, true);
 
 					// git pull
 					$command = 'git pull ' . define::GIT_REMOTE_NAME . ' master';
-					$this->main->common()->command_execute($command, false);
+					$this->main->common()->command_execute($command, true);
 
 				} else {
 
