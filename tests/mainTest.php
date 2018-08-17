@@ -497,8 +497,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 		$this->assertEquals( '公開処理が成功しました。', $result['message'] );
 		$this->assertTrue( $result['status'] );
-		$this->assertTrue( $result['output_id'] );
-		$this->assertTrue( $result['backup_id'] );
+		$this->assertEquals( 1, $result['output_id'] );
+		$this->assertEquals( 1, $result['backup_id'] );
 
 
 	}
@@ -523,6 +523,9 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 		$this->assertEquals( '公開処理が失敗しました。', $result['message'] );
 		$this->assertTrue( !$result['status'] );
+		$this->assertEquals( 2, $result['output_id'] );
+		$this->assertEquals( '', $result['backup_id'] );
+
 		// TODO:ログなどのアウトプットファイルも要確認
 		// $this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) )
 
@@ -550,8 +553,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 		$this->assertEquals( '公開処理が成功しました。', $result['message'] );
 		$this->assertTrue( $result['status'] );
-		$this->assertTrue( $result['output_id'] );
-		$this->assertTrue( $result['backup_id'] );
+		$this->assertEquals( 3, $result['output_id'] );
+		$this->assertEquals( 2, $result['backup_id'] );
 
 
 		// TODO:ログなどのアウトプットファイルも要確認
