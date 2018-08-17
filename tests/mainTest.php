@@ -231,7 +231,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 								// 'gmt_reserve_datetime' => gmdate('Y-m-d H:i:s', strtotime('+10 second', $current_datetime)),
 								
 								'commit_hash' => 'f9fd330',	
-								'comment' => '予定登録テスト',	
+								'comment' => '予定登録テスト001',	
 								'ver_no' => null,
 								'selected_id' => null
 							);
@@ -469,7 +469,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 								// 'gmt_reserve_datetime' => gmdate('Y-m-d H:i:s', strtotime('+10 second', $current_datetime)),
 
 								'commit_hash' => '7daab0b',	
-								'comment' => '予定登録テスト',	
+								'comment' => '予定登録テスト002',	
 								'ver_no' => null,
 								'selected_id' => null
 							);
