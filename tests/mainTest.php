@@ -639,7 +639,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 		// 画面入力項目の設定
 		$options['_POST'] = array('restore' => 1,	
-								'selected_id' => 1	// backup_id(予定公開のブランチに戻る想定)
+								'selected_id' => 2	// backup_id(予定公開のブランチに戻る想定。即時公開の時に取得したバックアップデータに戻る。)
 							);
 
 		$main = new indigo\main( $options );
