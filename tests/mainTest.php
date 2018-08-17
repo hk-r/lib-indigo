@@ -43,7 +43,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 				'mysql_db_pass' => ''
 			),
 
-			// 予約最大件数
+			// 予定最大件数
 			'max_reserve_record' => 10,
 
 			// 本番環境パス（同期先）※バージョン0.1.0時点では先頭の設定内容のみ有効
@@ -129,7 +129,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$this->assertEquals( 1, count($html->find('thead')) );
 		$this->assertEquals( 1, count($html->find('tr')) );
 		$this->assertEquals( 9, count($html->find('tr',0)->find('th')) );
-		$this->assertEquals( '公開予約日時', $html->find('tr',0)->childNodes(1)->innertext );
+		$this->assertEquals( '公開予定日時', $html->find('tr',0)->childNodes(1)->innertext );
 		$this->assertEquals( 0, count($html->find('td')) );
 
 		$this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/backup/' ) );
@@ -203,7 +203,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 
 	/**
-	 * 予約公開ロック確認
+	 * 予定公開ロック確認
 	 */
 	public function testReservePublishLock(){
 
@@ -216,32 +216,43 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		clearstatcache();
 
 		//============================================================
-		// 予約公開実行
+		// 予定公開実行
 		//============================================================
 		$options = $this->options;
 
-		// $date = ;
 		// 画面入力項目の設定
-		$options['_POST'] = array('branch_select_value' => 'release/2018-04-01',	
-								'gmt_reserve_datetime' => gmdate("Y-m-d H:i:s", time()),
+		$options['_POST'] = array(
+								'add_confirm' => 1,	
+								'branch_select_value' => 'release/2018-04-01',	
+								// 'gmt_reserve_datetime' => gmdate('Y-m-d H:i:s', strtotime('+1 minute', time())),
+
+								'reserve_date' => date('Y-m-d', time()),
+								'reserve_time' => date('H:i:s', strtotime('-10 second', time())),
+								// 'gmt_reserve_datetime' => gmdate('Y-m-d H:i:s', strtotime('+10 second', $current_datetime)),
+								
 								'commit_hash' => 'f9fd330',	
-								'comment' => '予約登録テスト',	
+								'comment' => '予定登録テスト',	
 								'ver_no' => null,
 								'selected_id' => null
 							);
 
 		$main = new indigo\main( $options );
-		$tsReserve = new indigo\db\tsReserve( $main );
+		$initScn = new indigo\screen\initScreen( $main );
+
 		// var_dump($options);
 		//============================================================
-		// 入力情報を公開予約テーブルへ登録
+		// 入力情報を公開予定テーブルへ登録
 		//============================================================
-		$result = $tsReserve->confirm_add();
+		$result = $initScn->do_confirm_add();
 
+		$this->assertEquals('', $result['message']);
 		$this->assertTrue( $result['status'] );
+		$this->assertEquals('', $result['dialog_html']);
 
+		// sleep(20);
+		
 		//============================================================
-		// 予約公開実行
+		// 予定公開実行
 		//============================================================
 		$publish = new indigo\publish( $main );
 
@@ -420,63 +431,75 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 
 	/**
-	 * 予約公開処理
+	 * 予定公開処理
 	 */
 	public function testReservePublish(){
 
+		// //============================================================
+		// // 即時公開処理（失敗）　画面入力項目nullの場合
+		// //============================================================
+		// $options = $this->options;
+		// // $options['_POST'] = array('immediate_confirm' => 1);	
+
+		// $main = new indigo\main( $options );
+		// $publish = new indigo\publish( $main );
+
+		// $result = $publish->exec_publish(1, null);
+
+		// $this->assertTrue( !$result['status'] );
+		// $this->assertEquals( '公開処理が失敗しました。', $result['message'] );
+		// // TODO:ログなどのアウトプットファイルも要確認
+		// // $this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) )
+
+
 		//============================================================
-		// 即時公開処理（失敗）　画面入力項目nullの場合
+		// 予定公開実行
 		//============================================================
 		$options = $this->options;
-		// $options['_POST'] = array('immediate_confirm' => 1);	
 
-		$main = new indigo\main( $options );
-		$publish = new indigo\publish( $main );
+		$current_datetime = time();
 
-		$result = $publish->exec_publish(1, null);
-
-		$this->assertTrue( !$result['status'] );
-		$this->assertEquals( '公開処理が失敗しました。', $result['message'] );
-		// TODO:ログなどのアウトプットファイルも要確認
-		// $this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) )
-
-
-		//============================================================
-		// 予約公開実行
-		//============================================================
-		$options = $this->options;
-
-		// $date = ;
 		// 画面入力項目の設定
-		$options['_POST'] = array('branch_select_value' => 'release/2018-07-01',	
-								'gmt_reserve_datetime' => gmdate("Y-m-d H:i:s", time()),
+		$options['_POST'] = array(
+								'add_confirm' => 1,	
+								'branch_select_value' => 'release/2018-07-01',	
+
+								'reserve_date' => date('Y-m-d', time()),
+								'reserve_time' => date('H:i:s', strtotime('-10 second', time())),
+								// 'gmt_reserve_datetime' => gmdate('Y-m-d H:i:s', strtotime('+10 second', $current_datetime)),
+
 								'commit_hash' => '7daab0b',	
-								'comment' => '予約登録テスト',	
+								'comment' => '予定登録テスト',	
 								'ver_no' => null,
 								'selected_id' => null
 							);
 
 		$main = new indigo\main( $options );
-		$tsReserve = new indigo\db\tsReserve( $main );
+		$initScn = new indigo\screen\initScreen( $main );
 		
 		//============================================================
-		// 入力情報を公開予約テーブルへ登録
+		// 入力情報を公開予定テーブルへ登録
 		//============================================================
-		$result = $tsReserve->confirm_add();
+		$result = $initScn->do_confirm_add();
 
+		$this->assertEquals('', $result['message']);
 		$this->assertTrue( $result['status'] );
+		$this->assertEquals('', $result['dialog_html']);
+
+		// sleep(20);
 
 		//============================================================
-		// 予約公開実行
+		// 予定公開実行
 		//============================================================
 		$publish = new indigo\publish( $main );
 
 		$result = $publish->exec_publish(1, null);
 
-		$this->assertTrue( $result['status'] );
-		$this->assertTrue( isset($result['output_id']) );
-		$this->assertTrue( isset($result['backup_id']) );
 		$this->assertEquals( '公開処理が成功しました。', $result['message'] );
+		$this->assertTrue( $result['status'] );
+		$this->assertTrue( $result['output_id'] );
+		$this->assertTrue( $result['backup_id'] );
+
 
 	}
 
@@ -498,8 +521,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 		$result = $publish->exec_publish(2, null);
 
-		$this->assertTrue( !$result['status'] );
 		$this->assertEquals( '公開処理が失敗しました。', $result['message'] );
+		$this->assertTrue( !$result['status'] );
 		// TODO:ログなどのアウトプットファイルも要確認
 		// $this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) )
 
@@ -508,11 +531,9 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		//============================================================
 		$options = $this->options;
 
-		$branch_name = 'release/2017-03-31';
-
 		// 画面入力項目の設定
 		$options['_POST'] = array('immediate_confirm' => 1,	
-								'branch_select_value' => $branch_name,	
+								'branch_select_value' => 'release/2017-03-31',	
 								'reserve_date' => null,
 								'reserve_time' => null,	
 								'commit_hash' => '998e1bf',	
@@ -527,10 +548,11 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		// 即時公開
 		$result = $publish->exec_publish(2, null);
 
-		$this->assertTrue( $result['status'] );
-		$this->assertTrue( isset($result['output_id']) );
-		$this->assertTrue( isset($result['backup_id']) );
 		$this->assertEquals( '公開処理が成功しました。', $result['message'] );
+		$this->assertTrue( $result['status'] );
+		$this->assertTrue( $result['output_id'] );
+		$this->assertTrue( $result['backup_id'] );
+
 
 		// TODO:ログなどのアウトプットファイルも要確認
 		// $this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) )
@@ -567,35 +589,38 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 		$result = $publish->exec_publish(3, null);
 
-		$this->assertTrue( !$result['status'] );
 		$this->assertEquals( '公開処理が失敗しました。', $result['message'] );
+		$this->assertTrue( !$result['status'] );
+
 		// TODO:ログなどのアウトプットファイルも要確認
 		// $this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) )
 
 		//============================================================
-		// 即時公開処理（成功）
+		// 復元公開処理（成功）
 		//============================================================
 		$options = $this->options;
 
 		$branch_name = 'release/2018-04-01';
 
 		// 画面入力項目の設定
-		$options['_POST'] = array('immediate_confirm' => 1,	
+		$options['_POST'] = array('restore' => 1,	
 								'selected_id' => $backup_id
 							);
 
 		$main = new indigo\main( $options );
 		$publish = new indigo\publish( $main );
 
-		// 即時公開
+		// 手動復元公開
 		$result = $publish->exec_publish(3, null);
 
+
+		$this->assertEquals( '公開処理が成功しました。', $result['message'] );
 		$this->assertTrue( isset($backup_id) );
 
 		$this->assertTrue( $result['status'] );
-		$this->assertTrue( isset($result['output_id']) );
-		$this->assertTrue( isset($result['backup_id']) );
-		$this->assertEquals( '公開処理が成功しました。', $result['message'] );
+		$this->assertTrue( $result['output_id'] );
+		$this->assertTrue( $result['backup_id'] );
+
 
 		// TODO:ログなどのアウトプットファイルも要確認
 		// $this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) )
@@ -664,7 +689,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		// $this->assertEquals( 1, count($html->find('.scr_content thead')) );
 		// $this->assertEquals( 1, count($html->find('.scr_content tr')) );
 		// $this->assertEquals( 9, count($html->find('.scr_content tr',0)->find('th')) );
-		// $this->assertEquals( '公開予約日時', $html->find('.scr_content tr',0)->childNodes(1)->innertext );
+		// $this->assertEquals( '公開予定日時', $html->find('.scr_content tr',0)->childNodes(1)->innertext );
 		// $this->assertEquals( 0, count($html->find('.scr_content td')) );
 
 		// // ダイアログ裏で表示する初期表示画面の表示確認		
