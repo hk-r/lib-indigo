@@ -76,7 +76,7 @@ class publish
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ exec_publish start');
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '□ 公開種別：' . $this->main->common()->convert_publish_type($publish_type));
-		
+
 		$current_dir = realpath('.');
 
 		$result = array('status' => true,
@@ -177,13 +177,12 @@ class publish
 							$this->main->common()->put_process_log_block($logstr);
 						}
 
-						$logstr = "公開予定ID" . $data[tsReserve::TS_RESERVE_ID_SEQ] . "\r\n";
-						$logstr .= "公開予定日時(GMT)：" . $data[tsReserve::TS_RESERVE_DATETIME] . "\r\n";
-						$logstr .= "ブランチ名：" . $data[tsReserve::TS_RESERVE_BRANCH] . "\r\n";
-						$logstr .= "コミット：" . $data[tsReserve::TS_RESERVE_COMMIT_HASH] . "\r\n";
-						$logstr .= "コメント：" . $data[tsReserve::TS_RESERVE_COMMENT] . "\r\n";
-						$logstr .= "ユーザID：" . $this->main->options->user_id;
-						$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
+						$this->main->common()->put_publish_log(__METHOD__, __LINE__, "公開予定ID" . $data[tsReserve::TS_RESERVE_ID_SEQ], $this->realpath_tracelog);
+						$this->main->common()->put_publish_log(__METHOD__, __LINE__, "公開予定日時(GMT)：" . $data[tsReserve::TS_RESERVE_DATETIME], $this->realpath_tracelog);
+						$this->main->common()->put_publish_log(__METHOD__, __LINE__, "ブランチ名：" . $data[tsReserve::TS_RESERVE_BRANCH], $this->realpath_tracelog);
+						$this->main->common()->put_publish_log(__METHOD__, __LINE__, "コミット：" . $data[tsReserve::TS_RESERVE_COMMIT_HASH], $this->realpath_tracelog);
+						$this->main->common()->put_publish_log(__METHOD__, __LINE__, "コメント：" . $data[tsReserve::TS_RESERVE_COMMENT], $this->realpath_tracelog);
+						$this->main->common()->put_publish_log(__METHOD__, __LINE__, "ユーザID：" . $this->main->options->user_id, $this->realpath_tracelog);
 
 						//============================================================
 						// 公開予定テーブルのステータス更新処理
@@ -370,10 +369,7 @@ class publish
 			// ロック解除処理
 			$this->unlock();
 
-			$logstr = "===============================================" . "\r\n";
-			$logstr .= "公開処理 異常終了"								. "\r\n";
-			$logstr .= "===============================================";
-			$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
+			$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, "==========公開処理 異常終了==========");
 
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ exec_publish end');
 
@@ -388,10 +384,7 @@ class publish
 		// ロック解除処理
 		$this->unlock();
 
-		$logstr = "===============================================" . "\r\n";
-		$logstr .= "公開処理 正常終了"								. "\r\n";
-		$logstr .= "===============================================";
-		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
+		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, "==========公開処理 正常終了==========");
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ exec_publish end');
 
@@ -423,8 +416,8 @@ class publish
 	public function exec_sync($ignore, $from_realpath, $to_realpath) {
 
 		$logstr = "==========rsyncコマンドによるディレクトリの同期実行==========";
-		$logstr .= "同期元パス --> " . $from_realpath . "\r\n";
-		$logstr .= "同期先パス --> " . $to_realpath;
+		$logstr .= "【同期元パス】" . $from_realpath . "\r\n";
+		$logstr .= "【同期先パス】" . $to_realpath;
 		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
 		// 除外コマンドの作成
@@ -458,8 +451,8 @@ class publish
 	public function exec_sync_copy($from_realpath, $to_realpath) {
 
 		$logstr = "==========rsyncコマンドによるディレクトリのコピー実行==========" . "\r\n";
-		$logstr .= "コピー元パス --> " . $from_realpath . "\r\n";
-		$logstr .= "コピー先パス --> " . $to_realpath;
+		$logstr .= "【コピー元パス】" . $from_realpath . "\r\n";
+		$logstr .= "【コピー先パス】" . $to_realpath;
 		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
 		$command = 'rsync -rhtvz' . ' ' .
@@ -490,8 +483,8 @@ class publish
 	public function exec_sync_move($from_realpath, $to_realpath) {
 
 		$logstr = "==========rsyncコマンドによるディレクトリの移動実行==========" . "\r\n";
-		$logstr .= "移動元パス --> " . $from_realpath . "\r\n";
-		$logstr .= "移動先パス --> " . $to_realpath;
+		$logstr .= "【移動元パス】 " . $from_realpath . "\r\n";
+		$logstr .= "【移動先パス】 " . $to_realpath;
 		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
 		$command = 'rsync -rhtvz --remove-source-files ' .
@@ -501,7 +494,7 @@ class publish
 		$this->main->common()->command_execute($command, true);
 
 		$logstr = "==========移動元の空ディレクトリ削除実行==========" . "\r\n";
-		$logstr .= "削除ディレクトリ：" . $from_realpath;
+		$logstr .= "【削除パス】：" . $from_realpath;
 		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
 		// 空のディレクトリを再帰的に削除する
@@ -550,15 +543,12 @@ class publish
 		$logstr = "==========パブリッシュのロック作成 START==========";
 		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-		$src = '';
-		$src .= 'ProcessID='.getmypid()."\r\n";
-		// $src .= @date( 'Y-m-d H:i:s' , time() )."\r\n";
+		$src = 'ProcessID='.getmypid()."\r\n";
 		$src .= 'Date='. $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 		$rtn = $this->main->fs()->save_file( $lockfilepath , $src );
 
-		$logstr = "ロックファイル作成結果：rtn=" . $rtn . "\r\n";
-		$logstr .= $src;
-		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
+		$this->main->common()->put_publish_log(__METHOD__, __LINE__, "ロックファイル作成結果：rtn=" . $rtn, $this->realpath_tracelog);
+		$this->main->common()->put_publish_log(__METHOD__, __LINE__, "ProcessID=" . getmypid(), $this->realpath_tracelog);
 
 		$logstr = "==========パブリッシュのロック作成 END==========";
 		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
@@ -786,9 +776,8 @@ class publish
 		// 公開処理結果テーブルの登録
 		$output_id = $this->tsOutput->insert_ts_output($output_dataArray);
 
-		$logstr = "☆公開処理結果テーブルのINSERT処理実行" . "\r\n";
-		$logstr .= "公開処理結果ID --> " . $output_id;
-		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
+		$this->main->common()->put_publish_log(__METHOD__, __LINE__, "☆公開処理結果テーブルのINSERT処理実行", $this->realpath_tracelog);
+		$this->main->common()->put_publish_log(__METHOD__, __LINE__, "公開処理結果ID --> " . $output_id, $this->realpath_tracelog);
 
 		return $output_id;
 	}
