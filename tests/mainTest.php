@@ -571,15 +571,49 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 		// $this->assertEquals( $branch_name, $current_branch_name );
 		
-		return $result['backup_id'];
+		return $result['output_id'];
 	}
+
+	/**
+	 * [自動復元のテスト！]手動復元公開処理
+	 *
+	 * @depends testImmediatePublish
+	 */
+	public function testAutoRestorePublish($output_id){
+
+		//============================================================
+		// 復元公開処理（成功）
+		//============================================================
+		$options = $this->options;
+
+		// 画面入力項目の設定
+		// $options['_POST'] = array('restore' => 1
+		// 					);
+
+		$main = new indigo\main( $options );
+		$publish = new indigo\publish( $main );
+
+		// 手動復元公開
+		$result = $publish->exec_publish(4, $output_id);
+
+		$this->assertEquals( '公開処理が成功しました。', $result['message'] );
+
+		$this->assertTrue( $result['status'] );
+		
+		// 1,2は予約公開済みとスキップデータ、3は即時公開済みデータ
+		$this->assertEquals( 4, $result['output_id'] );
+
+		// 自動復元公開はバックアップを取得しない
+		$this->assertEquals( '', $result['backup_id'] );
+		
+	}
+
 
 	/**
 	 * 手動復元公開処理
 	 *
-	 * @depends testImmediatePublish
 	 */
-	public function testManualRestorePublish($backup_id){
+	public function testManualRestorePublish(){
 
 		//============================================================
 		// 復元公開処理（失敗）　画面入力項目nullの場合
@@ -605,7 +639,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 		// 画面入力項目の設定
 		$options['_POST'] = array('restore' => 1,	
-								'selected_id' => $backup_id
+								'selected_id' => 1	// backup_id(予定公開のブランチに戻る想定)
 							);
 
 		$main = new indigo\main( $options );
@@ -619,8 +653,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 		$this->assertTrue( $result['status'] );
 		
-		// 1,2は予約公開済みとスキップデータ、3は即時公開済みデータ
-		$this->assertEquals( 4, $result['output_id'] );
+		// 1,2は予約公開済みとスキップデータ、3は即時公開済みデータ、4は自動復元公開済みデータ
+		$this->assertEquals( 5, $result['output_id'] );
 
 		// 1は予約公開のバックアップデータ、2は即時公開のバックアップデータ
 		$this->assertEquals( 3, $result['backup_id'] );
@@ -642,41 +676,6 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		
 	}
 
-
-	/**
-	 * [自動復元のテスト！]手動復元公開処理
-	 *
-	 * @depends testImmediatePublish
-	 */
-	public function testAutoRestorePublish($backup_id){
-
-		//============================================================
-		// 復元公開処理（成功）
-		//============================================================
-		$options = $this->options;
-
-		// 画面入力項目の設定
-		$options['_POST'] = array('restore' => 1,	
-								'selected_id' => $backup_id
-							);
-
-		$main = new indigo\main( $options );
-		$publish = new indigo\publish( $main );
-
-		// 手動復元公開
-		$result = $publish->exec_publish(4, 2);
-
-		$this->assertEquals( '公開処理が成功しました。', $result['message'] );
-
-		$this->assertTrue( $result['status'] );
-		
-		// 1,2は予約公開済みとスキップデータ、3は即時公開済みデータ、4は手動復元済みデータ
-		$this->assertEquals( 5, $result['output_id'] );
-
-		// 1は予約公開のバックアップデータ、2は即時公開のバックアップデータ、3は手動復元のバックアップデータ
-		$this->assertEquals( 4, $result['backup_id'] );
-		
-	}
 
 	/**
 	 * 新規ダイアログ表示処理
