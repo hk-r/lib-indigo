@@ -553,7 +553,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 		$this->assertEquals( '公開処理が成功しました。', $result['message'] );
 		$this->assertTrue( $result['status'] );
-		$this->assertEquals( 2, $result['output_id'] );
+		$this->assertEquals( 3, $result['output_id'] );	// 1,2は予約公開済みとスキップデータ
 		$this->assertEquals( 2, $result['backup_id'] );
 
 
