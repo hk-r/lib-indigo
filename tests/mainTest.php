@@ -621,8 +621,12 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$this->assertTrue( isset($backup_id) );
 
 		$this->assertTrue( $result['status'] );
-		$this->assertTrue( $result['output_id'] );
-		$this->assertTrue( $result['backup_id'] );
+		
+		// 1,2は予約公開済みとスキップデータ、3は即時公開済みデータ
+		$this->assertEquals( 4, $result['output_id'] );
+
+		// 1は予約公開のバックアップデータ、2は即時公開のバックアップデータ
+		$this->assertEquals( 3, $result['backup_id'] );
 
 
 		// TODO:ログなどのアウトプットファイルも要確認
