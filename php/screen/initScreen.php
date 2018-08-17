@@ -1212,17 +1212,13 @@ class initScreen
 				// 以下、日付の妥当性チェックがOKの場合にのみチェックする
 				} else {
 
-					// 画面入力された日時を結合し、GMTへ変換する
-					$gmt_reserve_datetime = $this->combine_to_gmt_date_and_time($form['reserve_date'], $form['reserve_time']);
-
-
 					// 未来の日付であるかチェック
-					if (!$this->check->check_future_date($gmt_reserve_datetime)) {
+					if (!$this->check->check_future_date($form['gmt_reserve_datetime'])) {
 						$ret .= '<p class="error_message">「公開予約日時」は未来日時を設定してください。</p>';
 					}
 
 					// 公開予約日時の重複チェック
-					if (!$this->check->check_exist_reserve($data_list, $gmt_reserve_datetime, $form['selected_id'])) {
+					if (!$this->check->check_exist_reserve($data_list, $form['gmt_reserve_datetime'], $form['selected_id'])) {
 						$ret .= '<p class="error_message">入力された日時はすでに公開予約が作成されています。</p>';
 					}
 				}
@@ -1313,6 +1309,7 @@ class initScreen
 	 * 			string $result['comment']	 	コメント
 	 * 			string $result['ver_no'] 		バージョンNO
 	 * 			string $result['selected_id'] 	選択ID
+	 * 			string $result['gmt_reserve_datetime'] 	公開予約日時（GMT）
 	 */
 	private function get_form_value() {
 
@@ -1324,7 +1321,8 @@ class initScreen
 						'commit_hash' => '',
 						'comment' => '',
 						'ver_no' => '',
-						'selected_id' => ''
+						'selected_id' => '',
+						'gmt_reserve_datetime'
 					);
 
 		// フォームパラメタが設定されている場合変数へ設定
@@ -1348,6 +1346,9 @@ class initScreen
 		}
 		if (isset($this->main->options->_POST->selected_id)) {
 			$form['selected_id'] = $this->main->options->_POST->selected_id;
+		}
+		if (isset($this->main->options->_POST->gmt_reserve_datetime)) {
+			$form['gmt_reserve_datetime'] = $this->main->options->_POST->gmt_reserve_datetime;
 		}
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_form_value end');

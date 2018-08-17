@@ -156,7 +156,7 @@ class publish
 						//============================================================
 						// 公開処理結果テーブルの登録処理
 						//============================================================
-						$insert_id = $this->insert_output_data($status, $set_start_datetime, $data, null);
+						$insert_id = $this->insert_output_data($publish_type, $status, $set_start_datetime, $data, null);
 
 						if ($cnt == 1) {
 							// 先頭データは公開予約対象
