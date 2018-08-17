@@ -523,7 +523,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 		$this->assertEquals( '公開処理が失敗しました。', $result['message'] );
 		$this->assertTrue( !$result['status'] );
-		$this->assertEquals( 2, $result['output_id'] );
+		$this->assertEquals( '', $result['output_id'] );
 		$this->assertEquals( 2, $result['backup_id'] );
 
 		// TODO:ログなどのアウトプットファイルも要確認
