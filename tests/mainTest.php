@@ -553,8 +553,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 		$this->assertEquals( '公開処理が成功しました。', $result['message'] );
 		$this->assertTrue( $result['status'] );
-		$this->assertEquals( 3, $result['output_id'] );
-		$this->assertEquals( 3, $result['backup_id'] );
+		$this->assertEquals( 2, $result['output_id'] );
+		$this->assertEquals( 2, $result['backup_id'] );
 
 
 		// TODO:ログなどのアウトプットファイルも要確認
