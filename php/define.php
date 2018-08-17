@@ -36,7 +36,7 @@ class define
 	/**
 	 * 公開種別
 	 */
-	const PUBLISH_TYPE_RESERVE		  = '1'; // 予約公開
+	const PUBLISH_TYPE_RESERVE		  = '1'; // 予定公開
 	const PUBLISH_TYPE_IMMEDIATE 	  = '2'; // 即時公開
 	const PUBLISH_TYPE_MANUAL_RESTORE = '3'; // 手動復元公開
 	const PUBLISH_TYPE_AUTO_RESTORE   = '4'; // 自動復元公開
@@ -72,7 +72,7 @@ class define
 	/**
 	 * その他
 	 */
-	// 公開予約ディレクトリの付与文字列
+	// 公開予定ディレクトリの付与文字列
 	const DIR_NAME_RESERVE = '_reserve';
 
 	// gitリモート名

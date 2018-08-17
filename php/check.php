@@ -58,9 +58,9 @@ class check
 	}
 
 	/**
-	 * 公開予約日付の必須チェック
+	 * 公開予定日付の必須チェック
 	 *	 
-	 * @param string $reserve_date 公開予約日時の日付
+	 * @param string $reserve_date 公開予定日時の日付
 	 *	 
 	 * @return bool $ret チェックOKの場合は `true`、NGの場合は `false` を返します。
 	 */
@@ -77,9 +77,9 @@ class check
 	}
 
 	/**
-	 * 公開予約時刻の必須チェック
+	 * 公開予定時刻の必須チェック
 	 *	 
-	 * @param strin $reserve_time 公開予約日時の時刻
+	 * @param strin $reserve_time 公開予定日時の時刻
 	 *	 
 	 * @return bool $ret チェックOKの場合は `true`、NGの場合は `false` を返します。
 	 */
@@ -96,10 +96,10 @@ class check
 	}
 
 	/**
-	 * 公開予約の最大件数チェック
+	 * 公開予定の最大件数チェック
 	 *	 
-	 * @param array[] $data_list 公開予約リスト
-	 * @param string  $max       予約最大件数
+	 * @param array[] $data_list 公開予定リスト
+	 * @param string  $max       予定最大件数
 	 *	 
 	 * @return bool $ret チェックOKの場合は `true`、NGの場合は `false` を返します。
 	 */
@@ -119,7 +119,7 @@ class check
 	/**
 	 * 日付の妥当性チェック
 	 *	 
-	 * @param string $reserve_date 公開予約日時の日付
+	 * @param string $reserve_date 公開予定日時の日付
 	 *	 
 	 * @return bool $ret チェックOKの場合は `true`、NGの場合は `false` を返します。
 	 */
@@ -142,7 +142,7 @@ class check
 	/**
 	 * 未来日付チェック
 	 *	 
-	 * @param string $datetime 公開予約日時
+	 * @param string $datetime 公開予定日時
 	 *	 
 	 * @return bool $ret チェックOKの場合は `true`、NGの場合は `false` を返します。
 	 */
@@ -164,11 +164,11 @@ class check
 
 
 	/**
-	 * 予約データの中に、同名ブランチが存在していないか重複チェック
+	 * 予定データの中に、同名ブランチが存在していないか重複チェック
 	 *	 
-	 * @param array[] $data_list        公開予約リスト
+	 * @param array[] $data_list        公開予定リスト
 	 * @param string  $selected_branch  選択されたブランチ名
-	 * @param int     $selected_id      チェックデータ自身の公開予約ID
+	 * @param int     $selected_id      チェックデータ自身の公開予定ID
 	 *	 
 	 * @return bool $ret チェックOKの場合は `true`、NGの場合は `false` を返します。
 	 */
@@ -191,11 +191,11 @@ class check
 	}
 
 	/**
-	 * 予約データの中に、同じ公開予約日時が存在していないか重複チェック
+	 * 予定データの中に、同じ公開予定日時が存在していないか重複チェック
 	 *	 
-	 * @param array[] $data_list        公開予約リスト
-	 * @param string  $input_reserve    入力された公開予約日時
-	 * @param int     $selected_id      チェックデータ自身の公開予約ID
+	 * @param array[] $data_list        公開予定リスト
+	 * @param string  $input_reserve    入力された公開予定日時
+	 * @param int     $selected_id      チェックデータ自身の公開予定ID
 	 *	 
 	 * @return bool $ret チェックOKの場合は `true`、NGの場合は `false` を返します。
 	 */

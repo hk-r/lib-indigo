@@ -14,9 +14,9 @@ class tsOutput
 	 * 公開処理結果テーブルのカラム定義
 	 */
 	const TS_OUTPUT_ID_SEQ 			= 'output_id_seq';			// 公開処理結果ID
-	const TS_OUTPUT_RESERVE_ID 		= 'reserve_id';				// 公開予約ID
+	const TS_OUTPUT_RESERVE_ID 		= 'reserve_id';				// 公開予定ID
 	const TS_OUTPUT_BACKUP_ID 		= 'backup_id';				// バックアップID
-	const TS_OUTPUT_RESERVE 		= 'reserve_datetime';		// 公開予約日時
+	const TS_OUTPUT_RESERVE 		= 'reserve_datetime';		// 公開予定日時
 	const TS_OUTPUT_BRANCH 			= 'branch_name';			// ブランチ名
 	const TS_OUTPUT_COMMIT_HASH 	= 'commit_hash';			// コミットハッシュ値（短縮）
 	const TS_OUTPUT_COMMENT 		= 'comment';				// コメント
@@ -38,8 +38,8 @@ class tsOutput
 	 */
 	const OUTPUT_ENTITY_ID_SEQ 			= 'output_id_seq';			// ID
 	const OUTPUT_ENTITY_BACKUP_ID 		= 'backup_id';				// バックアップID
-	const OUTPUT_ENTITY_RESERVE 		= 'reserve_datetime';		// 公開予約日時（タイムゾーン日時）
-	const OUTPUT_ENTITY_RESERVE_DISP 	= 'reserve_datetime_disp';	// 公開予約日時（表示用フォーマット）
+	const OUTPUT_ENTITY_RESERVE 		= 'reserve_datetime';		// 公開予定日時（タイムゾーン日時）
+	const OUTPUT_ENTITY_RESERVE_DISP 	= 'reserve_datetime_disp';	// 公開予定日時（表示用フォーマット）
 	const OUTPUT_ENTITY_BRANCH 			= 'branch_name';			// ブランチ名
 	const OUTPUT_ENTITY_COMMIT_HASH 	= 'commit_hash';			// コミットハッシュ値（短縮）
 	const OUTPUT_ENTITY_PUBLISH_TYPE 	= 'publish_type';			// 公開種別
@@ -222,7 +222,7 @@ class tsOutput
 	/**
 	 * 公開処理結果テーブル更新処理メソッド
 	 *
-	 * 引数の公開予約IDを条件に、公開処理結果情報を1件更新します。
+	 * 引数の公開予定IDを条件に、公開処理結果情報を1件更新します。
 	 *
 	 * @param  int   $output_id 公開処理結果ID
 	 * @param  array $dataArray 公開処理結果情報
@@ -286,7 +286,7 @@ class tsOutput
 		// バックアップID
 		$conv_array[self::OUTPUT_ENTITY_BACKUP_ID] = $array[self::TS_OUTPUT_BACKUP_ID];
 
-		// 公開予約日時（タイムゾーン日時）
+		// 公開予定日時（タイムゾーン日時）
 		$tz_datetime = $this->main->common()->convert_to_timezone_datetime($array[self::TS_OUTPUT_RESERVE]);
 		$conv_array[self::OUTPUT_ENTITY_RESERVE] 		 = $tz_datetime;
 		$conv_array[self::OUTPUT_ENTITY_RESERVE_DISP] = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);

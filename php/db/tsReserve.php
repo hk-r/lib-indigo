@@ -10,10 +10,10 @@ class tsReserve
 	private $main;
 
 	/**
-	 * 公開予約テーブルのカラム定義
+	 * 公開予定テーブルのカラム定義
 	 */
 	const TS_RESERVE_ID_SEQ 		= 'reserve_id_seq';			// ID
-	const TS_RESERVE_DATETIME 		= 'reserve_datetime';		// 公開予約日時
+	const TS_RESERVE_DATETIME 		= 'reserve_datetime';		// 公開予定日時
 	const TS_RESERVE_BRANCH 		= 'branch_name';			// ブランチ名
 	const TS_RESERVE_COMMIT_HASH	= 'commit_hash';			// コミットハッシュ値（短縮）
 	const TS_RESERVE_COMMENT		= 'comment';				// コメント
@@ -26,14 +26,14 @@ class tsReserve
 	const TS_RESERVE_VER_NO 			= 'ver_no';				// バージョンNO
 
 	/**
-	 * 公開予約エンティティのカラム定義
+	 * 公開予定エンティティのカラム定義
 	 */
 	const RESERVE_ENTITY_ID_SEQ 		= 'reserve_id_seq';			// ID
-	const RESERVE_ENTITY_RESERVE_GMT	= 'reserve_datetime_gmt';	// 公開予約日時（GMT日時）
-	const RESERVE_ENTITY_RESERVE 		= 'reserve_datetime';		// 公開予約日時（タイムゾーン日時）
-	const RESERVE_ENTITY_RESERVE_DISP 	= 'reserve_datetime_disp';	// 公開予約日時（表示用フォーマット）
-	const RESERVE_ENTITY_RESERVE_DATE 	= 'reserve_date';			// 公開予約日時（タイムゾーン日付）
-	const RESERVE_ENTITY_RESERVE_TIME	= 'reserve_time';			// 公開予約日時（タイムゾーン時刻）
+	const RESERVE_ENTITY_RESERVE_GMT	= 'reserve_datetime_gmt';	// 公開予定日時（GMT日時）
+	const RESERVE_ENTITY_RESERVE 		= 'reserve_datetime';		// 公開予定日時（タイムゾーン日時）
+	const RESERVE_ENTITY_RESERVE_DISP 	= 'reserve_datetime_disp';	// 公開予定日時（表示用フォーマット）
+	const RESERVE_ENTITY_RESERVE_DATE 	= 'reserve_date';			// 公開予定日時（タイムゾーン日付）
+	const RESERVE_ENTITY_RESERVE_TIME	= 'reserve_time';			// 公開予定日時（タイムゾーン時刻）
 	const RESERVE_ENTITY_BRANCH 		= 'branch_name';			// ブランチ名
 	const RESERVE_ENTITY_COMMIT_HASH 	= 'commit_hash';			// コミットハッシュ値（短縮）
 	const RESERVE_ENTITY_COMMENT 		= 'comment';				// コメント
@@ -55,14 +55,14 @@ class tsReserve
 	}
 
 	/**
-	 * 公開予約一覧リストの取得メソッド
+	 * 公開予定一覧リストの取得メソッド
 	 *
-	 * 公開予約テーブルから未処理、未削除データをリストで取得します。
+	 * 公開予定テーブルから未処理、未削除データをリストで取得します。
 	 * 初期表示画面表示用に使用しており、フォーマット変換を行い配列を返却します。
 	 * 該当データが存在しない場合はnullを返却します。
 	 *
 	 * @return array[] $conv_ret_array
-	 * 				公開予約リスト
+	 * 				公開予定リスト
 	 */
 	public function get_ts_reserve_list() {
 
@@ -72,7 +72,7 @@ class tsReserve
 				SELECT * FROM TS_RESERVE 
 				WHERE " . self::TS_RESERVE_STATUS . " = '0' " . 		// 0:未処理
 				"  AND " . self::TS_RESERVE_DELETE_FLG . " = '0' " .	// 0:未削除
-				"ORDER BY " . self::TS_RESERVE_DATETIME . " ASC;";		// 公開予約日時 昇順
+				"ORDER BY " . self::TS_RESERVE_DATETIME . " ASC;";		// 公開予定日時 昇順
 
 		// 前処理
 		$stmt = $this->main->dbh()->prepare($select_sql);
@@ -91,27 +91,27 @@ class tsReserve
 	}
 
 	/**
-	 * 公開対象の公開予約一覧リストの取得メソッド
+	 * 公開対象の公開予定一覧リストの取得メソッド
 	 *
-	 * 公開予約一覧テーブルから未処理、未削除、かつ、公開日時に達したデータをリストで取得します。
+	 * 公開予定一覧テーブルから未処理、未削除、かつ、公開日時に達したデータをリストで取得します。
 	 * クーロン処理用に使用しています。
 	 * 該当データが存在しない場合はnullを返却します。
 	 *
 	 * @param  string  $now 日時
 	 * @return array[] $ret_array
-	 * 				公開予約リスト
+	 * 				公開予定リスト
 	 */
 	public function get_ts_reserve_publish_list($now) {
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_ts_reserve_publish_list start');
 
-		// SELECT文作成（削除フラグ = 0、公開予約日時>=現在日時、ソート順：公開予約日時の降順）
+		// SELECT文作成（削除フラグ = 0、公開予定日時>=現在日時、ソート順：公開予定日時の降順）
 		$select_sql = "
 				SELECT * FROM TS_RESERVE
 				WHERE " . self::TS_RESERVE_STATUS . " = '0' " . 		// 0:未処理
 				" AND " . self::TS_RESERVE_DATETIME . " <= ? " .		// 引数日時と同時刻、または過去日時
 				" AND " . self::TS_RESERVE_DELETE_FLG . " = '0' " . 	// 0:未削除
-				"ORDER BY " . self::TS_RESERVE_DATETIME . " DESC;";		// 公開予約日時 降順
+				"ORDER BY " . self::TS_RESERVE_DATETIME . " DESC;";		// 公開予定日時 降順
 
 		// 前処理
 		$stmt = $this->main->dbh()->prepare($select_sql);
@@ -128,14 +128,14 @@ class tsReserve
 	}
 
 	/**
-	 * 公開予約情報取得メソッド
+	 * 公開予定情報取得メソッド
 	 *
-	 * 引数の公開予約IDを条件に、公開予約情報を1件取得します。
+	 * 引数の公開予定IDを条件に、公開予定情報を1件取得します。
 	 * フォーマット変換を行い返却します。
 	 * 該当データが存在しない場合はnullを返却します。
 	 *
-	 * @param  string  $selected_id 公開予約ID
-	 * @return array $conv_ret_array 変換後の公開予約情報
+	 * @param  string  $selected_id 公開予定ID
+	 * @return array $conv_ret_array 変換後の公開予定情報
 	 * 
 	 * @throws Exception パラメタの値が正しく設定されていない場合
 	 */
@@ -146,7 +146,7 @@ class tsReserve
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '[パラメタ]selected_id：' . $selected_id);
 
 		if (!$selected_id) {
-			throw new \Exception('対象の公開予約IDが正しく取得できませんでした。 ');
+			throw new \Exception('対象の公開予定IDが正しく取得できませんでした。 ');
 		}
 
 		// SELECT文作成
@@ -170,9 +170,9 @@ class tsReserve
 	}
 
 	/**
-	 * 公開予約テーブル登録処理メソッド
+	 * 公開予定テーブル登録処理メソッド
 	 *
-	 * 公開予約情報を1件登録します。
+	 * 公開予定情報を1件登録します。
 	 *
 	 * @param  array[]  $options mainオプション情報
 	 * @return null
@@ -223,12 +223,12 @@ class tsReserve
 	}
 
 	/**
-	 * 公開予約テーブル更新処理メソッド
+	 * 公開予定テーブル更新処理メソッド
 	 *
-	 * 引数の公開予約IDを条件に、公開予約情報を1件更新します。
+	 * 引数の公開予定IDを条件に、公開予定情報を1件更新します。
 	 *
 	 * @param  array[]  $options mainオプション情報
-	 * @param  string  $selected_id 公開予約ID
+	 * @param  string  $selected_id 公開予定ID
 	 * @return null
 	 * 
 	 * @throws Exception パラメタの値が正しく設定されていない場合
@@ -239,7 +239,7 @@ class tsReserve
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ update_ts_reserve start');
 
 		if (!$selected_id) {
-			throw new \Exception('更新対象の公開予約IDが取得できませんでした。 ');
+			throw new \Exception('更新対象の公開予定IDが取得できませんでした。 ');
 		}
 
 		// 他ユーザで更新されていないか確認
@@ -252,7 +252,7 @@ class tsReserve
 		if ($selected_ret &&
 			$selected_ret[self::RESERVE_ENTITY_VER_NO] != $options->_POST->ver_no) {
 
-			throw new \Exception('ユーザID [' . $selected_ret[self::RESERVE_ENTITY_UPDATE_USER_ID] . '] にて公開予約情報が更新されております。');
+			throw new \Exception('ユーザID [' . $selected_ret[self::RESERVE_ENTITY_UPDATE_USER_ID] . '] にて公開予定情報が更新されております。');
 		}
 
 		// UPDATE文作成
@@ -289,12 +289,12 @@ class tsReserve
 	}
 
 	/**
-	 * 公開予約テーブル更新処理メソッド（ステータス更新用）
+	 * 公開予定テーブル更新処理メソッド（ステータス更新用）
 	 *
-	 * 引数の公開予約IDを条件に、公開予約情報のステータスを"処理済み"へ更新します。
+	 * 引数の公開予定IDを条件に、公開予定情報のステータスを"処理済み"へ更新します。
 	 *
 	 * @param  array[]  $options mainオプション情報
-	 * @param  string  $selected_id 公開予約ID
+	 * @param  string  $selected_id 公開予定ID
 	 * @return null
 	 * 
 	 * @throws Exception パラメタの値が正しく設定されていない場合
@@ -305,7 +305,7 @@ class tsReserve
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ update_ts_reserve_status start');
 
 		if (!$selected_id) {
-			throw new \Exception('更新対象の公開予約IDが取得できませんでした。 ');
+			throw new \Exception('更新対象の公開予定IDが取得できませんでした。 ');
 		}
 
 		// 他ユーザで更新されていないか確認
@@ -318,7 +318,7 @@ class tsReserve
 		if ($selected_ret &&
 			$selected_ret[self::RESERVE_ENTITY_VER_NO] != $ver_no) {
 
-			throw new \Exception('ユーザID [' . $selected_ret[self::RESERVE_ENTITY_UPDATE_USER_ID] . '] にて公開予約情報が更新されております。');
+			throw new \Exception('ユーザID [' . $selected_ret[self::RESERVE_ENTITY_UPDATE_USER_ID] . '] にて公開予定情報が更新されております。');
 		}
 
 		// UPDATE文作成
@@ -340,12 +340,12 @@ class tsReserve
 	}
 
 	/**
-	 * 公開予約テーブル論理削除処理メソッド
+	 * 公開予定テーブル論理削除処理メソッド
 	 *
-	 * 引数の公開予約IDを条件に、公開予約情報を削除済みへ更新します。
+	 * 引数の公開予定IDを条件に、公開予定情報を削除済みへ更新します。
 	 *
 	 * @param  array[]  $options mainオプション情報
-	 * @param  string  $selected_id 公開予約ID
+	 * @param  string  $selected_id 公開予定ID
 	 * @return null
 	 * 
 	 * @throws Exception パラメタの値が正しく設定されていない場合
@@ -355,7 +355,7 @@ class tsReserve
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ delete_reserve_table start');
 
 		if (!$selected_id) {
-			throw new \Exception('更新対象の公開予約IDが取得できませんでした。 ');
+			throw new \Exception('更新対象の公開予定IDが取得できませんでした。 ');
 		}
 
 		// UPDATE文作成
@@ -384,10 +384,10 @@ class tsReserve
 	}
 
 	/**
-	 * 公開予約テーブルの情報を変換する
+	 * 公開予定テーブルの情報を変換する
 	 *
-	 * @param  array $array 公開予約テーブル情報
-	 * @return array $conv_array 変換後の公開予約テーブル情報
+	 * @param  array $array 公開予定テーブル情報
+	 * @return array $conv_array 変換後の公開予定テーブル情報
 	 */
 	private function convert_ts_reserve_entity($array) {
 	
@@ -396,10 +396,10 @@ class tsReserve
 		// ID
 		$conv_array[self::RESERVE_ENTITY_ID_SEQ] 		= $array[self::TS_RESERVE_ID_SEQ];
 
-		// 公開予約日時（GMT日時）
+		// 公開予定日時（GMT日時）
 		$conv_array[self::RESERVE_ENTITY_RESERVE_GMT] 	= $array[self::TS_RESERVE_DATETIME];
 
-		// 公開予約日時（タイムゾーン日時）
+		// 公開予定日時（タイムゾーン日時）
 		$tz_datetime = $this->main->common()->convert_to_timezone_datetime($array[self::TS_RESERVE_DATETIME]);
 		$conv_array[self::RESERVE_ENTITY_RESERVE] = $tz_datetime;
 		$conv_array[self::RESERVE_ENTITY_RESERVE_DISP] = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);

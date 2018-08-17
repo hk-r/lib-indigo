@@ -34,8 +34,8 @@ class tsBackup
 	const BACKUP_ENTITY_UPDATE_DATETIME = 'update_datetime';		// 更新日時
 	const BACKUP_ENTITY_UPDATE_USER_ID 	= 'update_user_id';			// 更新ユーザID
 
-	const BACKUP_ENTITY_RESERVE 		= 'reserve_datetime';		// 公開予約日時
-	const BACKUP_ENTITY_RESERVE_DISP 	= 'reserve_datetime_disp';	// 公開予約日時（表示用フォーマット）
+	const BACKUP_ENTITY_RESERVE 		= 'reserve_datetime';		// 公開予定日時
+	const BACKUP_ENTITY_RESERVE_DISP 	= 'reserve_datetime_disp';	// 公開予定日時（表示用フォーマット）
 	const BACKUP_ENTITY_BRANCH 			= 'branch_name';			// ブランチ名
 	const BACKUP_ENTITY_COMMIT_HASH 	= 'commit_hash';			// コミットハッシュ値（短縮）
 	const BACKUP_ENTITY_COMMENT 		= 'comment';				// コメント
@@ -268,7 +268,7 @@ class tsBackup
 		$conv_array[self::BACKUP_ENTITY_DATETIME] = $tz_datetime;
 		$conv_array[self::BACKUP_ENTITY_DATETIME_DISP] = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
 
-		// 公開予約日時（タイムゾーン日時）
+		// 公開予定日時（タイムゾーン日時）
 		$tz_datetime = $this->main->common()->convert_to_timezone_datetime($array[self::BACKUP_ENTITY_RESERVE]);
 		$conv_array[self::BACKUP_ENTITY_RESERVE] = $tz_datetime;
 		$conv_array[self::BACKUP_ENTITY_RESERVE_DISP] = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);

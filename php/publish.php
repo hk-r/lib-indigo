@@ -51,13 +51,13 @@ class publish
 	/**
 	 * 公開処理
 	 *
-	 * 予約公開、即時公開、手動復元公開、また、これらが失敗した場合の自動復元公開が存在します。	
+	 * 予定公開、即時公開、手動復元公開、また、これらが失敗した場合の自動復元公開が存在します。	
 	 * パラメタで受け取る$publish_typeの値でどの公開処理かを判断します。
 	 * 
 	 * 処理開始時にロックファイルを作成し、他の公開処理をロックします。
 	 * 処理終了時にロックファイルは削除されます。
 	 *
-	 * 予約公開：公開対象のデータが存在しない場合は処理を終了します。
+	 * 予定公開：公開対象のデータが存在しない場合は処理を終了します。
 	 * 
 	 * 	 
 	 *
@@ -89,7 +89,7 @@ class publish
 		$reserve_data_list;
 
 		//============================================================
-		// 予約公開の場合、公開対象の予約データを取得する。
+		// 予定公開の場合、公開対象の予定データを取得する。
 		// データが存在しない場合は処理を終了する。
 		//============================================================
 		if ($publish_type == define::PUBLISH_TYPE_RESERVE) {
@@ -139,7 +139,7 @@ class publish
 
 			try {
 
-				// 予約公開の場合
+				// 予定公開の場合
 				if ($publish_type == define::PUBLISH_TYPE_RESERVE) {
 
 					$cnt = 1;
@@ -159,12 +159,12 @@ class publish
 						$insert_id = $this->insert_output_data($publish_type, $status, $set_start_datetime, $data, null);
 
 						if ($cnt == 1) {
-							// 先頭データは公開予約対象
+							// 先頭データは公開予定対象
 
 							$result['output_id'] = $insert_id;
 
 							$reserve_dirname = $this->main->common()->get_reserve_dirname($data[tsReserve::TS_RESERVE_DATETIME]);
-							$this->main->common()->put_publish_log(__METHOD__, __LINE__, "★予約公開対象", $this->realpath_tracelog);
+							$this->main->common()->put_publish_log(__METHOD__, __LINE__, "★予定公開対象", $this->realpath_tracelog);
 
 							// 以降のループはスキップデータなので値を変更
 							$status = define::PUBLISH_STATUS_SKIP;
@@ -176,8 +176,8 @@ class publish
 							$this->main->common()->put_process_log_block($logstr);
 						}
 
-						$logstr = "公開予約ID" . $data[tsReserve::TS_RESERVE_ID_SEQ] . "\r\n";
-						$logstr .= "公開予約日時(GMT)：" . $data[tsReserve::TS_RESERVE_DATETIME] . "\r\n";
+						$logstr = "公開予定ID" . $data[tsReserve::TS_RESERVE_ID_SEQ] . "\r\n";
+						$logstr .= "公開予定日時(GMT)：" . $data[tsReserve::TS_RESERVE_DATETIME] . "\r\n";
 						$logstr .= "ブランチ名：" . $data[tsReserve::TS_RESERVE_BRANCH] . "\r\n";
 						$logstr .= "コミット：" . $data[tsReserve::TS_RESERVE_COMMIT_HASH] . "\r\n";
 						$logstr .= "コメント：" . $data[tsReserve::TS_RESERVE_COMMENT] . "\r\n";
@@ -185,10 +185,10 @@ class publish
 						$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
 						//============================================================
-						// 公開予約テーブルのステータス更新処理
+						// 公開予定テーブルのステータス更新処理
 						//============================================================
 						$this->tsReserve->update_ts_reserve_status($data[tsReserve::TS_RESERVE_ID_SEQ], $data[tsReserve::TS_RESERVE_VER_NO]);
-						$this->main->common()->put_publish_log(__METHOD__, __LINE__, "----------公開予約テーブルのステータス更新処理----------", $this->realpath_tracelog);						
+						$this->main->common()->put_publish_log(__METHOD__, __LINE__, "----------公開予定テーブルのステータス更新処理----------", $this->realpath_tracelog);						
 						$cnt++;
 					}
 
@@ -197,7 +197,7 @@ class publish
 					$this->main->common()->put_publish_log(__METHOD__, __LINE__, "==========コミット処理実行==========", $this->realpath_tracelog);
 
 					//============================================================
-					// 公開予約ディレクトリを「waiting」から「running」ディレクトリへ移動
+					// 公開予定ディレクトリを「waiting」から「running」ディレクトリへ移動
 					//============================================================
 					$from_realpath = $realpath_array['realpath_waiting'] . $reserve_dirname . '/';
 					$to_realpath = $realpath_array['realpath_running'] . $running_dirname . '/';
@@ -696,7 +696,7 @@ class publish
 	 * @param string $publish_type    公開種別
 	 * @param string $status 		  公開ステータス
 	 * @param string $start_datetime  処理開始日時
-	 * @param array  $reserve_data	  予約情報配列（予約公開の場合のみ）
+	 * @param array  $reserve_data	  予定情報配列（予定公開の場合のみ）
 	 * @param int    $backup_id  	  バックアップID （復元公開の場合のみ）
 	 *
 	 * @return int $output_id insertしたシーケンスID
@@ -710,7 +710,7 @@ class publish
 
 		if ($publish_type == define::PUBLISH_TYPE_RESERVE) {
 
-			// 予約公開時の公開処理結果テーブル設定情報
+			// 予定公開時の公開処理結果テーブル設定情報
 			$output_dataArray = array(
 
 				tsOutput::TS_OUTPUT_RESERVE_ID 		=> $reserve_data[tsReserve::TS_RESERVE_ID_SEQ],

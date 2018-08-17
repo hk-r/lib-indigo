@@ -83,7 +83,7 @@ class initScreen
 		
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ do_disp_init_screen start');
 
-		// 公開予約一覧を取得
+		// 公開予定一覧を取得
 		$data_list = $this->tsReserve->get_ts_reserve_list();
 
 		$ret = '<div class="scr_content">'
@@ -109,7 +109,7 @@ class initScreen
 			. '<thead>'
 			. '<tr>'
 			. '<th scope="row"></th>'
-			. '<th scope="row">公開予約日時</th>'
+			. '<th scope="row">公開予定日時</th>'
 			. '<th scope="row">コミット</th>'
 			. '<th scope="row">ブランチ</th>'
 			. '<th scope="row">コメント</th>'
@@ -442,7 +442,7 @@ class initScreen
 	/**
 	 * 新規ダイアログの確定処理
 	 *	 
-	 * 公開予約データの登録と、予約ディレクトリを作成しGitの情報をコピーします。
+	 * 公開予定データの登録と、予定ディレクトリを作成しGitの情報をコピーします。
 	 * 
 	 * @return array $result
 	 * 			bool   $result['status'] 		処理成功時に `true`、失敗時に `false` を返します。
@@ -466,7 +466,7 @@ class initScreen
 			// waitingディレクトリの絶対パスを取得。
 			$realpath_waiting = $this->main->realpath_array['realpath_waiting'];
 
-			// 公開予約ディレクトリ名の取得
+			// 公開予定ディレクトリ名の取得
 			$dirname = $this->main->common()->get_reserve_dirname($this->main->options->_POST->gmt_reserve_datetime);
 
 			// コピー処理
@@ -475,7 +475,7 @@ class initScreen
 	 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ -----公開処理結果テーブルの登録処理-----');
 			
 			//============================================================
-			// 入力情報を公開予約テーブルへ登録
+			// 入力情報を公開予定テーブルへ登録
 			//============================================================
 			$this->tsReserve->insert_ts_reserve($this->main->options);
 			
@@ -504,7 +504,7 @@ class initScreen
 	/**
 	 * 変更ダイアログの確定処理
 	 *	 
-	 * 公開予約データの更新と、既存の予約ディレクトリを削除し、再作成後Gitの情報をコピーします。
+	 * 公開予定データの更新と、既存の予定ディレクトリを削除し、再作成後Gitの情報をコピーします。
 	 * 
 	 * @return array $result
 	 * 			bool   $result['status'] 		処理成功時に `true`、失敗時に `false` を返します。
@@ -525,10 +525,10 @@ class initScreen
 			//============================================================
 			// 「waiting」ディレクトリの変更前の公開ソースディレクトリを削除
 			//============================================================
-			// 変更前の公開予約ディレクトリ名の取得
+			// 変更前の公開予定ディレクトリ名の取得
 			$before_dirname = $this->main->common()->get_reserve_dirname($this->main->options->_POST->before_gmt_reserve_datetime);
 
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ 変更前の公開予約ディレクトリ：');
+			$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ 変更前の公開予定ディレクトリ：');
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, $before_dirname);
 
 			// 変更前削除
@@ -538,10 +538,10 @@ class initScreen
 			//============================================================
 			// 変更後ブランチのGit情報を「waiting」ディレクトリへコピー
 			//============================================================
-			// 公開予約ディレクトリ名の取得
+			// 公開予定ディレクトリ名の取得
 			$dirname = $this->main->common()->get_reserve_dirname($this->main->options->_POST->gmt_reserve_datetime);
 
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ 変更後の公開予約ディレクトリ：');
+			$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ 変更後の公開予定ディレクトリ：');
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, $dirname);
 
 			// コピー処理
@@ -550,7 +550,7 @@ class initScreen
 	 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ -----公開処理結果テーブルの更新処理-----');
 			
 			//============================================================
-			// 入力情報を公開予約テーブルへ更新
+			// 入力情報を公開予定テーブルへ更新
 			//============================================================
 			$selected_id =  $this->main->options->_POST->selected_id;
 
@@ -580,7 +580,7 @@ class initScreen
 	/**
 	 * 削除処理
 	 *	 
-	 * 公開予約データの論理削除と、Gitコピーディレクトリの削除を行います。
+	 * 公開予定データの論理削除と、Gitコピーディレクトリの削除を行います。
 	 *	 
 	 * @return array $result
 	 * 			bool   $result['status'] 		処理成功時に `true`、失敗時に `false` を返します。
@@ -608,17 +608,17 @@ class initScreen
 				$this->main->dbh()->beginTransaction();
 
 				//============================================================
-				// 公開予約情報の論理削除
+				// 公開予定情報の論理削除
 				//============================================================
 
-				$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ -----公開予約情報の論理削除処理-----');
+				$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ -----公開予定情報の論理削除処理-----');
 
 				$this->tsReserve->delete_reserve_table($this->main->options, $selected_id);
 
 				//============================================================
 				// 「waiting」ディレクトリの変更前の公開ソースディレクトリを削除
 				//============================================================
-				// 公開予約ディレクトリ名の取得
+				// 公開予定ディレクトリ名の取得
 				$selected_ret = $this->tsReserve->get_selected_ts_reserve($selected_id);
 				$dirname = $this->main->common()->get_reserve_dirname($selected_ret[tsReserve::RESERVE_ENTITY_RESERVE_GMT]);
 				
@@ -717,7 +717,7 @@ class initScreen
 
 		} elseif ($input_mode == self::INPUT_MODE_UPDATE) {
 
-			// 画面選択された公開予約情報を取得
+			// 画面選択された公開予定情報を取得
 			$form['selected_id'] = $this->main->options->_POST->selected_id;
 
 			$selected_data = $this->tsReserve->get_selected_ts_reserve($form['selected_id']);
@@ -768,18 +768,18 @@ class initScreen
 			  . '<input type="hidden" id="commit_hash" name="commit_hash" value="' . htmlspecialchars($form['commit_hash']) . '"/>'
 			  . '</tr>';
 
-		// 「公開予約日時」項目
+		// 「公開予定日時」項目
 		if ( ($input_mode == self::INPUT_MODE_IMMEDIATE) || ($input_mode == self::INPUT_MODE_IMMEDIATE_BACK) ) {
 
 			$ret .= '<tr>'
-				  . '<td class="dialog_thead">公開予約日時</td>'
+				  . '<td class="dialog_thead">公開予定日時</td>'
 				  . '<td scope="row"><span style="margin-right:10px;color:#B61111">即時</span></td>'
 				  . '</tr>';
 		
 		} else {
 
 			$ret .= '<tr>'
-				  . '<td class="dialog_thead">公開予約日時</td>'
+				  . '<td class="dialog_thead">公開予定日時</td>'
 				  . '<td scope="row"><span style="margin-right:10px;"><input type="text" id="datepicker" name="reserve_date" value="'. htmlspecialchars($form['reserve_date']) . '" autocomplete="off" /></span>'
 				  . '<input type="time" id="reserve_time" name="reserve_time" value="'. htmlspecialchars($form['reserve_time']) . '" /></td>'
 				  . '</tr>';
@@ -872,9 +872,9 @@ class initScreen
 			. '<input type="hidden" name="commit_hash" value="' . htmlspecialchars($form['commit_hash']) . '"/>'
 			. '</tr>';
 
-		// 「公開予約日時」項目
+		// 「公開予定日時」項目
 		$ret .= '<tr>'
-			. '<td class="dialog_thead">' . '公開予約日時' . '</td>'
+			. '<td class="dialog_thead">' . '公開予定日時' . '</td>'
 			. '<td>' . htmlspecialchars($form['reserve_date']) . ' ' . htmlspecialchars($form['reserve_time'])
 			. '<input type="hidden" name="reserve_date" value="' . htmlspecialchars($form['reserve_date']) . '"/>'
 			. '<input type="hidden" name="reserve_time" value="' . htmlspecialchars($form['reserve_time']) . '"/>'
@@ -943,7 +943,7 @@ class initScreen
 		$before_comment = "";
 		$before_gmt_reserve_datetime = "";
 
-		// 画面選択された変更前の公開予約情報を取得
+		// 画面選択された変更前の公開予定情報を取得
 		$selected_id =  $this->main->options->_POST->selected_id;
 		$selected_data = $this->tsReserve->get_selected_ts_reserve($selected_id);
 
@@ -983,9 +983,9 @@ class initScreen
 			. '<td>' . htmlspecialchars($before_commit_hash) . '</td>'
 			. '</tr>';
 		
-		// 「公開予約日時」項目（変更前）
+		// 「公開予定日時」項目（変更前）
 		$ret .= '<tr>'
-			. '<td class="dialog_thead">' . '公開予約日時' . '</td>'
+			. '<td class="dialog_thead">' . '公開予定日時' . '</td>'
 			. '<td>' . htmlspecialchars($before_reserve_date) . ' ' . htmlspecialchars($before_reserve_time) . '</td>'
 			. '<input type="hidden" name="before_gmt_reserve_datetime" value="' . htmlspecialchars($before_gmt_reserve_datetime) . '"/>'
 			. '</tr>';
@@ -1026,7 +1026,7 @@ class initScreen
 
 			// 「公開日時」項目（変更後）
 			. '<tr>'
-			. '<td class="dialog_thead">' . '公開予約日時' . '</td>'
+			. '<td class="dialog_thead">' . '公開予定日時' . '</td>'
 			. '<td>' . htmlspecialchars($form['reserve_date']) . ' ' . htmlspecialchars($form['reserve_time']) . '</td>'
 			. '<input type="hidden" name="reserve_date" value="' . htmlspecialchars($form['reserve_date']) . '"/>'
 			. '<input type="hidden" name="reserve_time" value="' . htmlspecialchars($form['reserve_time']) . '"/>'	 
@@ -1104,9 +1104,9 @@ class initScreen
 			. '<input type="hidden" name="commit_hash" value="' . htmlspecialchars($form['commit_hash']) . '"/>'
 			. '</tr>';
 
-		// 「公開予約日時」項目
+		// 「公開予定日時」項目
 		$ret .= '<tr>'
-			  . '<td class="dialog_thead">公開予約日時</td>'
+			  . '<td class="dialog_thead">公開予定日時</td>'
 			  . '<td scope="row"><span style="margin-right:10px;color:#B61111">即時</span></td>'
 			  . '</tr>';
 
@@ -1155,13 +1155,13 @@ class initScreen
 	 * [入力チェックの内容]
 	 *  必須チェック：ブランチ
 	 *  必須チェック：コミット（ブランチ選択時にajaxにより自動取得されるため内部エラーが発生しない限りは入力されている）
-	 *  必須チェック：公開予約日付
-	 *  必須チェック：公開予約時刻
-	 *  重複チェック：ブランチ（予約データの中に、同名ブランチが存在していないか）
-	 *  重複チェック：公開予約日時（予約データの中に、同じ公開予約日時が存在していないか）
-	 *  公開予約の最大件数チェック（パラメタで設定された件数を超える場合エラーとする）
+	 *  必須チェック：公開予定日付
+	 *  必須チェック：公開予定時刻
+	 *  重複チェック：ブランチ（予定データの中に、同名ブランチが存在していないか）
+	 *  重複チェック：公開予定日時（予定データの中に、同じ公開予定日時が存在していないか）
+	 *  公開予定の最大件数チェック（パラメタで設定された件数を超える場合エラーとする）
 	 *  日付の妥当性チェック（yyyy-mm-ddの形式となっているか、存在する日付であるか）
-	 *  未来日チェック（公開予約日時が未来時刻であるか）
+	 *  未来日チェック（公開予定日時が未来時刻であるか）
 	 * 
 	 * @param string $input_mode 入力モード
 	 *
@@ -1179,7 +1179,7 @@ class initScreen
 		$form = $this->get_form_value();
 
 		/**
- 		* 公開予約一覧を取得
+ 		* 公開予定一覧を取得
 		*/ 
 		$data_list = $this->tsReserve->get_ts_reserve_list();
 	
@@ -1208,18 +1208,18 @@ class initScreen
 				// 日付と時刻が共に入力されている場合にのみチェックする
 				// 日付の妥当性チェック
 				if (!$this->check->check_date($form['reserve_date'])) {
-					$ret .= '<p class="error_message">「公開予約日時」の日付が有効ではありません。</p>';
+					$ret .= '<p class="error_message">「公開予定日時」の日付が有効ではありません。</p>';
 				// 以下、日付の妥当性チェックがOKの場合にのみチェックする
 				} else {
 
 					// 未来の日付であるかチェック
 					if (!$this->check->check_future_date($form['gmt_reserve_datetime'])) {
-						$ret .= '<p class="error_message">「公開予約日時」は未来日時を設定してください。</p>';
+						$ret .= '<p class="error_message">「公開予定日時」は未来日時を設定してください。</p>';
 					}
 
-					// 公開予約日時の重複チェック
+					// 公開予定日時の重複チェック
 					if (!$this->check->check_exist_reserve($data_list, $form['gmt_reserve_datetime'], $form['selected_id'])) {
-						$ret .= '<p class="error_message">入力された日時はすでに公開予約が作成されています。</p>';
+						$ret .= '<p class="error_message">入力された日時はすでに公開予定が作成されています。</p>';
 					}
 				}
 			}
@@ -1227,7 +1227,7 @@ class initScreen
 			if ($branch_required_error) {
 				// ブランチの重複チェック
 				if (!$this->check->check_exist_branch($data_list, $form['branch_select_value'], $form['selected_id'])) {
-					$ret .= '<p class="error_message">1つのブランチで複数の公開予約を作成することはできません。</p>';
+					$ret .= '<p class="error_message">1つのブランチで複数の公開予定を作成することはできません。</p>';
 				}
 			}
 		}
@@ -1236,12 +1236,12 @@ class initScreen
 			$input_mode == self::INPUT_MODE_ADD_CHECK) {
 
 
-			// パラメタの最大予約件数
+			// パラメタの最大予定件数
 			$max = $this->main->options->max_reserve_record;
 
-			// 公開予約の最大件数チェック
+			// 公開予定の最大件数チェック
 			if (!$this->check->check_reserve_max_record($data_list, $max)) {
-				$ret .= '<p class="error_message">公開予約は最大' . $max . '件までの登録になります。</p>';
+				$ret .= '<p class="error_message">公開予定は最大' . $max . '件までの登録になります。</p>';
 			}
 		}
 
@@ -1303,13 +1303,13 @@ class initScreen
 	 *	 
 	 * @return array $form
 	 * 			string $result['branch_select_value'] ブランチ名
-	 * 			string $result['reserve_date'] 	公開予約日付
-	 * 			string $result['reserve_time'] 	公開予約時刻
+	 * 			string $result['reserve_date'] 	公開予定日付
+	 * 			string $result['reserve_time'] 	公開予定時刻
 	 * 			string $result['commit_hash'] 	コミットハッシュ値
 	 * 			string $result['comment']	 	コメント
 	 * 			string $result['ver_no'] 		バージョンNO
 	 * 			string $result['selected_id'] 	選択ID
-	 * 			string $result['gmt_reserve_datetime'] 	公開予約日時（GMT）
+	 * 			string $result['gmt_reserve_datetime'] 	公開予定日時（GMT）
 	 */
 	private function get_form_value() {
 

@@ -69,7 +69,7 @@ class backupScreen
 				. '<th scope="row"></th>'
 				. '<th scope="row">バックアップ日時</th>'
 				. '<th scope="row">公開種別</th>'
-				. '<th scope="row">公開予約日時</th>'
+				. '<th scope="row">公開予定日時</th>'
 				. '<th scope="row">ブランチ</th>'
 				. '<th scope="row">コミット</th>'
 				. '<th scope="row">コメント</th>'

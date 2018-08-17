@@ -60,7 +60,7 @@ class historyScreen
 				. '<th width="3%" scope="row"></th>'
 				. '<th width="8%" scope="row">状態</th>'
 				. '<th width="8%" scope="row">公開種別</th>'
-				. '<th width="10%" scope="row">公開予約日時</th>'
+				. '<th width="10%" scope="row">公開予定日時</th>'
 				. '<th width="10%" scope="row">バックアップ日時</th>'
 				. '<th width="7%" scope="row">コミット</th>'
 				. '<th width="14%" scope="row">ブランチ</th>'
@@ -153,7 +153,7 @@ class historyScreen
 			$selected_ret = $this->tsOutput->get_selected_ts_output($selected_id);
 
 			$start_datetime_gmt = $selected_ret[tsOutput::OUTPUT_ENTITY_START_GMT];
-			// 公開予約ディレクトリ名の取得
+			// 公開予定ディレクトリ名の取得
 			$dirname = $this->main->common()->format_gmt_datetime($start_datetime_gmt, define::DATETIME_FORMAT_SAVE);
 
 			// logディレクトリの絶対パスを取得。

@@ -143,7 +143,7 @@ class pdoManager
 		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ create_table start');
 
 		//============================================================
-		// 公開予約テーブル作成
+		// 公開予定テーブル作成
 		//============================================================
 		$create_sql = 'CREATE TABLE IF NOT EXISTS TS_RESERVE ('
 			  . tsReserve::TS_RESERVE_ID_SEQ		. ' INTEGER PRIMARY KEY AUTOINCREMENT,

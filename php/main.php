@@ -32,7 +32,7 @@ class main
 	 *  		- mysql用の設定項目
 	 * ),
 	 * max_reserve_record,
-	 *   - 予約最大件数
+	 *   - 予定最大件数
 	 * max_backup_generation,
 	 *   - バックアップ世代管理件数
 	 *
@@ -97,7 +97,7 @@ class main
 	 */
 	public $realpath_array = array('realpath_server' => '',	// 本番環境
 								'realpath_backup' => '',	// バックアップ本番ソース
-								'realpath_waiting' => '',	// 予約待機Gitソース
+								'realpath_waiting' => '',	// 予定待機Gitソース
 								'realpath_running' => '',	// 処理中ソース
 								'realpath_released' => '',	// 処理完了ソース
 								'realpath_log' => '');		// ログ
@@ -608,16 +608,16 @@ class main
 		try {
 
 			$logstr = "===============================================" . "\r\n";
-			$logstr .= "予約公開処理開始" . "\r\n";
+			$logstr .= "予定公開処理開始" . "\r\n";
 			$logstr .= "===============================================";
 			$this->common()->put_process_log_block($logstr);
 
 			$result = $this->publish->exec_publish(define::PUBLISH_TYPE_RESERVE, null);
 	
 			if ( !$result['status'] ) {
-				// 予約公開処理失敗の場合
+				// 予定公開処理失敗の場合
 
-				$logstr = "** 予約公開処理エラー終了 **" . "\r\n";
+				$logstr = "** 予定公開処理エラー終了 **" . "\r\n";
 				$logstr .= $result['message'];
 				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
@@ -679,7 +679,7 @@ class main
 
 		$logstr = '□ $result->message: ' . $result['message'] . "\r\n";;
 		$logstr .= "===============================================" . "\r\n";
-		$logstr .= "予約公開処理終了" . "\r\n";
+		$logstr .= "予定公開処理終了" . "\r\n";
 		$logstr .= "===============================================";
 		$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 

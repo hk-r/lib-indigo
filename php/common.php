@@ -158,7 +158,7 @@ class common
 
 		if ($publish_type == define::PUBLISH_TYPE_RESERVE) {
 		
-			$ret =  '予約';
+			$ret =  '予定';
 		
 		} else if ($publish_type == define::PUBLISH_TYPE_MANUAL_RESTORE) {
 			
@@ -283,7 +283,7 @@ class common
 
 
 	/**
-	 * 予約ディレクトリを命名し返却する
+	 * 予定ディレクトリを命名し返却する
 	 *	 
 	 * @param string $status ステータスのコード値
 	 *	 
