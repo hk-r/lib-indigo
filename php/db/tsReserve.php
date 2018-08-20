@@ -4,6 +4,12 @@ namespace indigo\db;
 
 use indigo\define as define;
 
+/**
+ * ts_reserveテーブルのデータベース処理クラス
+ *
+ * ts_reserveテーブルに関する処理をまとめたクラス。
+ *
+ */
 class tsReserve
 {
 
@@ -167,8 +173,6 @@ class tsReserve
 	 * @param array  $form 		 フォーム格納配列
 	 * @param string $gmt_reserve_datetime GMT公開予定日時
 	 * @param string $user_id 	 ユーザID
-	 *
-	 * @return null
 	 */
 	public function insert_ts_reserve($form, $gmt_reserve_datetime, $user_id) {
 
@@ -220,14 +224,10 @@ class tsReserve
 	 * @param string $gmt_reserve_datetime GMT公開予定日時
 	 * @param string $user_id 	 ユーザID
 	 * 
-	 * @return null
-	 * 
 	 * @throws Exception パラメタの値が正しく設定されていない場合
 	 * @throws Exception バージョンNOを確認し、すでに他ユーザにて情報が更新されている場合
 	 */
 	public function update_ts_reserve($form, $gmt_reserve_datetime, $user_id) {
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ update_ts_reserve start');
 
 		if (!$form['selected_id']) {
 			throw new \Exception('更新対象の公開予定IDが取得できませんでした。 ');
@@ -276,7 +276,6 @@ class tsReserve
 		// UPDATE実行
 		$stmt = $this->main->pdoMgr()->execute($this->main->dbh(), $stmt);
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ update_ts_reserve end');
 	}
 
 	/**
@@ -292,8 +291,6 @@ class tsReserve
 	 * @throws Exception バージョンNOを確認し、すでに他ユーザにて情報が更新されている場合
 	 */
 	public function update_ts_reserve_status($selected_id, $ver_no) {
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ update_ts_reserve_status start');
 
 		if (!$selected_id) {
 			throw new \Exception('更新対象の公開予定IDが取得できませんでした。 ');
@@ -326,8 +323,6 @@ class tsReserve
 
 		// UPDATE実行
 		$stmt = $this->main->pdoMgr()->execute($this->main->dbh(), $stmt);
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ update_ts_reserve_status end');
 	}
 
 	/**
@@ -342,8 +337,6 @@ class tsReserve
 	 * @throws Exception パラメタの値が正しく設定されていない場合
 	 */
 	public function delete_reserve_table($options, $selected_id) {
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ delete_reserve_table start');
 
 		if (!$selected_id) {
 			throw new \Exception('更新対象の公開予定IDが取得できませんでした。 ');
@@ -370,8 +363,6 @@ class tsReserve
 
 		// UPDATE実行
 		$stmt = $this->main->pdoMgr()->execute($this->main->dbh(), $stmt);
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ delete_reserve_table end');
 	}
 
 	/**

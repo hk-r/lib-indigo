@@ -4,6 +4,12 @@ namespace indigo\db;
 
 use indigo\define as define;
 
+/**
+ * ts_outputテーブルのデータベース処理クラス
+ *
+ * ts_outputテーブルに関する処理をまとめたクラス。
+ *
+ */
 class tsOutput
 {
 
@@ -271,8 +277,6 @@ class tsOutput
 	 */
 	private function convert_ts_output_entity($array) {
 	
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ convert_ts_output_entity start');
-
 		$conv_array = array();
 		
 		// ID
@@ -312,8 +316,6 @@ class tsOutput
 		$conv_array[self::OUTPUT_ENTITY_PUBLISH_TYPE] = $this->main->common()->convert_publish_type($array[self::TS_OUTPUT_PUBLISH_TYPE]);
 		// 登録ユーザID
 		$conv_array[self::OUTPUT_ENTITY_INSERT_USER_ID] = $array[self::TS_OUTPUT_INSERT_USER_ID];
-
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ convert_ts_output_entity end');
 
 	    return $conv_array;
 	}

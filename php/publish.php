@@ -6,6 +6,12 @@ use indigo\db\tsReserve as tsReserve;
 use indigo\db\tsOutput as tsOutput;
 use indigo\db\tsBackup as tsBackup;
 
+/**
+ * 公開処理実行クラス
+ *
+ * 本番公開の処理を共通化したクラス。
+ *
+ */
 class publish
 {
 
@@ -51,13 +57,13 @@ class publish
 	/**
 	 * 公開処理
 	 *
-	 * 予定公開、即時公開、手動復元公開、また、これらが失敗した場合の自動復元公開が存在します。	
-	 * パラメタで受け取る$publish_typeの値でどの公開処理かを判断します。
-	 * 
+	 * 予定公開、即時公開、手動復元公開、また、これらが失敗した場合の自動復元公開を記載しています。	
+	 * 引数の公開種別によって処理を分岐しています。
+	 *
 	 * 処理開始時にロックファイルを作成し、他の公開処理をロックします。
 	 * 処理終了時にロックファイルは削除されます。
 	 *
-	 * 予定公開：公開対象のデータが存在しない場合は処理を終了します。
+	 * 予定公開の場合 -> 公開対象のデータが存在しない場合は処理を終了します。
 	 * 
 	 * 	 
 	 *
@@ -249,8 +255,7 @@ class publish
 						// ============================================================
 						// 選択されたブランチのGit情報を「running」ディレクトリへコピー
 						// ============================================================
-						$logstr = "==========[即時公開]Git情報をrunningへコピー==========";
-						$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
+						$this->main->common()->put_publish_log(__METHOD__, __LINE__,"==========Git情報をrunningへコピー==========", $this->realpath_tracelog);
 
 						// Git情報のコピー処理
 						$this->main->gitMgr()->git_file_copy($this->main->options, $realpath_array['realpath_running'], $running_dirname);
@@ -369,7 +374,7 @@ class publish
 			// ロック解除処理
 			$this->unlock();
 
-			$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, "==========公開処理 異常終了==========");
+			$this->main->common()->put_publish_log(__METHOD__, __LINE__, "==========公開処理 異常終了==========", $this->realpath_tracelog);
 
 			$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ exec_publish end');
 
@@ -384,7 +389,7 @@ class publish
 		// ロック解除処理
 		$this->unlock();
 
-		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, "==========公開処理 正常終了==========");
+		$this->main->common()->put_publish_log(__METHOD__, __LINE__, "==========公開処理 正常終了==========", $this->realpath_tracelog);
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ exec_publish end');
 
@@ -415,7 +420,7 @@ class publish
 	 */
 	public function exec_sync($ignore, $from_realpath, $to_realpath) {
 
-		$logstr = "==========rsyncコマンドによるディレクトリの同期実行==========";
+		$logstr = "==========rsyncコマンドによるディレクトリの同期実行==========" . "\r\n";
 		$logstr .= "【同期元パス】" . $from_realpath . "\r\n";
 		$logstr .= "【同期先パス】" . $to_realpath;
 		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);

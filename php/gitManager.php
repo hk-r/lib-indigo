@@ -2,6 +2,12 @@
 
 namespace indigo;
 
+/**
+ * Git操作クラス
+ *
+ * Git操作の処理を共通化したクラス。
+ *
+ */
 class gitManager
 {
 	public $main;
@@ -31,6 +37,7 @@ class gitManager
 	 * 指定リポジトリ内のブランチリストを返却する
 	 *	
 	 * @param  array   $options mainクラスのオプション情報
+	 *
 	 * @return array[] $ret_array ブランチリスト
 	 * 
 	 * @throws Exception masterブランチディレクトリへの移動に失敗した場合
@@ -92,9 +99,7 @@ class gitManager
 	 * @throws Exception コマンド実行が異常終了した場合
 	 */
 	public function git_file_copy($options, $path, $dirname) {
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ git_file_copy start');
-
+			
 		$current_dir = realpath('.');
 
 		set_time_limit(12*60*60);
@@ -102,6 +107,8 @@ class gitManager
 		// 公開日時ディレクトリの絶対パスを取得。
 		// すでに存在している場合はエラーメッセージを表示する。
 		$dir_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($path . $dirname));
+
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '【file copy path】 ' . $dir_real_path);
 
 		if (file_exists($dir_real_path)) {
 			throw new \Exception('同日時に公開予定のGitファイルが既に存在しています。公開予定情報を確認してください。' . $dir_real_path);
@@ -151,8 +158,6 @@ class gitManager
 		}
 
 		chdir($current_dir);
-			
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ git_file_copy end');
 	}
 
 	/**
@@ -165,11 +170,11 @@ class gitManager
 	 * @throws Exception 削除に失敗した場合
 	 */
 	public function file_delete($path, $dirname) {
-		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ file_delete start');
-
+			
 		// 公開ソースディレクトリの絶対パスを取得
 		$dir_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($path . $dirname));
+
+		$this->main->common()->put_process_log(__METHOD__, __LINE__, '【file delete path】 ' . $dir_real_path);
 
 		if( $dir_real_path && file_exists( $dir_real_path )) {
 			// ディレクトリが存在する場合、削除コマンド実行
@@ -183,8 +188,6 @@ class gitManager
 		} else {
 			throw new \Exception('Delete directory not found. ' . $dir_real_path);
 		}
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ file_delete end');
 	}
 
 
@@ -197,8 +200,6 @@ class gitManager
 	 * @throws Exception デプロイ先ディレクトリへの移動に失敗した場合
 	 */
 	public function get_git_master($options) {
-
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_git_master start');
 
 		$current_dir = realpath('.');
 
@@ -247,8 +248,6 @@ class gitManager
 		}
 
 		chdir($current_dir);
-
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_git_master end');
 	}
 
 }

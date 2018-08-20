@@ -5,6 +5,12 @@ namespace indigo\screen;
 use indigo\db\tsBackup as tsBackup;
 use indigo\define as define;
 
+/**
+ * バックアップ一覧画面処理クラス
+ *
+ * バックアップ一覧画面に関連する処理をまとめたクラス。
+ *
+ */
 class backupScreen
 {
 	private $main;
@@ -13,7 +19,7 @@ class backupScreen
 	 * オブジェクト
 	 * @access private
 	 */
-	private $check, $tsBackup, $tsOutput, $publish;
+	private $tsBackup;
 
 	/**
 	 * 入力画面のエラーメッセージ
@@ -31,7 +37,6 @@ class backupScreen
 		$this->main = $main;
 
 		$this->tsBackup = new tsBackup($this->main);
-		$this->publish = new \indigo\publish($this->main);
 	}
 
 

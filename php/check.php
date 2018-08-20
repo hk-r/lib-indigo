@@ -4,6 +4,12 @@ namespace indigo;
 
 use indigo\db\tsReserve as tsReserve;
 
+/**
+ * 入力チェック共通クラス
+ *
+ * ダイアログの遷移の際、入力情報が正しいか確認する処理を共通化したクラス。
+ *
+ */
 class check
 {
 

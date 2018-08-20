@@ -2,6 +2,12 @@
 
 namespace indigo;
 
+/**
+ * 共通クラス
+ *
+ * 各クラスで共通化できる処理をまとめたクラス。
+ *
+ */
 class common
 {
 

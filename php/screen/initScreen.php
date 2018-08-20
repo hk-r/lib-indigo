@@ -8,6 +8,12 @@ use indigo\db\tsBackup as tsBackup;
 
 use indigo\define as define;
 
+/**
+ * 初期表示画面処理クラス
+ *
+ * 初期表示画面に関連する処理をまとめたクラス。
+ *
+ */
 class initScreen
 {
 	/** indigo\mainオブジェクト */
@@ -429,24 +435,21 @@ class initScreen
 
 			//============================================================
 			// 指定ブランチのGit情報を「waiting」ディレクトリへコピー
-			//============================================================
-
-	 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ -----Gitのファイルコピー処理-----');
-			
+			//============================================================		
 			// waitingディレクトリの絶対パスを取得。
 			$realpath_waiting = $this->main->realpath_array['realpath_waiting'];
 
 			// 公開予定ディレクトリ名の取得
 			$dirname = $this->main->common()->get_reserve_dirname($gmt_reserve_datetime);
 
-			// コピー処理
+	 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　-----Git情報をwaitingへコピー-----');
 			$this->main->gitMgr()->git_file_copy($this->main->options, $realpath_waiting, $dirname);
 
-	 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ -----公開処理結果テーブルの登録処理-----');
-			
+		
 			//============================================================
 			// 入力情報を公開予定テーブルへ登録
 			//============================================================
+	 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　-----公開処理結果テーブルの登録処理-----');
 			$this->tsReserve->insert_ts_reserve($form, $gmt_reserve_datetime, $this->main->options->user_id);
 			
 		} catch (\Exception $e) {
@@ -510,17 +513,14 @@ class initScreen
 			// 公開予定ディレクトリ名の取得
 			$dirname = $this->main->common()->get_reserve_dirname($gmt_reserve_datetime);
 
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ 変更後の公開予定ディレクトリ：');
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, $dirname);
-
-			// コピー処理
+	 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　-----Git情報をwaitingへコピー-----');
 			$this->main->gitMgr()->git_file_copy($this->main->options, $realpath_waiting, $dirname);
+		
 
-	 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ -----公開処理結果テーブルの更新処理-----');
-			
 			//============================================================
 			// 入力情報を公開予定テーブルへ更新
 			//============================================================
+	 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　-----公開処理結果テーブルの更新処理-----');
 			$this->tsReserve->update_ts_reserve($form, $gmt_reserve_datetime, $this->main->options->user_id);
 			
 		} catch (\Exception $e) {
@@ -1241,7 +1241,6 @@ class initScreen
 	 * 			string $result['comment']	 	コメント
 	 * 			string $result['ver_no'] 		バージョンNO
 	 * 			string $result['selected_id'] 	選択ID
-	 * 			string $result['before_gmt_reserve_datetime'] 	変更前公開予定日時（GMT）
 	 */
 	private function get_form_value() {
 

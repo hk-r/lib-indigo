@@ -2,6 +2,12 @@
 
 namespace indigo;
 
+/**
+ * 共通定義クラス
+ *
+ * 各クラスで共通化できる定義をまとめたクラス。
+ *
+ */
 class define
 {
 	public $options;
@@ -75,9 +81,9 @@ class define
 	// 公開予定ディレクトリの付与文字列
 	const DIR_NAME_RESERVE = '_reserve';
 
-	// gitリモート名
+	// gitリモート名（indigoで作成したGitリモートの名前）
 	const GIT_REMOTE_NAME = 'origin';
 
-	// gitリモート名
+	// 公開予定の最大登録件数
 	const LIMIT_LIST_RECORD = 1000;
 }

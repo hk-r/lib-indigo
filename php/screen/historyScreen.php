@@ -6,6 +6,12 @@ use indigo\db\tsOutput as tsOutput;
 use indigo\db\tsBackup as tsBackup;
 use indigo\define as define;
 
+/**
+ * 履歴一覧表示画面処理クラス
+ *
+ * 履歴一覧表示画面に関連する処理をまとめたクラス。
+ *
+ */
 class historyScreen
 {
 	private $main;

@@ -4,6 +4,12 @@ namespace indigo\db;
 
 use indigo\define as define;
 
+/**
+ * ts_backupテーブルのデータベース処理クラス
+ *
+ * ts_backupテーブルに関する処理をまとめたクラス。
+ *
+ */
 class tsBackup
 {
 
@@ -185,12 +191,6 @@ class tsBackup
 
 		return $ret_array;
 	}
-
-	/**
-	 * バックアップテーブル登録処理
-	 *
-	 * @return なし
-	 */
 
 	/**
 	 * バックアップテーブル登録処理メソッド

@@ -2,6 +2,12 @@
 
 namespace indigo;
 
+/**
+ * コミットハッシュ値ajax取得クラス。
+ *
+ * 入力ダイアログのブランチに紐づくコミットハッシュ値をGitを介して取得するクラス。
+ *
+ */
 class ajax
 {
     public $options;
@@ -18,6 +24,8 @@ class ajax
      * @param array $options パラメタ情報
      */
     public function __construct($options) {
+
+        $this->put_ajax_log("__construct call");
 
         $this->options = json_decode(json_encode($options));
 
@@ -44,8 +52,6 @@ class ajax
      */
     public function get_commit_hash() {
 
-        $this->put_ajax_log("■ get_commit_hash start");
-
         $commit_hash;
 
         $ret = array(
@@ -65,7 +71,9 @@ class ajax
 
                     // コミットハッシュ値取得
                     $command = 'git log --pretty=%h ' . define::GIT_REMOTE_NAME . '/' . $this->options->_GET->branch_name . ' -1';
+                     
                      $this->put_ajax_log($command);
+
                     exec($command, $output, $return);
                     foreach ( (array)$output as $data ) {
                         $commit_hash = $data;
@@ -95,13 +103,15 @@ class ajax
 
         header('Content-Type: application/json; charset=utf-8');
 
-        $this->put_ajax_log("■ get_commit_hash end");
+        $this->put_ajax_log("【commit hash】 " . $commit_hash);
 
         return json_encode($ret);
     }
 
     /**
      * ajax用のログ書き込み
+     *
+     * @param string $text 出力文字列
      * 
      * @return 成功した場合に TRUE を、失敗した場合に FALSEを返却
      */
@@ -111,7 +121,7 @@ class ajax
 
         $str = "[" . $datetime . "]" . " " .
                "[pid:" . getmypid() . "]" . " " .
-               // "[userid:" . $this->main->options->user_id . "]" . " " .
+               "[userid:" . $this->options->user_id . "]" . " " .
                "[" . __METHOD__ . "]" . " " .
                "[line:" . __LINE__ . "]" . " " .
                $text . "\r\n";

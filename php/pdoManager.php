@@ -6,6 +6,12 @@ use indigo\db\tsReserve as tsReserve;
 use indigo\db\tsOutput as tsOutput;
 use indigo\db\tsBackup as tsBackup;
 
+/**
+ * PDO操作クラス
+ *
+ * データベースを操作するPDOの処理を共通化したクラス。
+ *
+ */
 class pdoManager
 {
 
@@ -140,8 +146,6 @@ class pdoManager
 	 */
 	public function create_table() {
 
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ create_table start');
-
 		//============================================================
 		// 公開予定テーブル作成
 		//============================================================
@@ -222,8 +226,6 @@ class pdoManager
 			// エラー情報表示
 			throw new \Exception($this->main->dbh->errorInfo());
 		}
-
-		// $this->main->common()->put_process_log(__METHOD__, __LINE__, '■ create_table end');
 	}
 
 	/**
