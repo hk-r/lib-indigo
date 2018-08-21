@@ -94,14 +94,15 @@ $ chmod -R o+w honbanProject/[directoryName(ex. indigo-test-project)]
 
 ### 6. indigoの画面実行
 
-各種パラメータを設定し、lib-indigoのmainクラスを呼び出し初期化を行います。
+各種パラメータを設定します。こちらに記載したパラメタが別ファイルから呼び出されます。
 
 ```
 <?php
 
-require __DIR__ . '/../vendor/autoload.php';
+function call_parameter () {
 
-$indigo = new indigo\main(
+	$parameter = 
+
 	array(
 		// POST
 		'_POST' => $_POST,
@@ -187,16 +188,16 @@ $indigo = new indigo\main(
 ### 7. indigoの画面実行
 #### 7-1. 初期化する
 
-6.で作成したパラメータを設定し、lib-indigoのmainクラスを呼び出し初期化を行います。
+6.で作成したパラメータを引数にlib-indigoのmainクラスを呼び出し初期化を行います。
 
 ```
 <?php
 
 require __DIR__ . '/../vendor/autoload.php';
 // 6.1で作成したパラメタ記載ファイル
-require __DIR__ . '/local_parameter.php';
+require __DIR__ . '/parameter.php';
 
-// parameter.php->call_parameter()
+// parameter.phpのcall_parameterメソッド
 $parameter = call_parameter();
 
 // load indigo\main
@@ -208,7 +209,6 @@ $indigo = new indigo\main($parameter);
 `run()` を実行します。
 
 ```
-// return: 結果表示用HTML
 echo $indigo->run();
 ```
 
@@ -216,8 +216,8 @@ echo $indigo->run();
 ### 8. ajax呼び出しクラス
 #### 8-1. 初期化する
 
-6.で作成したパラメータを設定し、lib-indigoのajaxクラスを呼び出し初期化を行います。
-7-1.の 「ajax呼出クラス（絶対パス）：'realpath_ajax_call'」 で記載している内容と一致するようにクラスを作成してください。
+6.で作成したパラメータを引数にlib-indigoのajaxクラスを呼び出し初期化を行います。
+※6.で設定した 「ajax呼出クラス（絶対パス）：'realpath_ajax_call'」 のファイル名と一致するようにファイルを作成してください。
 
 ```
 <?php
@@ -225,9 +225,9 @@ echo $indigo->run();
 require __DIR__ . '/../vendor/autoload.php';
 
 // 6.1で作成したパラメタ記載ファイル
-require __DIR__ . '/local_parameter.php';
+require __DIR__ . '/parameter.php';
 
-// parameter.php->call_parameter()
+// parameter.phpのcall_parameterメソッド
 $parameter = call_parameter();
 
 // load indigo\ajax
@@ -247,7 +247,7 @@ echo $indigo->get_commit_hash();
 ### 9. indigoのクーロン実行
 #### 9-1. 初期化する
 
-6.で作成したパラメータを設定し、lib-indigoのmainクラスを呼び出し初期化を行います。
+6.で作成したパラメータを引数にlib-indigoのmainクラスを呼び出し初期化を行います。
 
 ```
 <?php
@@ -255,9 +255,9 @@ echo $indigo->get_commit_hash();
 require __DIR__ . '/../vendor/autoload.php';
 
 // 6.1で作成したパラメタ記載ファイル
-require __DIR__ . '/local_parameter.php';
+require __DIR__ . '/parameter.php';
 
-// parameter.php->call_parameter()
+// parameter.phpのcall_parameterメソッド
 $parameter = call_parameter();
 
 // load indigo\main
@@ -269,7 +269,6 @@ $indigo = new indigo\main($parameter);
 `cron_run()` を実行します。
 
 ```
-// return: 結果ログ表示用
 echo $indigo->cron_run();
 ```
 
@@ -284,6 +283,13 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 ```
 
 ## 更新履歴 - Change log
+### lib-indigo 0.1.1 (2018年08月21日)
+- SQLインジェクション対策実装
+- htmlspecialchars実装
+- 複数のエンドポイントファイルのパラメタ部分を一元管理
+- 関数戻り値受け渡し時のjson変換を廃止
+- docコメント修正
+
 ### lib-indigo 0.1.0 (2018年08月06日)
 - Initial Release.
 
