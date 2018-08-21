@@ -197,14 +197,12 @@ class tsBackup
 	 *
 	 * バックアップ情報を1件登録します。
 	 *
-	 * @param  array   $options mainクラスのオプション情報
+	 * @param  string  $user_id ユーザID
 	 * @param  string  $backup_datetime バックアップ日時
 	 * @param  int     $output_id 公開処理結果ID
 	 * @return int   $insert_id 登録発行されたシーケンスID
 	 */
-	public function insert_ts_backup($options, $backup_datetime, $output_id) {
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ insert_ts_backup start');
+	public function insert_ts_backup($user_id, $backup_datetime, $output_id) {
 
 		// INSERT文作成
 		$insert_sql = "INSERT INTO TS_BACKUP ("
@@ -231,7 +229,7 @@ class tsBackup
 		$stmt->bindValue(3, define::DELETE_FLG_OFF, \PDO::PARAM_STR);
 		$stmt->bindValue(4, null, \PDO::PARAM_STR);
 		$stmt->bindParam(5, $now, \PDO::PARAM_STR);
-		$stmt->bindParam(6, $options->user_id, \PDO::PARAM_STR);
+		$stmt->bindParam(6, $user_id, \PDO::PARAM_STR);
 		$stmt->bindValue(7, null, \PDO::PARAM_STR);
 		$stmt->bindValue(8, null, \PDO::PARAM_STR);
 
@@ -241,8 +239,6 @@ class tsBackup
 		// 登録したシーケンスIDを取得
 		$insert_id = $this->main->dbh()->lastInsertId();
 		
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ insert_ts_backup end');
-
 		return $insert_id;
 	}
 
@@ -255,8 +251,6 @@ class tsBackup
 	 */
 	private function convert_ts_backup_entity($array) {
 	
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ convert_ts_backup_entity start');
-
 		// ID
 		$conv_array[self::BACKUP_ENTITY_ID_SEQ] = $array[self::BACKUP_ENTITY_ID_SEQ];
 
@@ -282,8 +276,6 @@ class tsBackup
 		$conv_array[self::BACKUP_ENTITY_PUBLISH_TYPE] = $this->main->common()->convert_publish_type($array[self::BACKUP_ENTITY_PUBLISH_TYPE]);	
 		// 登録ユーザ
 		$conv_array[self::BACKUP_ENTITY_INSERT_USER_ID] = $array[self::BACKUP_ENTITY_INSERT_USER_ID];
-
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ convert_ts_backup_entity end');
 
 	    return $conv_array;
 	}

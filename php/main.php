@@ -38,7 +38,7 @@ class main
 	 * realpath_workdir,
 	 *   - indigo作業用ディレクトリ（絶対パス）
 	 * user_id,
-	 *   - ユーザID
+	 *   - ユーザID（任意）
 	 * db = array(
 	 * 		string 'db_type',
 	 *  		- db種類（'mysql' or null（nullの場合はSQLite3を使用））
@@ -78,6 +78,10 @@ class main
 	 * )
 	 */
 	public $options;
+	
+	// オプション ユーザID（任意項目）
+	public $user_id;
+
 
 	/** tomk79\filesystem のインスタンス */
 	private $fs;
@@ -119,12 +123,17 @@ class main
 								'realpath_released' => '',	// 処理完了ソース
 								'realpath_log' => '');		// ログ
 
+	/** indigoログパス */
+	public $log_path;
+
 	/** indigo全体操作ログパス */
 	public $process_log_path;
 
 	/** indigoエラーログパス */
 	public $error_log_path;
 
+	/** パラメタチェック */
+	public $param_check_flg = true;
 
 	/**
 	 * コンストラクタ
@@ -154,10 +163,31 @@ class main
 		$this->backupScn = new \indigo\screen\backupScreen($this);
 
 
-		//============================================================
-		// エラーログ出力登録
-		//============================================================	
-		$this->error_log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_LOG . 'error.log'));
+		// ログディレクトリの作成
+		if (array_key_exists('realpath_workdir', $this->options) && $this->options->realpath_workdir ) {
+
+			// logディレクトリの生成
+			$current_dir = realpath('.');
+			$this->log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_LOG));
+			if (chdir($this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir)))) {
+				// logファイルディレクトリが存在しない場合は作成
+				$this->fs()->mkdir($this->log_path);
+			}
+			chdir($current_dir);
+
+
+			//============================================================
+			// エラーログ出力登録
+			//============================================================
+			$this->error_log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->log_path . 'error.log'));
+
+			//============================================================
+			// 通常ログ出力登録
+			//============================================================	
+			$log_dirname = $this->common()->get_current_datetime_of_gmt("Ymd");
+			$this->process_log_path = $this->log_path . 'log_process_' . $log_dirname . '.log';
+
+		}
 
 		// 致命的なエラーのエラーハンドラ登録
 		register_shutdown_function(
@@ -173,9 +203,9 @@ class main
 		            $e['type'] == E_COMPILE_ERROR ||
 		            $e['type'] == E_USER_ERROR ){
 		            
-		            echo "エラーが発生しました。管理者にお問い合わせください。";
+		            echo "致命的なエラーが発生しました。管理者にお問い合わせください。";
 
-					if (file_exists($this->error_log_path)) {
+					if (file_exists($this->log_path)) {
 					
 						$logstr =  "***** エラー発生 *****" . "\r\n";
 						$logstr .= "[ERROR]" . "\r\n";
@@ -199,78 +229,81 @@ class main
 		});
 
 		//============================================================
-		// 作業ディレクトリ絶対パス格納
-		//============================================================
-		// 本番環境ディレクトリの絶対パスを取得。（配列1番目のサーバを設定）
-		foreach ( (array)$this->options->server as $server ) {
-			$this->realpath_array['realpath_server'] = $this->fs()->normalize_path($this->fs()->get_realpath($server->real_path . "/"));
-			break; // 現時点では最初の1つのみ有効なのですぐに抜ける
-		}
-
-		// backupディレクトリの絶対パスを取得。
-		$this->realpath_array['realpath_backup'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_BACKUP));
-
-		// waitingディレクトリの絶対パスを取得。
-		$this->realpath_array['realpath_waiting'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_WAITING));
-
-		// runningディレクトリの絶対パスを取得。
-		$this->realpath_array['realpath_running'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_RUNNING));
-
-		// releasedディレクトリの絶対パスを取得。
-		$this->realpath_array['realpath_released'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_RELEASED));
-
-		// logディレクトリの絶対パスを取得。
-		$this->realpath_array['realpath_log'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_LOG));
-
-		//============================================================
-		// 作業ディレクトリ作成
-		//============================================================
-		$current_dir = realpath('.');
-		if (chdir($this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir)))) {
-
-			// logファイルディレクトリが存在しない場合は作成
-			$this->fs()->mkdir($this->realpath_array['realpath_log']);
-			// backupディレクトリが存在しない場合は作成
-			$this->fs()->mkdir($this->realpath_array['realpath_backup']);
-			// waitingディレクトリが存在しない場合は作成
-			$this->fs()->mkdir($this->realpath_array['realpath_waiting']);
-			// runningディレクトリが存在しない場合は作成
-			$this->fs()->mkdir($this->realpath_array['realpath_running']);
-			// releasedディレクトリが存在しない場合は作成
-			$this->fs()->mkdir($this->realpath_array['realpath_released']);
-
-		} else {
-			// ディレクトリ移動に失敗
-			chdir($current_dir);
-			throw new \Exception('Move to indigo work directory failed.');
-		}
-		chdir($current_dir);
-
-
-		//============================================================
-		// 通常ログ出力登録
+		// オプション情報入力チェック（必須項目のみ）
 		//============================================================	
-		// ログファイル名
-		$log_dirname = $this->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT_YMD);
 
-		// ログパス
-		$this->process_log_path = $this->realpath_array['realpath_log'] . 'log_process_' . $log_dirname . '.log';
+		if (
+		    
+			!( array_key_exists('realpath_workdir', $this->options) && $this->options->realpath_workdir) ||
+			!( array_key_exists('relativepath_resourcedir', $this->options) && $this->options->relativepath_resourcedir) ||
+			!( array_key_exists('realpath_ajax_call', $this->options) && $this->options->realpath_ajax_call) ||
+			!( array_key_exists('time_zone', $this->options) && $this->options->time_zone) ||
+			!( array_key_exists('db', $this->options) && $this->options->db) ||
+			!( array_key_exists('db_type', $this->options->db)) ||	// ← null OK
+			!( array_key_exists('max_reserve_record', $this->options) && $this->options->max_reserve_record) ||
+			!( array_key_exists('server', $this->options) && $this->options->server) ||
+			!( array_key_exists('real_path', $this->options->server[0]) && $this->options->server[0]->real_path) ||
+			!( array_key_exists('git', $this->options) && $this->options->git) ||
+			!( array_key_exists('giturl', $this->options->git) && $this->options->git->giturl) ||
+			!( array_key_exists('username', $this->options->git) && $this->options->git->username) ||
+			!( array_key_exists('password', $this->options->git) && $this->options->git->password) )  {
 
-		// $logstr = "[realpath]" . "\r\n";
-		// $logstr .= "server -> " . $this->realpath_array['realpath_server'] . "\r\n";
-		// $logstr .= "backup -> " . $this->realpath_array['realpath_backup'] . "\r\n";
-		// $logstr .= "waiting -> " . $this->realpath_array['realpath_waiting'] . "\r\n";
-		// $logstr .= "running -> " . $this->realpath_array['realpath_running'] . "\r\n";
-		// $logstr .= "released -> " . $this->realpath_array['realpath_released'] . "\r\n";
-		// $logstr .= "log -> " . $this->realpath_array['realpath_log'];
-		// $this->common()->put_process_log_block($logstr);
+			$this->param_check_flg = false;
+		
+		} else {
+			
+			//============================================================
+			// 作業ディレクトリ絶対パス格納
+			//============================================================
+		
+			// backupディレクトリの絶対パスを取得。
+			$this->realpath_array['realpath_backup'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_BACKUP));
 
-		//============================================================
-		// タイムゾーンの設定
-		//============================================================
-		// cron実行の場合は、タイムゾーンパラメタは存在しないので設定無し
-		if (property_exists($this->options, 'time_zone')) {
+			// waitingディレクトリの絶対パスを取得。
+			$this->realpath_array['realpath_waiting'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_WAITING));
 
+			// runningディレクトリの絶対パスを取得。
+			$this->realpath_array['realpath_running'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_RUNNING));
+
+			// releasedディレクトリの絶対パスを取得。
+			$this->realpath_array['realpath_released'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_RELEASED));
+
+			// logディレクトリの絶対パスを取得。
+			$this->realpath_array['realpath_log'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_LOG));
+			
+
+			//============================================================
+			// 作業ディレクトリ作成
+			//============================================================
+			$current_dir = realpath('.');
+			if (chdir($this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir)))) {
+
+				// backupディレクトリが存在しない場合は作成
+				$this->fs()->mkdir($this->realpath_array['realpath_backup']);
+				// waitingディレクトリが存在しない場合は作成
+				$this->fs()->mkdir($this->realpath_array['realpath_waiting']);
+				// runningディレクトリが存在しない場合は作成
+				$this->fs()->mkdir($this->realpath_array['realpath_running']);
+				// releasedディレクトリが存在しない場合は作成
+				$this->fs()->mkdir($this->realpath_array['realpath_released']);
+
+			} else {
+				// ディレクトリ移動に失敗
+				chdir($current_dir);
+				throw new \Exception('Move to indigo work directory failed.');
+			}
+			chdir($current_dir);
+
+			// 本番環境ディレクトリの絶対パスを取得。（配列1番目のサーバを設定）
+			foreach ( (array)$this->options->server as $server ) {
+				$this->realpath_array['realpath_server'] = $this->fs()->normalize_path($this->fs()->get_realpath($server->real_path . "/"));
+				break; // 現時点では最初の1つのみ有効なのですぐに抜ける
+			}
+
+			//============================================================
+			// タイムゾーンの設定
+			//============================================================
+			// cron実行の場合は、タイムゾーンパラメタは存在しないので設定無し
 			$time_zone = $this->options->time_zone;
 			if (!$time_zone) {
 				throw new \Exception('Parameter of timezone not found.');
@@ -279,25 +312,32 @@ class main
 
 			$logstr = "設定タイムゾーン：" . $time_zone;
 			$this->common()->put_process_log_block($logstr);
+
+
+			//============================================================
+			// データベース接続
+			//============================================================
+			$this->dbh = $this->pdoMgr->connect();
+
+
+			//============================================================
+			// テーブル作成（作成済みの場合はスキップ）
+			//============================================================
+			$this->pdoMgr->create_table();
+			
+
+			//============================================================
+			// Gitのmaster情報取得
+			//============================================================
+			$this->gitMgr->get_git_master($this->options);
 		}
 
 		//============================================================
-		// データベース接続
+		// オプションの任意項目
 		//============================================================
-		$this->dbh = $this->pdoMgr->connect();
-
-
-		//============================================================
-		// テーブル作成（作成済みの場合はスキップ）
-		//============================================================
-		$this->pdoMgr->create_table();
-		
-
-		//============================================================
-		// Gitのmaster情報取得
-		//============================================================
-		$this->gitMgr->get_git_master($this->options);
-
+		if (array_key_exists('user_id', $this->options)) {
+			$this->user_id = $this->options->user_id;
+		}
 	}
 
 	/**
@@ -310,8 +350,6 @@ class main
 	 * @return string HTMLソースコード
 	 */
 	public function run() {
-		
-		$this->common()->put_process_log(__METHOD__, __LINE__, "■ run start");
 
 		// 画面表示
 		$disp = '';  
@@ -330,9 +368,16 @@ class main
 					    'message' => '',
 					  	'dialog_html' => ''
 				);
-
+	
 		try {
 
+			if (!$this->param_check_flg) {
+				throw new \ErrorException('パラメタが不足しています。');
+			}
+
+			$this->common()->put_process_log(__METHOD__, __LINE__, "■ run start");
+
+	
 			//============================================================
 			// 新規関連処理
 			//============================================================
@@ -556,41 +601,45 @@ class main
 
 		} catch (\ErrorException $e) {
 
-		    echo "エラーが発生しました。管理者にお問い合わせください。". "\r\n";
+		    $alert_title = "エラーが発生しました。";
 
-			if (file_exists($this->error_log_path)) {
+			if (file_exists($this->log_path)) {
 				$logstr =  "***** エラー発生 *****" . "\r\n";
-				$logstr .= "[ERROR]" . "\r\n";
+				$logstr .= "[ErrorException]" . "\r\n";
 				$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
 				$logstr .= "Error message:" . $e->getMessage() . "\r\n";
 				$this->common()->put_error_log($logstr);
 			} else {
-				echo $e->getFile() . " in " . $e->getLine() . "\r\n";
-				echo "Error message:" . $e->getMessage() . "\r\n";
+				$alert_line = $e->getFile() . " in " . $e->getLine();
+				$alert_message = "Error message:" . $e->getMessage();
 			}
 
+			// エラーメッセージ表示
+			$dialog_html = '<div><h3>'.  $alert_title . '</h3>';
+			$dialog_html .= '<p>'.  $alert_line . '</p>';
+			$dialog_html .= '<p>'.  $alert_message . '</p></div>';
+
+			return $dialog_html;
 
 		} catch (\Exception $e) {
 
-			echo "例外エラーが発生しました。管理者にお問い合わせください。". "\r\n";
+			$alert_title = "例外エラーが発生しました。";
 
 			$logstr = "** run() 例外キャッチ **" . "\r\n";
 			$logstr .= $e->getMessage() . "\r\n";
 			$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 			$logstr =  "***** 例外エラー発生 *****" . "\r\n";
-			$logstr .= "[ERROR]" . "\r\n";
+			$logstr .= "[Exception]" . "\r\n";
 			$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
 			$logstr .= "Error message:" . $e->getMessage() . "\r\n";
 			$this->common()->put_error_log($logstr);
 
-			// データベース接続を閉じる
-			$this->pdoMgr->close($this->dbh);
+			// エラーメッセージ表示
+			$dialog_html = '<h3>'.  $alert_title . '</h3>';
 
-			$this->common()->put_process_log(__METHOD__, __LINE__, '■ cron_run error end');
+			return $dialog_html;
 
-			// return $dialog_html;
-			return;
 		}
 		
 		// データベース接続を閉じる
@@ -651,41 +700,44 @@ class main
 
 		} catch (\ErrorException $e) {
 
-		    echo "エラーが発生しました。管理者にお問い合わせください。". "\r\n";
+		    $alert_title = "エラーが発生しました。";
 
-			if (file_exists($this->error_log_path)) {
+			if (file_exists($this->log_path)) {
 				$logstr =  "***** エラー発生 *****" . "\r\n";
-				$logstr .= "[ERROR]" . "\r\n";
+				$logstr .= "[ErrorException]" . "\r\n";
 				$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
 				$logstr .= "Error message:" . $e->getMessage() . "\r\n";
 				$this->common()->put_error_log($logstr);
 			} else {
-				echo $e->getFile() . " in " . $e->getLine() . "\r\n";
-				echo "Error message:" . $e->getMessage() . "\r\n";
+				$alert_line = $e->getFile() . " in " . $e->getLine();
+				$alert_message = "Error message:" . $e->getMessage();
 			}
 
-			return;
+			// エラーメッセージ表示
+			$dialog_html = '<h3>'.  $alert_title . '</h3>';
+			$dialog_html .= '<p>'.  $alert_line . '</p>';
+			$dialog_html .= '<p>'.  $alert_message . '</p>';
+
+			return $dialog_html;
 
 		} catch (\Exception $e) {
 
-		    echo "例外エラーが発生しました。管理者にお問い合わせください。". "\r\n";
+		    $alert_title = "例外エラーが発生しました。";
 
 			$logstr = "** cron_run() 例外キャッチ **" . "\r\n";
 			$logstr .= $e->getMessage() . "\r\n";
 			$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 			$logstr =  "***** 例外エラー発生 *****" . "\r\n";
-			$logstr .= "[ERROR]" . "\r\n";
+			$logstr .= "[Exception]" . "\r\n";
 			$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
 			$logstr .= "Error message:" . $e->getMessage() . "\r\n";
 			$this->common()->put_error_log($logstr);
 
-			// データベース接続を閉じる
-			$this->pdoMgr->close($this->dbh);
+			// エラーメッセージ表示
+			$dialog_html = '<h3>'.  $alert_title . '</h3>';
 
-			$this->common()->put_process_log(__METHOD__, __LINE__, '■ run error end');
-
-			return;
+			return $dialog_html;
 		}
 
 		// データベース接続を閉じる

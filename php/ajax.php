@@ -17,6 +17,8 @@ class ajax
      * @access private
      */
     private $fs, $common;
+    
+    private $user_id;
 
     /**
      * コンストラクタ
@@ -40,6 +42,13 @@ class ajax
 
         // ログパス
         $this->ajax_log_path = $this->fs->normalize_path($this->fs->get_realpath($this->options->realpath_workdir . define::PATH_LOG)) . 'log_ajax_' . $log_dirname . '.log';
+
+        //============================================================
+        // オプションの任意項目
+        //============================================================
+        if (array_key_exists('user_id', $this->options)) {
+            $this->user_id = $this->options->user_id;
+        }
     }
 
     /**
@@ -121,7 +130,7 @@ class ajax
 
         $str = "[" . $datetime . "]" . " " .
                "[pid:" . getmypid() . "]" . " " .
-               "[userid:" . $this->options->user_id . "]" . " " .
+               "[userid:" . $this->user_id . "]" . " " .
                "[" . __METHOD__ . "]" . " " .
                "[line:" . __LINE__ . "]" . " " .
                $text . "\r\n";

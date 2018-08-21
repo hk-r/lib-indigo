@@ -450,7 +450,7 @@ class initScreen
 			// 入力情報を公開予定テーブルへ登録
 			//============================================================
 	 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　-----公開処理結果テーブルの登録処理-----');
-			$this->tsReserve->insert_ts_reserve($form, $gmt_reserve_datetime, $this->main->options->user_id);
+			$this->tsReserve->insert_ts_reserve($form, $gmt_reserve_datetime, $this->main->user_id);
 			
 		} catch (\Exception $e) {
 
@@ -521,7 +521,7 @@ class initScreen
 			// 入力情報を公開予定テーブルへ更新
 			//============================================================
 	 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　-----公開処理結果テーブルの更新処理-----');
-			$this->tsReserve->update_ts_reserve($form, $gmt_reserve_datetime, $this->main->options->user_id);
+			$this->tsReserve->update_ts_reserve($form, $gmt_reserve_datetime, $this->main->user_id);
 			
 		} catch (\Exception $e) {
 
@@ -576,7 +576,7 @@ class initScreen
 
 				$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ -----公開予定情報の論理削除処理-----');
 
-				$this->tsReserve->delete_reserve_table($this->main->options, $selected_id);
+				$this->tsReserve->delete_reserve_table($this->main->user_id, $selected_id);
 
 				//============================================================
 				// 「waiting」ディレクトリの変更前の公開ソースディレクトリを削除

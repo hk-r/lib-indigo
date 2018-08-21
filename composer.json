@@ -16,7 +16,7 @@
     },
     "require": {
         "php": ">=5.4.0",
-        "tomk79/filesystem": "^1.0.6"
+        "tomk79/filesystem": "^1.0.8"
     },
     "require-dev": {
         "phpunit/phpunit": "^4.1.0"

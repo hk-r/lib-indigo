@@ -330,13 +330,13 @@ class tsReserve
 	 *
 	 * 引数の公開予定IDを条件に、公開予定情報を削除済みへ更新します。
 	 *
-	 * @param  array[]  $options mainオプション情報
+	 * @param  string  $user_id     ユーザID
 	 * @param  string  $selected_id 公開予定ID
 	 * @return null
 	 * 
 	 * @throws Exception パラメタの値が正しく設定されていない場合
 	 */
-	public function delete_reserve_table($options, $selected_id) {
+	public function delete_reserve_table($user_id, $selected_id) {
 
 		if (!$selected_id) {
 			throw new \Exception('更新対象の公開予定IDが取得できませんでした。 ');

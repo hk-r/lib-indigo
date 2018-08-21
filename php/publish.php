@@ -48,9 +48,6 @@ class publish
 		$this->tsReserve = new tsReserve($this->main);
 		$this->tsOutput = new tsOutput($this->main);
 		$this->tsBackup = new tsBackup($this->main);
-		
-		$path_lockdir = $main->fs()->get_realpath( $this->main->options->realpath_workdir . 'applock/' );
-		$this->path_lockfile = $path_lockdir .'applock.txt';
 	}
 
 
@@ -90,7 +87,6 @@ class publish
 						'output_id' => '',
 						'backup_id' => '');
 
-		
 		$start_datetime = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 		
 		$reserve_data_list;
@@ -188,7 +184,7 @@ class publish
 						$this->main->common()->put_publish_log(__METHOD__, __LINE__, "ブランチ名：" . $data[tsReserve::TS_RESERVE_BRANCH], $this->realpath_tracelog);
 						$this->main->common()->put_publish_log(__METHOD__, __LINE__, "コミット：" . $data[tsReserve::TS_RESERVE_COMMIT_HASH], $this->realpath_tracelog);
 						$this->main->common()->put_publish_log(__METHOD__, __LINE__, "コメント：" . $data[tsReserve::TS_RESERVE_COMMENT], $this->realpath_tracelog);
-						$this->main->common()->put_publish_log(__METHOD__, __LINE__, "ユーザID：" . $this->main->options->user_id, $this->realpath_tracelog);
+						$this->main->common()->put_publish_log(__METHOD__, __LINE__, "ユーザID：" . $this->main->user_id, $this->realpath_tracelog);
 
 						//============================================================
 						// 公開予定テーブルのステータス更新処理
@@ -518,12 +514,15 @@ class publish
 		$logstr = "==========パブリッシュのロック処理 START==========";
 		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-		$lockfilepath = $this->path_lockfile;
+
+		$path_lockdir = $this->main->fs()->get_realpath( $this->main->options->realpath_workdir . 'applock/' );
+		$this->path_lockfile = $path_lockdir .'applock.txt';
+
 		$timeout_limit = 5;
 
 		// 親ディレクトリのチェック生成
-		if( !@is_dir( dirname( $lockfilepath ) ) ){
-			$this->main->fs()->mkdir_r( dirname( $lockfilepath ) );
+		if( !@is_dir( dirname( $this->path_lockfile ) ) ){
+			$this->main->fs()->mkdir_r( dirname( $this->path_lockfile ) );
 		}
 
 		#	PHPのFileStatusCacheをクリア
@@ -550,7 +549,7 @@ class publish
 
 		$src = 'ProcessID='.getmypid()."\r\n";
 		$src .= 'Date='. $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
-		$rtn = $this->main->fs()->save_file( $lockfilepath , $src );
+		$rtn = $this->main->fs()->save_file( $this->path_lockfile , $src );
 
 		$this->main->common()->put_publish_log(__METHOD__, __LINE__, "ロックファイル作成結果：rtn=" . $rtn, $this->realpath_tracelog);
 		$this->main->common()->put_publish_log(__METHOD__, __LINE__, "ProcessID=" . getmypid(), $this->realpath_tracelog);
@@ -723,7 +722,7 @@ class publish
 				tsOutput::TS_OUTPUT_GEN_DELETE_FLG 	=> define::DELETE_FLG_OFF,
 				tsOutput::TS_OUTPUT_GEN_DELETE 		=> null,
 				tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
-				tsOutput::TS_OUTPUT_INSERT_USER_ID 	=> $this->main->options->user_id,
+				tsOutput::TS_OUTPUT_INSERT_USER_ID 	=> $this->main->user_id,
 				tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
 				tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> null
 			);
@@ -748,7 +747,7 @@ class publish
 				tsOutput::TS_OUTPUT_GEN_DELETE_FLG 	=> define::DELETE_FLG_OFF,
 				tsOutput::TS_OUTPUT_GEN_DELETE 		=> null,
 				tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
-				tsOutput::TS_OUTPUT_INSERT_USER_ID 	=> $this->main->options->user_id,
+				tsOutput::TS_OUTPUT_INSERT_USER_ID 	=> $this->main->user_id,
 				tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
 				tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> null
 			);
@@ -772,7 +771,7 @@ class publish
 				tsOutput::TS_OUTPUT_GEN_DELETE_FLG 	=> define::DELETE_FLG_OFF,
 				tsOutput::TS_OUTPUT_GEN_DELETE 		=> null,
 				tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
-				tsOutput::TS_OUTPUT_INSERT_USER_ID 	=> $this->main->options->user_id,
+				tsOutput::TS_OUTPUT_INSERT_USER_ID 	=> $this->main->user_id,
 				tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
 				tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> null
 			);
@@ -807,7 +806,7 @@ class publish
 			tsOutput::TS_OUTPUT_STATUS 			=> $status,
 			tsOutput::TS_OUTPUT_SRV_BK_DIFF_FLG => "0",
 			tsOutput::TS_OUTPUT_END 			=> $end_datetime,
-			tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> $this->main->options->user_id
+			tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> $this->main->user_id
 		);
 
  		$this->tsOutput->update_ts_output($output_id, $dataArray);
@@ -828,7 +827,7 @@ class publish
 		$backup_dirname = $this->main->common()->format_gmt_datetime($backup_datetime, define::DATETIME_FORMAT_SAVE);
 
 		// バックアップテーブルの登録処理
-		$backup_id = $this->tsBackup->insert_ts_backup($this->main->options, $backup_datetime, $output_id);
+		$backup_id = $this->tsBackup->insert_ts_backup($this->main->user_id, $backup_datetime, $output_id);
 
 		$logstr = "☆バックアップテーブルのINSERT実行" . "\r\n";
 		$logstr .= "バックアップID --> " . $backup_id . "\r\n";

@@ -197,7 +197,7 @@ class common
 
 		$str = "[" . $datetime . "]" . " " .
 			   "[pid:" . getmypid() . "]" . " " .
-			   "[userid:" . $this->main->options->user_id . "]" . " " .
+			   "[userid:" . $this->main->user_id . "]" . " " .
 			   "[" . $method . "]" . " " .
 			   "[line:" . $line . "]" . " " .
 			   $text . "\r\n";
@@ -252,7 +252,7 @@ class common
 
 		$str = "[" . $datetime . "]" . " " .
 			   "[pid:" . getmypid() . "]" . " " .
-			   "[userid:" . $this->main->options->user_id . "]" . " " .
+			   "[userid:" . $this->main->user_id . "]" . " " .
 			   "[" . $method . "]" . " " .
 			   "[line:" . $line . "]" . " " .
 			   $text . "\r\n";
