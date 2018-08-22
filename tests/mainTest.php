@@ -1,6 +1,6 @@
 <?php
 /**
- * test for Plum
+ * test for Indigo
  */
 class mainTest extends PHPUnit_Framework_TestCase{
 
@@ -417,26 +417,6 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		}
 		clearstatcache();
 	}
-
-    // public function reserveTestData()
-    // {
-    //     return array(
-    //       array(
-    //       	1,
-    //       	'2018-08-18 10:00:00',
-    //       	'release/2018-07-01	',
-    //       	'86daeb8',
-    //       	'ユニットテスト001',
-    //       	'0',
-    //       	'0',
-    //       	'2018-08-16 13:15:09',
-    //       	'user01',
-    //       	null,
-    //       	null,
-    //       	'0')
-    //     );
-    // }
-
 
 	/**
 	 * 予定公開処理
