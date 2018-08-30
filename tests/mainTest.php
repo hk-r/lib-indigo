@@ -9,28 +9,6 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 	public function setup(){
 
-		register_shutdown_function(
-		    function(){
-		        $e = error_get_last();
-		        // if ($e === null) {
-		        // 	return;
-		        // }
-		        if( $e['type'] == E_ERROR ||
-		        	$e['type'] == E_WARNING ||
-		            $e['type'] == E_PARSE ||
-		            $e['type'] == E_CORE_ERROR ||
-		            $e['type'] == E_COMPILE_ERROR ||
-		            $e['type'] == E_USER_ERROR ){
-		            
-		            $datetime = gmdate("Y-m-d H:i:s", time());
-
-            		$logstr = "[" . $datetime . "]" . " " . $e['file'] . " in " . $e['line'] . "\r\n";
-					$logstr .= "Error message:" . $e['message'] . "\r\n";
-					error_log($logstr, 3, __DIR__.'/error.log');
-		        }
-		    }
-		);
-
 		$this->fs = new tomk79\filesystem();
 
 		mb_internal_encoding('UTF-8');
@@ -102,7 +80,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		}
 		clearstatcache();
 		$this->fs->mkdir_r(__DIR__.'/testdata/indigo_dir/');
-		// touch(__DIR__.'/testdata/indigo_dir/.gitkeep');
+		touch(__DIR__.'/testdata/indigo_dir/.gitkeep');
 		clearstatcache();
 	}
 	private function chmod_r($path = null){
@@ -133,7 +111,6 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		//============================================================
 		// 初期表示画面表示
 		//============================================================
-
 		$options = $this->options;
 		
 		$indigo = new indigo\main( $options );
@@ -448,6 +425,23 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 		sleep(1);
 
+		// //============================================================
+		// // 即時公開処理（失敗）　画面入力項目nullの場合
+		// //============================================================
+		// $options = $this->options;
+		// // $options['_POST'] = array('immediate_confirm' => 1);	
+
+		// $main = new indigo\main( $options );
+		// $publish = new indigo\publish( $main );
+
+		// $result = $publish->exec_publish(1, null);
+
+		// $this->assertTrue( !$result['status'] );
+		// $this->assertEquals( '公開処理が失敗しました。', $result['message'] );
+		// // TODO:ログなどのアウトプットファイルも要確認
+		// // $this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) )
+
+
 		//============================================================
 		// 予定公開実行
 		//============================================================
@@ -481,6 +475,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$this->assertEquals('', $result['message']);
 		$this->assertTrue( $result['status'] );
 		$this->assertEquals('', $result['dialog_html']);
+
+		// sleep(20);
 
 		//============================================================
 		// 予定公開実行
@@ -522,6 +518,9 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$this->assertEquals( '', $result['output_id'] );
 		$this->assertEquals( '', $result['backup_id'] );
 
+		// TODO:ログなどのアウトプットファイルも要確認
+		// $this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) )
+
 		//============================================================
 		// 即時公開処理（成功）
 		//============================================================
@@ -549,6 +548,21 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$this->assertEquals( 3, $result['output_id'] );	// 1,2は予約公開済みとスキップデータ
 		$this->assertEquals( 2, $result['backup_id'] );
 
+
+		// TODO:ログなどのアウトプットファイルも要確認
+		// $this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) )
+
+		
+		// $path = '';
+		// // 本番環境ディレクトリの絶対パスを取得。（配列1番目のサーバを設定）
+		// foreach ( (array)$options['server'] as $server ) {
+		// 	$path = $this->fs->normalize_path($this->fs->get_realpath($server['real_path'] . "/"));
+		// 	break; // 現時点では最初の1つのみ有効なのでブレイク
+		// }
+		// $current_branch_name = $this->get_current_branch_name($path);
+
+		// $this->assertEquals( $branch_name, $current_branch_name );
+		
 		return $result['output_id'];
 	}
 
@@ -611,6 +625,9 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$this->assertEquals( '公開処理が失敗しました。', $result['message'] );
 		$this->assertTrue( !$result['status'] );
 
+		// TODO:ログなどのアウトプットファイルも要確認
+		// $this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) )
+
 		//============================================================
 		// 復元公開処理（成功）
 		//============================================================
@@ -638,6 +655,21 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		// 1は予約公開のバックアップデータ、2は即時公開のバックアップデータ
 		$this->assertEquals( 3, $result['backup_id'] );
 
+
+		// TODO:ログなどのアウトプットファイルも要確認
+		// $this->assertTrue( is_dir( __DIR__.'/testdata/indigo_dir/running/' ) )
+
+		
+		// $path = '';
+		// // 本番環境ディレクトリの絶対パスを取得。（配列1番目のサーバを設定）
+		// foreach ( (array)$options['server'] as $server ) {
+		// 	$path = $this->fs->normalize_path($this->fs->get_realpath($server['real_path'] . "/"));
+		// 	break; // 現時点では最初の1つのみ有効なのでブレイク
+		// }
+		// $current_branch_name = $this->get_current_branch_name($path);
+
+		// $this->assertEquals( $branch_name, $current_branch_name );
+		
 	}
 
 
@@ -677,6 +709,25 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$this->assertEquals( 0, count($html->find('.dialog tr',0)->find('th')) );
 		$this->assertEquals( 2, count($html->find('.dialog tr',0)->find('td')) );
 		$this->assertEquals( 'ブランチ', $html->find('.dialog tr',0)->childNodes(0)->innertext );
+
+
+		// // ダイアログ裏で表示する初期表示画面の表示確認		
+		// $this->assertEquals( 3, count($html->find('.scr_content div')) );
+
+		// $this->assertEquals( 1, count($html->find('.scr_content form')) );
+		// $this->assertEquals( 2, count($html->find('.scr_content ul')) );
+		// $this->assertEquals( 6, count($html->find('.scr_content li')) );
+		// $this->assertEquals( 6, count($html->find('.scr_content input')) );
+
+		// $this->assertEquals( 1, count($html->find('.scr_content table')) );
+		// $this->assertEquals( 1, count($html->find('.scr_content thead')) );
+		// $this->assertEquals( 1, count($html->find('.scr_content tr')) );
+		// $this->assertEquals( 9, count($html->find('.scr_content tr',0)->find('th')) );
+		// $this->assertEquals( '公開予定日時', $html->find('.scr_content tr',0)->childNodes(1)->innertext );
+		// $this->assertEquals( 0, count($html->find('.scr_content td')) );
+
+		// // ダイアログ裏で表示する初期表示画面の表示確認		
+		// $this->assertEquals( 1, count($html->find('#loader-bg div')) );
 	}
 
 }
