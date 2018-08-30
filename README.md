@@ -283,6 +283,9 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 ```
 
 ## 更新履歴 - Change log
+### lib-indigo 0.1.2 (2018年08月22日)
+- パラメタ不足パターンの対策
+
 ### lib-indigo 0.1.1 (2018年08月21日)
 - SQLインジェクション対策実装
 - htmlspecialchars実装
