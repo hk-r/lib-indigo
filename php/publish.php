@@ -311,14 +311,17 @@ class publish
 			
 				/* トランザクションを開始する。オートコミットがオフになる */
 				$this->main->dbh()->beginTransaction();
-				$this->main->common()->put_publish_log(__METHOD__, __LINE__, "==========トランザクション開始==========", $this->realpath_tracelog);
-				
+				$this->main->common()->put_publish_log(__METHOD__, __LINE__, "==========トランザクション開始==========", $this->realpath_tracelog);	
+
+				// GMTの現在日時
+				$end_datetime = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
+
 				//============================================================
 				// 公開処理結果テーブルの更新処理（ステータス：成功）
 				// ※ 同期後にテーブル更新でエラーが発生すると不整合となるので、同期前に成功ステータスで更新しておく。
 				// 　 コミット処理までは実際にDBへ反映されない。
 				//============================================================
-				$this->update_output_data(define::PUBLISH_STATUS_SUCCESS, $result['output_id']);
+				$this->update_output_data(define::PUBLISH_STATUS_SUCCESS, $result['output_id'], $end_datetime);
 
 				//============================================================
 				// runningディレクトリを本番環境へ同期
@@ -331,8 +334,12 @@ class publish
 				//============================================================
 				// 公開済みのソースを「running」ディレクトリから「released」ディレクトリへ移動
 				//============================================================
+
+				// 公開作業用のディレクトリ名
+				$released_dirname = $this->main->common()->format_gmt_datetime($end_datetime, define::DATETIME_FORMAT_SAVE);
+
 				$from_realpath = $realpath_array['realpath_running'] . $running_dirname . '/';
-				$to_realpath = $realpath_array['realpath_released'] . $running_dirname . '/';
+				$to_realpath = $realpath_array['realpath_released'] . $released_dirname . '/';
 
 				// rsyncによるディレクトリの移動処理
 				$this->exec_sync_move($from_realpath, $to_realpath);
@@ -360,11 +367,14 @@ class publish
 			$result['status'] = false;
 			$result['message'] = '公開処理が失敗しました。';
 
+			// GMTの現在日時
+			$end_datetime = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
+
 			//============================================================
 			// 公開処理結果テーブルの更新処理（失敗）
 			//============================================================
 			if ($result['output_id']) {
-				$this->update_output_data(define::PUBLISH_STATUS_FAILED, $result['output_id']);
+				$this->update_output_data(define::PUBLISH_STATUS_FAILED, $result['output_id'], $end_datetime);
 			}
 
 			// ロック解除処理
@@ -792,15 +802,13 @@ class publish
 	 *
 	 * @param string $status 		  公開ステータス
 	 * @param int    $output_id       公開処理結果ID
+	 * @param string $end_datetime    公開終了日時
 	 */
-	private function update_output_data($status, $output_id) {
+	private function update_output_data($status, $output_id, $end_datetime) {
 
 		$logstr = "==========公開処理結果テーブルのUPDATE(ステータス更新)実行==========" . "\r\n";
 		$logstr = "[ステータス] " . $this->main->common()->convert_status($status);
 		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
-
-		// GMTの現在日時
-		$end_datetime = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 
 		$dataArray = array(
 			tsOutput::TS_OUTPUT_STATUS 			=> $status,
