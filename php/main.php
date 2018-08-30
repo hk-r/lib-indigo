@@ -189,6 +189,45 @@ class main
 
 		}
 
+		// 致命的なエラーのエラーハンドラ登録
+		register_shutdown_function(
+		    function(){
+		        $e = error_get_last();
+		        // if ($e === null) {
+		        // 	return;
+		        // }
+		        if( $e['type'] == E_ERROR ||
+		        	$e['type'] == E_WARNING ||
+		            $e['type'] == E_PARSE ||
+		            $e['type'] == E_CORE_ERROR ||
+		            $e['type'] == E_COMPILE_ERROR ||
+		            $e['type'] == E_USER_ERROR ){
+		            
+		            echo "致命的なエラーが発生しました。管理者にお問い合わせください。";
+
+					if (file_exists($this->log_path)) {
+					
+						$logstr =  "***** エラー発生 *****" . "\r\n";
+						$logstr .= "[ERROR]" . "\r\n";
+						$logstr .= $e['file'] . " in " . $e['line'] . "\r\n";
+						$logstr .= "Error message:" . $e['message'] . "\r\n";
+						$this->common()->put_error_log($logstr);
+					
+					} else {
+						echo $e['file'] . " in " . $e['line'] . "\r\n";
+						echo "Error message:" . $e['message'] . "\r\n";
+					}
+
+		        }
+		    }
+		);
+
+
+		// 致命的なエラー以外のエラーハンドラ登録
+		set_error_handler(function($errno, $errstr, $errfile, $errline) {
+			throw new \ErrorException($errstr, $errno, 0, $errfile, $errline);
+		});
+
 		//============================================================
 		// オプション情報入力チェック（必須項目のみ）
 		//============================================================	
