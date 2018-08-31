@@ -144,7 +144,7 @@ class main
 		//============================================================
 		// オブジェクト生成
 		//============================================================	
-		$this->options = json_decode(json_encode($options));
+		$this->options = \json_decode(\json_encode($options));
 
 		$this->fs = new \tomk79\filesystem(array(
 		  'file_default_permission' => define::FILE_DEFAULT_PERMISSION,
@@ -167,13 +167,13 @@ class main
 		if (array_key_exists('realpath_workdir', $this->options) && $this->options->realpath_workdir ) {
 
 			// logディレクトリの生成
-			$current_dir = realpath('.');
+			$current_dir = \realpath('.');
 			$this->log_path = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_LOG));
 			if (chdir($this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir)))) {
 				// logファイルディレクトリが存在しない場合は作成
 				$this->fs()->mkdir($this->log_path);
 			}
-			chdir($current_dir);
+			\chdir($current_dir);
 
 
 			//============================================================
@@ -195,19 +195,19 @@ class main
 
 		if (
 		    
-			!( array_key_exists('realpath_workdir', $this->options) && $this->options->realpath_workdir) ||
-			!( array_key_exists('relativepath_resourcedir', $this->options) && $this->options->relativepath_resourcedir) ||
-			!( array_key_exists('realpath_ajax_call', $this->options) && $this->options->realpath_ajax_call) ||
-			!( array_key_exists('time_zone', $this->options) && $this->options->time_zone) ||
-			!( array_key_exists('db', $this->options) && $this->options->db) ||
-			!( array_key_exists('db_type', $this->options->db)) ||	// ← null OK
-			!( array_key_exists('max_reserve_record', $this->options) && $this->options->max_reserve_record) ||
-			!( array_key_exists('server', $this->options) && $this->options->server) ||
-			!( array_key_exists('real_path', $this->options->server[0]) && $this->options->server[0]->real_path) ||
-			!( array_key_exists('git', $this->options) && $this->options->git) ||
-			!( array_key_exists('giturl', $this->options->git) && $this->options->git->giturl) ||
-			!( array_key_exists('username', $this->options->git) && $this->options->git->username) ||
-			!( array_key_exists('password', $this->options->git) && $this->options->git->password) )  {
+			!( \array_key_exists('realpath_workdir', $this->options) && $this->options->realpath_workdir) ||
+			!( \array_key_exists('relativepath_resourcedir', $this->options) && $this->options->relativepath_resourcedir) ||
+			!( \array_key_exists('realpath_ajax_call', $this->options) && $this->options->realpath_ajax_call) ||
+			!( \array_key_exists('time_zone', $this->options) && $this->options->time_zone) ||
+			!( \array_key_exists('db', $this->options) && $this->options->db) ||
+			!( \array_key_exists('db_type', $this->options->db)) ||	// ← null OK
+			!( \array_key_exists('max_reserve_record', $this->options) && $this->options->max_reserve_record) ||
+			!( \array_key_exists('server', $this->options) && $this->options->server) ||
+			!( \array_key_exists('real_path', $this->options->server[0]) && $this->options->server[0]->real_path) ||
+			!( \array_key_exists('git', $this->options) && $this->options->git) ||
+			!( \array_key_exists('giturl', $this->options->git) && $this->options->git->giturl) ||
+			!( \array_key_exists('username', $this->options->git) && $this->options->git->username) ||
+			!( \array_key_exists('password', $this->options->git) && $this->options->git->password) )  {
 
 			$this->param_check_flg = false;
 		
@@ -236,8 +236,8 @@ class main
 			//============================================================
 			// 作業ディレクトリ作成
 			//============================================================
-			$current_dir = realpath('.');
-			if (chdir($this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir)))) {
+			$current_dir = \realpath('.');
+			if (\chdir($this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir)))) {
 
 				// backupディレクトリが存在しない場合は作成
 				$this->fs()->mkdir($this->realpath_array['realpath_backup']);
@@ -250,10 +250,10 @@ class main
 
 			} else {
 				// ディレクトリ移動に失敗
-				chdir($current_dir);
+				\chdir($current_dir);
 				throw new \Exception('Move to indigo work directory failed.');
 			}
-			chdir($current_dir);
+			\chdir($current_dir);
 
 			// 本番環境ディレクトリの絶対パスを取得。（配列1番目のサーバを設定）
 			foreach ( (array)$this->options->server as $server ) {
@@ -269,7 +269,7 @@ class main
 			if (!$time_zone) {
 				throw new \Exception('Parameter of timezone not found.');
 			}
-			date_default_timezone_set($time_zone);
+			\date_default_timezone_set($time_zone);
 
 			$logstr = "設定タイムゾーン：" . $time_zone;
 			$this->common()->put_process_log_block($logstr);
@@ -296,7 +296,7 @@ class main
 		//============================================================
 		// オプションの任意項目
 		//============================================================
-		if (array_key_exists('user_id', $this->options)) {
+		if (\array_key_exists('user_id', $this->options)) {
 			$this->user_id = $this->options->user_id;
 		}
 	}
@@ -564,7 +564,7 @@ class main
 
 		    $alert_title = "エラーが発生しました。";
 
-			if (file_exists($this->log_path)) {
+			if (\file_exists($this->log_path)) {
 				$logstr =  "***** エラー発生 *****" . "\r\n";
 				$logstr .= "[ErrorException]" . "\r\n";
 				$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
@@ -663,7 +663,7 @@ class main
 
 		    $alert_title = "エラーが発生しました。";
 
-			if (file_exists($this->log_path)) {
+			if (\file_exists($this->log_path)) {
 				$logstr =  "***** エラー発生 *****" . "\r\n";
 				$logstr .= "[ErrorException]" . "\r\n";
 				$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
