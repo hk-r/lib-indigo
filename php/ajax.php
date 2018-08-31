@@ -29,7 +29,7 @@ class ajax
 
         $this->put_ajax_log("__construct call");
 
-        $this->options = json_decode(json_encode($options));
+        $this->options = \json_decode(json_encode($options));
 
         $this->fs = new \tomk79\filesystem(array(
           'file_default_permission' => define::FILE_DEFAULT_PERMISSION,
@@ -46,7 +46,7 @@ class ajax
         //============================================================
         // オプションの任意項目
         //============================================================
-        if (array_key_exists('user_id', $this->options)) {
+        if (\array_key_exists('user_id', $this->options)) {
             $this->user_id = $this->options->user_id;
         }
     }
@@ -76,14 +76,14 @@ class ajax
 
             if ( $master_real_path ) {
 
-                if ( chdir( $master_real_path ) ) {
+                if ( \chdir( $master_real_path ) ) {
 
                     // コミットハッシュ値取得
                     $command = 'git log --pretty=%h ' . define::GIT_REMOTE_NAME . '/' . $this->options->_GET->branch_name . ' -1';
                      
                      $this->put_ajax_log($command);
 
-                    exec($command, $output, $return);
+                    \exec($command, $output, $return);
                     foreach ( (array)$output as $data ) {
                         $commit_hash = $data;
                     }
@@ -108,13 +108,13 @@ class ajax
             $ret['commit_hash'] = $commit_hash;
         }
         
-        chdir($current_dir);
+        \chdir($current_dir);
 
-        header('Content-Type: application/json; charset=utf-8');
+        \header('Content-Type: application/json; charset=utf-8');
 
         $this->put_ajax_log("【commit hash】 " . $commit_hash);
 
-        return json_encode($ret);
+        return \json_encode($ret);
     }
 
     /**
@@ -126,15 +126,15 @@ class ajax
      */
     private function put_ajax_log($text){
         
-        $datetime = gmdate("Y-m-d H:i:s", time());
+        $datetime = \gmdate("Y-m-d H:i:s", \time());
 
         $str = "[" . $datetime . "]" . " " .
-               "[pid:" . getmypid() . "]" . " " .
+               "[pid:" . \getmypid() . "]" . " " .
                "[userid:" . $this->user_id . "]" . " " .
                "[" . __METHOD__ . "]" . " " .
                "[line:" . __LINE__ . "]" . " " .
                $text . "\r\n";
 
-        return error_log( $str, 3, $this->ajax_log_path );
+        return \error_log( $str, 3, $this->ajax_log_path );
     }
 }

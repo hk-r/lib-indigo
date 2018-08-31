@@ -27,9 +27,9 @@ class gitManager
 		$this->main = $main;
 
 		if (isset($main->options->git)) {
-			$this->protocol = parse_url($main->options->git->giturl, PHP_URL_SCHEME);
-			$this->host = parse_url($main->options->git->giturl, PHP_URL_HOST);
-			$this->path = parse_url($main->options->git->giturl, PHP_URL_PATH);
+			$this->protocol = \parse_url($main->options->git->giturl, PHP_URL_SCHEME);
+			$this->host = \parse_url($main->options->git->giturl, PHP_URL_HOST);
+			$this->path = \parse_url($main->options->git->giturl, PHP_URL_PATH);
 		}
 	}
 
@@ -44,7 +44,7 @@ class gitManager
 	 */
 	public function get_branch_list($options) {
 
-		$current_dir = realpath('.');
+		$current_dir = \realpath('.');
 
 		// masterディレクトリの絶対パス
 		$master_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_MASTER));
@@ -52,7 +52,7 @@ class gitManager
 		// リストの先頭を空にする
 		$ret_array[] = "";
 
-		if ( chdir( $master_real_path )) {
+		if ( \chdir( $master_real_path )) {
 
 			// fetch
 			$command = 'git fetch';
@@ -63,25 +63,25 @@ class gitManager
 			$ret = $this->main->common()->command_execute($command, true);
 
 			foreach ((array)$ret['output'] as $key => $value) {
-				if( strpos($value, '/HEAD') !== false ){
+				if( \strpos($value, '/HEAD') !== false ){
 					continue;
 				}
 
 				// リモート名は非表示とする
 				$findme   = '/';
-				$pos = strpos($value, $findme);
-				$trimed = substr($value, $pos + 1);
-				$ret_array[] = trim($trimed);
+				$pos = \strpos($value, $findme);
+				$trimed = \substr($value, $pos + 1);
+				$ret_array[] = \trim($trimed);
 			}
 
 		} else {
 			// ディレクトリ移動に失敗
 
-			chdir($current_dir);
+			\chdir($current_dir);
 			throw new \Exception('Move to master directory failed.');
 		}
 
-		chdir($current_dir);
+		\chdir($current_dir);
 
 		return $ret_array;
 	}
@@ -100,9 +100,9 @@ class gitManager
 	 */
 	public function git_file_copy($options, $path, $dirname) {
 			
-		$current_dir = realpath('.');
+		$current_dir = \realpath('.');
 
-		set_time_limit(12*60*60);
+		\set_time_limit(12*60*60);
 
 		// 公開日時ディレクトリの絶対パスを取得。
 		// すでに存在している場合はエラーメッセージを表示する。
@@ -110,7 +110,7 @@ class gitManager
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '【file copy path】 ' . $dir_real_path);
 
-		if (file_exists($dir_real_path)) {
+		if (\file_exists($dir_real_path)) {
 			throw new \Exception('同日時に公開予定のGitファイルが既に存在しています。公開予定情報を確認してください。' . $dir_real_path);
 		}
 
@@ -121,10 +121,10 @@ class gitManager
 		//============================================================
 		// 作成ディレクトリに移動し、指定ブランチのGit情報をコピーする
 		//============================================================
-		if ( chdir($dir_real_path) ) {
+		if ( \chdir($dir_real_path) ) {
 
 			// 指定ブランチ
-			$branch_name = trim($options->_POST->branch_select_value);
+			$branch_name = \trim($options->_POST->branch_select_value);
 
 			//============================================================
 			// git init
@@ -157,7 +157,7 @@ class gitManager
 			throw new \Exception('Git file copy failed. Move directory not found. ' . $dir_real_path);
 		}
 
-		chdir($current_dir);
+		\chdir($current_dir);
 	}
 
 	/**
@@ -176,7 +176,7 @@ class gitManager
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '【file delete path】 ' . $dir_real_path);
 
-		if( $dir_real_path && file_exists( $dir_real_path )) {
+		if( $dir_real_path && \file_exists( $dir_real_path )) {
 			// ディレクトリが存在する場合、削除コマンド実行
 			$command = 'rm -rf --preserve-root '. $dir_real_path;
 			$ret = $this->main->common()->command_execute($command, true);
@@ -201,7 +201,7 @@ class gitManager
 	 */
 	public function get_git_master($options) {
 
-		$current_dir = realpath('.');
+		$current_dir = \realpath('.');
 
 		// masterディレクトリの絶対パス
 		$master_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_MASTER));
@@ -215,11 +215,11 @@ class gitManager
 			}
 
 			// 「.git」フォルダが存在すれば初期化済みと判定
-			if ( !file_exists( $master_real_path . "/.git") ) {
+			if ( !\file_exists( $master_real_path . "/.git") ) {
 				// 存在しない場合
 
 				// ディレクトリ移動
-				if ( chdir( $master_real_path ) ) {
+				if ( \chdir( $master_real_path ) ) {
 
 					// git セットアップ
 					$command = 'git init';
@@ -247,7 +247,7 @@ class gitManager
 			}
 		}
 
-		chdir($current_dir);
+		\chdir($current_dir);
 	}
 
 }

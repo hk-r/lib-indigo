@@ -94,17 +94,17 @@ class historyScreen
 
 			$ret .= '<tr>'
 				. '<td class="p-center">
-				  <input type="radio" name="target" value="' . htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_ID_SEQ]) . '"/></td>'
-				. '<td class="p-center">' . htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_STATUS_DISP]) . '</td>'
-				. '<td class="p-center">' . htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_PUBLISH_TYPE]) . '</td>'
-				. '<td class="p-center">' . htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_RESERVE_DISP]) . '</td>'
-				. '<td class="p-center">' . htmlspecialchars($backup_datetime_disp) . '</td>'
-				. '<td class="p-center">' . htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_COMMIT_HASH]) . '</td>'
-				. '<td class="p-center">' . htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_BRANCH]) . '</td>'
-				. '<td>' 				  . htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_COMMENT]) . '</td>'
-				. '<td class="p-center">' . htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_START_DISP]) . '</td>'
-				. '<td class="p-center">' . htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_END_DISP]) . '</td>'
-				. '<td class="p-center">' . htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_INSERT_USER_ID]) . '</td>'
+				  <input type="radio" name="target" value="' . \htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_ID_SEQ]) . '"/></td>'
+				. '<td class="p-center">' . \htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_STATUS_DISP]) . '</td>'
+				. '<td class="p-center">' . \htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_PUBLISH_TYPE]) . '</td>'
+				. '<td class="p-center">' . \htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_RESERVE_DISP]) . '</td>'
+				. '<td class="p-center">' . \htmlspecialchars($backup_datetime_disp) . '</td>'
+				. '<td class="p-center">' . \htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_COMMIT_HASH]) . '</td>'
+				. '<td class="p-center">' . \htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_BRANCH]) . '</td>'
+				. '<td>' 				  . \htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_COMMENT]) . '</td>'
+				. '<td class="p-center">' . \htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_START_DISP]) . '</td>'
+				. '<td class="p-center">' . \htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_END_DISP]) . '</td>'
+				. '<td class="p-center">' . \htmlspecialchars($array[tsOutput::OUTPUT_ENTITY_INSERT_USER_ID]) . '</td>'
 				. '</tr>';
 		}
 		
@@ -159,9 +159,9 @@ class historyScreen
 		$log_filename = $realpath_log . 'pub_copy_' . $dirname . '.log';
 
 		$content = "";
-		if (file_exists($log_filename)) {
+		if (\file_exists($log_filename)) {
 			// ファイルの読み込み
-			$content = file_get_contents($log_filename);
+			$content = \file_get_contents($log_filename);
 		}
 
 		$ret = '<div class="dialog" id="modal_dialog">'
@@ -170,11 +170,11 @@ class historyScreen
 			  . '<div style="position: absolute; left: 0px; top: 0px; padding-top: 4em; overflow: auto; width: 100%; height: 100%;">'
 			  . '<div class="dialog_box">';
 
-		$ret .= '<p>User ID：' . htmlspecialchars($selected_ret[tsOutput::OUTPUT_ENTITY_INSERT_USER_ID]) . '</p>'
-			  . '<p>公開開始日時：' . htmlspecialchars($selected_ret[tsOutput::OUTPUT_ENTITY_START_DISP]) . '</p>'
-			  . '<p>公開終了日時：' . htmlspecialchars($selected_ret[tsOutput::OUTPUT_ENTITY_END_DISP]) . '</p>'
+		$ret .= '<p>User ID：' . \htmlspecialchars($selected_ret[tsOutput::OUTPUT_ENTITY_INSERT_USER_ID]) . '</p>'
+			  . '<p>公開開始日時：' . \htmlspecialchars($selected_ret[tsOutput::OUTPUT_ENTITY_START_DISP]) . '</p>'
+			  . '<p>公開終了日時：' . \htmlspecialchars($selected_ret[tsOutput::OUTPUT_ENTITY_END_DISP]) . '</p>'
 			  . '<p>公開同期ログ：</p>'
-			  . '<p>' . htmlspecialchars(nl2br($content)) .'</p>';
+			  . '<p>' . \htmlspecialchars(nl2br($content)) .'</p>';
 
 		$ret .=  '<div class="button_contents_box">'
 			  . '<div class="button_contents">'

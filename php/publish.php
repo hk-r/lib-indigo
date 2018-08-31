@@ -80,7 +80,7 @@ class publish
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ exec_publish start');
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '□ 公開種別：' . $this->main->common()->convert_publish_type($publish_type));
 
-		$current_dir = realpath('.');
+		$current_dir = \realpath('.');
 
 		$result = array('status' => true,
 						'message' => '',
@@ -133,7 +133,7 @@ class publish
 
 		try {
 
-			set_time_limit(12*60*60);
+			\set_time_limit(12*60*60);
 
 			$logstr = "[公開種別]" . $this->main->common()->convert_publish_type($publish_type) . "\r\n";
 			$logstr .= "[公開処理開始日時]" . $start_datetime . "\r\n";
@@ -399,7 +399,7 @@ class publish
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ exec_publish end');
 
-		chdir($current_dir);
+		\chdir($current_dir);
 			
 		return $result;
 	}
@@ -531,12 +531,12 @@ class publish
 		$timeout_limit = 5;
 
 		// 親ディレクトリのチェック生成
-		if( !@is_dir( dirname( $this->path_lockfile ) ) ){
-			$this->main->fs()->mkdir_r( dirname( $this->path_lockfile ) );
+		if( !@\is_dir( \dirname( $this->path_lockfile ) ) ){
+			$this->main->fs()->mkdir_r( \dirname( $this->path_lockfile ) );
 		}
 
 		#	PHPのFileStatusCacheをクリア
-		clearstatcache();
+		\clearstatcache();
 
 		$i = 0;
 		while( $this->is_locked() ){
@@ -548,16 +548,16 @@ class publish
 				return false;
 				// break;
 			}
-			sleep(1);
+			\sleep(1);
 
 			#	PHPのFileStatusCacheをクリア
-			clearstatcache();
+			\clearstatcache();
 		}
 
 		$logstr = "==========パブリッシュのロック作成 START==========";
 		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-		$src = 'ProcessID='.getmypid()."\r\n";
+		$src = 'ProcessID='.\getmypid()."\r\n";
 		$src .= 'Date='. $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 		$rtn = $this->main->fs()->save_file( $this->path_lockfile , $src );
 
@@ -582,10 +582,10 @@ class publish
 		$lockfile_expire = 12*60*60;//有効期限は12時間（過ぎた場合はロック解除してもよいこととする）
 
 		#	PHPのFileStatusCacheをクリア
-		clearstatcache();
+		\clearstatcache();
 
 		if( $this->main->fs()->is_file($lockfilepath) ){
-			if( ( time() - filemtime($lockfilepath) ) > $lockfile_expire ){
+			if( ( \time() - \filemtime($lockfilepath) ) > $lockfile_expire ){
 				#	有効期限を過ぎていたら、ロックは成立する。
 
 				$logstr = "※パブリッシュのロック確認 --->>> ロック無し（有効期限の超過）";
@@ -619,7 +619,7 @@ class publish
 		$lockfilepath = $this->path_lockfile;
 
 		#	PHPのFileStatusCacheをクリア
-		clearstatcache();
+		\clearstatcache();
 
 		return @unlink( $lockfilepath );
 	}//unlock()
@@ -641,12 +641,12 @@ class publish
 			$realpath_array['realpath_log'] . $running_dirname . "/")) . 'pub_trace_' . $running_dirname . '.log';
 
 		// ログファイルの上位ディレクトリを作成
-		if( !@is_dir( dirname( $this->realpath_copylog ) ) ){
-			$this->main->fs()->mkdir_r( dirname( $this->realpath_copylog ) );
+		if( !@\is_dir( \dirname( $this->realpath_copylog ) ) ){
+			$this->main->fs()->mkdir_r( \dirname( $this->realpath_copylog ) );
 		}
 		// ログファイルの上位ディレクトリを作成
-		if( !@is_dir( dirname( $this->realpath_tracelog ) ) ){
-			$this->main->fs()->mkdir_r( dirname( $this->realpath_tracelog ) );
+		if( !@\is_dir( \dirname( $this->realpath_tracelog ) ) ){
+			$this->main->fs()->mkdir_r( \dirname( $this->realpath_tracelog ) );
 		}
 	}
 

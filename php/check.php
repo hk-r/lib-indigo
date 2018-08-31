@@ -105,7 +105,7 @@ class check
 
 		$ret = true;
 
-		if (isset($max) && $max <= count($data_list)) {
+		if (isset($max) && $max <= \count($data_list)) {
 			$ret = false;
 		}
 
@@ -124,9 +124,9 @@ class check
 		$ret = true;
 
 		// 日付の妥当性チェック
-		list($Y, $m, $d) = explode('-', $reserve_date);
+		list($Y, $m, $d) = \explode('-', $reserve_date);
 
-		if (!checkdate(intval($m), intval($d), intval($Y))) {
+		if (!\checkdate(\intval($m), \intval($d), \intval($Y))) {
 			$ret = false;
 		}	
 
@@ -147,7 +147,7 @@ class check
 		// GMTの現在日時
 		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 
-		if (strtotime($now) < strtotime($datetime)) {
+		if (\strtotime($now) < \strtotime($datetime)) {
 			$ret = false;
 		}
 

@@ -77,22 +77,30 @@ $ php res_install_script.php [resourceInstallPath(ex. ./res)]
 
 
 #### 4. indigo作業用のディレクトリを作成する。
-apache（その他）ユーザに書き込み権限を付与します。
+後述の6. indigoの実行パラメタ設定 にて 「 indigo作業用ディレクトリ（絶対パス）：'realpath_workdir'」 にパス設定を行うディレクトリとなります。
+#### 4-1. ディレクトリを作成します。
+
 ```
-$ mkdir -m 767 yourProject/[directoryName(ex. indigo_dir)]
+$ mkdir yourProject/[directoryName(ex. indigo_dir)]
+```
+
+
+#### 4-2. apache（その他）ユーザに書き込み権限を付与します。
+```
+$ chmod -R o+w yourProject/[directoryName(ex. indigo_dir)]
 ```
 
 
 #### 5. 同期先の本番環境ディレクトリのパーミッションを変更する。
 apache（その他）ユーザに書き込み権限を付与します。
-※-Rオプション・・・指定ディレクトリ以下に存在するディレクトリ・ファイルも全て再帰的に権限変更を行う。
+※-Rオプションを付けることで、指定ディレクトリ以下に存在するディレクトリ・ファイルも全て再帰的に権限変更を行います。
 ```
 $ chmod -R o+w honbanProject/[directoryName(ex. indigo-test-project)]
 ```
 
 
 
-### 6. indigoの画面実行
+### 6. indigoの実行パラメタ設定
 
 各種パラメータを設定します。こちらに記載したパラメタが別ファイルから呼び出されます。
 
@@ -188,7 +196,7 @@ function call_parameter () {
 ### 7. indigoの画面実行
 #### 7-1. 初期化する
 
-6.で作成したパラメータを引数にlib-indigoのmainクラスを呼び出し初期化を行います。
+6.で作成したパラメータを引数にlib-indigoのmainクラスの呼び出しを行います。
 
 ```
 <?php
@@ -216,8 +224,8 @@ echo $indigo->run();
 ### 8. ajax呼び出しクラス
 #### 8-1. 初期化する
 
-6.で作成したパラメータを引数にlib-indigoのajaxクラスを呼び出し初期化を行います。
-※6.で設定した 「ajax呼出クラス（絶対パス）：'realpath_ajax_call'」 のファイル名と一致するようにファイルを作成してください。
+6.で作成したパラメータを引数に設定し、lib-indigoのajaxクラスの呼び出しを行います。
+※先述の 6. 「ajax呼出クラス（絶対パス）：'realpath_ajax_call'」 のファイル名と一致するようにファイルを作成してください。
 
 ```
 <?php
@@ -283,6 +291,11 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 ```
 
 ## 更新履歴 - Change log
+### lib-indigo 0.1.3 (2018年08月31日)
+- エラーハンドラ登録処理の削除
+- indigo内で生成するディレクトリ名を一部修正
+- 不具合修正：グローバル関数にバックスラッシュ付与
+
 ### lib-indigo 0.1.2 (2018年08月22日)
 - パラメタ不足パターンの対策
 

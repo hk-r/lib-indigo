@@ -34,7 +34,7 @@ class common
 	 */
 	public function get_current_datetime_of_gmt($format) {
 
-		return gmdate($format, time());
+		return \gmdate($format, time());
 	}
 
 	/**
@@ -65,7 +65,7 @@ class common
 	        $command .= ' 2>&1';
 	    }
 
-	    exec($command, $output, $return);
+	    \exec($command, $output, $return);
 
 		if ($return !== 0 ) {
 			// 異常終了の場合
@@ -100,7 +100,7 @@ class common
 		$ret = '';
 
 		if ($datetime) {
-			$ret = date($format, strtotime($datetime));
+			$ret = \date($format, \strtotime($datetime));
 		}
 		
 	    return $ret;
@@ -141,7 +141,7 @@ class common
 
 		if ($datetime) {
 
-			$timezone = date_default_timezone_get();
+			$timezone = \date_default_timezone_get();
 			$t = new \DateTime($datetime, new \DateTimeZone('GMT'));
 			$t->setTimeZone(new \DateTimeZone($timezone));
 			$ret = $t->format(define::DATETIME_FORMAT);
@@ -202,7 +202,7 @@ class common
 			   "[line:" . $line . "]" . " " .
 			   $text . "\r\n";
 
-		return error_log( $str, 3, $this->main->process_log_path );
+		return \error_log( $str, 3, $this->main->process_log_path );
 	}
 
 	/**
@@ -219,7 +219,7 @@ class common
 		$str = "[" . $datetime . "]" . " " .
 			   $text . "\r\n";
 
-		return error_log( $str, 3, $this->main->error_log_path );
+		return \error_log( $str, 3, $this->main->error_log_path );
 	}
 
 	/**
@@ -233,7 +233,7 @@ class common
 		
 		$str = $text . "\r\n";
 
-		return error_log( $str, 3, $this->main->process_log_path );
+		return \error_log( $str, 3, $this->main->process_log_path );
 	}
 
 	/**
@@ -251,13 +251,13 @@ class common
 		$datetime = $this->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 
 		$str = "[" . $datetime . "]" . " " .
-			   "[pid:" . getmypid() . "]" . " " .
+			   "[pid:" . \getmypid() . "]" . " " .
 			   "[userid:" . $this->main->user_id . "]" . " " .
 			   "[" . $method . "]" . " " .
 			   "[line:" . $line . "]" . " " .
 			   $text . "\r\n";
 
-		return error_log( $str, 3, $path );
+		return \error_log( $str, 3, $path );
 	}
 
 	/**
