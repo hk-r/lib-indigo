@@ -84,14 +84,14 @@ class backupScreen
 		foreach ((array)$data_list as $array) {
 			
 			$ret .= '<tr>'
-				. '<td class="p-center"><input type="radio" name="target" value="' . htmlspecialchars($array[tsBackup::BACKUP_ENTITY_ID_SEQ]) . '"/></td>'
-				. '<td class="p-center">' . htmlspecialchars($array[tsBackup::BACKUP_ENTITY_DATETIME_DISP]) . '</td>'
-				. '<td class="p-center">' . htmlspecialchars($array[tsBackup::BACKUP_ENTITY_PUBLISH_TYPE]) . '</td>'
-				. '<td class="p-center">' . htmlspecialchars($array[tsBackup::BACKUP_ENTITY_RESERVE_DISP]) . '</td>'
-				. '<td class="p-center">' . htmlspecialchars($array[tsBackup::BACKUP_ENTITY_BRANCH]) . '</td>'
-				. '<td class="p-center">' . htmlspecialchars($array[tsBackup::BACKUP_ENTITY_COMMIT_HASH]) . '</td>'
-				. '<td class="p-center">' . htmlspecialchars($array[tsBackup::BACKUP_ENTITY_COMMENT]) . '</td>'
-				. '<td class="p-center">' . htmlspecialchars($array[tsBackup::BACKUP_ENTITY_INSERT_USER_ID]) . '</td>'
+				. '<td class="p-center"><input type="radio" name="target" value="' . \htmlspecialchars($array[tsBackup::BACKUP_ENTITY_ID_SEQ]) . '"/></td>'
+				. '<td class="p-center">' . \htmlspecialchars($array[tsBackup::BACKUP_ENTITY_DATETIME_DISP]) . '</td>'
+				. '<td class="p-center">' . \htmlspecialchars($array[tsBackup::BACKUP_ENTITY_PUBLISH_TYPE]) . '</td>'
+				. '<td class="p-center">' . \htmlspecialchars($array[tsBackup::BACKUP_ENTITY_RESERVE_DISP]) . '</td>'
+				. '<td class="p-center">' . \htmlspecialchars($array[tsBackup::BACKUP_ENTITY_BRANCH]) . '</td>'
+				. '<td class="p-center">' . \htmlspecialchars($array[tsBackup::BACKUP_ENTITY_COMMIT_HASH]) . '</td>'
+				. '<td class="p-center">' . \htmlspecialchars($array[tsBackup::BACKUP_ENTITY_COMMENT]) . '</td>'
+				. '<td class="p-center">' . \htmlspecialchars($array[tsBackup::BACKUP_ENTITY_INSERT_USER_ID]) . '</td>'
 				. '</tr>';
 		}
 		
