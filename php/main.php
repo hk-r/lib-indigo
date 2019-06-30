@@ -148,6 +148,15 @@ class main
 		// オブジェクト生成
 		//============================================================	
 		$this->options = \json_decode(\json_encode($options));
+		if( !is_object($this->options) ){
+			$this->options = json_decode('{}');
+		}
+		if( !property_exists($this->options, '_GET') ){
+			$this->options->_GET = json_decode(json_encode($_GET));
+		}
+		if( !property_exists($this->options, '_POST') ){
+			$this->options->_POST = json_decode(json_encode($_POST));
+		}
 
 		$this->fs = new \tomk79\filesystem(array(
 		  'file_default_permission' => define::FILE_DEFAULT_PERMISSION,
