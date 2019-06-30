@@ -54,6 +54,13 @@ class ajax
 	}
 
 	/**
+	 * Ajax API 処理を実行する
+	 */
+	public function ajax_run(){
+		return $this->get_commit_hash();
+	}
+
+	/**
 	 * Gitブランチのコミットハッシュ値を取得
 	 *
 	 * @return json json_encode($ret) コミットハッシュ値(json変換)
@@ -61,7 +68,7 @@ class ajax
 	 * @throws Exception ブランチ名、作業ディレクトリ名パラメタがGETから取得できなかった場合
 	 * @throws Exception masterブランチディレクトリへの移動に失敗した場合
 	 */
-	public function get_commit_hash() {
+	private function get_commit_hash() {
 
 		$commit_hash;
 

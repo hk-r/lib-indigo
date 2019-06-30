@@ -199,7 +199,6 @@ function call_parameter () {
 
 
 ### 7. indigoの画面実行
-#### 7-1. 初期化する
 
 6.で作成したパラメータを引数にlib-indigoのmainクラスの呼び出しを行います。
 
@@ -215,19 +214,14 @@ $parameter = call_parameter();
 
 // load indigo\main
 $indigo = new indigo\main($parameter);
-```
 
-#### 7-2. indigoを実行する
-
-`run()` を実行します。
-
-```php
+// 実行する
 echo $indigo->run();
 ```
 
 
+
 ### 8. ajax呼び出しクラス
-#### 8-1. 初期化する
 
 6.で作成したパラメータを引数に設定し、lib-indigoのajaxクラスの呼び出しを行います。
 ※先述の 6. 「ajax呼出クラス（絶対パス）：'realpath_ajax_call'」 のファイル名と一致するようにファイルを作成してください。
@@ -245,20 +239,14 @@ $parameter = call_parameter();
 
 // load indigo\ajax
 $indigo = new indigo\ajax($parameter);
-```
 
-#### 8-2. ajax呼び出しを実行する
-
-`get_commit_hash()` を実行します。
-
-```
-echo $indigo->get_commit_hash();
+// 実行する
+echo $indigo->ajax_run();
 ```
 
 
 
 ### 9. indigoのクーロン実行
-#### 9-1. 初期化する
 
 6.で作成したパラメータを引数にlib-indigoのmainクラスを呼び出し初期化を行います。
 
@@ -275,15 +263,11 @@ $parameter = call_parameter();
 
 // load indigo\main
 $indigo = new indigo\main($parameter);
-```
 
-#### 9-2. indigo(cron)を実行する
-
-`cron_run()` を実行します。
-
-```php
+// 実行する
 echo $indigo->cron_run();
 ```
+
 
 #### 9-3. indigo(cron)をサーバから一定の間隔で呼び出すようクーロン登録を行う
 
@@ -307,6 +291,7 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 - オプション `additional_params` を追加。
 - オプション `_GET`, `_POST` を省略可能とした。
 - 配信予約日時の時制チェックに関する不具合を修正。
+- Ajaxの実行メソッド名を `ajax_run()` に変更。
 
 ### lib-indigo 0.1.3 (2018年08月31日)
 
