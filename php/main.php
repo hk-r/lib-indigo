@@ -27,6 +27,9 @@ class main
 	 * 
 	 * _GET,
 	 * _POST,
+	 *   - HTTP GET, POSTパラメータ (省略可)
+	 * additional_params,
+	 *   - フォーム送信時に付加する追加のパラメータ (省略可)
 	 * realpath_workdir,
 	 *   - indigo作業用ディレクトリ（絶対パス）
 	 * relativepath_resourcedir,
@@ -194,23 +197,23 @@ class main
 		//============================================================	
 
 		if (
-		    
-			!( \array_key_exists('realpath_workdir', $this->options) && $this->options->realpath_workdir) ||
-			!( \array_key_exists('relativepath_resourcedir', $this->options) && $this->options->relativepath_resourcedir) ||
-			!( \array_key_exists('realpath_ajax_call', $this->options) && $this->options->realpath_ajax_call) ||
-			!( \array_key_exists('time_zone', $this->options) && $this->options->time_zone) ||
-			!( \array_key_exists('db', $this->options) && $this->options->db) ||
-			!( \array_key_exists('db_type', $this->options->db)) ||	// ← null OK
-			!( \array_key_exists('max_reserve_record', $this->options) && $this->options->max_reserve_record) ||
-			!( \array_key_exists('server', $this->options) && $this->options->server) ||
-			!( \array_key_exists('real_path', $this->options->server[0]) && $this->options->server[0]->real_path) ||
-			!( \array_key_exists('git', $this->options) && $this->options->git) ||
-			!( \array_key_exists('giturl', $this->options->git) && $this->options->git->giturl) ||
-			!( \array_key_exists('username', $this->options->git) && $this->options->git->username) ||
-			!( \array_key_exists('password', $this->options->git) && $this->options->git->password) )  {
+
+			!( property_exists($this->options, 'realpath_workdir') && $this->options->realpath_workdir) ||
+			!( property_exists($this->options, 'relativepath_resourcedir') && $this->options->relativepath_resourcedir) ||
+			!( property_exists($this->options, 'realpath_ajax_call') && $this->options->realpath_ajax_call) ||
+			!( property_exists($this->options, 'time_zone') && $this->options->time_zone) ||
+			!( property_exists($this->options, 'db') && $this->options->db) ||
+			!( property_exists($this->options->db, 'db_type')) ||	// ← null OK
+			!( property_exists($this->options, 'max_reserve_record') && $this->options->max_reserve_record) ||
+			!( property_exists($this->options, 'server') && $this->options->server) ||
+			!( property_exists($this->options->server[0], 'real_path') && $this->options->server[0]->real_path) ||
+			!( property_exists($this->options, 'git') && $this->options->git) ||
+			!( property_exists($this->options->git, 'giturl') && $this->options->git->giturl) ||
+			!( property_exists($this->options->git, 'username') && $this->options->git->username) ||
+			!( property_exists($this->options->git, 'password') && $this->options->git->password) )  {
 
 			$this->param_check_flg = false;
-		
+
 		} else {
 			
 			//============================================================
@@ -231,7 +234,7 @@ class main
 
 			// logディレクトリの絶対パスを取得。
 			$this->realpath_array['realpath_log'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_LOG));
-			
+
 
 			//============================================================
 			// 作業ディレクトリ作成
@@ -302,6 +305,21 @@ class main
 	}
 
 	/**
+	 * 追加のパラメータを取得する
+	 */
+	public function get_additional_params(){
+		if( !property_exists($this->options, 'additional_params') ){
+			return '';
+		}
+		$params = json_decode(json_encode($this->options->additional_params), true);
+		$rtn = '';
+		foreach($params as $key=>$value){
+			$rtn .= '<input type="hidden" name="'.htmlspecialchars($key).'" value="'.htmlspecialchars($value).'" />';
+		}
+		return $rtn;
+	}
+
+	/**
 	 * 実行する
 	 *
 	 * ボタンイベントのname値を検知し、別クラスへ記載されている処理を呼び出す。
@@ -326,7 +344,7 @@ class main
 
 		// 処理実行結果格納
 		$result = array('status' => true,
-					    'message' => '',
+						'message' => '',
 					  	'dialog_html' => ''
 				);
 	
@@ -392,7 +410,7 @@ class main
 				$dialog_html   = $result['dialog_html'];
 
 			} elseif (isset($this->options->_POST->update_back)) {
-				// 変更確認ダイアログの「戻る」ボタン押下	
+				// 変更確認ダイアログの「戻る」ボタン押下
 				
 				$this->common()->put_process_log(__METHOD__, __LINE__, "==========変更ダイアログの「戻る」ボタン押下==========");
 				$dialog_html = $this->initScn->do_back_update_dialog();
@@ -402,7 +420,7 @@ class main
 			// 削除処理
 			//============================================================
 			} elseif (isset($this->options->_POST->delete)) {
-				// 初期表示画面の「削除」ボタン押下				
+				// 初期表示画面の「削除」ボタン押下
 			
 				$this->common()->put_process_log(__METHOD__, __LINE__, "==========初期表示画面の「削除」ボタン押下==========");
 				$result = $this->initScn->do_delete();
@@ -412,12 +430,12 @@ class main
 			// 手動復元処理
 			//============================================================
 			} elseif (isset($this->options->_POST->restore)) {
-				// バックアップ一覧画面の「復元ボタン押下				
+				// バックアップ一覧画面の「復元ボタン押下
 		
 				$this->common()->put_process_log(__METHOD__, __LINE__, "==========バックアップ一覧画面の「復元」ボタン押下==========");
 				$result = $this->publish->exec_publish(define::PUBLISH_TYPE_MANUAL_RESTORE, null);
 
-				// 画面アラート用のメッセージ			
+				// 画面アラート用のメッセージ
 				$alert_message = "≪手動復元公開処理≫" . $result['message'];
 
 				if ( !$result['status'] ) {
@@ -430,7 +448,7 @@ class main
 						$this->common()->put_process_log(__METHOD__, __LINE__, "==========自動復元処理の呼び出し==========");
 						$result = $this->publish->exec_publish(define::PUBLISH_TYPE_AUTO_RESTORE, $result['output_id']);
 
-						// 画面アラート用のメッセージ			
+						// 画面アラート用のメッセージ
 						$alert_message .= "≪自動復元公開処理≫" . $result['message'];
 
 						if ( !$result['status'] ) {
@@ -445,7 +463,7 @@ class main
 			// 即時公開処理
 			//============================================================
 			} elseif (isset($this->options->_POST->immediate)) {
-				// 初期表示画面の「即時公開」ボタン押下				
+				// 初期表示画面の「即時公開」ボタン押下
 
 				$this->common()->put_process_log(__METHOD__, __LINE__, "==========初期表示画面の「即時公開」ボタン押下==========");
 				$dialog_html = $this->initScn->do_disp_immediate_dialog();
@@ -457,12 +475,12 @@ class main
 				$dialog_html = $this->initScn->do_check_immediate();
 
 			} elseif (isset($this->options->_POST->immediate_confirm)) {
-				// 即時公開確認ダイアログの「確定」ボタン押下	
+				// 即時公開確認ダイアログの「確定」ボタン押下
 				
 				$this->common()->put_process_log(__METHOD__, __LINE__, "==========即時公開確認ダイアログの「確定」ボタン押下==========");
 				$result = $this->initScn->do_immediate_publish();
 
-				// 画面アラート用のメッセージ			
+				// 画面アラート用のメッセージ
 				$alert_message = "≪即時公開処理≫" . $result['message'];
 				$dialog_html   = $result['dialog_html'];
 
@@ -476,7 +494,7 @@ class main
 						$this->common()->put_process_log(__METHOD__, __LINE__, "==========自動復元処理の呼び出し==========");
 						$result = $this->publish->exec_publish(define::PUBLISH_TYPE_AUTO_RESTORE, $result['output_id']);
 
-						// 画面アラート用のメッセージ			
+						// 画面アラート用のメッセージ
 						$alert_message .= "≪自動復元公開処理≫" . $result['message'];
 
 						if ( !$result['status'] ) {
@@ -491,7 +509,7 @@ class main
 				}
 
 			} elseif (isset($this->options->_POST->immediate_back)) {
-				// 即時公開確認ダイアログの「戻る」ボタン押下			
+				// 即時公開確認ダイアログの「戻る」ボタン押下
 
 				$this->common()->put_process_log(__METHOD__, __LINE__, "==========即時公開確認ダイアログの「戻る」ボタン押下==========");
 				$dialog_html = $this->initScn->do_back_immediate_dialog();
@@ -562,7 +580,7 @@ class main
 
 		} catch (\ErrorException $e) {
 
-		    $alert_title = "エラーが発生しました。";
+			$alert_title = "エラーが発生しました。";
 
 			if (\file_exists($this->log_path)) {
 				$logstr =  "***** エラー発生 *****" . "\r\n";
@@ -621,13 +639,13 @@ class main
 	 *
 	 * @return string HTMLソースコード
 	 */
-    public function cron_run(){
+	public function cron_run(){
 	
 		$this->common()->put_process_log(__METHOD__, __LINE__, '■ [cron] run start');
 
 		// 処理実行結果格納
 		$result = array('status' => true,
-					      'message' => ''
+						  'message' => ''
 				  );
 
 		try {
@@ -661,7 +679,7 @@ class main
 
 		} catch (\ErrorException $e) {
 
-		    $alert_title = "エラーが発生しました。";
+			$alert_title = "エラーが発生しました。";
 
 			if (\file_exists($this->log_path)) {
 				$logstr =  "***** エラー発生 *****" . "\r\n";
@@ -683,7 +701,7 @@ class main
 
 		} catch (\Exception $e) {
 
-		    $alert_title = "例外エラーが発生しました。";
+			$alert_title = "例外エラーが発生しました。";
 
 			$logstr = "** cron_run() 例外キャッチ **" . "\r\n";
 			$logstr .= $e->getMessage() . "\r\n";
@@ -713,7 +731,7 @@ class main
 		$this->common()->put_process_log(__METHOD__, __LINE__, '■ [cron] run end');
 
 		return;
-    }
+	}
 
 	/**
 	 * `$fs` オブジェクトを取得する。

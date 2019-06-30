@@ -45,6 +45,7 @@ class historyScreen
 
 		$ret = '<div style="overflow:hidden">'
 			. '<form id="form_table" method="post">'
+			. $this->main->get_additional_params()
 			. '<div class="button_contents" style="float:left">'
 			. '<ul>'
 			. '<li><h4>履歴一覧画面</h4></li>'

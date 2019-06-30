@@ -7,7 +7,7 @@ pickles2/lib-indigo
 
 `require` の項目に、`pickles2/lib-indigo` を追加します。
 
-```
+```json
 {
 	〜 中略 〜
     "require": {
@@ -46,7 +46,7 @@ $ php res_install_script.php [resourceInstallPath(ex. ./res)]
 ```
 
 #### 2-4. Resourceを読込む
-```
+```html
 <link rel="stylesheet" href="/[resourceInstallPath]/bootstrap/css/bootstrap.min.css">
 <link rel="stylesheet" href="/[resourceInstallPath]/styles/common.css">
 
@@ -56,10 +56,11 @@ $ php res_install_script.php [resourceInstallPath(ex. ./res)]
 
 
 ### 3. jqueryのdatepickerを読込む
-```
-<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1/i18n/jquery.ui.datepicker-ja.min.js"></script>
-<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+```html
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1/i18n/jquery.ui.datepicker-ja.min.js"></script>
+<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
 
 <script>
 	$(function() {
@@ -104,25 +105,28 @@ $ chmod -R o+w honbanProject/[directoryName(ex. indigo-test-project)]
 
 各種パラメータを設定します。こちらに記載したパラメタが別ファイルから呼び出されます。
 
-```
+```php
 <?php
 
 function call_parameter () {
 
-	$parameter = 
-
-	array(
+	$parameter = array(
 		// POST
 		'_POST' => $_POST,
 
 		// GET
 		'_GET' => $_GET,
 
+		// フォーム送信時に付加する追加のパラメータ (省略可)
+		'additional_params' => array(
+			'hoge' => 'fuga',
+		),
+
 		// indigo作業用ディレクトリ（絶対パス）
-		'realpath_workdir' => '/var/www/html/sample-lib-indigo/[directoryName(ex. indigo_dir)]/',
+		'realpath_workdir' => '/var/www/html/sample-lib-indigo/', // directoryName (ex. indigo_dir)
 
 		// リソースディレクトリ（ドキュメントルートからの相対パス）
-		'relativepath_resourcedir'	=> './../[directoryName(ex. res)]/',
+		'relativepath_resourcedir'	=> './../res/', // directoryName (ex. res)
 
 		// ajax呼出クラス（ドキュメントルートからの相対パス）
 		'realpath_ajax_call' => './ajax.php',
@@ -188,8 +192,9 @@ function call_parameter () {
 			// Gitリポジトリのパスワードを設定
 			'password' => 'fuga'
 		)
-	)
-);
+	);
+	return $parameter;
+};
 ```
 
 
@@ -198,7 +203,7 @@ function call_parameter () {
 
 6.で作成したパラメータを引数にlib-indigoのmainクラスの呼び出しを行います。
 
-```
+```php
 <?php
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -216,7 +221,7 @@ $indigo = new indigo\main($parameter);
 
 `run()` を実行します。
 
-```
+```php
 echo $indigo->run();
 ```
 
@@ -227,7 +232,7 @@ echo $indigo->run();
 6.で作成したパラメータを引数に設定し、lib-indigoのajaxクラスの呼び出しを行います。
 ※先述の 6. 「ajax呼出クラス（絶対パス）：'realpath_ajax_call'」 のファイル名と一致するようにファイルを作成してください。
 
-```
+```php
 <?php
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -257,7 +262,7 @@ echo $indigo->get_commit_hash();
 
 6.で作成したパラメータを引数にlib-indigoのmainクラスを呼び出し初期化を行います。
 
-```
+```php
 <?php
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -276,30 +281,43 @@ $indigo = new indigo\main($parameter);
 
 `cron_run()` を実行します。
 
-```
+```php
 echo $indigo->cron_run();
 ```
 
 #### 9-3. indigo(cron)をサーバから一定の間隔で呼び出すようクーロン登録を行う
+
 apache権限でクーロン登録用コマンドを実行（root権限だとindigo内の一部動作時にエラーとなる）
+
 ```
 $ crontab -u apache -e
 ```
+
 何分間隔で呼び出すのかを設定する。クーロン用のログも出力させる場合は、以下のようにログディレクトリ・ログファイル名を記載する。
+
 ```
 $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/var/www/html/sample-lib-indigo/indigo_dir/log/cron.log 2>>/var/www/html/sample-lib-indigo/indigo_dir/log/cron-err.log
 ```
 
+
 ## 更新履歴 - Change log
+
+### lib-indigo 0.1.4 (リリース日未定)
+
+- オプション `additional_params` を追加。
+
 ### lib-indigo 0.1.3 (2018年08月31日)
+
 - エラーハンドラ登録処理の削除
 - indigo内で生成するディレクトリ名を一部修正
 - 不具合修正：グローバル関数にバックスラッシュ付与
 
 ### lib-indigo 0.1.2 (2018年08月22日)
+
 - パラメタ不足パターンの対策
 
 ### lib-indigo 0.1.1 (2018年08月21日)
+
 - SQLインジェクション対策実装
 - htmlspecialchars実装
 - 複数のエンドポイントファイルのパラメタ部分を一元管理
@@ -307,10 +325,14 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 - docコメント修正
 
 ### lib-indigo 0.1.0 (2018年08月06日)
+
 - Initial Release.
 
+
 ## ライセンス - License
+
 MIT License
 
 ## 作者 - Author
+
 - (C)Natsuki Gushikawa natsuki.gushikawa@imjp.co.jp

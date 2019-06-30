@@ -41,12 +41,22 @@ $indigo_stdout = $indigo->run();
 				});
 			});
 		</script>
+
+		<style>
+			.theme-outline{
+				padding: 14px;
+			}
+		</style>
 	</head>
 	<body>
-		<h1>Indigo Test</h1>
+		<div class="theme-outline">
+			<h1>Indigo Test</h1>
 
+			<div class="contents">
 <?php
 echo $indigo_stdout;
 ?>
+			</div>
+		</div>
 	</body>
 </html>

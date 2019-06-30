@@ -12,8 +12,8 @@ $(function($){
 
 			if (!branch_name) {
 
-	    		$('#result').text("");
-	    		$('#commit_hash').val("");
+				$('#result').text("");
+				$('#commit_hash').val("");
 
 			} else {
 
@@ -30,23 +30,23 @@ $(function($){
 							'realpath_workdir': realpath_workdir
 						},
 					dataType: 'json',
-				    success: function(data, dataType) {
-				    	if (data) {
-				    		$('#result').text(data.commit_hash);
-				    		$('#commit_hash').val(data.commit_hash);
-				    	}					
-			    	},
-			    	error: function(jqXHR, textStatus, errorThrown) {
-				        // エラーメッセージの表示
-				        alert('コミット取得に失敗しました。');
-	                      $("#XMLHttpRequest").html("XMLHttpRequest : " + jqXHR.status);
-	                      $("#textStatus").html("textStatus : " + textStatus);
-	                      $("#errorThrown").html("errorThrown : " + errorThrown);
-		      		}
+					success: function(data, dataType) {
+						if (data) {
+							$('#result').text(data.commit_hash);
+							$('#commit_hash').val(data.commit_hash);
+						}
+					},
+					error: function(jqXHR, textStatus, errorThrown) {
+						// エラーメッセージの表示
+						alert('コミット取得に失敗しました。');
+						  $("#XMLHttpRequest").html("XMLHttpRequest : " + jqXHR.status);
+						  $("#textStatus").html("textStatus : " + textStatus);
+						  $("#errorThrown").html("errorThrown : " + errorThrown);
+			  		}
 				});
 			}
 
-	      	return false;
+		  	return false;
 		});
 
 		/*
@@ -104,13 +104,10 @@ $(function($){
 		$('#update_btn').on('click', function() {
 
 			var selected_flg = false;
-				
 			var element = document.getElementsByName('target');
-				
 			var str = "";
 
 			for (var i = 0; i < element.length; i++) {
-
 				if (element[i].checked) {
 					selected_flg = true;
 					str = element[i].value;
@@ -119,7 +116,6 @@ $(function($){
 			}
 
 			if (!selected_flg) {
-				
 				alert('選択されていません');
 				return false;
 			}
@@ -141,13 +137,10 @@ $(function($){
 		$('#restore_btn').on('click', function() {
 
 			var selected_flg = false;
-				
 			var element = document.getElementsByName('target');
-				
 			var str = "";
 
 			for (var i = 0; i < element.length; i++) {
-
 				if (element[i].checked) {
 					selected_flg = true;
 					str = element[i].value;
@@ -156,7 +149,6 @@ $(function($){
 			}
 
 			if (!selected_flg) {
-				
 				alert('選択されていません');
 				return false;
 			}
@@ -246,7 +238,6 @@ $(function($){
 			}
 
 			if (!selected_flg) {
-				
 				alert('選択されていません');
 				return false;
 			}
@@ -265,7 +256,6 @@ $(function($){
 		 * 状態ダイアログ[閉じる]ボタン
 		 */
 		$('#close_btn').on('click', function() {
-
 			var dialog = document.getElementById('modal_dialog');
 			dialog.remove();
 
@@ -282,7 +272,6 @@ $(function($){
 		var branch_select_value = document.getElementsByName('branch_select_value').item(0).value;
 
 		if(branch_select_value === ""){
-		  
 			alert("ブランチを選択して下さい。");
 			return false;
 		}
@@ -299,7 +288,6 @@ $(function($){
 		var time = document.getElementById('reserve_time').value;
 
 		if(date === "" || time === ""){
-		  
 			alert("日付と時間を入力して下さい。");
 			return false;
 		}

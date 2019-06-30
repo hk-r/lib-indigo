@@ -92,9 +92,10 @@ class initScreen
 
 		$ret = '<div class="scr_content">'
 			. '<form id="form_table" method="post">'
+			. $this->main->get_additional_params()
 			. '<div class="button_contents" style="float:left">'
 			. '<ul>'
-			. '<li><input type="submit" id="add_btn" name="add" class="px2-btn" value="新規"/></li>'
+			. '<li><input type="submit" id="add_btn" name="add" class="px2-btn" value="新規配信予約"/></li>'
 			. '</ul>'
 			. '</div>'
 			. '<div class="button_contents" style="float:right;">'
@@ -435,7 +436,7 @@ class initScreen
 
 			//============================================================
 			// 指定ブランチのGit情報を「waiting」ディレクトリへコピー
-			//============================================================		
+			//============================================================
 			// waitingディレクトリの絶対パスを取得。
 			$realpath_waiting = $this->main->realpath_array['realpath_waiting'];
 
@@ -692,6 +693,7 @@ class initScreen
 		}
 
 		$ret .= '<form method="post">';
+		$ret .= $this->main->get_additional_params();
 
 		// hidden項目
 		$ret .= '<input type="hidden" name="selected_id" value="' . \htmlspecialchars($form['selected_id']) . '"/>';
@@ -802,6 +804,7 @@ class initScreen
 		$ret .= '<h4>追加確認</h4>';
 
 		$ret .= '<form method="post">'
+			. $this->main->get_additional_params()
 			. '<table class="table table-striped">'
 
 			// hidden項目
@@ -858,11 +861,11 @@ class initScreen
 			. '</div>'
 
 			. '</div>'
-			 . '</div>'
+			. '</div>'
 
 			. '</form>'
-			 . '</div>'
-			 . '</div></div></div>';
+			. '</div>'
+			. '</div></div></div>';
 
 		return $ret;
 	}
@@ -906,6 +909,7 @@ class initScreen
 		
 		$ret .= '<h4>変更確認</h4>'
 			. '<form method="post">'
+			. $this->main->get_additional_params()
 			. '<div class="colum_3">'
 			. '<div class="left_box">';
 
@@ -1021,6 +1025,7 @@ class initScreen
 		$ret .= '<h4>即時公開確認</h4>';
 
 		$ret .= '<form method="post">'
+			. $this->main->get_additional_params()
 			. '<table class="table table-striped">';
 
 		// 「ブランチ」項目
@@ -1071,11 +1076,11 @@ class initScreen
 			. '</div>'
 
 			. '</div>'
-			 . '</div>'
+			. '</div>'
 
 			. '</form>'
-			 . '</div>'
-			 . '</div></div></div>';
+			. '</div>'
+			. '</div></div></div>';
 
 		return $ret;
 	}
