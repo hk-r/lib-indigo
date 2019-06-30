@@ -1,46 +1,38 @@
 @charset "UTF-8";
-*{
-   margin : 0;
-   padding : 0;
-}
+* {
+  margin: 0;
+  padding: 0; }
 
 body {
   background-color: #fff;
   cursor: default;
-  color: #333;
-}
-
-
+  color: #333; }
 
 .table th {
   text-align: center;
-/*  background-color: #666;
+  /*  background-color: #666;
   color: #fff;
-*/  background-color: #e7e7e7;
+*/
+  background-color: #e7e7e7;
   color: #000;
-  border: 1px solid #999 !important;
-}
+  border: 1px solid #999 !important; }
 
 .table td {
-  border: 1px solid #999 !important;
-}
+  border: 1px solid #999 !important; }
 
 .dialog_thead {
   font-weight: bold;
   text-align: left;
-  width: 25%;
-}
+  width: 25%; }
 
 .p-center {
-  text-align: center;
-}
+  text-align: center; }
 
-#loading{
+#loading {
   position: absolute;
   left: 50%;
   top: 50%;
-  margin-left: -110px;
-}
+  margin-left: -110px; }
 
 #loader-bg {
   display: none;
@@ -55,70 +47,58 @@ body {
   background-image: url(../images/loader.gif);
   background-repeat: no-repeat;
   background-attachment: fixed;
-  background-position: center;
-}
+  background-position: center; }
 
-#main-contents{
+#main-contents {
   text-align: center;
-  margin-top: 20%;
-}
+  margin-top: 20%; }
 
 .dialog_box {
   width: 80%;
-    margin: 3em auto;
-    background-color: #fff;
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    box-shadow: 5px 10px 10px rgba(0, 0, 0, 0.2);
-}
+  margin: 3em auto;
+  background-color: #fff;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 5px 10px 10px rgba(0, 0, 0, 0.2); }
 
 .dialog_box_danger {
   width: 80%;
-    margin: 3em auto;
-    background-color: #fdf8f8;
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    box-shadow: 5px 10px 10px rgba(0, 0, 0, 0.2);
-}
+  margin: 3em auto;
+  background-color: #fdf8f8;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 5px 10px 10px rgba(0, 0, 0, 0.2); }
 
 .dialog-buttons {
-  text-align: center;
-}
+  text-align: center; }
 
 .alert_box {
   /*width:80%;*/
-  padding:15px;
+  padding: 15px;
   margin-bottom: 20px;
-  background: #FEDFE1;
-
-}
+  background: #FEDFE1; }
 
 .alert_box .alert_title {
   font-weight: bold;
-  margin: 0 0 10px 0;
-}
+  margin: 0 0 10px 0; }
 
 .alert_box .alert_content a {
   color: #724938;
   font-weight: bold;
   /*vertical-align: middle;*/
-  /*text-decoration: underline;*/
-}
+  /*text-decoration: underline;*/ }
 
 .alert_box .alert_content {
   /*color: #724938;*/
-
   margin: 0;
-  line-height: 1.5;
-}
+  line-height: 1.5; }
 
 .alert_box .error_message {
   color: #724938;
   margin: 0;
-  line-height: 1.5;
-}
+  line-height: 1.5; }
 
 /* picklesソースよりボタンスタイル */
 .px2-btn {
@@ -138,95 +118,96 @@ body {
   cursor: pointer;
   box-sizing: border-box;
   -webkit-box-align: stretch;
-      -ms-flex-align: stretch;
-          align-items: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
   font-family: sans-serif;
   -webkit-transition: color 0.1s, background-color 0.1s, -webkit-transform 0.1s;
-          transition: color 0.1s, background-color 0.1s, transform 0.1s; 
-  }
-  
-  .px2-btn:focus, .px2-btn:hover {
-    text-decoration: none;
-    font-weight: normal;
-    color: #666;
-    background-color: #f9f9f9;
-    outline: none; }
-  .px2-btn:hover {
-    background-color: #f0f0f0; }
-  .px2-btn:active {
-    background-color: #333;
-    color: #fff;
-    box-shadow: inset 0 3px 15px rgba(0, 0, 0, 0.3);
-    -webkit-transform: translateY(1px);
-            transform: translateY(1px); }
+  transition: color 0.1s, background-color 0.1s, transform 0.1s; }
+
+.px2-btn:focus, .px2-btn:hover {
+  text-decoration: none;
+  font-weight: normal;
+  color: #666;
+  background-color: #f9f9f9;
+  outline: none; }
+
+.px2-btn:hover {
+  background-color: #f0f0f0; }
+
+.px2-btn:active {
+  background-color: #333;
+  color: #fff;
+  box-shadow: inset 0 3px 15px rgba(0, 0, 0, 0.3);
+  -webkit-transform: translateY(1px);
+  transform: translateY(1px); }
 
 .px2-btn.px2-btn--primary {
   border-color: #00a0e6;
   background-color: #f5fbfe;
   color: #00a0e6; }
-  .px2-btn.px2-btn--primary:focus, .px2-btn.px2-btn--primary:hover {
-    background-color: #d9f1fb; }
-  .px2-btn.px2-btn--primary:hover {
-    background-color: #ccecfa; }
-  .px2-btn.px2-btn--primary:active {
-    background-color: #00a0e6;
-    color: #fff;}
+
+.px2-btn.px2-btn--primary:focus, .px2-btn.px2-btn--primary:hover {
+  background-color: #d9f1fb; }
+
+.px2-btn.px2-btn--primary:hover {
+  background-color: #ccecfa; }
+
+.px2-btn.px2-btn--primary:active {
+  background-color: #00a0e6;
+  color: #fff; }
 
 .px2-btn.px2-btn--danger {
   border-color: #e86a60;
   background-color: #fdf8f8;
   color: #e86a60; }
-  .px2-btn.px2-btn--danger:focus, .px2-btn.px2-btn--danger:hover {
-    background-color: #fce9e7; }
-  .px2-btn.px2-btn--danger:hover {
-    background-color: #fae1df; }
-  .px2-btn.px2-btn--danger:active {
-    background-color: #e86a60;
-    color: #fff;
-}
+
+.px2-btn.px2-btn--danger:focus, .px2-btn.px2-btn--danger:hover {
+  background-color: #fce9e7; }
+
+.px2-btn.px2-btn--danger:hover {
+  background-color: #fae1df; }
+
+.px2-btn.px2-btn--danger:active {
+  background-color: #e86a60;
+  color: #fff; }
 
 /* ボタン位置 */
 .button_contents_box {
   text-align: center;
-  overflow: hidden;
-}
+  overflow: hidden; }
+
 .button_contents {
   /*overflow: auto;*/
-  margin: 10px 0 0 0;
-}
+  margin: 10px 0 0 0; }
+
 .button_contents ul {
-   border: none;
-   display: block;
-}
+  border: none;
+  display: block; }
+
 .button_contents li {
-   display: inline-block;
-   border: none;
-   padding: 1px 2px;
-}
+  display: inline-block;
+  border: none;
+  padding: 1px 2px; }
 
 /* 3カラム */
 .colum_3 {
-  overflow: hidden;
-}
+  overflow: hidden; }
 
 .colum_3 .left_box {
   float: left;
-  width: 45%;
-}
+  width: 45%; }
 
-.colum_3 .center_box{
+.colum_3 .center_box {
   float: left;
   width: 10%;
   vertical-align: middle;
   text-align: center;
-   position: relative;
-   top: 50px;
-}
+  position: relative;
+  top: 50px; }
 
-.colum_3 .right_box{
+.colum_3 .right_box {
   float: right;
-  width: 45%;
-}
+  width: 45%; }
 
 /*.contents .cont_filelist_sitemap__ext-list li button {
     font-size: small;
