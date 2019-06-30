@@ -25,7 +25,8 @@ class cleaningTest extends PHPUnit_Framework_TestCase{
 	public function testClear(){
 
 		// 変換後ファイルの後始末
-		$this->fs->rm(__DIR__.'/testdata/');
+		$this->fs->rm(__DIR__.'/testdata/honban1/');
+		$this->fs->rm(__DIR__.'/testdata/indigo_dir/');
 
 		clearstatcache();
 		// $this->assertFalse( is_dir( __DIR__.'/testdata/' ) );
