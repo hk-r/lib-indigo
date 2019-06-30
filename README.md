@@ -306,6 +306,7 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 
 - オプション `additional_params` を追加。
 - オプション `_GET`, `_POST` を省略可能とした。
+- 配信予約日時の時制チェックに関する不具合を修正。
 
 ### lib-indigo 0.1.3 (2018年08月31日)
 

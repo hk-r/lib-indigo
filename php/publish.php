@@ -535,7 +535,7 @@ class publish
 			$this->main->fs()->mkdir_r( \dirname( $this->path_lockfile ) );
 		}
 
-		#	PHPのFileStatusCacheをクリア
+		// PHPのFileStatusCacheをクリア
 		\clearstatcache();
 
 		$i = 0;
@@ -550,7 +550,7 @@ class publish
 			}
 			\sleep(1);
 
-			#	PHPのFileStatusCacheをクリア
+			// PHPのFileStatusCacheをクリア
 			\clearstatcache();
 		}
 
@@ -567,6 +567,12 @@ class publish
 		$logstr = "==========パブリッシュのロック作成 END==========";
 		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
+		if( file_get_contents($this->path_lockfile) != $src ){
+			$logstr = "==========パブリッシュのロック作成失敗========== - 割り込みを検出したため、ロックファイルを破棄しました。";
+			$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
+			$rtn = false;
+		}
+
 		return	$rtn;
 
 	}//lock()
@@ -581,7 +587,7 @@ class publish
 		$lockfilepath = $this->path_lockfile;
 		$lockfile_expire = 12*60*60;//有効期限は12時間（過ぎた場合はロック解除してもよいこととする）
 
-		#	PHPのFileStatusCacheをクリア
+		// PHPのFileStatusCacheをクリア
 		\clearstatcache();
 
 		if( $this->main->fs()->is_file($lockfilepath) ){
@@ -618,7 +624,7 @@ class publish
 
 		$lockfilepath = $this->path_lockfile;
 
-		#	PHPのFileStatusCacheをクリア
+		// PHPのFileStatusCacheをクリア
 		\clearstatcache();
 
 		return @unlink( $lockfilepath );

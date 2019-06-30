@@ -251,8 +251,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 								'branch_select_value' => 'release/2018-04-01',	
 								// 'gmt_reserve_datetime' => gmdate('Y-m-d H:i:s', strtotime('+1 minute', time())),
 
-								'reserve_date' => date('Y-m-d', time()),
-								'reserve_time' => date('H:i:s', strtotime('-10 second', time())),
+								'reserve_date' => date('Y-m-d', time() + 10),
+								'reserve_time' => date('H:i:s', time() + 10),
 								// 'gmt_reserve_datetime' => gmdate('Y-m-d H:i:s', strtotime('+10 second', $current_datetime)),
 								
 								'commit_hash' => 'f9fd330',	
@@ -460,8 +460,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 								'add_confirm' => 1,	
 								'branch_select_value' => 'release/2018-05-01',	
 
-								'reserve_date' => date('Y-m-d', time()),
-								'reserve_time' => date('H:i:s', strtotime('-10 second', time())),
+								'reserve_date' => date('Y-m-d', time() + 10),
+								'reserve_time' => date('H:i:s', time() + 10),
 								// 'gmt_reserve_datetime' => gmdate('Y-m-d H:i:s', strtotime('+10 second', $current_datetime)),
 
 								'commit_hash' => '0c39b3d',	

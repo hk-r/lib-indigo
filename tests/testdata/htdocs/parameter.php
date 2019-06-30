@@ -21,7 +21,7 @@ function call_parameter () {
 		'relativepath_resourcedir'	=> './../../../res/',
 
 		// ajax呼出クラス（ドキュメントルートからの相対パス）
-		'realpath_ajax_call' => './ajax.php',
+		'realpath_ajax_call' => './api.php',
 		
 		// 画面表示上のタイムゾーン
 		'time_zone' => 'Asia/Tokyo',
