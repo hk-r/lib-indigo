@@ -28,7 +28,7 @@ $ composer update
 ```
 
 
-### 2. Resourceファイルの取込
+### 2. Resourceファイルを配置する
 indigoを動作させる上で必要となるResrouceファイルをプロジェクトに取込みます。
 #### 2-1. Resourceファイル取込用スクリプトをプロジェクトへコピーする
 ```
@@ -45,40 +45,37 @@ $ mkdir yourProject/[directoryName(ex. res)]
 $ php res_install_script.php [resourceInstallPath(ex. ./res)]
 ```
 
-#### 2-4. Resourceを読込む
+### 3. Resourceを読み込み、フロントエンドを初期化する
+
 ```html
+<!-- Bootstrap -->
 <link rel="stylesheet" href="/[resourceInstallPath]/bootstrap/css/bootstrap.min.css">
-<link rel="stylesheet" href="/[resourceInstallPath]/styles/common.css">
-
 <script src="/[resourceInstallPath]/bootstrap/js/bootstrap.min.js"></script>
+
+<!-- Indigo -->
+<link rel="stylesheet" href="/[resourceInstallPath]/styles/common.css">
 <script src="/[resourceInstallPath]/scripts/common.js"></script>
-```
 
-
-### 3. jqueryのdatepickerを読込む
-```html
+<!-- jQuery UI -->
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1/i18n/jquery.ui.datepicker-ja.min.js"></script>
 <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
 
 <script>
-	$(function() {
-		
-		var dateFormat = 'yy-mm-dd';
-		
-		$.datepicker.setDefaults($.datepicker.regional["ja"]);
-		
-		$("#datepicker").datepicker({
-			   dateFormat: dateFormat
-		});
+	// Initialize Indigo
+	window.addEventListener('load', function(){
+		var indigo = new window.Indigo();
+		indigo.init();
 	});
 </script>
 ```
 
 
 #### 4. indigo作業用のディレクトリを作成する。
+
 後述の6. indigoの実行パラメタ設定 にて 「 indigo作業用ディレクトリ（絶対パス）：'realpath_workdir'」 にパス設定を行うディレクトリとなります。
+
 #### 4-1. ディレクトリを作成します。
 
 ```
@@ -292,6 +289,7 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 - オプション `_GET`, `_POST` を省略可能とした。
 - 配信予約日時の時制チェックに関する不具合を修正。
 - Ajaxの実行メソッド名を `ajax_run()` に変更。
+- フロントエンドの初期化スクリプト仕様を変更。
 
 ### lib-indigo 0.1.3 (2018年08月31日)
 

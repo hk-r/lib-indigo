@@ -1,264 +1,291 @@
 var $ = require('jquery');
 
-window.addEventListener('load', function(){
+window.Indigo = function(options){
+	options = options || {};
+	options.ajaxBridge = options.ajaxBridge || function(data, callback){
+		callback = callback || function(){};
+		var realpath_ajax_call = document.getElementById('realpath_ajax_call').value;
+		var rtn = '';
+		var error = false;
+		$.ajax ({
+			type: 'POST',
+			// "url": "./../vendor/pickles2/lib-indigo/php/jquery.php",
+			// url: path + "php/ajax.php",
+			url: realpath_ajax_call,
+			data: data,
+			dataType: 'json',
+			success: function(data, dataType) {
+				rtn = data;
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+				// エラーメッセージの表示
+				error = textStatus;
+				$("#XMLHttpRequest").html("XMLHttpRequest : " + jqXHR.status);
+				$("#textStatus").html("textStatus : " + textStatus);
+				$("#errorThrown").html("errorThrown : " + errorThrown);
+			},
+			complete: function(){
+				callback(rtn, error);
+			}
+		});
+	};
+	this.init = function(){
+
+		var dateFormat = 'yy-mm-dd';
+		
+		$.datepicker.setDefaults($.datepicker.regional["ja"]);
+		
+		$("#datepicker").datepicker({
+			dateFormat: dateFormat
+		});
 
 
-	$('#branch_list').change(function() {
+		$('#branch_list').change(function() {
 
-		// var str = $(this).val();
-		// alert('セレクトボックスチェンジ');
+			// var str = $(this).val();
+			// alert('セレクトボックスチェンジ');
 
-		// var site_id1 = document.getElementsByName('branch_select_value');
-		var branch_name = $(this).val();
+			// var site_id1 = document.getElementsByName('branch_select_value');
+			var branch_name = $(this).val();
 
-		if (!branch_name) {
+			if (!branch_name) {
 
-			$('#result').text("");
-			$('#commit_hash').val("");
+				$('#result').text("");
+				$('#commit_hash').val("");
 
-		} else {
+			} else {
 
-			var realpath_ajax_call = document.getElementById('realpath_ajax_call').value;
-			var realpath_workdir = document.getElementById('realpath_workdir').value;
-
-			$.ajax ({
-				type: 'GET',
-				// "url": "./../vendor/pickles2/lib-indigo/php/jquery.php",
-				// url: path + "php/ajax.php",
-				url: realpath_ajax_call,
-				
-				data: { 'branch_name': branch_name, 
-						'realpath_workdir': realpath_workdir
+				options.ajaxBridge(
+					{
+						'branch_name': branch_name
 					},
-				dataType: 'json',
-				success: function(data, dataType) {
-					if (data) {
-						$('#result').text(data.commit_hash);
-						$('#commit_hash').val(data.commit_hash);
+					function( data, error ){
+						if( error ){
+							alert('コミット取得に失敗しました。');
+							$("#textStatus").html("textStatus : " + error);
+						}
+						if( data ){
+							$('#result').text(data.commit_hash);
+							$('#commit_hash').val(data.commit_hash);
+						}
 					}
-				},
-				error: function(jqXHR, textStatus, errorThrown) {
-					// エラーメッセージの表示
-					alert('コミット取得に失敗しました。');
-						$("#XMLHttpRequest").html("XMLHttpRequest : " + jqXHR.status);
-						$("#textStatus").html("textStatus : " + textStatus);
-						$("#errorThrown").html("errorThrown : " + errorThrown);
+				);
+			}
+
+			return false;
+		});
+
+		/**
+		 * 削除ボタン
+		 */
+		$('#delete_btn').on('click', function() {
+
+			var selected_flg = false;
+			var element = document.getElementsByName('target');
+			var str = "";
+
+			for (var i = 0; i < element.length; i++) {
+				if (element[i].checked) {
+					selected_flg = true;
+					str = element[i].value;
+					break;
 				}
-			});
-		}
-
-		return false;
-	});
-
-	/**
-	 * 削除ボタン
-	 */
-	$('#delete_btn').on('click', function() {
-
-		var selected_flg = false;
-		var element = document.getElementsByName('target');
-		var str = "";
-
-		for (var i = 0; i < element.length; i++) {
-			if (element[i].checked) {
-				selected_flg = true;
-				str = element[i].value;
-				break;
 			}
-		}
 
-		if (!selected_flg) {
-			alert('選択されていません');
-			return false;
-		}
-
-		// 「OK」時の処理開始 ＋ 確認ダイアログの表示
-		if(window.confirm('本当に予定を削除してよろしいですか？')) {
-			$("#form_table").submit(function(){
-				$('<input />').attr('type', 'hidden')
-					.attr('name', 'selected_id')
-					.attr('value', str)
-					.appendTo('#form_table');
-			});
-		}
-
-		// 「キャンセル」時の処理開始
-		else {
-			var $dialog = $('.dialog');
-			$dialog.remove();
-			return false;
-		}
-
-		// 画面ロック
-		display_lock();
-	});	
-
-	/**
-	 * 変更ボタン
-	 */
-	$('#update_btn').on('click', function() {
-
-		var selected_flg = false;
-		var element = document.getElementsByName('target');
-		var str = "";
-
-		for (var i = 0; i < element.length; i++) {
-			if (element[i].checked) {
-				selected_flg = true;
-				str = element[i].value;
-				break;
+			if (!selected_flg) {
+				alert('選択されていません');
+				return false;
 			}
-		}
 
-		if (!selected_flg) {
-			alert('選択されていません');
-			return false;
-		}
-		
-		$("#form_table").submit(function(){
-			$('<input />').attr('type', 'hidden')
-				.attr('name', 'selected_id')
-				.attr('value', str)
-				.appendTo('#form_table');
-		});
-
-		// 画面ロック
-		display_lock();
-	});	
-
-	/**
-	 * 復元ボタン
-	 */
-	$('#restore_btn').on('click', function() {
-
-		var selected_flg = false;
-		var element = document.getElementsByName('target');
-		var str = "";
-
-		for (var i = 0; i < element.length; i++) {
-			if (element[i].checked) {
-				selected_flg = true;
-				str = element[i].value;
-				break;
-			}
-		}
-
-		if (!selected_flg) {
-			alert('選択されていません');
-			return false;
-		}
-
-		// 「OK」時の処理開始 ＋ 確認ダイアログの表示
-		if(window.confirm('本当に復元してよろしいですか？')) {
-
-			$("#form_table").submit(function(){
-				$('<input />').attr('type', 'hidden')
-					.attr('name', 'selected_id')
-					.attr('value', str)
-					.appendTo('#form_table');
+			// 「OK」時の処理開始 ＋ 確認ダイアログの表示
+			if(window.confirm('本当に予定を削除してよろしいですか？')) {
+				$("#form_table").submit(function(){
+					$('<input />').attr('type', 'hidden')
+						.attr('name', 'selected_id')
+						.attr('value', str)
+						.appendTo('#form_table');
 				});
-
-		}
-
-		// 「キャンセル」時の処理開始
-		else {
-			var $dialog = $('.dialog');
-			$dialog.remove();
-			return false;
-		}
-
-		// 画面ロック
-		display_lock();
-	});	
-
-	/**
-	 * 新規、変更ダイアログの\[確認\]\[確定\]ボタン
-	 */
-	$('#add_check_btn, #update_check_btn').on('click', function() {
-
-		/// ブランチ入力チェック
-		if (!check_branch_validation()) {
-			return false;
-		}
-		/// 日付入力チェック
-		if (!check_date_validation()) {
-			return false;
-		}
-		// ダイアログ画面ロック
-		display_lock();
-	});	
-
-	/**
-	 * 即時公開ダイアログの\[確認\]\[確定\]ボタン
-	 */
-	$('#immediate_check_btn').on('click', function() {
-
-		/// ブランチ入力チェック
-		if (!check_branch_validation()) {
-			return false;
-		}
-		
-		// ダイアログ画面ロック
-		display_lock();
-	});	
-
-	/**
-	 * 入力チェック不要
-	 * \[新規\]\[履歴\]\[戻る\]\[確定\]\[即時公開\]\[バックアップ一覧\]ボタン
-	 */
-	$('#add_btn, #back_btn, #history_btn, #backup_btn, #immediate_btn, #confirm_btn').on('click', function() {
-
-		// ダイアログ画面ロック
-		display_lock();
-	});	
-
-
-	/**
-	 * ログボタン
-	 */
-	$('#log_btn').on('click', function() {
-
-		var selected_flg = false;
-			
-		var element = document.getElementsByName('target');
-			
-		var str = "";
-
-		for (var i = 0; i < element.length; i++) {
-
-			if (element[i].checked) {
-				selected_flg = true;
-				str = element[i].value;
-				break;
 			}
-		}
 
-		if (!selected_flg) {
-			alert('選択されていません');
-			return false;
-		}
-		$("#form_table").submit(function(){
-			$('<input />').attr('type', 'hidden')
-				.attr('name', 'selected_id')
-				.attr('value', str)
-				.appendTo('#form_table');
-		});
+			// 「キャンセル」時の処理開始
+			else {
+				var $dialog = $('.dialog');
+				$dialog.remove();
+				return false;
+			}
 
-		// 画面ロック
-		display_lock();
-	});	
+			// 画面ロック
+			display_lock();
+		});	
 
-	/**
-	 * 状態ダイアログ \[閉じる\] ボタン
-	 */
-	$('#close_btn').on('click', function() {
-		var dialog = document.getElementById('modal_dialog');
-		dialog.remove();
+		/**
+		 * 変更ボタン
+		 */
+		$('#update_btn').on('click', function() {
 
-		// // 画面ロック
-		// display_lock();
-	});	
-});
+			var selected_flg = false;
+			var element = document.getElementsByName('target');
+			var str = "";
+
+			for (var i = 0; i < element.length; i++) {
+				if (element[i].checked) {
+					selected_flg = true;
+					str = element[i].value;
+					break;
+				}
+			}
+
+			if (!selected_flg) {
+				alert('選択されていません');
+				return false;
+			}
+			
+			$("#form_table").submit(function(){
+				$('<input />').attr('type', 'hidden')
+					.attr('name', 'selected_id')
+					.attr('value', str)
+					.appendTo('#form_table');
+			});
+
+			// 画面ロック
+			display_lock();
+		});	
+
+		/**
+		 * 復元ボタン
+		 */
+		$('#restore_btn').on('click', function() {
+
+			var selected_flg = false;
+			var element = document.getElementsByName('target');
+			var str = "";
+
+			for (var i = 0; i < element.length; i++) {
+				if (element[i].checked) {
+					selected_flg = true;
+					str = element[i].value;
+					break;
+				}
+			}
+
+			if (!selected_flg) {
+				alert('選択されていません');
+				return false;
+			}
+
+			// 「OK」時の処理開始 ＋ 確認ダイアログの表示
+			if(window.confirm('本当に復元してよろしいですか？')) {
+
+				$("#form_table").submit(function(){
+					$('<input />').attr('type', 'hidden')
+						.attr('name', 'selected_id')
+						.attr('value', str)
+						.appendTo('#form_table');
+					});
+
+			}
+
+			// 「キャンセル」時の処理開始
+			else {
+				var $dialog = $('.dialog');
+				$dialog.remove();
+				return false;
+			}
+
+			// 画面ロック
+			display_lock();
+		});	
+
+		/**
+		 * 新規、変更ダイアログの\[確認\]\[確定\]ボタン
+		 */
+		$('#add_check_btn, #update_check_btn').on('click', function() {
+
+			/// ブランチ入力チェック
+			if (!check_branch_validation()) {
+				return false;
+			}
+			/// 日付入力チェック
+			if (!check_date_validation()) {
+				return false;
+			}
+			// ダイアログ画面ロック
+			display_lock();
+		});	
+
+		/**
+		 * 即時公開ダイアログの\[確認\]\[確定\]ボタン
+		 */
+		$('#immediate_check_btn').on('click', function() {
+
+			/// ブランチ入力チェック
+			if (!check_branch_validation()) {
+				return false;
+			}
+			
+			// ダイアログ画面ロック
+			display_lock();
+		});	
+
+		/**
+		 * 入力チェック不要
+		 * \[新規\]\[履歴\]\[戻る\]\[確定\]\[即時公開\]\[バックアップ一覧\]ボタン
+		 */
+		$('#add_btn, #back_btn, #history_btn, #backup_btn, #immediate_btn, #confirm_btn').on('click', function() {
+
+			// ダイアログ画面ロック
+			display_lock();
+		});	
+
+
+		/**
+		 * ログボタン
+		 */
+		$('#log_btn').on('click', function() {
+
+			var selected_flg = false;
+				
+			var element = document.getElementsByName('target');
+				
+			var str = "";
+
+			for (var i = 0; i < element.length; i++) {
+
+				if (element[i].checked) {
+					selected_flg = true;
+					str = element[i].value;
+					break;
+				}
+			}
+
+			if (!selected_flg) {
+				alert('選択されていません');
+				return false;
+			}
+			$("#form_table").submit(function(){
+				$('<input />').attr('type', 'hidden')
+					.attr('name', 'selected_id')
+					.attr('value', str)
+					.appendTo('#form_table');
+			});
+
+			// 画面ロック
+			display_lock();
+		});	
+
+		/**
+		 * 状態ダイアログ \[閉じる\] ボタン
+		 */
+		$('#close_btn').on('click', function() {
+			var dialog = document.getElementById('modal_dialog');
+			dialog.remove();
+
+			// // 画面ロック
+			// display_lock();
+		});	
+	}
+}
+
 
 
 /**

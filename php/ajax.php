@@ -73,22 +73,22 @@ class ajax
 		$commit_hash;
 
 		$ret = array(
-					'commit_hash' => ''
-				);
+			'commit_hash' => ''
+		);
 
 		$current_dir = realpath('.');
 
-		if (isset($this->options->_GET->branch_name) && isset($this->options->_GET->realpath_workdir)) {
+		if (isset($this->options->_POST->branch_name) && isset($this->options->realpath_workdir)) {
 
 			// masterディレクトリの絶対パス
-			$master_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->options->_GET->realpath_workdir . define::PATH_MASTER));
+			$master_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->options->realpath_workdir . define::PATH_MASTER));
 
 			if ( $master_real_path ) {
 
 				if ( \chdir( $master_real_path ) ) {
 
 					// コミットハッシュ値取得
-					$command = 'git log --pretty=%h ' . define::GIT_REMOTE_NAME . '/' . $this->options->_GET->branch_name . ' -1';
+					$command = 'git log --pretty=%h ' . define::GIT_REMOTE_NAME . '/' . $this->options->_POST->branch_name . ' -1';
 					 
 					 $this->put_ajax_log($command);
 
