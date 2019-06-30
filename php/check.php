@@ -105,7 +105,7 @@ class check
 
 		$ret = true;
 
-		if (isset($max) && $max <= \count($data_list)) {
+		if (isset($max) && is_array($max) && $max <= \count($data_list)) {
 			$ret = false;
 		}
 
