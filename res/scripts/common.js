@@ -10610,8 +10610,6 @@ window.Indigo = function(options){
 		var error = false;
 		$.ajax ({
 			type: 'POST',
-			// "url": "./../vendor/pickles2/lib-indigo/php/jquery.php",
-			// url: path + "php/ajax.php",
 			url: realpath_ajax_call,
 			data: data,
 			dataType: 'json',
@@ -10631,15 +10629,6 @@ window.Indigo = function(options){
 		});
 	};
 	this.init = function(){
-
-		var dateFormat = 'yy-mm-dd';
-		
-		$.datepicker.setDefaults($.datepicker.regional["ja"]);
-		
-		$("#datepicker").datepicker({
-			dateFormat: dateFormat
-		});
-
 
 		$('#branch_list').change(function() {
 

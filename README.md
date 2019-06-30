@@ -65,14 +65,51 @@ $ php res_install_script.php [resourceInstallPath(ex. ./res)]
 <script>
 	// Initialize Indigo
 	window.addEventListener('load', function(){
+		var dateFormat = 'yy-mm-dd';
+		
+		$.datepicker.setDefaults($.datepicker.regional["ja"]);
+		
+		$("#datepicker").datepicker({
+			dateFormat: dateFormat
+		});
+
 		var indigo = new window.Indigo();
 		indigo.init();
 	});
 </script>
 ```
 
+#### フロントエンドの初期化オプション
 
-#### 4. indigo作業用のディレクトリを作成する。
+```js
+var indigo = new window.Indigo({
+	ajaxBridge: function(data, callback){
+		// バックエンドとのデータ受け渡しの方式を変更したい場合に、
+		// このオプションを指定します。
+		var rtn = '';
+		var error = false;
+		$.ajax ({
+			type: 'POST',
+			url: '/path/to/ajax.php',
+			data: data,
+			dataType: 'json',
+			success: function(data, dataType) {
+				rtn = data;
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+				error = textStatus;
+			},
+			complete: function(){
+				callback(rtn, error);
+			}
+		});
+	}
+});
+indigo.init();
+```
+
+
+### 4. indigo作業用のディレクトリを作成する。
 
 後述の6. indigoの実行パラメタ設定 にて 「 indigo作業用ディレクトリ（絶対パス）：'realpath_workdir'」 にパス設定を行うディレクトリとなります。
 

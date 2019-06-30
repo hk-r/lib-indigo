@@ -31,6 +31,14 @@ $indigo_stdout = $indigo->run();
 
 		<script>
 			window.addEventListener('load', function(){
+				var dateFormat = 'yy-mm-dd';
+				
+				$.datepicker.setDefaults($.datepicker.regional["ja"]);
+				
+				$("#datepicker").datepicker({
+					dateFormat: dateFormat
+				});
+
 				var indigo = new window.Indigo();
 				indigo.init();
 			});
