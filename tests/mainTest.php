@@ -274,7 +274,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$this->assertTrue( $result['status'] );
 		$this->assertEquals('', $result['dialog_html']);
 
-		// sleep(20);
+		sleep(13); // 10秒後に予約した配信予約を有効にするため、10秒以上待つ
 		
 		//============================================================
 		// 予定公開実行
@@ -481,6 +481,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$this->assertEquals('', $result['message']);
 		$this->assertTrue( $result['status'] );
 		$this->assertEquals('', $result['dialog_html']);
+
+		sleep(13); // 10秒後に予約した配信予約を有効にするため、10秒以上待つ
 
 		//============================================================
 		// 予定公開実行
