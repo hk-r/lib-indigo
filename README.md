@@ -320,7 +320,7 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 
 ## 更新履歴 - Change log
 
-### lib-indigo 0.1.4 (リリース日未定)
+### lib-indigo 0.1.4 (2019年7月1日)
 
 - オプション `additional_params` を追加。
 - オプション `_GET`, `_POST` を省略可能とした。
@@ -330,17 +330,17 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 - 配信予約の更新に関する不具合を修正。
 - その他いくつかの細かい修正。
 
-### lib-indigo 0.1.3 (2018年08月31日)
+### lib-indigo 0.1.3 (2018年8月31日)
 
 - エラーハンドラ登録処理の削除
 - indigo内で生成するディレクトリ名を一部修正
 - 不具合修正：グローバル関数にバックスラッシュ付与
 
-### lib-indigo 0.1.2 (2018年08月22日)
+### lib-indigo 0.1.2 (2018年8月22日)
 
 - パラメタ不足パターンの対策
 
-### lib-indigo 0.1.1 (2018年08月21日)
+### lib-indigo 0.1.1 (2018年8月21日)
 
 - SQLインジェクション対策実装
 - htmlspecialchars実装
@@ -348,7 +348,7 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 - 関数戻り値受け渡し時のjson変換を廃止
 - docコメント修正
 
-### lib-indigo 0.1.0 (2018年08月06日)
+### lib-indigo 0.1.0 (2018年8月6日)
 
 - Initial Release.
 
