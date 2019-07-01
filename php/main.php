@@ -552,7 +552,7 @@ class main
 
 			} else {
 
-				if ($result['dialog_html']) {
+				if (array_key_exists('dialog_html', $result) && $result['dialog_html']) {
 					$dialog_html = $result['dialog_html'];	
 				}
 			}

@@ -60,12 +60,12 @@ class common
 		$this->main->common()->put_process_log_block('[command]');
 		$this->main->common()->put_process_log_block($command);
 
-	    // 標準出力とエラー出力を両方とも出力する
-	    if ($captureStderr === true) {
-	        $command .= ' 2>&1';
-	    }
+		// 標準出力とエラー出力を両方とも出力する
+		if ($captureStderr === true) {
+			$command .= ' 2>&1';
+		}
 
-	    \exec($command, $output, $return);
+		\exec($command, $output, $return);
 
 		if ($return !== 0 ) {
 			// 異常終了の場合
@@ -83,7 +83,7 @@ class common
 		$ret['output'] = $output;
 		$ret['return'] = $return;
 
-	    return $ret;
+		return $ret;
 	}
 
 
@@ -103,7 +103,7 @@ class common
 			$ret = \date($format, \strtotime($datetime));
 		}
 		
-	    return $ret;
+		return $ret;
 	}
 
 	/**
@@ -124,7 +124,7 @@ class common
 			$ret = $t->format($format);
 		}
 		
-	    return $ret;
+		return $ret;
 	}
 
 
@@ -147,7 +147,7 @@ class common
 			$ret = $t->format(define::DATETIME_FORMAT);
 		}
 
-	    return $ret;
+		return $ret;
 	}
 	
 	/**

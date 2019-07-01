@@ -176,9 +176,9 @@ class gitManager
 
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '【file delete path】 ' . $dir_real_path);
 
-		if( $dir_real_path && \file_exists( $dir_real_path )) {
+		if( $dir_real_path && is_dir( $dir_real_path ) && strlen($dir_real_path) > 3 ) {
 			// ディレクトリが存在する場合、削除コマンド実行
-			$command = 'rm -rf --preserve-root '. $dir_real_path;
+			$command = 'rm -rf '. $dir_real_path;
 			$ret = $this->main->common()->command_execute($command, true);
 
 			if ( $ret['return'] !== 0 ) {

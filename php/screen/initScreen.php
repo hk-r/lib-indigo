@@ -110,7 +110,7 @@ class initScreen
 
 		// テーブルヘッダー
 		$ret .= '<div>'
-		    . '<table name="list_tbl" class="table table-striped">'
+			. '<table name="list_tbl" class="table table-striped">'
 			. '<thead>'
 			. '<tr>'
 			. '<th scope="row"></th>'
@@ -594,13 +594,13 @@ class initScreen
 				$this->main->dbh()->commit();
 				/* データベース接続はオートコミットモードに戻る */
 
-		    } catch (\Exception $e) {
-		    
-		      /* 変更をロールバックする */
-		      $this->main->dbh()->rollBack();
+			} catch (\Exception $e) {
+			
+			  /* 変更をロールバックする */
+			  $this->main->dbh()->rollBack();
 		 
-		      throw $e;
-		    }
+			  throw $e;
+			}
 
 		} catch (\Exception $e) {
 
@@ -671,7 +671,7 @@ class initScreen
 			($input_mode == self::INPUT_MODE_UPDATE_BACK) ||
 			($input_mode == self::INPUT_MODE_IMMEDIATE_BACK)) {
 
-        	// 戻り表示の場合のパラメタ取得
+			// 戻り表示の場合のパラメタ取得
 			$form = $this->get_form_value();
 
 		} elseif ($input_mode == self::INPUT_MODE_UPDATE) {
@@ -878,7 +878,7 @@ class initScreen
 	 *	 
 	 * @return string $ret ダイアログHTML
 	 */
-	private function create_check_update_dialog_html() {
+	private function create_check_update_dialog_html($form) {
 	
 		$before_branch_select_value = "";
 		$before_reserve_date = "";
@@ -941,17 +941,17 @@ class initScreen
 			. '</tr>'
 			. '</tbody></table>'
 			
-		    . '</div>'
+			. '</div>'
 
-		    . '<div class="center_box">'
-		    . '<img src="'. $this->main->options->relativepath_resourcedir . "/images/arrow_right.png" .'"/>'
-		    . '</div>'
+			. '<div class="center_box">'
+			. '<img src="'. $this->main->options->relativepath_resourcedir . "/images/arrow_right.png" .'"/>'
+			. '</div>'
 
-            . '<div class="right_box">'
+			. '<div class="right_box">'
 			. '<table class="table table-striped" style="width: 100%">'
 
 			// hidden項目
-		    . '<input type="hidden" name="selected_id" value="' . \htmlspecialchars($form['selected_id']) . '"/>'
+			. '<input type="hidden" name="selected_id" value="' . \htmlspecialchars($form['selected_id']) . '"/>'
 			. '<input type="hidden" name="ver_no" value="' . \htmlspecialchars($form['ver_no']) . '"/>'
 
 			// 「ブランチ」項目（変更後）
@@ -984,7 +984,7 @@ class initScreen
 			. '</tr>'
 
 			. '</tbody></table>'
-		    . '</div>'
+			. '</div>'
 		 	. '</div>'
 
 			. '<div class="button_contents_box">'
@@ -1232,7 +1232,7 @@ class initScreen
 			$ret = $t->format(define::DATETIME_FORMAT);
 		}
 			
-	    return $ret;
+		return $ret;
 	}
 
 	/**
