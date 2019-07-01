@@ -220,21 +220,22 @@ class tsReserve
 	 *
 	 * 引数の公開予定IDを条件に、公開予定情報を1件更新します。
 	 *
-	 * @param  array[]  $options mainオプション情報
+	 * @param  string $selected_id 操作対象の公開予定ID
+	 * @param  array $form 入力情報
 	 * @param string $gmt_reserve_datetime GMT公開予定日時
 	 * @param string $user_id 	 ユーザID
 	 * 
 	 * @throws Exception パラメタの値が正しく設定されていない場合
 	 * @throws Exception バージョンNOを確認し、すでに他ユーザにて情報が更新されている場合
 	 */
-	public function update_ts_reserve($form, $gmt_reserve_datetime, $user_id) {
+	public function update_ts_reserve($selected_id, $form, $gmt_reserve_datetime, $user_id) {
 
-		if (!$form['selected_id']) {
+		if (!$selected_id) {
 			throw new \Exception('更新対象の公開予定IDが取得できませんでした。 ');
 		}
 
 		// 他ユーザで更新されていないか確認
-		$selected_ret = $this->get_selected_ts_reserve($form['selected_id']);
+		$selected_ret = $this->get_selected_ts_reserve($selected_id);
 
 		$logstr = "[排他確認]データ取得時のバージョンNO：" . $form['ver_no'] . "\r\n";
 		$logstr .= "[排他確認]現時点のバージョンNO：" . $selected_ret[self::RESERVE_ENTITY_VER_NO];
@@ -283,8 +284,8 @@ class tsReserve
 	 *
 	 * 引数の公開予定IDを条件に、公開予定情報のステータスを"処理済み"へ更新します。
 	 *
-	 * @param  array[]  $options mainオプション情報
 	 * @param  string  $selected_id 公開予定ID
+	 * @param  string  $ver_no 対象のバージョン番号
 	 * @return null
 	 * 
 	 * @throws Exception パラメタの値が正しく設定されていない場合

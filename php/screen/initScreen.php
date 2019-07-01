@@ -522,7 +522,7 @@ class initScreen
 			// 入力情報を公開予定テーブルへ更新
 			//============================================================
 	 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　-----公開処理結果テーブルの更新処理-----');
-			$this->tsReserve->update_ts_reserve($form, $gmt_reserve_datetime, $this->main->user_id);
+			$this->tsReserve->update_ts_reserve($form['selected_id'], $form, $gmt_reserve_datetime, $this->main->user_id);
 			
 		} catch (\Exception $e) {
 
