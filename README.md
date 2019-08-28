@@ -322,6 +322,7 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 
 ### lib-indigo 0.1.5 (リリース日未定)
 
+- Gitリモートの `username` と `password` オプションを省略可能になった。
 - 細かい不具合の修正。
 
 ### lib-indigo 0.1.4 (2019年7月1日)

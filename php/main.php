@@ -215,7 +215,7 @@ class main
 			$this->param_check_flg = false;
 		}elseif( !( property_exists($this->options, 'db') && $this->options->db) ){
 			$this->param_check_flg = false;
-		}elseif( !( property_exists($this->options->db, 'db_type')) ){	// ← null OK
+		}elseif( !( property_exists($this->options->db, 'db_type')) ){ // ← null OK
 			$this->param_check_flg = false;
 		}elseif( !( property_exists($this->options, 'max_reserve_record') && $this->options->max_reserve_record) ){
 			$this->param_check_flg = false;
@@ -226,10 +226,6 @@ class main
 		}elseif( !( property_exists($this->options, 'git') && $this->options->git) ){
 			$this->param_check_flg = false;
 		}elseif( !( property_exists($this->options->git, 'giturl') && $this->options->git->giturl) ){
-			$this->param_check_flg = false;
-		}elseif( !( property_exists($this->options->git, 'username') && $this->options->git->username) ){
-			$this->param_check_flg = false;
-		}elseif( !( property_exists($this->options->git, 'password') && $this->options->git->password) ){
 			$this->param_check_flg = false;
 
 		} else {
