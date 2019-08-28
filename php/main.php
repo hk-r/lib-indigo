@@ -591,6 +591,9 @@ class main
 
 			$alert_title = "エラーが発生しました。";
 
+			// エラーメッセージ表示
+			$dialog_html = '<div><h3>'.  $alert_title . '</h3>';
+
 			if (\file_exists($this->log_path)) {
 				$logstr =  "***** エラー発生 *****" . "\r\n";
 				$logstr .= "[ErrorException]" . "\r\n";
@@ -600,12 +603,9 @@ class main
 			} else {
 				$alert_line = $e->getFile() . " in " . $e->getLine();
 				$alert_message = "Error message:" . $e->getMessage();
+				$dialog_html .= '<p>'.  $alert_line . '</p>';
+				$dialog_html .= '<p>'.  $alert_message . '</p></div>';
 			}
-
-			// エラーメッセージ表示
-			$dialog_html = '<div><h3>'.  $alert_title . '</h3>';
-			$dialog_html .= '<p>'.  $alert_line . '</p>';
-			$dialog_html .= '<p>'.  $alert_message . '</p></div>';
 
 			return $dialog_html;
 
