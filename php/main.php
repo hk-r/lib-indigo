@@ -205,22 +205,31 @@ class main
 		// オプション情報入力チェック（必須項目のみ）
 		//============================================================	
 
-		if (
-
-			!( property_exists($this->options, 'realpath_workdir') && $this->options->realpath_workdir) ||
-			!( property_exists($this->options, 'relativepath_resourcedir') && $this->options->relativepath_resourcedir) ||
-			!( property_exists($this->options, 'realpath_ajax_call') && $this->options->realpath_ajax_call) ||
-			!( property_exists($this->options, 'time_zone') && $this->options->time_zone) ||
-			!( property_exists($this->options, 'db') && $this->options->db) ||
-			!( property_exists($this->options->db, 'db_type')) ||	// ← null OK
-			!( property_exists($this->options, 'max_reserve_record') && $this->options->max_reserve_record) ||
-			!( property_exists($this->options, 'server') && $this->options->server) ||
-			!( property_exists($this->options->server[0], 'real_path') && $this->options->server[0]->real_path) ||
-			!( property_exists($this->options, 'git') && $this->options->git) ||
-			!( property_exists($this->options->git, 'giturl') && $this->options->git->giturl) ||
-			!( property_exists($this->options->git, 'username') && $this->options->git->username) ||
-			!( property_exists($this->options->git, 'password') && $this->options->git->password) )  {
-
+		if (!( property_exists($this->options, 'realpath_workdir') && $this->options->realpath_workdir)){
+			$this->param_check_flg = false;
+		}elseif( !( property_exists($this->options, 'relativepath_resourcedir') && $this->options->relativepath_resourcedir) ){
+			$this->param_check_flg = false;
+		}elseif( !( property_exists($this->options, 'realpath_ajax_call') && $this->options->realpath_ajax_call) ){
+			$this->param_check_flg = false;
+		}elseif( !( property_exists($this->options, 'time_zone') && $this->options->time_zone) ){
+			$this->param_check_flg = false;
+		}elseif( !( property_exists($this->options, 'db') && $this->options->db) ){
+			$this->param_check_flg = false;
+		}elseif( !( property_exists($this->options->db, 'db_type')) ){	// ← null OK
+			$this->param_check_flg = false;
+		}elseif( !( property_exists($this->options, 'max_reserve_record') && $this->options->max_reserve_record) ){
+			$this->param_check_flg = false;
+		}elseif( !( property_exists($this->options, 'server') && $this->options->server) ){
+			$this->param_check_flg = false;
+		}elseif( !( property_exists($this->options->server[0], 'real_path') && $this->options->server[0]->real_path) ){
+			$this->param_check_flg = false;
+		}elseif( !( property_exists($this->options, 'git') && $this->options->git) ){
+			$this->param_check_flg = false;
+		}elseif( !( property_exists($this->options->git, 'giturl') && $this->options->git->giturl) ){
+			$this->param_check_flg = false;
+		}elseif( !( property_exists($this->options->git, 'username') && $this->options->git->username) ){
+			$this->param_check_flg = false;
+		}elseif( !( property_exists($this->options->git, 'password') && $this->options->git->password) ){
 			$this->param_check_flg = false;
 
 		} else {
