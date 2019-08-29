@@ -34,7 +34,7 @@ class main
 	 *   - indigo作業用ディレクトリ（絶対パス）
 	 * relativepath_resourcedir,
 	 *   - リソースディレクトリ（ドキュメントルートからの相対パス）
-	 * realpath_ajax_call,
+	 * url_ajax_call,
 	 *   - ajax呼出クラス（ドキュメントルートからの相対パス）
 	 * time_zone,
 	 *   - 画面表示上のタイムゾーン
@@ -209,7 +209,7 @@ class main
 			$this->param_check_flg = false;
 		}elseif( !( property_exists($this->options, 'relativepath_resourcedir') && $this->options->relativepath_resourcedir) ){
 			$this->param_check_flg = false;
-		}elseif( !( property_exists($this->options, 'realpath_ajax_call') && $this->options->realpath_ajax_call) ){
+		}elseif( !( property_exists($this->options, 'url_ajax_call') && $this->options->url_ajax_call) ){
 			$this->param_check_flg = false;
 		}elseif( !( property_exists($this->options, 'time_zone') && $this->options->time_zone) ){
 			$this->param_check_flg = false;
@@ -331,6 +331,18 @@ class main
 			$rtn .= '<input type="hidden" name="'.htmlspecialchars($key).'" value="'.htmlspecialchars($value).'" />';
 		}
 		return $rtn;
+	}
+
+	/**
+	 * master作業ディレクトリのパスを取得する
+	 * TODO: このメソッドは ajax.php と重複している。1ヶ所にまとめたい。
+	 */
+	public function get_master_repository_dir(){
+		$master_real_path = $this->fs->normalize_path( $this->fs->get_realpath( $this->options->realpath_workdir . define::PATH_MASTER ) );
+		if( property_exists($this->options, 'realpath_git_master_dir') && strlen( $this->options->realpath_git_master_dir ) && is_dir( $this->options->realpath_git_master_dir ) ){
+			$master_real_path = $this->fs->normalize_path( $this->fs->get_realpath( $this->options->realpath_git_master_dir ) );
+		}
+		return $master_real_path;
 	}
 
 	/**

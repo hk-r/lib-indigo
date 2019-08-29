@@ -47,7 +47,7 @@ class gitManager
 		$current_dir = \realpath('.');
 
 		// masterディレクトリの絶対パス
-		$master_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_MASTER));
+		$master_real_path = $this->main->get_master_repository_dir();
 
 		// リストの先頭を空にする
 		$ret_array[] = "";
@@ -204,7 +204,7 @@ class gitManager
 		$current_dir = \realpath('.');
 
 		// masterディレクトリの絶対パス
-		$master_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($options->realpath_workdir . define::PATH_MASTER));
+		$master_real_path = $this->main->get_master_repository_dir();
 
 		if ( $master_real_path ) {
 

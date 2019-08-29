@@ -699,7 +699,7 @@ class initScreen
 		$ret .= '<input type="hidden" name="selected_id" value="' . \htmlspecialchars($form['selected_id']) . '"/>';
 		$ret .= '<input type="hidden" name="ver_no" value="' . \htmlspecialchars($form['ver_no']) . '"/>';
 		// ajax呼出クラス絶対パス
-		$ret .= '<input type="hidden" id="realpath_ajax_call" value="' . \htmlspecialchars($this->main->options->realpath_ajax_call) . '"/>';
+		$ret .= '<input type="hidden" id="url_ajax_call" value="' . \htmlspecialchars($this->main->options->url_ajax_call) . '"/>';
 		// indigo作業用ディレクトリ絶対パス
 		$ret .= '<input type="hidden" id="realpath_workdir" value="' . \htmlspecialchars($this->main->options->realpath_workdir) . '"/>';
 

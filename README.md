@@ -156,14 +156,19 @@ function call_parameter () {
 			'hoge' => 'fuga',
 		),
 
-		// indigo作業用ディレクトリ（絶対パス）
+		// indigo作業用ディレクトリの絶対パス
+		// indigoは、このディレクトリに内部で利用する情報を書き込みます。
 		'realpath_workdir' => '/var/www/html/sample-lib-indigo/', // directoryName (ex. indigo_dir)
+
+		// git local のマスターデータディレクトリの絶対パス
+		// 省略時は、 `realpath_workdir` 内に自動生成されます。
+		'realpath_git_master_dir' => '/var/www/html/sample-lib-indigo/master_repository/',
 
 		// リソースディレクトリ（ドキュメントルートからの相対パス）
 		'relativepath_resourcedir'	=> './../res/', // directoryName (ex. res)
 
 		// ajax呼出クラス（ドキュメントルートからの相対パス）
-		'realpath_ajax_call' => './ajax.php',
+		'url_ajax_call' => './ajax.php',
 		
 		// 画面表示上のタイムゾーン
 		'time_zone' => 'Asia/Tokyo',
@@ -258,7 +263,7 @@ echo $indigo->run();
 ### 8. ajax呼び出しクラス
 
 6.で作成したパラメータを引数に設定し、lib-indigoのajaxクラスの呼び出しを行います。
-※先述の 6. 「ajax呼出クラス（絶対パス）：'realpath_ajax_call'」 のファイル名と一致するようにファイルを作成してください。
+※先述の 6. 「ajax呼出クラス（絶対パス）：'url_ajax_call'」 のファイル名と一致するようにファイルを作成してください。
 
 ```php
 <?php
@@ -323,6 +328,8 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 ### lib-indigo 0.1.5 (リリース日未定)
 
 - Gitリモートの `username` と `password` オプションを省略可能になった。
+- 設定項目名 `realpath_ajax_call` を `url_ajax_call` に名称変更。
+- 新しい設定項目 `realpath_git_master_dir` を追加。
 - 細かい不具合の修正。
 
 ### lib-indigo 0.1.4 (2019年7月1日)

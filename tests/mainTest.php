@@ -47,7 +47,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 			'relativepath_resourcedir'	=> __DIR__.'/../res/',
 
 			// ajax呼出クラス（ドキュメントルートからの相対パス）
-			'realpath_ajax_call'		=> './ajax.php',
+			'url_ajax_call'		=> './ajax.php',
 
 			// 画面表示上のタイムゾーン
 			'time_zone' => 'Asia/Tokyo',

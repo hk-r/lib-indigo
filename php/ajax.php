@@ -41,9 +41,9 @@ class ajax
 		}
 
 		$this->fs = new \tomk79\filesystem(array(
-		  'file_default_permission' => define::FILE_DEFAULT_PERMISSION,
-		  'dir_default_pefrmission' => define::DIR_DEFAULT_PERMISSION,
-		  'filesystem_encoding'     => define::FILESYSTEM_ENCODING
+			'file_default_permission' => define::FILE_DEFAULT_PERMISSION,
+			'dir_default_pefrmission' => define::DIR_DEFAULT_PERMISSION,
+			'filesystem_encoding'     => define::FILESYSTEM_ENCODING
 		));
 
 		// ログファイル名
@@ -60,6 +60,18 @@ class ajax
 		if (\array_key_exists('user_id', $this->options)) {
 			$this->user_id = $this->options->user_id;
 		}
+	}
+
+	/**
+	 * master作業ディレクトリのパスを取得する
+	 * TODO: このメソッドは main.php と重複している。1ヶ所にまとめたい。
+	 */
+	public function get_master_repository_dir(){
+		$master_real_path = $this->fs->normalize_path( $this->fs->get_realpath( $this->options->realpath_workdir . define::PATH_MASTER ) );
+		if( property_exists($this->options, 'realpath_git_master_dir') && strlen( $this->options->realpath_git_master_dir ) && is_dir( $this->options->realpath_git_master_dir ) ){
+			$master_real_path = $this->fs->normalize_path( $this->fs->get_realpath( $this->options->realpath_git_master_dir ) );
+		}
+		return $master_real_path;
 	}
 
 	/**
@@ -90,7 +102,7 @@ class ajax
 		if (isset($this->options->_POST->branch_name) && isset($this->options->realpath_workdir)) {
 
 			// masterディレクトリの絶対パス
-			$master_real_path = $this->fs->normalize_path($this->fs->get_realpath($this->options->realpath_workdir . define::PATH_MASTER));
+			$master_real_path = $this->get_master_repository_dir();
 
 			if ( $master_real_path ) {
 

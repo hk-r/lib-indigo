@@ -4,12 +4,12 @@ window.Indigo = function(options){
 	options = options || {};
 	options.ajaxBridge = options.ajaxBridge || function(data, callback){
 		callback = callback || function(){};
-		var realpath_ajax_call = document.getElementById('realpath_ajax_call').value;
+		var url_ajax_call = document.getElementById('url_ajax_call').value;
 		var rtn = '';
 		var error = false;
 		$.ajax ({
 			type: 'POST',
-			url: realpath_ajax_call,
+			url: url_ajax_call,
 			data: data,
 			dataType: 'json',
 			success: function(data, dataType) {
