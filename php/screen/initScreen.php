@@ -458,7 +458,7 @@ class initScreen
 			$result['status'] = false;
 			$result['message'] = '追加処理が失敗しました。';
 
-			$logstr =  "***** エラー発生 *****" . "\r\n";
+			$logstr =  "***** ERROR *****" . "\r\n";
 			$logstr .= "[ERROR]" . "\r\n";
 			$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
 			$logstr .= "Error message:" . $e->getMessage() . "\r\n";
@@ -529,7 +529,7 @@ class initScreen
 			$result['status'] = false;
 			$result['message'] = '変更処理が失敗しました。';
 
-			$logstr =  "***** エラー発生 *****" . "\r\n";
+			$logstr =  "***** ERROR *****" . "\r\n";
 			$logstr .= "[ERROR]" . "\r\n";
 			$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
 			$logstr .= "Error message:" . $e->getMessage() . "\r\n";
@@ -607,7 +607,7 @@ class initScreen
 			$result['status'] = false;
 			$result['message'] = '削除処理が失敗しました。';
 
-			$logstr =  "***** エラー発生 *****" . "\r\n";
+			$logstr =  "***** ERROR *****" . "\r\n";
 			$logstr .= "[ERROR]" . "\r\n";
 			$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
 			$logstr .= "Error message:" . $e->getMessage() . "\r\n";

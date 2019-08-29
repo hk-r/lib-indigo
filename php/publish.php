@@ -360,7 +360,7 @@ class publish
 
 		} catch (\Exception $e) {
 
-			$logstr =  "***** exec_publish 例外キャッチ *****" . "\r\n";
+			$logstr =  "***** exec_publish Exception caught *****" . "\r\n";
 			$logstr .= "[ERROR]" . "\r\n" . $e->getFile() . " in " . $e->getLine() . "\r\n" . "Error message:" . $e->getMessage() . "\r\n";
 			$this->main->common()->put_error_log($logstr);
 

@@ -600,7 +600,7 @@ class main
 			$dialog_html = '<div><h3>'.  $alert_title . '</h3>';
 
 			if (\file_exists($this->log_path)) {
-				$logstr =  "***** エラー発生 *****" . "\r\n";
+				$logstr =  "***** ERROR *****" . "\r\n";
 				$logstr .= "[ErrorException]" . "\r\n";
 				$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
 				$logstr .= "Error message:" . $e->getMessage() . "\r\n";
@@ -618,11 +618,11 @@ class main
 
 			$alert_title = "例外エラーが発生しました。";
 
-			$logstr = "** run() 例外キャッチ **" . "\r\n";
+			$logstr = "** run() Exception caught **" . "\r\n";
 			$logstr .= $e->getMessage() . "\r\n";
 			$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
-			$logstr =  "***** 例外エラー発生 *****" . "\r\n";
+			$logstr =  "***** EXCEPTION ERROR *****" . "\r\n";
 			$logstr .= "[Exception]" . "\r\n";
 			$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
 			$logstr .= "Error message:" . $e->getMessage() . "\r\n";
@@ -696,7 +696,7 @@ class main
 			$alert_title = "エラーが発生しました。";
 
 			if (\file_exists($this->log_path)) {
-				$logstr =  "***** エラー発生 *****" . "\r\n";
+				$logstr =  "***** ERROR *****" . "\r\n";
 				$logstr .= "[ErrorException]" . "\r\n";
 				$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
 				$logstr .= "Error message:" . $e->getMessage() . "\r\n";
@@ -717,11 +717,11 @@ class main
 
 			$alert_title = "例外エラーが発生しました。";
 
-			$logstr = "** cron_run() 例外キャッチ **" . "\r\n";
+			$logstr = "** cron_run() Exception caught **" . "\r\n";
 			$logstr .= $e->getMessage() . "\r\n";
 			$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
 
-			$logstr =  "***** 例外エラー発生 *****" . "\r\n";
+			$logstr =  "***** EXCEPTION ERROR *****" . "\r\n";
 			$logstr .= "[Exception]" . "\r\n";
 			$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
 			$logstr .= "Error message:" . $e->getMessage() . "\r\n";

@@ -99,7 +99,7 @@ class gitManager
 	 * @throws Exception コマンド実行が異常終了した場合
 	 */
 	public function git_file_copy($options, $path, $dirname) {
-			
+
 		$current_dir = \realpath('.');
 
 		\set_time_limit(12*60*60);
@@ -135,22 +135,22 @@ class gitManager
 			//============================================================
 			// git urlのセット
 			//============================================================
-			$url = $this->protocol . "://" . urlencode($options->git->username) . ":" . urlencode($options->git->password) . "@" . $this->host . $this->path;
+			$url = $this->get_git_remote_url();
 			
 			// initしたリポジトリに名前を付ける
-			$command = 'git remote add ' . define::GIT_REMOTE_NAME .  ' ' . $url;
+			$command = 'git remote add ' . escapeshellarg(define::GIT_REMOTE_NAME) .  ' ' . escapeshellarg($url);
 			$this->main->common()->command_execute($command, true);
 			
 			//============================================================
 			// git fetch（リモートリポジトリの指定ブランチの情報をローカルブランチへ反映）
 			//============================================================
-			$command = 'git fetch ' . define::GIT_REMOTE_NAME .  ' ' . $branch_name;
+			$command = 'git fetch ' . escapeshellarg(define::GIT_REMOTE_NAME) .  ' ' . escapeshellarg($branch_name);
 			$this->main->common()->command_execute($command, true);
 			
 			//============================================================
 			// git pull（リモート取得ブランチを任意のローカルブランチにマージするコマンド）
 			//============================================================
-			$command = 'git pull ' . define::GIT_REMOTE_NAME .  ' ' . $branch_name;
+			$command = 'git pull ' . escapeshellarg(define::GIT_REMOTE_NAME) .  ' ' . escapeshellarg($branch_name);
 			$this->main->common()->command_execute($command, true);
 			
 		} else {
@@ -226,17 +226,17 @@ class gitManager
 					$this->main->common()->command_execute($command, true);
 
 					// git urlのセット
-					$url = $this->protocol . "://" . urlencode($options->git->username) . ":" . urlencode($options->git->password) . "@" . $this->host . $this->path;
+					$url = $this->get_git_remote_url();
 
-					$command = 'git remote add ' . define::GIT_REMOTE_NAME . ' ' . $url;
+					$command = 'git remote add ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' ' . escapeshellarg($url);
 					$this->main->common()->command_execute($command, true);
 
 					// git fetch
-					$command = 'git fetch ' . define::GIT_REMOTE_NAME;
+					$command = 'git fetch ' . escapeshellarg(define::GIT_REMOTE_NAME);
 					$this->main->common()->command_execute($command, true);
 
 					// git pull
-					$command = 'git pull ' . define::GIT_REMOTE_NAME . ' master';
+					$command = 'git pull ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' master';
 					$this->main->common()->command_execute($command, true);
 
 				} else {
@@ -248,6 +248,23 @@ class gitManager
 		}
 
 		\chdir($current_dir);
+	}
+
+	/**
+	 * gitリモートサーバーのURLを取得する
+	 */
+	private function get_git_remote_url(){
+		$url = $this->protocol . "://";
+		if( strlen($this->main->options->git->username) ){
+			$url .= urlencode($this->main->options->git->username);
+			if( strlen($this->main->options->git->password) ){
+				$url .= ":" . urlencode($this->main->options->git->password);
+			}
+			$url .= "@";
+		}
+		$url .= $this->host;
+		$url .= $this->path;
+		return $url;
 	}
 
 }

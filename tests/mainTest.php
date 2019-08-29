@@ -97,8 +97,11 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 	private function clear_indigo_dir(){
 		$this->chmod_r();//パーミッションを変えないと削除できない
-		if( !$this->fs->rm(__DIR__.'/testdata/indigo_dir/') ){
-			var_dump('Failed to cleaning test data directory.');
+		clearstatcache();
+		if( $this->fs->is_dir(__DIR__.'/testdata/indigo_dir/') ){
+			if( !$this->fs->rm(__DIR__.'/testdata/indigo_dir/') ){
+				var_dump('Failed to cleaning test data `indigo_dir` directory.');
+			}
 		}
 		clearstatcache();
 		$this->fs->mkdir_r(__DIR__.'/testdata/indigo_dir/');
@@ -291,7 +294,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		//============================================================
 		clearstatcache();
 		if( !$this->fs->rm(__DIR__.'/testdata/indigo_dir/applock/') ){
-			var_dump('Failed to cleaning test data directory.');
+			var_dump('Failed to cleaning test data `applock` directory.');
 		}
 		clearstatcache();
 	}
@@ -339,7 +342,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		//============================================================
 		clearstatcache();
 		if( !$this->fs->rm(__DIR__.'/testdata/indigo_dir/applock/') ){
-			var_dump('Failed to cleaning test data directory.');
+			var_dump('Failed to cleaning test data `applock` directory.');
 		}
 		clearstatcache();
 	}
@@ -387,7 +390,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		//============================================================
 		clearstatcache();
 		if( !$this->fs->rm(__DIR__.'/testdata/indigo_dir/applock/') ){
-			var_dump('Failed to cleaning test data directory.');
+			var_dump('Failed to cleaning test data `applock` directory.');
 		}
 		clearstatcache();
 	}
@@ -436,7 +439,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		//============================================================
 		clearstatcache();
 		if( !$this->fs->rm(__DIR__.'/testdata/indigo_dir/applock/') ){
-			var_dump('Failed to cleaning test data directory.');
+			var_dump('Failed to cleaning test data `applock` directory.');
 		}
 		clearstatcache();
 	}
