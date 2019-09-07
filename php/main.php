@@ -657,7 +657,101 @@ class main
 	}
 
 	/**
-	 * クーロン実行する
+	 * Ajax API 処理を実行する
+	 */
+	public function ajax_run(){
+		return $this->get_commit_hash();
+	}
+
+	/**
+	 * Gitブランチのコミットハッシュ値を取得
+	 *
+	 * @return json json_encode($ret) コミットハッシュ値(json変換)
+	 * 
+	 * @throws Exception ブランチ名、作業ディレクトリ名パラメタがGETから取得できなかった場合
+	 * @throws Exception masterブランチディレクトリへの移動に失敗した場合
+	 */
+	private function get_commit_hash() {
+
+		$commit_hash;
+
+		$ret = array(
+			'commit_hash' => ''
+		);
+
+		$current_dir = realpath('.');
+
+		if (isset($this->options->_POST->branch_name) && isset($this->options->realpath_workdir)) {
+
+			// masterディレクトリの絶対パス
+			$master_real_path = $this->get_master_repository_dir();
+
+			if ( $master_real_path ) {
+
+				if ( \chdir( $master_real_path ) ) {
+
+					// コミットハッシュ値取得
+					$command = 'git log --pretty=%h ' . define::GIT_REMOTE_NAME . '/' . $this->options->_POST->branch_name . ' -1';
+					 
+					$this->put_ajax_log($command);
+
+					\exec($command, $output, $return);
+					foreach ( (array)$output as $data ) {
+						$commit_hash = $data;
+					}
+
+				} else {
+
+					$this->put_ajax_log("Error. Move to work directory failed.");
+
+					// ディレクトリ移動に失敗
+					throw new \Exception('Failed to get git commitHash.');
+				} 
+			}
+		} else {
+
+			$this->put_ajax_log("Error. Parameter not found.");
+
+			// ディレクトリ移動に失敗
+			throw new \Exception('Failed to get git commitHash.');
+		} 
+		
+		if ($commit_hash) {
+			$ret['commit_hash'] = $commit_hash;
+		}
+		
+		\chdir($current_dir);
+
+		\header('Content-Type: application/json; charset=utf-8');
+
+		$this->put_ajax_log("【commit hash】 " . $commit_hash);
+
+		return \json_encode($ret);
+	}
+
+	/**
+	 * ajax用のログ書き込み
+	 *
+	 * @param string $text 出力文字列
+	 * 
+	 * @return 成功した場合に TRUE を、失敗した場合に FALSEを返却
+	 */
+	private function put_ajax_log($text){
+		
+		$datetime = \gmdate("Y-m-d H:i:s", \time());
+
+		$str = "[" . $datetime . "]" . " " .
+			   "[pid:" . \getmypid() . "]" . " " .
+			   "[userid:" . $this->user_id . "]" . " " .
+			   "[" . __METHOD__ . "]" . " " .
+			   "[line:" . __LINE__ . "]" . " " .
+			   $text . "\r\n";
+
+		return error_log( $str, 3, $this->ajax_log_path );
+	}
+
+	/**
+	 * cron を実行する
 	 *
 	 * サーバにて登録されたクーロン処理から呼び出されるメソッド。
 	 * 処理結果は$resultへ格納されており、エラーが発生した場合はエラーログへの書き込みを行う。

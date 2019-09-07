@@ -50,12 +50,10 @@ class common
 	 * @throws Exception コマンド実行が異常終了した場合
 	 */
 	public function command_execute($command, $captureStderr) {
-	
 		$ret = array(
 					'output' => array(),
 					'return' => 0
 			  	  );
-
 
 		$this->main->common()->put_process_log_block('[command]');
 		$this->main->common()->put_process_log_block($command);
@@ -66,19 +64,6 @@ class common
 		}
 
 		\exec($command, $output, $return);
-
-		if ($return !== 0 ) {
-			// 異常終了の場合
-
-			$logstr = "** コマンド実行エラーが発生しました。詳細はエラーログを確認してください。 **";
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
-
-			$msg = 'Command error. ' . "\r\n" .
-					   '<command>' . "\r\n" . $command . "\r\n" .
-					   '<message>' . "\r\n" . implode(" " , $output);
-
-			throw new \Exception($msg);
-		}
 
 		$ret['output'] = $output;
 		$ret['return'] = $return;

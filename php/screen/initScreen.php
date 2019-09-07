@@ -156,7 +156,7 @@ class initScreen
 	 * @return string $dialog_html 新規入力ダイアログHTML
 	 */
 	public function do_disp_add_dialog() {
-		
+
 		// ダイアログHTMLの作成
 		$dialog_html= $this->create_input_dialog_html(self::INPUT_MODE_ADD);
 
@@ -629,7 +629,7 @@ class initScreen
 	 * @return string $ret ダイアログHTML
 	 */
 	private function create_input_dialog_html($input_mode) {
-		
+
 		$ret = '<div class="dialog" id="modal_dialog">'
 			  . '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
 			  . '<div style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; background: rgb(0, 0, 0); opacity: 0.5;"></div>'

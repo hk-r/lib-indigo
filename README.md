@@ -277,7 +277,7 @@ require __DIR__ . '/parameter.php';
 $parameter = call_parameter();
 
 // load indigo\ajax
-$indigo = new indigo\ajax($parameter);
+$indigo = new indigo\main($parameter);
 
 // 実行する
 echo $indigo->ajax_run();
@@ -330,6 +330,7 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 - Gitリモートの `username` と `password` オプションを省略可能になった。
 - 設定項目名 `realpath_ajax_call` を `url_ajax_call` に名称変更。
 - 新しい設定項目 `realpath_git_master_dir` を追加。
+- `indigo\ajax::ajax_run()` を廃止し、`indigo\main::ajax_run()` に統一した。
 - 細かい不具合の修正。
 
 ### lib-indigo 0.1.4 (2019年7月1日)
