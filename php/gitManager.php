@@ -54,6 +54,12 @@ class gitManager
 
 		if ( \chdir( $master_real_path )) {
 
+			$url_git_remote = $this->get_git_remote_url( true );
+
+			// set remote as origin
+			$command = 'git remote add ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' ' . escapeshellarg($url_git_remote);
+			$this->main->common()->command_execute($command, true);
+
 			// fetch
 			$command = 'git fetch';
 			$this->main->common()->command_execute($command, true);
@@ -135,10 +141,10 @@ class gitManager
 			//============================================================
 			// git urlのセット
 			//============================================================
-			$url = $this->get_git_remote_url();
+			$url_git_remote = $this->get_git_remote_url( true );
 			
 			// initしたリポジトリに名前を付ける
-			$command = 'git remote add ' . escapeshellarg(define::GIT_REMOTE_NAME) .  ' ' . escapeshellarg($url);
+			$command = 'git remote add ' . escapeshellarg(define::GIT_REMOTE_NAME) .  ' ' . escapeshellarg($url_git_remote);
 			$this->main->common()->command_execute($command, true);
 			
 			//============================================================
@@ -226,9 +232,9 @@ class gitManager
 					$this->main->common()->command_execute($command, true);
 
 					// git urlのセット
-					$url = $this->get_git_remote_url();
+					$url_git_remote = $this->get_git_remote_url( true );
 
-					$command = 'git remote add ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' ' . escapeshellarg($url);
+					$command = 'git remote add ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' ' . escapeshellarg($url_git_remote);
 					$this->main->common()->command_execute($command, true);
 
 					// git fetch
@@ -253,14 +259,16 @@ class gitManager
 	/**
 	 * gitリモートサーバーのURLを取得する
 	 */
-	private function get_git_remote_url(){
+	private function get_git_remote_url($include_credentials = false){
 		$url = $this->protocol . "://";
-		if( strlen($this->main->options->git->username) ){
-			$url .= urlencode($this->main->options->git->username);
-			if( strlen($this->main->options->git->password) ){
-				$url .= ":" . urlencode($this->main->options->git->password);
+		if( $include_credentials ){
+			if( strlen($this->main->options->git->username) ){
+				$url .= urlencode($this->main->options->git->username);
+				if( strlen($this->main->options->git->password) ){
+					$url .= ":" . urlencode($this->main->options->git->password);
+				}
+				$url .= "@";
 			}
-			$url .= "@";
 		}
 		$url .= $this->host;
 		$url .= $this->path;

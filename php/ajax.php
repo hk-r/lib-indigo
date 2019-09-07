@@ -111,7 +111,7 @@ class ajax
 					// コミットハッシュ値取得
 					$command = 'git log --pretty=%h ' . define::GIT_REMOTE_NAME . '/' . $this->options->_POST->branch_name . ' -1';
 					 
-					 $this->put_ajax_log($command);
+					$this->put_ajax_log($command);
 
 					\exec($command, $output, $return);
 					foreach ( (array)$output as $data ) {
