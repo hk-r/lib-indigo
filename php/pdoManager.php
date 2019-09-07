@@ -159,6 +159,7 @@ class pdoManager
 			' . tsReserve::TS_RESERVE_DELETE_FLG	. ' TEXT,
 			' . tsReserve::TS_RESERVE_INSERT_DATETIME	. ' TEXT,
 			' . tsReserve::TS_RESERVE_INSERT_USER_ID	. ' TEXT,
+			' . tsReserve::TS_RESERVE_SPACE_NAME		. ' TEXT,
 			' . tsReserve::TS_RESERVE_UPDATE_DATETIME	. ' TEXT,
 			' . tsReserve::TS_RESERVE_UPDATE_USER_ID	. ' TEXT,
 			' . tsReserve::TS_RESERVE_VER_NO			. ' TEXT
@@ -192,6 +193,7 @@ class pdoManager
 			' . tsOutput::TS_OUTPUT_GEN_DELETE		. ' TEXT,
 			' . tsOutput::TS_OUTPUT_INSERT_DATETIME . ' TEXT,
 			' . tsOutput::TS_OUTPUT_INSERT_USER_ID 	. ' TEXT,
+			' . tsOutput::TS_OUTPUT_SPACE_NAME	 	. ' TEXT,
 			' . tsOutput::TS_OUTPUT_UPDATE_DATETIME . ' TEXT,
 			' . tsOutput::TS_OUTPUT_UPDATE_USER_ID 	. ' TEXT
 		)';
@@ -215,6 +217,7 @@ class pdoManager
 			' . tsBackup::TS_BACKUP_GEN_DELETE_DATETIME	. ' TEXT,
 			' . tsBackup::TS_BACKUP_INSERT_DATETIME		. ' TEXT,
 			' . tsBackup::TS_BACKUP_INSERT_USER_ID		. ' TEXT,
+			' . tsBackup::TS_BACKUP_SPACE_NAME			. ' TEXT,
 			' . tsBackup::TS_BACKUP_UPDATE_DATETIME		. ' TEXT,
 			' . tsBackup::TS_BACKUP_UPDATE_USER_ID		. ' TEXT
 		)';

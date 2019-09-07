@@ -42,6 +42,8 @@ class main
 	 *   - indigo作業用ディレクトリ（絶対パス）
 	 * user_id,
 	 *   - ユーザID（任意）
+	 * space_name,
+	 *   - 空間名（任意）
 	 * db = array(
 	 * 		string 'dbms',
 	 *  		- db種類（'mysql' or null（nullの場合はSQLite3を使用））
@@ -85,6 +87,9 @@ class main
 	// オプション ユーザID（任意項目）
 	public $user_id;
 
+	// オプション 空間名（任意項目）
+	public $space_name;
+
 
 	/** tomk79\filesystem のインスタンス */
 	private $fs;
@@ -110,6 +115,7 @@ class main
 	/** indigo\screen\backupScreen のインスタンス */
 	private $backupScn;
 
+	private $ajax_log_path;
 
 	/**
 	 * indigo\pdoManager::connect() DBインスタンス
@@ -200,6 +206,9 @@ class main
 			$this->process_log_path = $this->log_path . 'log_process_' . $log_dirname . '.log';
 
 		}
+
+		// Ajax API ログパス
+		$this->ajax_log_path = $this->fs->normalize_path($this->fs->get_realpath($this->options->realpath_workdir . define::PATH_LOG)) . 'log_ajax_' . gmdate("Ymd", time()) . '.log';
 
 		//============================================================
 		// オプション情報入力チェック（必須項目のみ）
@@ -327,6 +336,9 @@ class main
 		//============================================================
 		if (\array_key_exists('user_id', $this->options)) {
 			$this->user_id = $this->options->user_id;
+		}
+		if (\array_key_exists('space_name', $this->options)) {
+			$this->space_name = $this->options->space_name;
 		}
 	}
 
@@ -755,6 +767,7 @@ class main
 		$str = "[" . $datetime . "]" . " " .
 			   "[pid:" . \getmypid() . "]" . " " .
 			   "[userid:" . $this->user_id . "]" . " " .
+			   "[spacename:" . $this->space_name . "]" . " " .
 			   "[" . __METHOD__ . "]" . " " .
 			   "[line:" . __LINE__ . "]" . " " .
 			   $text . "\r\n";

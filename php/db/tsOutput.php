@@ -35,6 +35,7 @@ class tsOutput
 	const TS_OUTPUT_GEN_DELETE 		= 'gen_delete_datetime';	// 世代削除日時
 	const TS_OUTPUT_INSERT_DATETIME = 'insert_datetime';		// 登録日時
 	const TS_OUTPUT_INSERT_USER_ID 	= 'insert_user_id';			// 登録ユーザID
+	const TS_OUTPUT_SPACE_NAME	 	= 'space_name';				// 空間名
 	const TS_OUTPUT_UPDATE_DATETIME = 'update_datetime';		// 更新日時
 	const TS_OUTPUT_UPDATE_USER_ID 	= 'update_user_id';			// 更新ユーザID
 
@@ -90,6 +91,7 @@ class tsOutput
 
 		$select_sql = "SELECT * FROM ".$this->main->pdoMgr()->get_physical_table_name('TS_OUTPUT')." " .
 				"WHERE " . self::TS_OUTPUT_GEN_DELETE_FLG . " = '0' " .	// 0:未削除
+				" AND " . self::TS_OUTPUT_SPACE_NAME . " = ".json_encode($this->main->space_name)." " .
 				"ORDER BY " . self::TS_OUTPUT_ID_SEQ . " DESC "	.		// 処理結果ID 降順
 				"LIMIT " . define::LIMIT_LIST_RECORD;					// 最大1,000件までの取得
 
@@ -132,13 +134,14 @@ class tsOutput
 
 		// SELECT文作成
 		$select_sql = "SELECT * from ".$this->main->pdoMgr()->get_physical_table_name('TS_OUTPUT')." 
-		WHERE " . self::TS_OUTPUT_ID_SEQ  . " = ?;";
+		WHERE " . self::TS_OUTPUT_ID_SEQ  . " = ? AND " . self::TS_OUTPUT_SPACE_NAME  . " = ?;";
 
 		// 前処理
 		$stmt = $this->main->dbh()->prepare($select_sql);
 
 		// バインド引数設定
 		$stmt->bindParam(1, $selected_id, \PDO::PARAM_INT);
+		$stmt->bindParam(2, $this->main->space_name, \PDO::PARAM_STR);
 
 		// SELECT実行
 		$ret_array = $this->main->pdoMgr()->execute_select_one($this->main->dbh(), $stmt);
@@ -179,10 +182,11 @@ class tsOutput
 		. self::TS_OUTPUT_GEN_DELETE . ","
 		. self::TS_OUTPUT_INSERT_DATETIME . ","
 		. self::TS_OUTPUT_INSERT_USER_ID . ","
+		. self::TS_OUTPUT_SPACE_NAME . ","
 		. self::TS_OUTPUT_UPDATE_DATETIME . ","
 		. self::TS_OUTPUT_UPDATE_USER_ID
 
-		. ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+		. ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
 		// 前処理
 		$stmt = $this->main->dbh()->prepare($insert_sql);
@@ -206,8 +210,9 @@ class tsOutput
 		$stmt->bindParam(13, $dataArray[self::TS_OUTPUT_GEN_DELETE], \PDO::PARAM_STR);
 		$stmt->bindParam(14, $now, \PDO::PARAM_STR);
 		$stmt->bindParam(15, $dataArray[self::TS_OUTPUT_INSERT_USER_ID], \PDO::PARAM_STR);
-		$stmt->bindValue(16, null, \PDO::PARAM_STR);
+		$stmt->bindParam(16, $dataArray[self::TS_OUTPUT_SPACE_NAME], \PDO::PARAM_STR);
 		$stmt->bindValue(17, null, \PDO::PARAM_STR);
+		$stmt->bindValue(18, null, \PDO::PARAM_STR);
 
 		// INSERT実行
 		$stmt = $this->main->pdoMgr()->execute($this->main->dbh(), $stmt);
@@ -246,7 +251,8 @@ class tsOutput
 			self::TS_OUTPUT_END 				. " = ?, " .
 			self::TS_OUTPUT_UPDATE_DATETIME 	. " = ?, " .
 			self::TS_OUTPUT_UPDATE_USER_ID 		. " = ? " .
-			" WHERE " . self::TS_OUTPUT_ID_SEQ 	. " = ?;";
+			" WHERE " . self::TS_OUTPUT_ID_SEQ 	. " = ? ".
+			"   AND " . self::TS_OUTPUT_SPACE_NAME . " = ?;";
 
 		// 前処理
 		$stmt = $this->main->dbh()->prepare($update_sql);
@@ -261,6 +267,7 @@ class tsOutput
 		$stmt->bindParam(4, $now, \PDO::PARAM_STR);
 		$stmt->bindParam(5, $dataArray[self::TS_OUTPUT_UPDATE_USER_ID], \PDO::PARAM_STR);
 		$stmt->bindParam(6, $output_id, \PDO::PARAM_INT);
+		$stmt->bindParam(7, $this->main->space_name, \PDO::PARAM_STR);
 
 		// UPDATE実行
 		$stmt = $this->main->pdoMgr()->execute($this->main->dbh(), $stmt);

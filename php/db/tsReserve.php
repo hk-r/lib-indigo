@@ -18,15 +18,16 @@ class tsReserve
 	/**
 	 * 公開予定テーブルのカラム定義
 	 */
-	const TS_RESERVE_ID_SEQ 		= 'reserve_id_seq';			// ID
-	const TS_RESERVE_DATETIME 		= 'reserve_datetime';		// 公開予定日時
-	const TS_RESERVE_BRANCH 		= 'branch_name';			// ブランチ名
-	const TS_RESERVE_COMMIT_HASH	= 'commit_hash';			// コミットハッシュ値（短縮）
-	const TS_RESERVE_COMMENT		= 'comment';				// コメント
-	const TS_RESERVE_STATUS			= 'status';					// 状態（0：未処理、1：処理済）
-	const TS_RESERVE_DELETE_FLG		= 'delete_flg';				// 削除フラグ（0：未削除、1：削除済）
+	const TS_RESERVE_ID_SEQ 			= 'reserve_id_seq';		// ID
+	const TS_RESERVE_DATETIME 			= 'reserve_datetime';	// 公開予定日時
+	const TS_RESERVE_BRANCH 			= 'branch_name';		// ブランチ名
+	const TS_RESERVE_COMMIT_HASH		= 'commit_hash';		// コミットハッシュ値（短縮）
+	const TS_RESERVE_COMMENT			= 'comment';			// コメント
+	const TS_RESERVE_STATUS				= 'status';				// 状態（0：未処理、1：処理済）
+	const TS_RESERVE_DELETE_FLG			= 'delete_flg';			// 削除フラグ（0：未削除、1：削除済）
 	const TS_RESERVE_INSERT_DATETIME 	= 'insert_datetime';	// 登録日時
 	const TS_RESERVE_INSERT_USER_ID 	= 'insert_user_id';		// 登録ユーザID
+	const TS_RESERVE_SPACE_NAME		 	= 'space_name';			// 空間名
 	const TS_RESERVE_UPDATE_DATETIME 	= 'update_datetime';	// 更新日時
 	const TS_RESERVE_UPDATE_USER_ID 	= 'update_user_id';		// 更新ユーザID
 	const TS_RESERVE_VER_NO 			= 'ver_no';				// バージョンNO
@@ -75,6 +76,7 @@ class tsReserve
 		$select_sql = "SELECT * FROM ".$this->main->pdoMgr()->get_physical_table_name('TS_RESERVE')." " . 
 				"WHERE " . self::TS_RESERVE_STATUS . " = '0' " . 		// 0:未処理
 				"  AND " . self::TS_RESERVE_DELETE_FLG . " = '0' " .	// 0:未削除
+				"  AND " . self::TS_RESERVE_SPACE_NAME . " = ".json_encode($this->main->space_name)." " .
 				"ORDER BY " . self::TS_RESERVE_DATETIME . " ASC;";		// 公開予定日時 昇順
 
 
@@ -110,6 +112,7 @@ class tsReserve
 				"WHERE " . self::TS_RESERVE_STATUS . " = '0' " . 		// 0:未処理
 				" AND " . self::TS_RESERVE_DATETIME . " <= ? " .		// 引数日時と同時刻、または過去日時
 				" AND " . self::TS_RESERVE_DELETE_FLG . " = '0' " . 	// 0:未削除
+				" AND " . self::TS_RESERVE_SPACE_NAME . " = ".json_encode($this->main->space_name)." " .
 				"ORDER BY " . self::TS_RESERVE_DATETIME . " DESC;";		// 公開予定日時 降順
 
 		// 前処理
@@ -146,13 +149,16 @@ class tsReserve
 		}
 
 		// SELECT文作成
-		$select_sql = "SELECT * from ".$this->main->pdoMgr()->get_physical_table_name('TS_RESERVE')." WHERE " . self::TS_RESERVE_ID_SEQ . " = ?;";
+		$select_sql = "SELECT * from ".$this->main->pdoMgr()->get_physical_table_name('TS_RESERVE')
+			." WHERE " . self::TS_RESERVE_ID_SEQ . " = ? "
+			."   AND " . self::TS_RESERVE_SPACE_NAME . " = ?;";
 
 		// 前処理
 		$stmt = $this->main->dbh()->prepare($select_sql);
 
 		// バインド引数設定
 		$stmt->bindParam(1, $selected_id, \PDO::PARAM_INT);
+		$stmt->bindParam(2, $this->main->space_name, \PDO::PARAM_STR);
 
 		$this->main->common()->put_process_log_block('[Param]');
 		$this->main->common()->put_process_log_block(self::TS_RESERVE_ID_SEQ . " = " . $selected_id);
@@ -186,11 +192,12 @@ class tsReserve
 		. self::TS_RESERVE_DELETE_FLG . ","
 		. self::TS_RESERVE_INSERT_DATETIME . ","
 		. self::TS_RESERVE_INSERT_USER_ID . ","
+		. self::TS_RESERVE_SPACE_NAME . ","
 		. self::TS_RESERVE_UPDATE_DATETIME . ","
 		. self::TS_RESERVE_UPDATE_USER_ID . ","
 		. self::TS_RESERVE_VER_NO
 
-		. ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+		. ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
 		// 前処理
 		$stmt = $this->main->dbh()->prepare($insert_sql);
@@ -207,9 +214,10 @@ class tsReserve
 		$stmt->bindValue(6, define::DELETE_FLG_OFF, \PDO::PARAM_STR);
 		$stmt->bindParam(7, $now, \PDO::PARAM_STR);
 		$stmt->bindParam(8, $user_id, \PDO::PARAM_STR);
-		$stmt->bindValue(9, null, \PDO::PARAM_STR);
+		$stmt->bindParam(9, $this->main->space_name, \PDO::PARAM_STR);
 		$stmt->bindValue(10, null, \PDO::PARAM_STR);
-		$stmt->bindValue(11, '0', \PDO::PARAM_STR);
+		$stmt->bindValue(11, null, \PDO::PARAM_STR);
+		$stmt->bindValue(12, '0', \PDO::PARAM_STR);
 
 		// INSERT実行
 		$stmt = $this->main->pdoMgr()->execute($this->main->dbh(), $stmt);
@@ -256,7 +264,8 @@ class tsReserve
 			self::TS_RESERVE_UPDATE_DATETIME . " = ?, " .
 			self::TS_RESERVE_UPDATE_USER_ID	 . " = ?, " .
 			self::TS_RESERVE_VER_NO 		 . " = ? " .
-			" WHERE " . self::TS_RESERVE_ID_SEQ . " = ?;";
+			" WHERE " . self::TS_RESERVE_ID_SEQ . " = ? ".
+			"   AND " . self::TS_RESERVE_SPACE_NAME . " = ?;";
 
 		// 前処理
 		$stmt = $this->main->dbh()->prepare($update_sql);
@@ -273,6 +282,7 @@ class tsReserve
 		$stmt->bindParam(6, $user_id, \PDO::PARAM_STR);
 		$stmt->bindValue(7, $form['ver_no'] + 1, \PDO::PARAM_STR);
 		$stmt->bindParam(8, $selected_id, \PDO::PARAM_INT);
+		$stmt->bindParam(9, $this->main->space_name, \PDO::PARAM_STR);
 
 		// UPDATE実行
 		$stmt = $this->main->pdoMgr()->execute($this->main->dbh(), $stmt);
@@ -313,7 +323,8 @@ class tsReserve
 		// UPDATE文作成
 		$update_sql = "UPDATE ".$this->main->pdoMgr()->get_physical_table_name('TS_RESERVE')." SET " .
 			self::TS_RESERVE_STATUS . " = ? " .
-			" WHERE " . self::TS_RESERVE_ID_SEQ . " = ?;";
+			" WHERE " . self::TS_RESERVE_ID_SEQ . " = ? ".
+			"   AND " . self::TS_RESERVE_SPACE_NAME . " = ?;";
 
 		// 前処理
 		$stmt = $this->main->dbh()->prepare($update_sql);
@@ -321,6 +332,7 @@ class tsReserve
 		// バインド引数設定
 		$stmt->bindValue(1, '1', \PDO::PARAM_STR);
 		$stmt->bindParam(2, $selected_id, \PDO::PARAM_INT);
+		$stmt->bindParam(3, $this->main->space_name, \PDO::PARAM_STR);
 
 		// UPDATE実行
 		$stmt = $this->main->pdoMgr()->execute($this->main->dbh(), $stmt);
@@ -348,7 +360,8 @@ class tsReserve
 			self::TS_RESERVE_DELETE_FLG 		. " = ?, " .
 			self::TS_RESERVE_UPDATE_DATETIME	. " = ?, " .
 			self::TS_RESERVE_UPDATE_USER_ID		. " = ? " .
-			" WHERE " . self::TS_RESERVE_ID_SEQ . " = ?;";
+			" WHERE " . self::TS_RESERVE_ID_SEQ . " = ? " .
+			"   AND " . self::TS_RESERVE_SPACE_NAME . " = ?;";
 
 		// 前処理
 		$stmt = $this->main->dbh()->prepare($update_sql);
@@ -361,6 +374,7 @@ class tsReserve
 		$stmt->bindParam(2, $now, \PDO::PARAM_STR);
 		$stmt->bindParam(3, $options->user_id, \PDO::PARAM_STR);
 		$stmt->bindParam(4, $selected_id, \PDO::PARAM_INT);
+		$stmt->bindParam(5, $this->main->space_name, \PDO::PARAM_STR);
 
 		// UPDATE実行
 		$stmt = $this->main->pdoMgr()->execute($this->main->dbh(), $stmt);

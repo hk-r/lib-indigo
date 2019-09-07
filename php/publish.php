@@ -738,6 +738,7 @@ class publish
 				tsOutput::TS_OUTPUT_GEN_DELETE 		=> null,
 				tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
 				tsOutput::TS_OUTPUT_INSERT_USER_ID 	=> $this->main->user_id,
+				tsOutput::TS_OUTPUT_SPACE_NAME		=> $this->main->space_name,
 				tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
 				tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> null
 			);
@@ -763,6 +764,7 @@ class publish
 				tsOutput::TS_OUTPUT_GEN_DELETE 		=> null,
 				tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
 				tsOutput::TS_OUTPUT_INSERT_USER_ID 	=> $this->main->user_id,
+				tsOutput::TS_OUTPUT_SPACE_NAME	 	=> $this->main->space_name,
 				tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
 				tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> null
 			);
@@ -787,6 +789,7 @@ class publish
 				tsOutput::TS_OUTPUT_GEN_DELETE 		=> null,
 				tsOutput::TS_OUTPUT_INSERT_DATETIME => $now,
 				tsOutput::TS_OUTPUT_INSERT_USER_ID 	=> $this->main->user_id,
+				tsOutput::TS_OUTPUT_SPACE_NAME 		=> $this->main->space_name,
 				tsOutput::TS_OUTPUT_UPDATE_DATETIME => null,
 				tsOutput::TS_OUTPUT_UPDATE_USER_ID 	=> null
 			);

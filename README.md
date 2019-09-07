@@ -174,7 +174,10 @@ function call_parameter () {
 		'time_zone' => 'Asia/Tokyo',
 
 		// ユーザID
-		'user_id' => 'user01',
+		'user_id' => 'user01', // 省略可
+
+		// 空間名
+		'space_name' => 'project0001', // 省略可
 
 		// DB設定
 		'db' => array(
@@ -329,6 +332,7 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 - Gitリモートの `username` と `password` オプションを省略可能になった。
 - 設定項目名 `realpath_ajax_call` を `url_ajax_call` に名称変更。
 - 新しい設定項目 `realpath_git_master_dir` を追加。
+- 新しい設定項目 `space_name` を追加。
 - `indigo\ajax::ajax_run()` を廃止し、`indigo\main::ajax_run()` に統一した。
 - データベース接続設定の項目名を変更。
 - データベース接続設定に `prefix` を追加。

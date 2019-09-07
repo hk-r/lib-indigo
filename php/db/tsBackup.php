@@ -25,6 +25,7 @@ class tsBackup
 	const TS_BACKUP_GEN_DELETE_DATETIME = 'gen_delete_datetime';	// 世代削除日時
 	const TS_BACKUP_INSERT_DATETIME 	= 'insert_datetime';		// 登録日時
 	const TS_BACKUP_INSERT_USER_ID 		= 'insert_user_id';			// 登録ユーザID
+	const TS_BACKUP_SPACE_NAME	 		= 'space_name';				// 空間名
 	const TS_BACKUP_UPDATE_DATETIME 	= 'update_datetime';		// 更新日時
 	const TS_BACKUP_UPDATE_USER_ID 		= 'update_user_id';			// 更新ユーザID
 	
@@ -91,6 +92,7 @@ class tsBackup
 				"LEFT OUTER JOIN ".$this->main->pdoMgr()->get_physical_table_name('TS_OUTPUT')."" . // 外部結合：公開処理結果テーブル
 				" 	ON ".$this->main->pdoMgr()->get_physical_table_name('TS_BACKUP')."." 	. self::TS_BACKUP_OUTPUT_ID . " = ".$this->main->pdoMgr()->get_physical_table_name('TS_OUTPUT')."." . tsOutput::TS_OUTPUT_ID_SEQ .
 				" WHERE ".$this->main->pdoMgr()->get_physical_table_name('TS_BACKUP')."." . self::TS_BACKUP_GEN_DELETE_FLG . " = '0' " .	// 0:未削除
+				"   AND ".$this->main->pdoMgr()->get_physical_table_name('TS_BACKUP')."." . self::TS_BACKUP_SPACE_NAME . " = ".json_encode($this->main->space_name)." " .
 				" ORDER BY ".$this->main->pdoMgr()->get_physical_table_name('TS_BACKUP')."." . self::TS_BACKUP_DATETIME . " DESC " .		// バックアップ日時 降順
 				" LIMIT " . define::LIMIT_LIST_RECORD;								// 最大1,000件までの取得
 
@@ -134,13 +136,14 @@ class tsBackup
 		}
 
 		// SELECT文作成
-		$select_sql = "SELECT * from ".$this->main->pdoMgr()->get_physical_table_name('TS_BACKUP')." WHERE " . self::TS_BACKUP_ID_SEQ . " = ?;";
+		$select_sql = "SELECT * from ".$this->main->pdoMgr()->get_physical_table_name('TS_BACKUP')." WHERE " . self::TS_BACKUP_ID_SEQ . " = ? AND ".self::TS_BACKUP_SPACE_NAME." = ?;";
 
 		// 前処理
 		$stmt = $this->main->dbh()->prepare($select_sql);
 
 		// バインド引数設定
 		$stmt->bindParam(1, $selected_id, \PDO::PARAM_INT);
+		$stmt->bindParam(2, $this->main->space_name, \PDO::PARAM_STR);
 
 		// SELECT実行
 		$ret_array = $this->main->pdoMgr()->execute_select_one($this->main->dbh(), $stmt);
@@ -175,13 +178,14 @@ class tsBackup
 
 		// SELECT文作成
 		$select_sql = "SELECT * from ".$this->main->pdoMgr()->get_physical_table_name('TS_BACKUP')." 
-		WHERE " . self::TS_BACKUP_OUTPUT_ID . " = ?;";
+		WHERE " . self::TS_BACKUP_OUTPUT_ID . " = ? AND ".self::TS_BACKUP_SPACE_NAME." = ?;";
 
 		// 前処理
 		$stmt = $this->main->dbh()->prepare($select_sql);
 
 		// バインド引数設定
 		$stmt->bindParam(1, $output_id, \PDO::PARAM_INT);
+		$stmt->bindParam(2, $this->main->space_name, \PDO::PARAM_STR);
 
 		// SELECT実行
 		$ret_array = $this->main->pdoMgr()->execute_select_one($this->main->dbh(), $stmt);
@@ -211,10 +215,11 @@ class tsBackup
 		. self::TS_BACKUP_GEN_DELETE_DATETIME . ","
 		. self::TS_BACKUP_INSERT_DATETIME . ","
 		. self::TS_BACKUP_INSERT_USER_ID . ","
+		. self::TS_BACKUP_SPACE_NAME . ","
 		. self::TS_BACKUP_UPDATE_DATETIME . ","
 		. self::TS_BACKUP_UPDATE_USER_ID
 
-		. ") VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+		. ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
 		// 前処理
 		$stmt = $this->main->dbh()->prepare($insert_sql);
@@ -229,8 +234,9 @@ class tsBackup
 		$stmt->bindValue(4, null, \PDO::PARAM_STR);
 		$stmt->bindParam(5, $now, \PDO::PARAM_STR);
 		$stmt->bindParam(6, $user_id, \PDO::PARAM_STR);
-		$stmt->bindValue(7, null, \PDO::PARAM_STR);
+		$stmt->bindParam(7, $this->main->space_name, \PDO::PARAM_STR);
 		$stmt->bindValue(8, null, \PDO::PARAM_STR);
+		$stmt->bindValue(9, null, \PDO::PARAM_STR);
 
 		// INSERT実行
 		$this->main->pdoMgr()->execute($this->main->dbh(), $stmt);

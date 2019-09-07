@@ -50,6 +50,7 @@ window.Indigo = function(options){
 					},
 					function( data, error ){
 						if( error ){
+							console.error(data, error);
 							alert('コミット取得に失敗しました。');
 							$("#textStatus").html("textStatus : " + error);
 						}

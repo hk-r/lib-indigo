@@ -29,11 +29,15 @@ function call_parameter () {
 		// ユーザID
 		'user_id' => 'user01',
 
+		// 空間名
+		'space_name' => 'project001',
+
 		// DB設定
 		'db' => array(
 
 			// 'mysql' or null（nullの場合はSQLite3を使用）　※バージョン0.1.0時点ではmysql未対応
 			'dbms' => null,
+			'prefix' => 'indigo_',
 		),
 
 		// 予約最大件数
