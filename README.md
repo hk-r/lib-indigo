@@ -186,10 +186,11 @@ function call_parameter () {
 			// ※ v0.2.0 時点ではMySQL未対応
 			'dbms' => null,
 			'prefix' => 'indigo_', // テーブル名の接頭辞
-			'name' => null,
+			'database' => null,
 			'host' => null,
-			'user' => null,
-			'pass' => null,
+			'port' => null,
+			'username' => null,
+			'password' => null,
 		),
 
 		// 予約最大件数

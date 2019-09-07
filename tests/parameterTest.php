@@ -75,10 +75,11 @@ class parameterTest extends PHPUnit_Framework_TestCase{
 				// 'mysql' or null（nullの場合はSQLite3を使用する）
 				'dbms' => null,
 				'prefix' => 'indigo_',
-				'name' => null,
+				'database' => null,
 				'host' => null,
-				'user' => null,
-				'pass' => null,
+				'port' => null,
+				'username' => null,
+				'password' => null,
 			),
 
 			// 予定最大件数
@@ -169,10 +170,11 @@ class parameterTest extends PHPUnit_Framework_TestCase{
 				// 'mysql' or null（nullの場合はSQLite3を使用する）
 				'dbms' => null,
 				'prefix' => 'indigo_',
-				'name' => null,
+				'database' => null,
 				'host' => null,
-				'user' => null,
-				'pass' => null,
+				'port' => null,
+				'username' => null,
+				'password' => null,
 			),
 
 			// 予定最大件数

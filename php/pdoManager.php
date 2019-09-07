@@ -62,13 +62,14 @@ class pdoManager
 			/**
 			 * mysqlの場合
 			 */
-			$db_name = $this->main->options->db->name;		// データベース名
+			$db_name = $this->main->options->db->database;	// データベース名
 			$db_host = $this->main->options->db->host;		// ホスト名
+			$db_port = $this->main->options->db->port;		// ポート番号
 
-			$dsn = "mysql:dbname=" . $db_name . ";host=" . $db_host. ";charset=utf8";
+			$dsn = "mysql:dbname=" . $db_name . ";host=" . $db_host. ";port=" . $db_port. ";charset=utf8";
 
-			$db_user = $this->main->options->db->user;
-			$db_pass = $this->main->options->db->pass;
+			$db_user = $this->main->options->db->username;
+			$db_pass = $this->main->options->db->password;
 
 			$option = array(
 						\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES '. SELF::UTF

@@ -47,10 +47,12 @@ class main
 	 * db = array(
 	 * 		string 'dbms',
 	 *  		- db種類（'mysql' or null（nullの場合はSQLite3を使用））
-	 * 		string 'name',
+	 * 		string 'prefix',
+	 * 		string 'database',
 	 * 		string 'host',
-	 * 		string 'user',
-	 * 		string 'pass'
+	 * 		string 'port',
+	 * 		string 'username',
+	 * 		string 'password'
 	 *  		- mysql用の設定項目
 	 * ),
 	 * max_reserve_record,
