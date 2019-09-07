@@ -72,7 +72,7 @@ class tsReserve
 	 */
 	public function get_ts_reserve_list() {
 
-		$select_sql = "SELECT * FROM TS_RESERVE " . 
+		$select_sql = "SELECT * FROM ".$this->main->pdoMgr()->get_physical_table_name('TS_RESERVE')." " . 
 				"WHERE " . self::TS_RESERVE_STATUS . " = '0' " . 		// 0:未処理
 				"  AND " . self::TS_RESERVE_DELETE_FLG . " = '0' " .	// 0:未削除
 				"ORDER BY " . self::TS_RESERVE_DATETIME . " ASC;";		// 公開予定日時 昇順
@@ -106,7 +106,7 @@ class tsReserve
 	public function get_ts_reserve_publish_list($now) {
 
 		// SELECT文作成（削除フラグ = 0、公開予定日時>=現在日時、ソート順：公開予定日時の降順）
-		$select_sql = "SELECT * FROM TS_RESERVE " .
+		$select_sql = "SELECT * FROM ".$this->main->pdoMgr()->get_physical_table_name('TS_RESERVE')." " .
 				"WHERE " . self::TS_RESERVE_STATUS . " = '0' " . 		// 0:未処理
 				" AND " . self::TS_RESERVE_DATETIME . " <= ? " .		// 引数日時と同時刻、または過去日時
 				" AND " . self::TS_RESERVE_DELETE_FLG . " = '0' " . 	// 0:未削除
@@ -146,7 +146,7 @@ class tsReserve
 		}
 
 		// SELECT文作成
-		$select_sql = "SELECT * from TS_RESERVE WHERE " . self::TS_RESERVE_ID_SEQ . " = ?;";
+		$select_sql = "SELECT * from ".$this->main->pdoMgr()->get_physical_table_name('TS_RESERVE')." WHERE " . self::TS_RESERVE_ID_SEQ . " = ?;";
 
 		// 前処理
 		$stmt = $this->main->dbh()->prepare($select_sql);
@@ -177,7 +177,7 @@ class tsReserve
 	public function insert_ts_reserve($form, $gmt_reserve_datetime, $user_id) {
 
 		// INSERT文作成
-		$insert_sql = "INSERT INTO TS_RESERVE ("
+		$insert_sql = "INSERT INTO ".$this->main->pdoMgr()->get_physical_table_name('TS_RESERVE')." ("
 		. self::TS_RESERVE_DATETIME . ","
 		. self::TS_RESERVE_BRANCH . ","
 		. self::TS_RESERVE_COMMIT_HASH . ","
@@ -248,7 +248,7 @@ class tsReserve
 		}
 
 		// UPDATE文作成
-		$update_sql = "UPDATE TS_RESERVE SET " .
+		$update_sql = "UPDATE ".$this->main->pdoMgr()->get_physical_table_name('TS_RESERVE')." SET " .
 			self::TS_RESERVE_DATETIME 		 . " = ?, " .
 			self::TS_RESERVE_BRANCH 		 . " = ?, " .
 			self::TS_RESERVE_COMMIT_HASH 	 . " = ?, " .
@@ -311,7 +311,7 @@ class tsReserve
 		}
 
 		// UPDATE文作成
-		$update_sql = "UPDATE TS_RESERVE SET " .
+		$update_sql = "UPDATE ".$this->main->pdoMgr()->get_physical_table_name('TS_RESERVE')." SET " .
 			self::TS_RESERVE_STATUS . " = ? " .
 			" WHERE " . self::TS_RESERVE_ID_SEQ . " = ?;";
 
@@ -344,7 +344,7 @@ class tsReserve
 		}
 
 		// UPDATE文作成
-		$update_sql = "UPDATE TS_RESERVE SET " .
+		$update_sql = "UPDATE ".$this->main->pdoMgr()->get_physical_table_name('TS_RESERVE')." SET " .
 			self::TS_RESERVE_DELETE_FLG 		. " = ?, " .
 			self::TS_RESERVE_UPDATE_DATETIME	. " = ?, " .
 			self::TS_RESERVE_UPDATE_USER_ID		. " = ? " .

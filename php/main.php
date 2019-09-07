@@ -43,12 +43,12 @@ class main
 	 * user_id,
 	 *   - ユーザID（任意）
 	 * db = array(
-	 * 		string 'db_type',
+	 * 		string 'dbms',
 	 *  		- db種類（'mysql' or null（nullの場合はSQLite3を使用））
-	 * 		string 'mysql_db_name',
-	 * 		string 'mysql_db_host',
-	 * 		string 'mysql_db_user',
-	 * 		string 'mysql_db_pass'
+	 * 		string 'name',
+	 * 		string 'host',
+	 * 		string 'user',
+	 * 		string 'pass'
 	 *  		- mysql用の設定項目
 	 * ),
 	 * max_reserve_record,
@@ -205,6 +205,18 @@ class main
 		// オプション情報入力チェック（必須項目のみ）
 		//============================================================	
 
+		// 省略可能な値を補完
+		if( !property_exists($this->options, 'db') ){
+			$this->options->db = json_decode('{}');
+		}
+		if( !property_exists($this->options->db, 'dbms') ){
+			$this->options->db->dbms = null;
+		}
+		if( !property_exists($this->options->db, 'prefix') ){
+			$this->options->db->prefix = null;
+		}
+
+		// 設定値チェック
 		if (!( property_exists($this->options, 'realpath_workdir') && $this->options->realpath_workdir)){
 			$this->param_check_flg = false;
 		}elseif( !( property_exists($this->options, 'relativepath_resourcedir') && $this->options->relativepath_resourcedir) ){
@@ -215,7 +227,7 @@ class main
 			$this->param_check_flg = false;
 		}elseif( !( property_exists($this->options, 'db') && $this->options->db) ){
 			$this->param_check_flg = false;
-		}elseif( !( property_exists($this->options->db, 'db_type')) ){ // ← null OK
+		}elseif( !( property_exists($this->options->db, 'dbms')) ){ // ← null OK
 			$this->param_check_flg = false;
 		}elseif( !( property_exists($this->options, 'max_reserve_record') && $this->options->max_reserve_record) ){
 			$this->param_check_flg = false;

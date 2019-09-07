@@ -78,20 +78,20 @@ class tsBackup
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_ts_backup_list start');
 
 		$select_sql = "SELECT " .
-				  "TS_BACKUP." . self::TS_BACKUP_ID_SEQ 				. " as " . self::BACKUP_ENTITY_ID_SEQ . "," .
-				  "TS_BACKUP." . self::TS_BACKUP_DATETIME 			. "	as " . self::BACKUP_ENTITY_DATETIME . "," .
-				  "TS_BACKUP." . self::TS_BACKUP_INSERT_USER_ID 		. "	as " . self::BACKUP_ENTITY_INSERT_USER_ID . "," .
-				  "TS_OUTPUT." . tsOutput::TS_OUTPUT_RESERVE 		. "	as " . self::BACKUP_ENTITY_RESERVE . "," .
-				  "TS_OUTPUT." . tsOutput::TS_OUTPUT_BRANCH 			. "	as " . self::BACKUP_ENTITY_BRANCH . "," .
-				  "TS_OUTPUT." . tsOutput::TS_OUTPUT_COMMIT_HASH 	. "	as " . self::BACKUP_ENTITY_COMMIT_HASH . "," .
-				  "TS_OUTPUT." . tsOutput::TS_OUTPUT_COMMENT 		. "	as " . self::BACKUP_ENTITY_COMMENT . "," .
-				  "TS_OUTPUT." . tsOutput::TS_OUTPUT_PUBLISH_TYPE 	. " as " . self::BACKUP_ENTITY_PUBLISH_TYPE . "," .
-				  "TS_OUTPUT." . tsOutput::TS_OUTPUT_STATUS			. "	as " . self::BACKUP_ENTITY_STATUS .
-				" FROM TS_BACKUP " .
-				"LEFT OUTER JOIN TS_OUTPUT" . // 外部結合：公開処理結果テーブル
-				" 	ON TS_BACKUP." 	. self::TS_BACKUP_OUTPUT_ID . " = TS_OUTPUT." . tsOutput::TS_OUTPUT_ID_SEQ .
-				" WHERE TS_BACKUP." . self::TS_BACKUP_GEN_DELETE_FLG . " = '0' " .	// 0:未削除
-				" ORDER BY TS_BACKUP." . self::TS_BACKUP_DATETIME . " DESC " .		// バックアップ日時 降順
+				  $this->main->pdoMgr()->get_physical_table_name('TS_BACKUP')."." . self::TS_BACKUP_ID_SEQ 				. " as " . self::BACKUP_ENTITY_ID_SEQ . "," .
+				  $this->main->pdoMgr()->get_physical_table_name('TS_BACKUP')."." . self::TS_BACKUP_DATETIME 			. "	as " . self::BACKUP_ENTITY_DATETIME . "," .
+				  $this->main->pdoMgr()->get_physical_table_name('TS_BACKUP')."." . self::TS_BACKUP_INSERT_USER_ID 		. "	as " . self::BACKUP_ENTITY_INSERT_USER_ID . "," .
+				  $this->main->pdoMgr()->get_physical_table_name('TS_OUTPUT')."." . tsOutput::TS_OUTPUT_RESERVE 		. "	as " . self::BACKUP_ENTITY_RESERVE . "," .
+				  $this->main->pdoMgr()->get_physical_table_name('TS_OUTPUT')."." . tsOutput::TS_OUTPUT_BRANCH 			. "	as " . self::BACKUP_ENTITY_BRANCH . "," .
+				  $this->main->pdoMgr()->get_physical_table_name('TS_OUTPUT')."." . tsOutput::TS_OUTPUT_COMMIT_HASH 	. "	as " . self::BACKUP_ENTITY_COMMIT_HASH . "," .
+				  $this->main->pdoMgr()->get_physical_table_name('TS_OUTPUT')."." . tsOutput::TS_OUTPUT_COMMENT 		. "	as " . self::BACKUP_ENTITY_COMMENT . "," .
+				  $this->main->pdoMgr()->get_physical_table_name('TS_OUTPUT')."." . tsOutput::TS_OUTPUT_PUBLISH_TYPE 	. " as " . self::BACKUP_ENTITY_PUBLISH_TYPE . "," .
+				  $this->main->pdoMgr()->get_physical_table_name('TS_OUTPUT')."." . tsOutput::TS_OUTPUT_STATUS			. "	as " . self::BACKUP_ENTITY_STATUS .
+				" FROM ".$this->main->pdoMgr()->get_physical_table_name('TS_BACKUP')." " .
+				"LEFT OUTER JOIN ".$this->main->pdoMgr()->get_physical_table_name('TS_OUTPUT')."" . // 外部結合：公開処理結果テーブル
+				" 	ON ".$this->main->pdoMgr()->get_physical_table_name('TS_BACKUP')."." 	. self::TS_BACKUP_OUTPUT_ID . " = ".$this->main->pdoMgr()->get_physical_table_name('TS_OUTPUT')."." . tsOutput::TS_OUTPUT_ID_SEQ .
+				" WHERE ".$this->main->pdoMgr()->get_physical_table_name('TS_BACKUP')."." . self::TS_BACKUP_GEN_DELETE_FLG . " = '0' " .	// 0:未削除
+				" ORDER BY ".$this->main->pdoMgr()->get_physical_table_name('TS_BACKUP')."." . self::TS_BACKUP_DATETIME . " DESC " .		// バックアップ日時 降順
 				" LIMIT " . define::LIMIT_LIST_RECORD;								// 最大1,000件までの取得
 
 		// 前処理
@@ -134,8 +134,7 @@ class tsBackup
 		}
 
 		// SELECT文作成
-		$select_sql = "SELECT * from TS_BACKUP 
-		WHERE " . self::TS_BACKUP_ID_SEQ . " = ?;";
+		$select_sql = "SELECT * from ".$this->main->pdoMgr()->get_physical_table_name('TS_BACKUP')." WHERE " . self::TS_BACKUP_ID_SEQ . " = ?;";
 
 		// 前処理
 		$stmt = $this->main->dbh()->prepare($select_sql);
@@ -175,7 +174,7 @@ class tsBackup
 		}
 
 		// SELECT文作成
-		$select_sql = "SELECT * from TS_BACKUP 
+		$select_sql = "SELECT * from ".$this->main->pdoMgr()->get_physical_table_name('TS_BACKUP')." 
 		WHERE " . self::TS_BACKUP_OUTPUT_ID . " = ?;";
 
 		// 前処理
@@ -205,7 +204,7 @@ class tsBackup
 	public function insert_ts_backup($user_id, $backup_datetime, $output_id) {
 
 		// INSERT文作成
-		$insert_sql = "INSERT INTO TS_BACKUP ("
+		$insert_sql = "INSERT INTO ".$this->main->pdoMgr()->get_physical_table_name('TS_BACKUP')." ("
 		. self::TS_BACKUP_OUTPUT_ID . ","
 		. self::TS_BACKUP_DATETIME . ","
 		. self::TS_BACKUP_GEN_DELETE_FLG . ","

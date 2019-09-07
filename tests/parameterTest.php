@@ -70,11 +70,11 @@ class parameterTest extends PHPUnit_Framework_TestCase{
 			// DB設定
 			'db' => array(
 				// 'mysql' or null（nullの場合はSQLite3を使用する）
-				'db_type' => null,
-				'mysql_db_name' => '',
-				'mysql_db_host' => '',
-				'mysql_db_user' => '',
-				'mysql_db_pass' => ''
+				'dbms' => null,
+				'name' => null,
+				'host' => null,
+				'user' => null,
+				'pass' => null,
 			),
 
 			// 予定最大件数
@@ -160,11 +160,11 @@ class parameterTest extends PHPUnit_Framework_TestCase{
 			// DB設定
 			'db' => array(
 				// 'mysql' or null（nullの場合はSQLite3を使用する）
-				'db_type' => null,
-				'mysql_db_name' => '',
-				'mysql_db_host' => '',
-				'mysql_db_user' => '',
-				'mysql_db_pass' => ''
+				'dbms' => null,
+				'name' => null,
+				'host' => null,
+				'user' => null,
+				'pass' => null,
 			),
 
 			// 予定最大件数

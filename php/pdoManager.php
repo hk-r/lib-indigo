@@ -50,25 +50,25 @@ class pdoManager
 	
 		$dbh = null; // 初期化
 
-		$dsn;
-		$db_user;
-		$db_pass;
-		$option;
+		$dsn = null;
+		$db_user = null;
+		$db_pass = null;
+		$option = null;
 
-		$db_type = $this->main->options->db->db_type;
+		$dbms = $this->main->options->db->dbms;
 
-		if ($db_type && $db_type == 'mysql') {
+		if ($dbms && $dbms == 'mysql') {
 
 			/**
 			 * mysqlの場合
 			 */
-			$db_name = $this->main->options->db->mysql_db_name;		// データベース名
-			$db_host = $this->main->options->db->mysql_db_host;		// ホスト名
+			$db_name = $this->main->options->db->name;		// データベース名
+			$db_host = $this->main->options->db->host;		// ホスト名
 
 			$dsn = "mysql:dbname=" . $db_name . ";host=" . $db_host. ";charset=utf8";
 
-			$db_user = $this->main->options->db->mysql_db_user;
-			$db_pass = $this->main->options->db->mysql_db_pass;
+			$db_user = $this->main->options->db->user;
+			$db_pass = $this->main->options->db->pass;
 
 			$option = array(
 						\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES '. SELF::UTF
@@ -149,14 +149,14 @@ class pdoManager
 		//============================================================
 		// 公開予定テーブル作成
 		//============================================================
-		$create_sql = 'CREATE TABLE IF NOT EXISTS TS_RESERVE ('
+		$create_sql = 'CREATE TABLE IF NOT EXISTS '.$this->get_physical_table_name('TS_RESERVE').' ('
 			  . tsReserve::TS_RESERVE_ID_SEQ		. ' INTEGER PRIMARY KEY AUTOINCREMENT,
 			' . tsReserve::TS_RESERVE_DATETIME		. ' TEXT,
 			' . tsReserve::TS_RESERVE_BRANCH		. ' TEXT,
 			' . tsReserve::TS_RESERVE_COMMIT_HASH	. ' TEXT,
 			' . tsReserve::TS_RESERVE_COMMENT 		. ' TEXT,
-			' . tsReserve::TS_RESERVE_STATUS 		. ' TEXT,			
-			' . tsReserve::TS_RESERVE_DELETE_FLG	. ' TEXT,			
+			' . tsReserve::TS_RESERVE_STATUS 		. ' TEXT,
+			' . tsReserve::TS_RESERVE_DELETE_FLG	. ' TEXT,
 			' . tsReserve::TS_RESERVE_INSERT_DATETIME	. ' TEXT,
 			' . tsReserve::TS_RESERVE_INSERT_USER_ID	. ' TEXT,
 			' . tsReserve::TS_RESERVE_UPDATE_DATETIME	. ' TEXT,
@@ -175,7 +175,7 @@ class pdoManager
 		//============================================================
 		// 公開処理結果テーブル作成
 		//============================================================
-		$create_sql = 'CREATE TABLE IF NOT EXISTS TS_OUTPUT ('
+		$create_sql = 'CREATE TABLE IF NOT EXISTS '.$this->get_physical_table_name('TS_OUTPUT').' ('
 			  . tsOutput::TS_OUTPUT_ID_SEQ		 . ' INTEGER PRIMARY KEY AUTOINCREMENT,
 			' . tsOutput::TS_OUTPUT_RESERVE_ID 		. ' INTEGER,
 			' . tsOutput::TS_OUTPUT_BACKUP_ID 		. ' INTEGER,
@@ -207,14 +207,14 @@ class pdoManager
 		//============================================================
 		// バックアップテーブル作成
 		//============================================================
-		$create_sql = 'CREATE TABLE IF NOT EXISTS TS_BACKUP ('
+		$create_sql = 'CREATE TABLE IF NOT EXISTS '.$this->get_physical_table_name('TS_BACKUP').' ('
 			  . tsBackup::TS_BACKUP_ID_SEQ				. ' INTEGER PRIMARY KEY AUTOINCREMENT,
 			' . tsBackup::TS_BACKUP_OUTPUT_ID			. ' INTEGER,
 			' . tsBackup::TS_BACKUP_DATETIME			. ' TEXT,
 			' . tsBackup::TS_BACKUP_GEN_DELETE_FLG		. ' TEXT,
 			' . tsBackup::TS_BACKUP_GEN_DELETE_DATETIME	. ' TEXT,
-			' . tsBackup::TS_BACKUP_INSERT_DATETIME		. ' TEXT,			
-			' . tsBackup::TS_BACKUP_INSERT_USER_ID		. ' TEXT,			
+			' . tsBackup::TS_BACKUP_INSERT_DATETIME		. ' TEXT,
+			' . tsBackup::TS_BACKUP_INSERT_USER_ID		. ' TEXT,
 			' . tsBackup::TS_BACKUP_UPDATE_DATETIME		. ' TEXT,
 			' . tsBackup::TS_BACKUP_UPDATE_USER_ID		. ' TEXT
 		)';
@@ -226,6 +226,14 @@ class pdoManager
 			// エラー情報表示
 			throw new \Exception($this->main->dbh->errorInfo());
 		}
+	}
+
+	/**
+	 * テーブル名を取得する
+	 */
+	public function get_physical_table_name($table_name){
+		$prefix = preg_replace('/[^a-zA-Z0-9\_]/', '_', $this->main->options->db->prefix);
+		return $this->main->options->db->prefix.$table_name;
 	}
 
 	/**

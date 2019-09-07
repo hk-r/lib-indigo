@@ -33,7 +33,7 @@ function call_parameter () {
 		'db' => array(
 
 			// 'mysql' or null（nullの場合はSQLite3を使用）　※バージョン0.1.0時点ではmysql未対応
-			'db_type' => null,
+			'dbms' => null,
 		),
 
 		// 予約最大件数

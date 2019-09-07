@@ -55,15 +55,15 @@ class mainTest extends PHPUnit_Framework_TestCase{
 			// ユーザID
 			'user_id' => 'user01',
 
-			// DB設定
-			'db' => array(
-				// 'mysql' or null（nullの場合はSQLite3を使用する）
-				'db_type' => null,
-				'mysql_db_name' => '',
-				'mysql_db_host' => '',
-				'mysql_db_user' => '',
-				'mysql_db_pass' => ''
-			),
+			// // DB設定
+			// 'db' => array(
+			// 	// 'mysql' or null（nullの場合はSQLite3を使用する）
+			// 	'dbms' => null,
+			// 	'name' => null,
+			// 	'host' => null,
+			// 	'user' => null,
+			// 	'pass' => null,
+			// ),
 
 			// 予定最大件数
 			'max_reserve_record' => 10,

@@ -88,7 +88,7 @@ class tsOutput
 	 */
 	public function get_ts_output_list() {
 
-		$select_sql = "SELECT * FROM TS_OUTPUT " .
+		$select_sql = "SELECT * FROM ".$this->main->pdoMgr()->get_physical_table_name('TS_OUTPUT')." " .
 				"WHERE " . self::TS_OUTPUT_GEN_DELETE_FLG . " = '0' " .	// 0:未削除
 				"ORDER BY " . self::TS_OUTPUT_ID_SEQ . " DESC "	.		// 処理結果ID 降順
 				"LIMIT " . define::LIMIT_LIST_RECORD;					// 最大1,000件までの取得
@@ -131,7 +131,7 @@ class tsOutput
 		}
 
 		// SELECT文作成
-		$select_sql = "SELECT * from TS_OUTPUT 
+		$select_sql = "SELECT * from ".$this->main->pdoMgr()->get_physical_table_name('TS_OUTPUT')." 
 		WHERE " . self::TS_OUTPUT_ID_SEQ  . " = ?;";
 
 		// 前処理
@@ -163,7 +163,7 @@ class tsOutput
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ insert_ts_output start');
 
 		// INSERT文作成
-		$insert_sql = "INSERT INTO TS_OUTPUT ("
+		$insert_sql = "INSERT INTO ".$this->main->pdoMgr()->get_physical_table_name('TS_OUTPUT')." ("
 		. self::TS_OUTPUT_RESERVE_ID . ","
 		. self::TS_OUTPUT_BACKUP_ID . ","
 		. self::TS_OUTPUT_RESERVE . ","
@@ -240,7 +240,7 @@ class tsOutput
 		}
 
 		// UPDATE文作成
-		$update_sql = "UPDATE TS_OUTPUT SET " .
+		$update_sql = "UPDATE ".$this->main->pdoMgr()->get_physical_table_name('TS_OUTPUT')." SET " .
 			self::TS_OUTPUT_STATUS 				. " = ?, " .
 			self::TS_OUTPUT_SRV_BK_DIFF_FLG 	. " = ?, " .
 			self::TS_OUTPUT_END 				. " = ?, " .

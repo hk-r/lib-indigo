@@ -179,14 +179,13 @@ function call_parameter () {
 		// DB設定
 		'db' => array(
 
-			// 'mysql' or null（nullの場合はSQLite3を使用）　※バージョン0.1.0時点ではmysql未対応
-			'db_type' => null,
-
-			// 以下mysql用の設定項目
-			'mysql_db_name' => '',
-			'mysql_db_host' => '',
-			'mysql_db_user' => '',
-			'mysql_db_pass' => ''
+			// 'mysql' or 'sqlite' (省略時はSQLite3を使用)　※バージョン0.1.0時点ではMySQL未対応
+			'dbms' => null,
+			'prefix' => 'indigo_', // テーブル名の接頭辞
+			'name' => null,
+			'host' => null,
+			'user' => null,
+			'pass' => null,
 		),
 
 		// 予約最大件数
@@ -331,6 +330,8 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 - 設定項目名 `realpath_ajax_call` を `url_ajax_call` に名称変更。
 - 新しい設定項目 `realpath_git_master_dir` を追加。
 - `indigo\ajax::ajax_run()` を廃止し、`indigo\main::ajax_run()` に統一した。
+- データベース接続設定の項目名を変更。
+- データベース接続設定に `prefix` を追加。
 - 細かい不具合の修正。
 
 ### lib-indigo 0.1.4 (2019年7月1日)
