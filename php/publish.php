@@ -269,10 +269,9 @@ class publish
 					}
 				}
 
-		    } catch (\Exception $e) {
-		    	
-		     	throw $e;
-		    }
+			} catch (\Exception $e) {
+				throw $e;
+			}
 
 			//============================================================
 			// バックアップの作成処理
@@ -499,8 +498,8 @@ class publish
 		$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
 		$command = 'rsync -rhtvz --remove-source-files ' .
-					$from_realpath . ' ' . $to_realpath . ' ' .
-				   '--log-file=' . $this->realpath_tracelog;
+					escapeshellarg($from_realpath) . ' ' . escapeshellarg($to_realpath) . ' ' .
+					escapeshellarg('--log-file=' . $this->realpath_tracelog);
 
 		$this->main->common()->command_execute($command, true);
 
