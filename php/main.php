@@ -115,7 +115,6 @@ class main
 	/** indigo\screen\backupScreen のインスタンス */
 	private $backupScn;
 
-	private $ajax_log_path;
 
 	/**
 	 * indigo\pdoManager::connect() DBインスタンス
@@ -207,9 +206,6 @@ class main
 
 		}
 
-		// Ajax API ログパス
-		$this->ajax_log_path = $this->fs->normalize_path($this->fs->get_realpath($this->options->realpath_workdir . define::PATH_LOG)) . 'log_ajax_' . gmdate("Ymd", time()) . '.log';
-
 		//============================================================
 		// オプション情報入力チェック（必須項目のみ）
 		//============================================================	
@@ -270,6 +266,8 @@ class main
 			// logディレクトリの絶対パスを取得。
 			$this->realpath_array['realpath_log'] = $this->fs()->normalize_path($this->fs()->get_realpath($this->options->realpath_workdir . define::PATH_LOG));
 
+			// Ajax API ログパス
+			$this->realpath_array['realpath_ajax_log_path'] = $this->fs->normalize_path($this->fs->get_realpath($this->options->realpath_workdir . define::PATH_LOG)) . 'log_ajax_' . gmdate("Ymd", time()) . '.log';
 
 			//============================================================
 			// 作業ディレクトリ作成
@@ -772,7 +770,7 @@ class main
 			   "[line:" . __LINE__ . "]" . " " .
 			   $text . "\r\n";
 
-		return error_log( $str, 3, $this->ajax_log_path );
+		return error_log( $str, 3, $this->realpath_array['realpath_ajax_log_path'] );
 	}
 
 	/**

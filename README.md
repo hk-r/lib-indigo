@@ -182,7 +182,8 @@ function call_parameter () {
 		// DB設定
 		'db' => array(
 
-			// 'mysql' or 'sqlite' (省略時はSQLite3を使用)　※バージョン0.1.0時点ではMySQL未対応
+			// 'mysql' or 'sqlite' (省略時はSQLite3を使用)
+			// ※ v0.2.0 時点ではMySQL未対応
 			'dbms' => null,
 			'prefix' => 'indigo_', // テーブル名の接頭辞
 			'name' => null,
@@ -194,10 +195,12 @@ function call_parameter () {
 		// 予約最大件数
 		'max_reserve_record' => 10,
 
-		// バックアップ世代管理件数　※バージョン0.1.0時点では未対応
+		// バックアップ世代管理件数
+		// ※ v0.2.0 時点では未対応
 		'max_backup_generation' => 5,
 
-		// 本番環境パス（同期先）※バージョン0.1.0時点では先頭の設定内容のみ有効
+		// 本番環境パス (同期先)
+		// ※ v0.2.0 時点では先頭の設定内容のみ有効
 		'server' => array(
 				array(
 						// 任意の名前
@@ -327,7 +330,7 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 
 ## 更新履歴 - Change log
 
-### lib-indigo 0.1.5 (リリース日未定)
+### lib-indigo 0.2.0 (リリース日未定)
 
 - Gitリモートの `username` と `password` オプションを省略可能になった。
 - 設定項目名 `realpath_ajax_call` を `url_ajax_call` に名称変更。
