@@ -10,25 +10,25 @@ class mainTest extends PHPUnit_Framework_TestCase{
 	public function setup(){
 
 		register_shutdown_function(
-		    function(){
-		        $e = error_get_last();
-		        // if ($e === null) {
-		        // 	return;
-		        // }
-		        if( $e['type'] == E_ERROR ||
-		        	$e['type'] == E_WARNING ||
-		            $e['type'] == E_PARSE ||
-		            $e['type'] == E_CORE_ERROR ||
-		            $e['type'] == E_COMPILE_ERROR ||
-		            $e['type'] == E_USER_ERROR ){
-		            
-		            $datetime = gmdate("Y-m-d H:i:s", time());
+			function(){
+				$e = error_get_last();
+				// if ($e === null) {
+				// 	return;
+				// }
+				if( $e['type'] == E_ERROR ||
+					$e['type'] == E_WARNING ||
+					$e['type'] == E_PARSE ||
+					$e['type'] == E_CORE_ERROR ||
+					$e['type'] == E_COMPILE_ERROR ||
+					$e['type'] == E_USER_ERROR ){
+					
+					$datetime = gmdate("Y-m-d H:i:s", time());
 
-            		$logstr = "[" . $datetime . "]" . " " . $e['file'] . " in " . $e['line'] . "\r\n";
+					$logstr = "[" . $datetime . "]" . " " . $e['file'] . " in " . $e['line'] . "\r\n";
 					$logstr .= "Error message:" . $e['message'] . "\r\n";
 					error_log($logstr, 3, __DIR__.'/error.log');
-		        }
-		    }
+				}
+			}
 		);
 
 		$this->fs = new tomk79\filesystem();
@@ -38,8 +38,9 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		require_once(__DIR__.'/libs/simple_html_dom.php');
 
 		$this->options = array(
-				'_POST' => array(),
-				'_GET' => array(),
+			'_POST' => array(),
+			'_GET' => array(),
+
 			// indigo作業用ディレクトリ（絶対パス）
 			'realpath_workdir'	 	=> __DIR__.'/testdata/indigo_dir/',
 
@@ -74,14 +75,14 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 			// 本番環境パス（同期先）※バージョン0.1.0時点では先頭の設定内容のみ有効
 			'server' => array(
-					array(
-							'name' => 'server1',
-							'real_path' => __DIR__.'/testdata/honban1/'
-					),
-					array(
-							'name' => 'server2',
-							'real_path' => __DIR__.'/testdata/honban2/'
-					)
+				array(
+					'name' => 'server1',
+					'dist' => __DIR__.'/testdata/honban1/'
+				),
+				array(
+					'name' => 'server2',
+					'dist' => __DIR__.'/testdata/honban2/'
+				)
 			),
 
 			// 同期除外ディレクトリ、またはファイル

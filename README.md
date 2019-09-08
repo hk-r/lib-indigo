@@ -206,13 +206,13 @@ function call_parameter () {
 				// 任意の名前
 				'name' => 'server1',
 				// 同期先絶対パス
-				'real_path' => '/path/to/document_root_01/htdocs/'
+				'dist' => '/path/to/document_root_01/htdocs/'
 			),
 			array(
 				// 任意の名前
 				'name' => 'server2',
 				// 同期先絶対パス
-				'real_path' => '/path/to/document_root_02/htdocs/'
+				'dist' => '/path/to/document_root_02/htdocs/'
 			)
 		),
 
@@ -340,6 +340,7 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 - データベース接続設定の項目名を変更。
 - データベース接続設定に `prefix` を追加。
 - データベース接続先に `mysql` を追加。
+- 出力先のパスの設定名を `real_path` から `dist` に変更。
 - 細かい不具合の修正。
 
 ### lib-indigo 0.1.4 (2019年7月1日)

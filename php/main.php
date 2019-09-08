@@ -55,8 +55,10 @@ class main
 	 * 		string 'password'
 	 *  		- mysql用の設定項目
 	 * ),
+	 * 
 	 * max_reserve_record,
 	 *   - 予定最大件数
+	 * 
 	 * max_backup_generation,
 	 *   - バックアップ世代管理件数
 	 *
@@ -65,7 +67,7 @@ class main
 	 * 	array(
 	 * 		string 'name':
 	 * 			- サーバ名(任意)
-	 * 		string 'real_path':
+	 * 		string 'dist':
 	 * 			- 同期先絶対パス
 	 * 	)
 	 * ),
@@ -240,7 +242,7 @@ class main
 			$this->param_check_flg = false;
 		}elseif( !( property_exists($this->options, 'server') && $this->options->server) ){
 			$this->param_check_flg = false;
-		}elseif( !( property_exists($this->options->server[0], 'real_path') && $this->options->server[0]->real_path) ){
+		}elseif( !( property_exists($this->options->server[0], 'dist') && $this->options->server[0]->dist) ){
 			$this->param_check_flg = false;
 		}elseif( !( property_exists($this->options, 'git') && $this->options->git) ){
 			$this->param_check_flg = false;
@@ -295,7 +297,7 @@ class main
 
 			// 本番環境ディレクトリの絶対パスを取得。（配列1番目のサーバを設定）
 			foreach ( (array)$this->options->server as $server ) {
-				$this->realpath_array['realpath_server'] = $this->fs()->normalize_path($this->fs()->get_realpath($server->real_path . "/"));
+				$this->realpath_array['realpath_server'] = $this->fs()->normalize_path($this->fs()->get_realpath($server->dist . "/"));
 				break; // 現時点では最初の1つのみ有効なのですぐに抜ける
 			}
 

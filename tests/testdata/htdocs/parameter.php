@@ -50,7 +50,7 @@ function call_parameter () {
 				// 任意の名前
 				'name' => 'server1',
 				// 同期先絶対パス
-				'real_path' => __DIR__.'/../honban1/'
+				'dist' => __DIR__.'/../honban1/'
 			),
 		),
 
