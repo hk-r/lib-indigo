@@ -18,7 +18,7 @@ class tsBackup
 	/**
 	 * バックアップテーブルのカラム定義
 	 */
-	const TS_BACKUP_ID_SEQ		 		= 'backup_id_seq';			// バックアップID
+	const TS_BACKUP_ID_SEQ		 		= 'backup_id';				// バックアップID
 	const TS_BACKUP_OUTPUT_ID 			= 'output_id';				// 公開処理結果ID
 	const TS_BACKUP_DATETIME 			= 'backup_datetime';		// バックアップ日時
 	const TS_BACKUP_GEN_DELETE_FLG 		= 'gen_delete_flg';			// 世代削除フラグ
@@ -32,7 +32,7 @@ class tsBackup
 	/**
 	 * バックアップエンティティのカラム定義
 	 */
-	const BACKUP_ENTITY_ID_SEQ 			= 'backup_id_seq';			// ID
+	const BACKUP_ENTITY_ID_SEQ 			= 'backup_id';				// ID
 	const BACKUP_ENTITY_DATETIME_GMT 	= 'backup_datetime_gmt';	// バックアップ日時（GMT日時）
 	const BACKUP_ENTITY_DATETIME 		= 'backup_datetime';		// バックアップ日時（タイムゾーン日時）
 	const BACKUP_ENTITY_DATETIME_DISP	= 'backup_datetime_disp';	// バックアップ日時（表示用フォーマット）

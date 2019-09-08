@@ -18,7 +18,7 @@ class tsReserve
 	/**
 	 * 公開予定テーブルのカラム定義
 	 */
-	const TS_RESERVE_ID_SEQ 			= 'reserve_id_seq';		// ID
+	const TS_RESERVE_ID_SEQ 			= 'reserve_id';			// ID
 	const TS_RESERVE_DATETIME 			= 'reserve_datetime';	// 公開予定日時
 	const TS_RESERVE_BRANCH 			= 'branch_name';		// ブランチ名
 	const TS_RESERVE_COMMIT_HASH		= 'commit_hash';		// コミットハッシュ値（短縮）
@@ -35,7 +35,7 @@ class tsReserve
 	/**
 	 * 公開予定エンティティのカラム定義
 	 */
-	const RESERVE_ENTITY_ID_SEQ 		= 'reserve_id_seq';			// ID
+	const RESERVE_ENTITY_ID_SEQ 		= 'reserve_id';				// ID
 	const RESERVE_ENTITY_RESERVE_GMT	= 'reserve_datetime_gmt';	// 公開予定日時（GMT日時）
 	const RESERVE_ENTITY_RESERVE 		= 'reserve_datetime';		// 公開予定日時（タイムゾーン日時）
 	const RESERVE_ENTITY_RESERVE_DISP 	= 'reserve_datetime_disp';	// 公開予定日時（表示用フォーマット）
