@@ -60,7 +60,6 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 			// DB設定
 			'db' => array(
-				// 'mysql' or null（nullの場合はSQLite3を使用する）
 				'dbms' => null,
 				'prefix' => 'indigo_',
 				'database' => null,

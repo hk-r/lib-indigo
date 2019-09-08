@@ -38,8 +38,6 @@ class pdoManager
 	 * データベースへ接続する
 	 * 
 	 * mainオプションのDBタイプによって接続方法が異なります。
-	 * バージョン0.1.0時点ではmysqlの動作確認は行っておりません。
-	 * sqliteについては動作確認済みです。
 	 *	 
 	 * @return PDO $dbh PDOオブジェクト
 	 * 
@@ -72,7 +70,7 @@ class pdoManager
 			$db_pass = $this->main->options->db->password;
 
 			$option = array(
-						\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES '. SELF::UTF
+						\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'
 					);
 
 		} else {
@@ -103,14 +101,14 @@ class pdoManager
 			
 		try {
 
-	  		$dbh = new \PDO(
-	  			$dsn,
-	  			$db_user,
-	  			$db_pass,
-	  			$option
-	  		);
+			$dbh = new \PDO(
+				$dsn,
+				$db_user,
+				$db_pass,
+				$option
+			);
 	
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ PDO connect success.');
+			$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ PDO connect success.');
 
 		} catch (\PDOException $e) {
 
@@ -151,7 +149,7 @@ class pdoManager
 		// 公開予定テーブル作成
 		//============================================================
 		$create_sql = 'CREATE TABLE IF NOT EXISTS '.$this->get_physical_table_name('TS_RESERVE').' ('
-			  . tsReserve::TS_RESERVE_ID_SEQ		. ' INTEGER PRIMARY KEY AUTOINCREMENT,
+			  . tsReserve::TS_RESERVE_ID_SEQ		. ' INTEGER PRIMARY KEY '.($this->main->options->db->dbms == 'mysql' ? 'AUTO_INCREMENT' : 'AUTOINCREMENT').',
 			' . tsReserve::TS_RESERVE_DATETIME		. ' TEXT,
 			' . tsReserve::TS_RESERVE_BRANCH		. ' TEXT,
 			' . tsReserve::TS_RESERVE_COMMIT_HASH	. ' TEXT,
@@ -178,7 +176,7 @@ class pdoManager
 		// 公開処理結果テーブル作成
 		//============================================================
 		$create_sql = 'CREATE TABLE IF NOT EXISTS '.$this->get_physical_table_name('TS_OUTPUT').' ('
-			  . tsOutput::TS_OUTPUT_ID_SEQ		 . ' INTEGER PRIMARY KEY AUTOINCREMENT,
+			  . tsOutput::TS_OUTPUT_ID_SEQ		 . ' INTEGER PRIMARY KEY '.($this->main->options->db->dbms == 'mysql' ? 'AUTO_INCREMENT' : 'AUTOINCREMENT').',
 			' . tsOutput::TS_OUTPUT_RESERVE_ID 		. ' INTEGER,
 			' . tsOutput::TS_OUTPUT_BACKUP_ID 		. ' INTEGER,
 			' . tsOutput::TS_OUTPUT_RESERVE 		. ' TEXT,
@@ -211,7 +209,7 @@ class pdoManager
 		// バックアップテーブル作成
 		//============================================================
 		$create_sql = 'CREATE TABLE IF NOT EXISTS '.$this->get_physical_table_name('TS_BACKUP').' ('
-			  . tsBackup::TS_BACKUP_ID_SEQ				. ' INTEGER PRIMARY KEY AUTOINCREMENT,
+			  . tsBackup::TS_BACKUP_ID_SEQ				. ' INTEGER PRIMARY KEY '.($this->main->options->db->dbms == 'mysql' ? 'AUTO_INCREMENT' : 'AUTOINCREMENT').',
 			' . tsBackup::TS_BACKUP_OUTPUT_ID			. ' INTEGER,
 			' . tsBackup::TS_BACKUP_DATETIME			. ' TEXT,
 			' . tsBackup::TS_BACKUP_GEN_DELETE_FLG		. ' TEXT,

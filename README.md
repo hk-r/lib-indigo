@@ -182,8 +182,7 @@ function call_parameter () {
 		// DB設定
 		'db' => array(
 
-			// 'mysql' or 'sqlite' (省略時はSQLite3を使用)
-			// ※ v0.2.0 時点ではMySQL未対応
+			// 'mysql' or 'sqlite' (省略時は SQLite を採用)
 			'dbms' => null,
 			'prefix' => 'indigo_', // テーブル名の接頭辞
 			'database' => null,
@@ -203,18 +202,18 @@ function call_parameter () {
 		// 本番環境パス (同期先)
 		// ※ v0.2.0 時点では先頭の設定内容のみ有効
 		'server' => array(
-				array(
-						// 任意の名前
-						'name' => 'server1',
-						// 同期先絶対パス
-						'real_path' => '/var/www/html/indigo-test-project/'
-				),
-				array(
-						// 任意の名前
-						'name' => 'server2',
-						// 同期先絶対パス
-						'real_path' => '/var/www/html/indigo-test-project2/'
-				)
+			array(
+				// 任意の名前
+				'name' => 'server1',
+				// 同期先絶対パス
+				'real_path' => '/path/to/document_root_01/htdocs/'
+			),
+			array(
+				// 任意の名前
+				'name' => 'server2',
+				// 同期先絶対パス
+				'real_path' => '/path/to/document_root_02/htdocs/'
+			)
 		),
 
 		// 同期除外ディレクトリ、またはファイル
@@ -340,6 +339,7 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 - `indigo\ajax::ajax_run()` を廃止し、`indigo\main::ajax_run()` に統一した。
 - データベース接続設定の項目名を変更。
 - データベース接続設定に `prefix` を追加。
+- データベース接続先に `mysql` を追加。
 - 細かい不具合の修正。
 
 ### lib-indigo 0.1.4 (2019年7月1日)
