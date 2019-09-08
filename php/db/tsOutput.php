@@ -140,7 +140,7 @@ class tsOutput
 		$stmt = $this->main->dbh()->prepare($select_sql);
 
 		// バインド引数設定
-		$stmt->bindParam(1, $selected_id, \PDO::PARAM_INT);
+		$stmt->bindParam(1, $selected_id, \PDO::PARAM_STR);
 		$stmt->bindParam(2, $this->main->space_name, \PDO::PARAM_STR);
 
 		// SELECT実行
@@ -167,6 +167,7 @@ class tsOutput
 
 		// INSERT文作成
 		$insert_sql = "INSERT INTO ".$this->main->pdoMgr()->get_physical_table_name('TS_OUTPUT')." ("
+		. self::TS_OUTPUT_ID_SEQ . ","
 		. self::TS_OUTPUT_RESERVE_ID . ","
 		. self::TS_OUTPUT_BACKUP_ID . ","
 		. self::TS_OUTPUT_RESERVE . ","
@@ -186,7 +187,7 @@ class tsOutput
 		. self::TS_OUTPUT_UPDATE_DATETIME . ","
 		. self::TS_OUTPUT_UPDATE_USER_ID
 
-		. ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+		. ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
 		// 前処理
 		$stmt = $this->main->dbh()->prepare($insert_sql);
@@ -194,25 +195,28 @@ class tsOutput
 		// 現在日時
 		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 
+		$uuid = \Ramsey\Uuid\Uuid::uuid1()->toString();
+
 		// バインド引数設定
-		$stmt->bindParam(1, $dataArray[self::TS_OUTPUT_RESERVE_ID], \PDO::PARAM_STR);
-		$stmt->bindParam(2, $dataArray[self::TS_OUTPUT_BACKUP_ID], \PDO::PARAM_STR);
-		$stmt->bindParam(3, $dataArray[self::TS_OUTPUT_RESERVE], \PDO::PARAM_STR);
-		$stmt->bindParam(4, $dataArray[self::TS_OUTPUT_BRANCH], \PDO::PARAM_STR);
-		$stmt->bindParam(5, $dataArray[self::TS_OUTPUT_COMMIT_HASH], \PDO::PARAM_STR);
-		$stmt->bindParam(6, $dataArray[self::TS_OUTPUT_COMMENT], \PDO::PARAM_STR);
-		$stmt->bindParam(7, $dataArray[self::TS_OUTPUT_PUBLISH_TYPE], \PDO::PARAM_STR);
-		$stmt->bindParam(8, $dataArray[self::TS_OUTPUT_STATUS], \PDO::PARAM_STR);
-		$stmt->bindParam(9, $dataArray[self::TS_OUTPUT_SRV_BK_DIFF_FLG], \PDO::PARAM_STR);
-		$stmt->bindParam(10, $dataArray[self::TS_OUTPUT_START], \PDO::PARAM_STR);
-		$stmt->bindParam(11, $dataArray[self::TS_OUTPUT_END], \PDO::PARAM_STR);
-		$stmt->bindParam(12, $dataArray[self::TS_OUTPUT_GEN_DELETE_FLG], \PDO::PARAM_STR);
-		$stmt->bindParam(13, $dataArray[self::TS_OUTPUT_GEN_DELETE], \PDO::PARAM_STR);
-		$stmt->bindParam(14, $now, \PDO::PARAM_STR);
-		$stmt->bindParam(15, $dataArray[self::TS_OUTPUT_INSERT_USER_ID], \PDO::PARAM_STR);
-		$stmt->bindParam(16, $dataArray[self::TS_OUTPUT_SPACE_NAME], \PDO::PARAM_STR);
-		$stmt->bindValue(17, null, \PDO::PARAM_STR);
+		$stmt->bindParam(1, $uuid, \PDO::PARAM_STR);
+		$stmt->bindParam(2, $dataArray[self::TS_OUTPUT_RESERVE_ID], \PDO::PARAM_STR);
+		$stmt->bindParam(3, $dataArray[self::TS_OUTPUT_BACKUP_ID], \PDO::PARAM_STR);
+		$stmt->bindParam(4, $dataArray[self::TS_OUTPUT_RESERVE], \PDO::PARAM_STR);
+		$stmt->bindParam(5, $dataArray[self::TS_OUTPUT_BRANCH], \PDO::PARAM_STR);
+		$stmt->bindParam(6, $dataArray[self::TS_OUTPUT_COMMIT_HASH], \PDO::PARAM_STR);
+		$stmt->bindParam(7, $dataArray[self::TS_OUTPUT_COMMENT], \PDO::PARAM_STR);
+		$stmt->bindParam(8, $dataArray[self::TS_OUTPUT_PUBLISH_TYPE], \PDO::PARAM_STR);
+		$stmt->bindParam(9, $dataArray[self::TS_OUTPUT_STATUS], \PDO::PARAM_STR);
+		$stmt->bindParam(10, $dataArray[self::TS_OUTPUT_SRV_BK_DIFF_FLG], \PDO::PARAM_STR);
+		$stmt->bindParam(11, $dataArray[self::TS_OUTPUT_START], \PDO::PARAM_STR);
+		$stmt->bindParam(12, $dataArray[self::TS_OUTPUT_END], \PDO::PARAM_STR);
+		$stmt->bindParam(13, $dataArray[self::TS_OUTPUT_GEN_DELETE_FLG], \PDO::PARAM_STR);
+		$stmt->bindParam(14, $dataArray[self::TS_OUTPUT_GEN_DELETE], \PDO::PARAM_STR);
+		$stmt->bindParam(15, $now, \PDO::PARAM_STR);
+		$stmt->bindParam(16, $dataArray[self::TS_OUTPUT_INSERT_USER_ID], \PDO::PARAM_STR);
+		$stmt->bindParam(17, $dataArray[self::TS_OUTPUT_SPACE_NAME], \PDO::PARAM_STR);
 		$stmt->bindValue(18, null, \PDO::PARAM_STR);
+		$stmt->bindValue(19, null, \PDO::PARAM_STR);
 
 		// INSERT実行
 		$stmt = $this->main->pdoMgr()->execute($this->main->dbh(), $stmt);
@@ -266,7 +270,7 @@ class tsOutput
 		$stmt->bindParam(3, $dataArray[self::TS_OUTPUT_END], \PDO::PARAM_STR);
 		$stmt->bindParam(4, $now, \PDO::PARAM_STR);
 		$stmt->bindParam(5, $dataArray[self::TS_OUTPUT_UPDATE_USER_ID], \PDO::PARAM_STR);
-		$stmt->bindParam(6, $output_id, \PDO::PARAM_INT);
+		$stmt->bindParam(6, $output_id, \PDO::PARAM_STR);
 		$stmt->bindParam(7, $this->main->space_name, \PDO::PARAM_STR);
 
 		// UPDATE実行

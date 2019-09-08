@@ -142,7 +142,7 @@ class tsBackup
 		$stmt = $this->main->dbh()->prepare($select_sql);
 
 		// バインド引数設定
-		$stmt->bindParam(1, $selected_id, \PDO::PARAM_INT);
+		$stmt->bindParam(1, $selected_id, \PDO::PARAM_STR);
 		$stmt->bindParam(2, $this->main->space_name, \PDO::PARAM_STR);
 
 		// SELECT実行
@@ -184,7 +184,7 @@ class tsBackup
 		$stmt = $this->main->dbh()->prepare($select_sql);
 
 		// バインド引数設定
-		$stmt->bindParam(1, $output_id, \PDO::PARAM_INT);
+		$stmt->bindParam(1, $output_id, \PDO::PARAM_STR);
 		$stmt->bindParam(2, $this->main->space_name, \PDO::PARAM_STR);
 
 		// SELECT実行
@@ -209,6 +209,7 @@ class tsBackup
 
 		// INSERT文作成
 		$insert_sql = "INSERT INTO ".$this->main->pdoMgr()->get_physical_table_name('TS_BACKUP')." ("
+		. self::TS_BACKUP_ID_SEQ . ","
 		. self::TS_BACKUP_OUTPUT_ID . ","
 		. self::TS_BACKUP_DATETIME . ","
 		. self::TS_BACKUP_GEN_DELETE_FLG . ","
@@ -219,24 +220,27 @@ class tsBackup
 		. self::TS_BACKUP_UPDATE_DATETIME . ","
 		. self::TS_BACKUP_UPDATE_USER_ID
 
-		. ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+		. ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
 		// 前処理
 		$stmt = $this->main->dbh()->prepare($insert_sql);
 
 		// 現在時刻
 		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
-		
-				// バインド引数設定
-		$stmt->bindParam(1, $output_id, \PDO::PARAM_INT);
-		$stmt->bindParam(2, $backup_datetime, \PDO::PARAM_STR);
-		$stmt->bindValue(3, define::DELETE_FLG_OFF, \PDO::PARAM_STR);
-		$stmt->bindValue(4, null, \PDO::PARAM_STR);
-		$stmt->bindParam(5, $now, \PDO::PARAM_STR);
-		$stmt->bindParam(6, $user_id, \PDO::PARAM_STR);
-		$stmt->bindParam(7, $this->main->space_name, \PDO::PARAM_STR);
-		$stmt->bindValue(8, null, \PDO::PARAM_STR);
+
+		$uuid = \Ramsey\Uuid\Uuid::uuid1()->toString();
+
+		// バインド引数設定
+		$stmt->bindParam(1, $uuid, \PDO::PARAM_STR);
+		$stmt->bindParam(2, $output_id, \PDO::PARAM_STR);
+		$stmt->bindParam(3, $backup_datetime, \PDO::PARAM_STR);
+		$stmt->bindValue(4, define::DELETE_FLG_OFF, \PDO::PARAM_STR);
+		$stmt->bindValue(5, null, \PDO::PARAM_STR);
+		$stmt->bindParam(6, $now, \PDO::PARAM_STR);
+		$stmt->bindParam(7, $user_id, \PDO::PARAM_STR);
+		$stmt->bindParam(8, $this->main->space_name, \PDO::PARAM_STR);
 		$stmt->bindValue(9, null, \PDO::PARAM_STR);
+		$stmt->bindValue(10, null, \PDO::PARAM_STR);
 
 		// INSERT実行
 		$this->main->pdoMgr()->execute($this->main->dbh(), $stmt);

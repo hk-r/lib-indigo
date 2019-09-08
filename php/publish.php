@@ -276,8 +276,8 @@ class publish
 			//============================================================
 			// バックアップの作成処理
 			//============================================================
-		    if ($publish_type != define::PUBLISH_TYPE_AUTO_RESTORE) {
-		    	// 自動復元公開の場合は、本番環境からバックアップは取得しない
+			if ($publish_type != define::PUBLISH_TYPE_AUTO_RESTORE) {
+				// 自動復元公開の場合は、本番環境からバックアップは取得しない
 
 				try {
 
@@ -293,18 +293,18 @@ class publish
 					$this->main->common()->put_publish_log(__METHOD__, __LINE__, "==========コミット処理実行==========", $this->realpath_tracelog);
 
 
-			    } catch (\Exception $e) {
+				} catch (\Exception $e) {
 		
-				    /* 変更をロールバックする */
-				    $this->main->dbh()->rollBack();
+					/* 変更をロールバックする */
+					$this->main->dbh()->rollBack();
 			 
 					$logstr = "==========バックアップテーブルのロールバック処理実行==========" . "\r\n";
 					$logstr .= $e->getMessage() . "\r\n";
 					$this->main->common()->put_publish_log(__METHOD__, __LINE__, $logstr, $this->realpath_tracelog);
 
-			     	throw $e;
-			    }
-		    }
+				 	throw $e;
+				}
+			}
 
 			try {
 			
@@ -347,15 +347,15 @@ class publish
 				$this->main->dbh()->commit();
 				$this->main->common()->put_publish_log(__METHOD__, __LINE__, "==========コミット処理実行==========", $this->realpath_tracelog);
 
-		    } catch (\Exception $e) {
+			} catch (\Exception $e) {
 
-		    	/* 変更をロールバックする */
-		    	$this->main->dbh()->rollBack();
+				/* 変更をロールバックする */
+				$this->main->dbh()->rollBack();
 				$this->main->common()->put_publish_log(__METHOD__, __LINE__, "==========公開処理結果テーブルのロールバック処理実行==========", $this->realpath_tracelog);
 				$this->main->common()->put_publish_log(__METHOD__, __LINE__, $e->getMessage(), $this->realpath_tracelog);
 
-		    	throw $e;
-		    }
+				throw $e;
+			}
 
 		} catch (\Exception $e) {
 

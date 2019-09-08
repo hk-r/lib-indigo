@@ -626,9 +626,13 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		//============================================================
 		$options = $this->options;
 
+		$main = new indigo\main( $options );
+		$tsBackup = new \indigo\db\tsBackup($main);
+		$backupList = $tsBackup->get_ts_backup_list();
+
 		// 画面入力項目の設定
 		$options['_POST'] = array('restore' => 1,	
-								'selected_id' => 2	// backup_id(予定公開のブランチに戻る想定。即時公開の時に取得したバックアップデータに戻る。)
+								'selected_id' => $backupList[1]['backup_id_seq']	// backup_id(予定公開のブランチに戻る想定。即時公開の時に取得したバックアップデータに戻る。)
 							);
 
 		$main = new indigo\main( $options );

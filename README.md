@@ -340,6 +340,7 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 - データベース接続設定の項目名を変更。
 - データベース接続設定に `prefix` を追加。
 - データベース接続先に `mysql` を追加。
+- データベースのプライマリキーを INT ではなく UUID を使用するように変更。
 - 出力先のパスの設定名を `real_path` から `dist` に変更。
 - 細かい不具合の修正。
 

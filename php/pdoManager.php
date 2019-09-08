@@ -149,7 +149,7 @@ class pdoManager
 		// 公開予定テーブル作成
 		//============================================================
 		$create_sql = 'CREATE TABLE IF NOT EXISTS '.$this->get_physical_table_name('TS_RESERVE').' ('
-			  . tsReserve::TS_RESERVE_ID_SEQ		. ' INTEGER PRIMARY KEY '.($this->main->options->db->dbms == 'mysql' ? 'AUTO_INCREMENT' : 'AUTOINCREMENT').',
+			  . tsReserve::TS_RESERVE_ID_SEQ		. ' VARCHAR(64) PRIMARY KEY,
 			' . tsReserve::TS_RESERVE_DATETIME		. ' TEXT,
 			' . tsReserve::TS_RESERVE_BRANCH		. ' TEXT,
 			' . tsReserve::TS_RESERVE_COMMIT_HASH	. ' TEXT,
@@ -176,9 +176,9 @@ class pdoManager
 		// 公開処理結果テーブル作成
 		//============================================================
 		$create_sql = 'CREATE TABLE IF NOT EXISTS '.$this->get_physical_table_name('TS_OUTPUT').' ('
-			  . tsOutput::TS_OUTPUT_ID_SEQ		 . ' INTEGER PRIMARY KEY '.($this->main->options->db->dbms == 'mysql' ? 'AUTO_INCREMENT' : 'AUTOINCREMENT').',
-			' . tsOutput::TS_OUTPUT_RESERVE_ID 		. ' INTEGER,
-			' . tsOutput::TS_OUTPUT_BACKUP_ID 		. ' INTEGER,
+			  . tsOutput::TS_OUTPUT_ID_SEQ			. ' VARCHAR(64) PRIMARY KEY,
+			' . tsOutput::TS_OUTPUT_RESERVE_ID 		. ' VARCHAR(64),
+			' . tsOutput::TS_OUTPUT_BACKUP_ID 		. ' VARCHAR(64),
 			' . tsOutput::TS_OUTPUT_RESERVE 		. ' TEXT,
 			' . tsOutput::TS_OUTPUT_BRANCH 			. ' TEXT,
 			' . tsOutput::TS_OUTPUT_COMMIT_HASH 	. ' TEXT,
@@ -209,8 +209,8 @@ class pdoManager
 		// バックアップテーブル作成
 		//============================================================
 		$create_sql = 'CREATE TABLE IF NOT EXISTS '.$this->get_physical_table_name('TS_BACKUP').' ('
-			  . tsBackup::TS_BACKUP_ID_SEQ				. ' INTEGER PRIMARY KEY '.($this->main->options->db->dbms == 'mysql' ? 'AUTO_INCREMENT' : 'AUTOINCREMENT').',
-			' . tsBackup::TS_BACKUP_OUTPUT_ID			. ' INTEGER,
+			  . tsBackup::TS_BACKUP_ID_SEQ				. ' VARCHAR(64) PRIMARY KEY,
+			' . tsBackup::TS_BACKUP_OUTPUT_ID			. ' VARCHAR(64),
 			' . tsBackup::TS_BACKUP_DATETIME			. ' TEXT,
 			' . tsBackup::TS_BACKUP_GEN_DELETE_FLG		. ' TEXT,
 			' . tsBackup::TS_BACKUP_GEN_DELETE_DATETIME	. ' TEXT,

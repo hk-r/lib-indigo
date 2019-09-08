@@ -157,7 +157,7 @@ class tsReserve
 		$stmt = $this->main->dbh()->prepare($select_sql);
 
 		// バインド引数設定
-		$stmt->bindParam(1, $selected_id, \PDO::PARAM_INT);
+		$stmt->bindParam(1, $selected_id, \PDO::PARAM_STR);
 		$stmt->bindParam(2, $this->main->space_name, \PDO::PARAM_STR);
 
 		$this->main->common()->put_process_log_block('[Param]');
@@ -184,6 +184,7 @@ class tsReserve
 
 		// INSERT文作成
 		$insert_sql = "INSERT INTO ".$this->main->pdoMgr()->get_physical_table_name('TS_RESERVE')." ("
+		. self::TS_RESERVE_ID_SEQ . ","
 		. self::TS_RESERVE_DATETIME . ","
 		. self::TS_RESERVE_BRANCH . ","
 		. self::TS_RESERVE_COMMIT_HASH . ","
@@ -197,7 +198,7 @@ class tsReserve
 		. self::TS_RESERVE_UPDATE_USER_ID . ","
 		. self::TS_RESERVE_VER_NO
 
-		. ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+		. ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
 		// 前処理
 		$stmt = $this->main->dbh()->prepare($insert_sql);
@@ -205,19 +206,22 @@ class tsReserve
 		// 現在日時
 		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 		
+		$uuid = \Ramsey\Uuid\Uuid::uuid1()->toString();
+
 		// バインド引数設定
-		$stmt->bindParam(1, $gmt_reserve_datetime, \PDO::PARAM_STR);
-		$stmt->bindParam(2, $form['branch_select_value'], \PDO::PARAM_STR);
-		$stmt->bindParam(3, $form['commit_hash'], \PDO::PARAM_STR);
-		$stmt->bindParam(4, $form['comment'], \PDO::PARAM_STR);
-		$stmt->bindValue(5, '0', \PDO::PARAM_STR);
-		$stmt->bindValue(6, define::DELETE_FLG_OFF, \PDO::PARAM_STR);
-		$stmt->bindParam(7, $now, \PDO::PARAM_STR);
-		$stmt->bindParam(8, $user_id, \PDO::PARAM_STR);
-		$stmt->bindParam(9, $this->main->space_name, \PDO::PARAM_STR);
-		$stmt->bindValue(10, null, \PDO::PARAM_STR);
+		$stmt->bindParam(1, $uuid, \PDO::PARAM_STR);
+		$stmt->bindParam(2, $gmt_reserve_datetime, \PDO::PARAM_STR);
+		$stmt->bindParam(3, $form['branch_select_value'], \PDO::PARAM_STR);
+		$stmt->bindParam(4, $form['commit_hash'], \PDO::PARAM_STR);
+		$stmt->bindParam(5, $form['comment'], \PDO::PARAM_STR);
+		$stmt->bindValue(6, '0', \PDO::PARAM_STR);
+		$stmt->bindValue(7, define::DELETE_FLG_OFF, \PDO::PARAM_STR);
+		$stmt->bindParam(8, $now, \PDO::PARAM_STR);
+		$stmt->bindParam(9, $user_id, \PDO::PARAM_STR);
+		$stmt->bindParam(10, $this->main->space_name, \PDO::PARAM_STR);
 		$stmt->bindValue(11, null, \PDO::PARAM_STR);
-		$stmt->bindValue(12, '0', \PDO::PARAM_STR);
+		$stmt->bindValue(12, null, \PDO::PARAM_STR);
+		$stmt->bindValue(13, '0', \PDO::PARAM_STR);
 
 		// INSERT実行
 		$stmt = $this->main->pdoMgr()->execute($this->main->dbh(), $stmt);
@@ -281,7 +285,7 @@ class tsReserve
 		$stmt->bindParam(5, $now, \PDO::PARAM_STR);
 		$stmt->bindParam(6, $user_id, \PDO::PARAM_STR);
 		$stmt->bindValue(7, $form['ver_no'] + 1, \PDO::PARAM_STR);
-		$stmt->bindParam(8, $selected_id, \PDO::PARAM_INT);
+		$stmt->bindParam(8, $selected_id, \PDO::PARAM_STR);
 		$stmt->bindParam(9, $this->main->space_name, \PDO::PARAM_STR);
 
 		// UPDATE実行
@@ -331,7 +335,7 @@ class tsReserve
 
 		// バインド引数設定
 		$stmt->bindValue(1, '1', \PDO::PARAM_STR);
-		$stmt->bindParam(2, $selected_id, \PDO::PARAM_INT);
+		$stmt->bindParam(2, $selected_id, \PDO::PARAM_STR);
 		$stmt->bindParam(3, $this->main->space_name, \PDO::PARAM_STR);
 
 		// UPDATE実行
@@ -373,7 +377,7 @@ class tsReserve
 		$stmt->bindValue(1, define::DELETE_FLG_ON, \PDO::PARAM_STR);
 		$stmt->bindParam(2, $now, \PDO::PARAM_STR);
 		$stmt->bindParam(3, $options->user_id, \PDO::PARAM_STR);
-		$stmt->bindParam(4, $selected_id, \PDO::PARAM_INT);
+		$stmt->bindParam(4, $selected_id, \PDO::PARAM_STR);
 		$stmt->bindParam(5, $this->main->space_name, \PDO::PARAM_STR);
 
 		// UPDATE実行
