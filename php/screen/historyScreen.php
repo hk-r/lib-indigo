@@ -165,19 +165,23 @@ class historyScreen
 			$content = \file_get_contents($log_filename);
 		}
 
-		$ret = '<div class="dialog" id="modal_dialog">'
+		$ret = '';
+		$ret .= '<div class="dialog" id="modal_dialog">'
 			  . '<div class="contents" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; z-index: 10000;">'
 			  . '<div style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; background: rgb(0, 0, 0); opacity: 0.5;"></div>'
 			  . '<div style="position: absolute; left: 0px; top: 0px; padding-top: 4em; overflow: auto; width: 100%; height: 100%;">'
 			  . '<div class="dialog_box">';
 
-		$ret .= '<p>User ID：' . \htmlspecialchars($selected_ret[tsOutput::OUTPUT_ENTITY_INSERT_USER_ID]) . '</p>'
-			  . '<p>公開開始日時：' . \htmlspecialchars($selected_ret[tsOutput::OUTPUT_ENTITY_START_DISP]) . '</p>'
-			  . '<p>公開終了日時：' . \htmlspecialchars($selected_ret[tsOutput::OUTPUT_ENTITY_END_DISP]) . '</p>'
-			  . '<p>公開同期ログ：</p>'
-			  . '<p>' . \htmlspecialchars(nl2br($content)) .'</p>';
+		$ret .= '<table class="table table-striped">'
+			  . '<tbody>'
+			  . '<tr><th>ユーザーID</th><td>' . \htmlspecialchars($selected_ret[tsOutput::OUTPUT_ENTITY_INSERT_USER_ID]) . '</td></tr>'
+			  . '<tr><th>公開開始日時</th><td>' . \htmlspecialchars($selected_ret[tsOutput::OUTPUT_ENTITY_START_DISP]) . '</td></tr>'
+			  . '<tr><th>公開終了日時</th><td>' . \htmlspecialchars($selected_ret[tsOutput::OUTPUT_ENTITY_END_DISP]) . '</td></tr>'
+			  . '<tr><th>公開同期ログ</th><td>' . nl2br(htmlspecialchars($content)) .'</td></tr>'
+			  . '</tbody>'
+			  . '</table>';
 
-		$ret .=  '<div class="button_contents_box">'
+		$ret .= '<div class="button_contents_box">'
 			  . '<div class="button_contents">'
 			  . '<ul>';
 		
