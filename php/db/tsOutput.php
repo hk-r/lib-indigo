@@ -222,8 +222,9 @@ class tsOutput
 		$stmt = $this->main->pdoMgr()->execute($this->main->dbh(), $stmt);
 
 		// 登録したシーケンスIDを取得
-		$insert_id = $this->main->dbh()->lastInsertId();
-		
+		// $insert_id = $this->main->dbh()->lastInsertId();
+		$insert_id = $uuid;
+
 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ insert_ts_output end');
 
 		return $insert_id;
