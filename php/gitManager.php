@@ -59,6 +59,8 @@ class gitManager
 			// set remote as origin
 			$command = 'git remote add ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' ' . escapeshellarg($url_git_remote);
 			$this->main->common()->command_execute($command, true);
+			$command = 'git remote set-url ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' ' . escapeshellarg($url_git_remote);
+			$this->main->common()->command_execute($command, true);
 
 			// fetch
 			$command = 'git fetch';
@@ -86,6 +88,10 @@ class gitManager
 			\chdir($current_dir);
 			throw new \Exception('Move to master directory failed.');
 		}
+
+		$url_git_remote = $this->get_git_remote_url( false );
+		$command = 'git remote set-url ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' ' . escapeshellarg($url_git_remote);
+		$this->main->common()->command_execute($command, true);
 
 		\chdir($current_dir);
 
@@ -146,6 +152,8 @@ class gitManager
 			// initしたリポジトリに名前を付ける
 			$command = 'git remote add ' . escapeshellarg(define::GIT_REMOTE_NAME) .  ' ' . escapeshellarg($url_git_remote);
 			$this->main->common()->command_execute($command, true);
+			$command = 'git remote set-url ' . escapeshellarg(define::GIT_REMOTE_NAME) .  ' ' . escapeshellarg($url_git_remote);
+			$this->main->common()->command_execute($command, true);
 			
 			//============================================================
 			// git fetch（リモートリポジトリの指定ブランチの情報をローカルブランチへ反映）
@@ -163,7 +171,12 @@ class gitManager
 			throw new \Exception('Git file copy failed. Move directory not found. ' . $dir_real_path);
 		}
 
+		$url_git_remote = $this->get_git_remote_url( false );
+		$command = 'git remote set-url ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' ' . escapeshellarg($url_git_remote);
+		$this->main->common()->command_execute($command, true);
+
 		\chdir($current_dir);
+		return;
 	}
 
 	/**
@@ -236,6 +249,8 @@ class gitManager
 
 					$command = 'git remote add ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' ' . escapeshellarg($url_git_remote);
 					$this->main->common()->command_execute($command, true);
+					$command = 'git remote set-url ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' ' . escapeshellarg($url_git_remote);
+					$this->main->common()->command_execute($command, true);
 
 					// git fetch
 					$command = 'git fetch ' . escapeshellarg(define::GIT_REMOTE_NAME);
@@ -253,7 +268,12 @@ class gitManager
 			}
 		}
 
+		$url_git_remote = $this->get_git_remote_url( false );
+		$command = 'git remote set-url ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' ' . escapeshellarg($url_git_remote);
+		$this->main->common()->command_execute($command, true);
+
 		\chdir($current_dir);
+		return;
 	}
 
 	/**
