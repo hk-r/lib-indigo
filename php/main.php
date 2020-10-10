@@ -185,7 +185,7 @@ class main
 
 
 		// ログディレクトリの作成
-		if (array_key_exists('realpath_workdir', $this->options) && $this->options->realpath_workdir ) {
+		if (property_exists($this->options, 'realpath_workdir') && $this->options->realpath_workdir ) {
 
 			// logディレクトリの生成
 			$current_dir = \realpath('.');
@@ -336,10 +336,10 @@ class main
 		//============================================================
 		// オプションの任意項目
 		//============================================================
-		if (\array_key_exists('user_id', $this->options)) {
+		if (property_exists($this->options, 'user_id')) {
 			$this->user_id = $this->options->user_id;
 		}
-		if (\array_key_exists('space_name', $this->options)) {
+		if (property_exists($this->options, 'space_name')) {
 			$this->space_name = $this->options->space_name;
 		}
 	}
