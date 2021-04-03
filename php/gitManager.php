@@ -82,18 +82,16 @@ class gitManager
 				$ret_array[] = \trim($trimed);
 			}
 
-		} else {
-			// ディレクトリ移動に失敗
+			$url_git_remote = $this->get_git_remote_url( false );
+			$command = 'git remote set-url ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' ' . escapeshellarg($url_git_remote);
+			$this->main->common()->command_execute($command, true);
 
 			\chdir($current_dir);
-			throw new \Exception('Move to master directory failed.');
+
+		} else {
+			// ディレクトリ移動に失敗
+			throw new \Exception('Failed to chdir to master directory.');
 		}
-
-		$url_git_remote = $this->get_git_remote_url( false );
-		$command = 'git remote set-url ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' ' . escapeshellarg($url_git_remote);
-		$this->main->common()->command_execute($command, true);
-
-		\chdir($current_dir);
 
 		return $ret_array;
 	}
@@ -167,15 +165,16 @@ class gitManager
 			$command = 'git pull ' . escapeshellarg(define::GIT_REMOTE_NAME) .  ' ' . escapeshellarg($branch_name);
 			$this->main->common()->command_execute($command, true);
 			
+			$url_git_remote = $this->get_git_remote_url( false );
+			$command = 'git remote set-url ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' ' . escapeshellarg($url_git_remote);
+			$this->main->common()->command_execute($command, true);
+
+			\chdir($current_dir);
+
 		} else {
 			throw new \Exception('Git file copy failed. Move directory not found. ' . $dir_real_path);
 		}
 
-		$url_git_remote = $this->get_git_remote_url( false );
-		$command = 'git remote set-url ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' ' . escapeshellarg($url_git_remote);
-		$this->main->common()->command_execute($command, true);
-
-		\chdir($current_dir);
 		return;
 	}
 
@@ -260,19 +259,20 @@ class gitManager
 					$command = 'git pull ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' master';
 					$this->main->common()->command_execute($command, true);
 
+					$url_git_remote = $this->get_git_remote_url( false );
+					$command = 'git remote set-url ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' ' . escapeshellarg($url_git_remote);
+					$this->main->common()->command_execute($command, true);
+
+					\chdir($current_dir);
+
 				} else {
 
 					// ディレクトリ移動に失敗
-					throw new \Exception('Failed to get git master. Move to master directory failed.');
+					throw new \Exception('Failed to get git master. Failed to chdir to master directory.');
 				}
 			}
 		}
 
-		$url_git_remote = $this->get_git_remote_url( false );
-		$command = 'git remote set-url ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' ' . escapeshellarg($url_git_remote);
-		$this->main->common()->command_execute($command, true);
-
-		\chdir($current_dir);
 		return;
 	}
 

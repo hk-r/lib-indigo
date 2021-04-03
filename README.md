@@ -330,6 +330,10 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 
 ## 更新履歴 - Change log
 
+### lib-indigo v0.2.1 (リリース日未定)
+
+- GitリモートURLの扱いに関する不具合を修正。
+
 ### lib-indigo v0.2.0 (2020年11月9日)
 
 - Gitリモートの `username` と `password` オプションを省略可能になった。
