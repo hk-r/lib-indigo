@@ -4,6 +4,10 @@
     "keywords": ["indigo"],
     "license": "MIT",
     "authors": [
+		{
+			"name": "Tomoya Koyanagi",
+			"email": "tomk79@gmail.com"
+		},
         {
             "name": "Natsuki Gushikawa",
             "email": "natsuki.gushikawa@imjp.co.jp"
