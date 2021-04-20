@@ -101,9 +101,9 @@ class mainTest extends PHPUnit_Framework_TestCase{
 	}
 
 	private function clear_indigo_dir(){
-		$this->chmod_r();//パーミッションを変えないと削除できない
 		clearstatcache();
 		if( $this->fs->is_dir(__DIR__.'/testdata/indigo_dir/') ){
+			$this->fs->chmod(__DIR__.'/testdata/indigo_dir/' , 0777);
 			if( !$this->fs->rm(__DIR__.'/testdata/indigo_dir/') ){
 				var_dump('Failed to cleaning test data `indigo_dir` directory.');
 			}
@@ -113,19 +113,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		// touch(__DIR__.'/testdata/indigo_dir/.gitkeep');
 		clearstatcache();
 	}
-	private function chmod_r($path = null){
-		$base = __DIR__.'/testdata/indigo_dir';
-		// var_dump($base.'/'.$path);
-		$this->fs->chmod($base.'/'.$path , 0777);
-		if(is_dir($base.'/'.$path)){
-			$ls = $this->fs->ls($base.'/'.$path);
-			foreach($ls as $basename){
-				$this->chmod_r($path.'/'.$basename);
-			}
-		}
-	}
 	private function create_honban_dir(){
-		
 		$this->fs->mkdir_r(__DIR__.'/testdata/honban1/');
 	}
 
