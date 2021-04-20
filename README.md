@@ -330,6 +330,10 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 
 ## 更新履歴 - Change log
 
+### lib-indigo v0.2.2 (リリース日未定)
+
+- 内部コードの細かい修正。
+
 ### lib-indigo v0.2.1 (2021年4月4日)
 
 - GitリモートURLの扱いに関する不具合を修正。
