@@ -7,6 +7,9 @@ if( !is_dir( __DIR__.'/../indigo_dir/' ) ){
 if( !is_dir( __DIR__.'/../honban1/' ) ){
 	$fs->mkdir( __DIR__.'/../honban1/' );
 }
+if( !is_dir( __DIR__.'/../honban2/' ) ){
+	$fs->mkdir( __DIR__.'/../honban2/' );
+}
 
 // indigo options
 require(__DIR__.'/parameter.php');

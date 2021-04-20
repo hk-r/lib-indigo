@@ -2,7 +2,9 @@ pickles2/lib-indigo
 ======================
 
 ## 導入方法 - Setup
+
 ### 1. composerの設定
+
 #### 1-1. `composer.json` に `pickles2/lib-indigo` を設定する
 
 `require` の項目に、`pickles2/lib-indigo` を追加します。
@@ -20,8 +22,9 @@ pickles2/lib-indigo
 
 #### 1-2. composer update を実行する
 
-1-1の設定後は、`composer update` を実行して変更を反映することを忘れずに。
-実行するとvendorディレクトリなどが作成されます。
+1-1 の設定後は、`composer update` を実行して変更を反映することを忘れずに。
+
+実行すると `vendor` ディレクトリなどが作成されます。
 
 ```
 $ composer update
@@ -29,18 +32,23 @@ $ composer update
 
 
 ### 2. Resourceファイルを配置する
+
 indigoを動作させる上で必要となるResrouceファイルをプロジェクトに取込みます。
+
 #### 2-1. Resourceファイル取込用スクリプトをプロジェクトへコピーする
+
 ```
 $ cp yourProject/vendor/pickles2/lib-indigo/res_install_script.php yourProject
 ```
 
 #### 2-2. Resourceファイル格納用のディレクトリを作成する。
+
 ```
 $ mkdir yourProject/[directoryName(ex. res)]
 ```
 
 #### 2-3. スクリプトをコマンドラインで実行する
+
 ```
 $ php res_install_script.php [resourceInstallPath(ex. ./res)]
 ```
@@ -121,14 +129,18 @@ $ mkdir yourProject/[directoryName(ex. indigo_dir)]
 
 
 #### 4-2. apache（その他）ユーザに書き込み権限を付与します。
+
 ```
 $ chmod -R o+w yourProject/[directoryName(ex. indigo_dir)]
 ```
 
 
 #### 5. 同期先の本番環境ディレクトリのパーミッションを変更する。
+
 apache（その他）ユーザに書き込み権限を付与します。
-※-Rオプションを付けることで、指定ディレクトリ以下に存在するディレクトリ・ファイルも全て再帰的に権限変更を行います。
+
+※ `-R` オプションを付けることで、指定ディレクトリ以下に存在するディレクトリ・ファイルも全て再帰的に権限変更を行います。
+
 ```
 $ chmod -R o+w honbanProject/[directoryName(ex. indigo-test-project)]
 ```
@@ -268,6 +280,7 @@ echo $indigo->run();
 ### 8. ajax呼び出しクラス
 
 6.で作成したパラメータを引数に設定し、lib-indigoのajaxクラスの呼び出しを行います。
+
 ※先述の 6. 「ajax呼出クラス（絶対パス）：'url_ajax_call'」 のファイル名と一致するようにファイルを作成してください。
 
 ```php

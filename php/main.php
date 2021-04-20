@@ -128,12 +128,14 @@ class main
 	/**
 	 * 作業ディレクトリ 絶対パス格納配列
 	 */
-	public $realpath_array = array('realpath_server' => '',	// 本番環境
-								'realpath_backup' => '',	// バックアップ本番ソース
-								'realpath_waiting' => '',	// 予定待機Gitソース
-								'realpath_running' => '',	// 処理中ソース
-								'realpath_released' => '',	// 処理完了ソース
-								'realpath_log' => '');		// ログ
+	public $realpath_array = array(
+		// 'realpath_server' => '',	// 本番環境
+		'realpath_backup' => '',	// バックアップ本番ソース
+		'realpath_waiting' => '',	// 予定待機Gitソース
+		'realpath_running' => '',	// 処理中ソース
+		'realpath_released' => '',	// 処理完了ソース
+		'realpath_log' => '',		// ログ
+	);
 
 	/** indigoログパス */
 	public $log_path;
@@ -156,7 +158,7 @@ class main
 		//============================================================
 		// オブジェクト生成
 		//============================================================	
-		$this->options = \json_decode(\json_encode($options));
+		$this->options = json_decode(json_encode($options));
 		if( !is_object($this->options) ){
 			$this->options = json_decode('{}');
 		}
@@ -295,11 +297,11 @@ class main
 			}
 			\chdir($current_dir);
 
-			// 本番環境ディレクトリの絶対パスを取得。（配列1番目のサーバを設定）
-			foreach ( (array)$this->options->server as $server ) {
-				$this->realpath_array['realpath_server'] = $this->fs()->normalize_path($this->fs()->get_realpath($server->dist . "/"));
-				break; // 現時点では最初の1つのみ有効なのですぐに抜ける
-			}
+			// // 本番環境ディレクトリの絶対パスを取得。（配列1番目のサーバを設定）
+			// foreach ( (array)$this->options->server as $server ) {
+			// 	$this->realpath_array['realpath_server'] = $this->fs()->normalize_path($this->fs()->get_realpath($server->dist . "/"));
+			// 	break; // 現時点では最初の1つのみ有効なのですぐに抜ける
+			// }
 
 			//============================================================
 			// タイムゾーンの設定

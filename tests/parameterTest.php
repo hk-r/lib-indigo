@@ -86,14 +86,14 @@ class parameterTest extends PHPUnit_Framework_TestCase{
 
 			// 本番環境パス（同期先）※バージョン0.1.0時点では先頭の設定内容のみ有効
 			'server' => array(
-					array(
-						'name' => 'server1',
-						'dist' => __DIR__.'/testdata/honban1/'
-					),
-					array(
-						'name' => 'server2',
-						'dist' => __DIR__.'/testdata/honban2/'
-					)
+				array(
+					'name' => 'server1',
+					'dist' => __DIR__.'/testdata/honban1/'
+				),
+				array(
+					'name' => 'server2',
+					'dist' => __DIR__.'/testdata/honban2/'
+				)
 			),
 
 			// 同期除外ディレクトリ、またはファイル

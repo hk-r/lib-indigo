@@ -115,6 +115,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 	}
 	private function create_honban_dir(){
 		$this->fs->mkdir_r(__DIR__.'/testdata/honban1/');
+		$this->fs->mkdir_r(__DIR__.'/testdata/honban2/');
 	}
 
 

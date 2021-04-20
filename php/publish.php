@@ -326,7 +326,8 @@ class publish
 				// runningディレクトリを本番環境へ同期
 				//============================================================
 				$from_realpath = $realpath_array['realpath_running'] . $running_dirname . '/';
-				$to_realpath = $realpath_array['realpath_server'];
+				$to_realpath = $this->main->options->server[0]->dist;
+				// $to_realpath = $realpath_array['realpath_server'];
 
 				$this->exec_sync($this->main->options->ignore, $from_realpath, $to_realpath);
 
@@ -854,7 +855,8 @@ class publish
 		//============================================================
 		// 本番ソースを「backup」ディレクトリへコピー
 		//============================================================
-		$from_realpath = $realpath_array['realpath_server'];
+		$from_realpath = $this->main->options->server[0]->dist;
+		// $from_realpath = $realpath_array['realpath_server'];
 		$to_realpath = $realpath_array['realpath_backup'] . $backup_dirname . '/';
 		$this->exec_sync_copy($from_realpath, $to_realpath);
 
