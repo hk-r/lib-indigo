@@ -25,6 +25,19 @@ class cleaningTest extends PHPUnit_Framework_TestCase{
 	public function testClear(){
 
 		// 変換後ファイルの後始末
+
+		if( $this->fs->is_dir(__DIR__.'/testdata/honban1/') ){
+			$this->fs->chmod_r(__DIR__.'/testdata/remote' , 0777);
+			if( !$this->fs->rm(__DIR__.'/testdata/remote/') ){
+				var_dump('Failed to cleaning test remote directory.');
+			}
+			clearstatcache();
+			$this->fs->mkdir_r(__DIR__.'/testdata/remote/');
+			touch(__DIR__.'/testdata/remote/.gitkeep');
+		}
+		clearstatcache();
+		$this->assertTrue( is_file(__DIR__.'/testdata/remote/.gitkeep') );
+
 		clearstatcache();
 		if( $this->fs->is_dir(__DIR__.'/testdata/honban1/') ){
 			$this->fs->chmod_r(__DIR__.'/testdata/honban1/', 0777);
@@ -32,17 +45,16 @@ class cleaningTest extends PHPUnit_Framework_TestCase{
 				var_dump('Failed to cleaning test remote directory.');
 			}
 		}
-
 		clearstatcache();
+		$this->assertFalse( is_dir( __DIR__.'/testdata/honban1/' ) );
+
 		if( $this->fs->is_dir(__DIR__.'/testdata/indigo_dir/') ){
 			$this->fs->chmod_r(__DIR__.'/testdata/indigo_dir/', 0777);
 			if( !$this->fs->rm(__DIR__.'/testdata/indigo_dir/') ){
 				var_dump('Failed to cleaning test remote directory.');
 			}
 		}
-
 		clearstatcache();
-		$this->assertFalse( is_dir( __DIR__.'/testdata/honban1/' ) );
 		$this->assertFalse( is_dir( __DIR__.'/testdata/indigo_dir/' ) );
 
 	}//testClear()

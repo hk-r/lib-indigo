@@ -525,7 +525,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 		// 画面入力項目の設定
 		$options['_POST'] = array('immediate_confirm' => 1,	
-								'branch_select_value' => 'release/2018-06-01',	
+								'branch_select_value' => 'release/2018-06-01',
 								'reserve_date' => null,
 								'reserve_time' => null,	
 								'commit_hash' => 'ee404da',	
