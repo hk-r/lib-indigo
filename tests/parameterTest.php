@@ -104,7 +104,7 @@ class parameterTest extends PHPUnit_Framework_TestCase{
 
 			// Git情報定義
 			'git' => array(
-				'giturl' => 'https://github.com/gk-r/indigo-test-project.git',
+				'giturl' => __DIR__.'/testdata/remote',
 				'username' => 'hoge',
 				'password' => 'fuga'
 			)
@@ -198,7 +198,7 @@ class parameterTest extends PHPUnit_Framework_TestCase{
 
 			// Git情報定義
 			'git' => array(
-				// 'giturl' => 'https://github.com/gk-r/indigo-test-project.git',
+				// 'giturl' => __DIR__.'/testdata/remote',
 				'username' => 'hoge',
 				'password' => 'fuga'
 			)

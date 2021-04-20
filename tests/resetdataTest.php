@@ -1,6 +1,6 @@
 <?php
 /**
- * test for Plum
+ * test for Indigo
  */
 class resetdataTest extends PHPUnit_Framework_TestCase{
 	private $options = array();

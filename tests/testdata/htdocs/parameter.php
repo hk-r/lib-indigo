@@ -64,7 +64,7 @@ function call_parameter () {
 		'git' => array(
 
 			// Gitリポジトリのurl（現在はhttpsプロトコルのみ対応）
-			'giturl' => 'https://github.com/gk-r/indigo-test-project.git',
+			'giturl' => __DIR__.'/../remote',
 
 			// ユーザ名
 			// Gitリポジトリのユーザ名を設定
