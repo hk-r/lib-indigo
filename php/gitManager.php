@@ -13,24 +13,12 @@ class gitManager
 	public $main;
 
 	/**
-	 * gitURL分解パス
-	 */
-	public $protocol, $host, $path;
-
-	/**
 	 * コンストラクタ
 	 *
 	 * @param object $main mainオブジェクト
 	 */
 	public function __construct($main) {
-
 		$this->main = $main;
-
-		if (isset($main->options->git)) {
-			$this->protocol = \parse_url($main->options->git->giturl, PHP_URL_SCHEME);
-			$this->host = \parse_url($main->options->git->giturl, PHP_URL_HOST);
-			$this->path = \parse_url($main->options->git->giturl, PHP_URL_PATH);
-		}
 	}
 
 	/**
@@ -280,8 +268,21 @@ class gitManager
 	 * gitリモートサーバーのURLを取得する
 	 */
 	private function get_git_remote_url($include_credentials = false){
-		$url = $this->protocol . "://";
-		if( $include_credentials ){
+		$url = '';
+		$giturl_protocol = null;
+		$giturl_host = null;
+		$giturl_path = null;
+
+		if (isset($this->main->options->git)) {
+			$giturl_protocol = parse_url($this->main->options->git->giturl, PHP_URL_SCHEME);
+			$giturl_host = parse_url($this->main->options->git->giturl, PHP_URL_HOST);
+			$giturl_path = parse_url($this->main->options->git->giturl, PHP_URL_PATH);
+		}
+
+		if( strlen($giturl_protocol) ){
+			$url .= $giturl_protocol . "://";
+		}
+		if( $include_credentials && strlen($giturl_host) ){
 			if( strlen($this->main->options->git->username) ){
 				$url .= urlencode($this->main->options->git->username);
 				if( strlen($this->main->options->git->password) ){
@@ -290,8 +291,11 @@ class gitManager
 				$url .= "@";
 			}
 		}
-		$url .= $this->host;
-		$url .= $this->path;
+		if( strlen($giturl_host) ){
+			$url .= $giturl_host;
+		}
+		$url .= $giturl_path;
+
 		return $url;
 	}
 

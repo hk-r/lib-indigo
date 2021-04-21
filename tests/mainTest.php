@@ -244,19 +244,19 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 		// 画面入力項目の設定
 		$options['_POST'] = array(
-								'add_confirm' => 1,	
-								'branch_select_value' => 'release/2018-04-01',	
-								// 'gmt_reserve_datetime' => gmdate('Y-m-d H:i:s', strtotime('+1 minute', time())),
+			'add_confirm' => 1,	
+			'branch_select_value' => 'release/2018-04-01',	
+			// 'gmt_reserve_datetime' => gmdate('Y-m-d H:i:s', strtotime('+1 minute', time())),
 
-								'reserve_date' => date('Y-m-d', time() + 10),
-								'reserve_time' => date('H:i:s', time() + 10),
-								// 'gmt_reserve_datetime' => gmdate('Y-m-d H:i:s', strtotime('+10 second', $current_datetime)),
-								
-								'commit_hash' => 'f9fd330',	
-								'comment' => '予定登録テスト001',	
-								'ver_no' => null,
-								'selected_id' => null
-							);
+			'reserve_date' => date('Y-m-d', time() + 10),
+			'reserve_time' => date('H:i:s', time() + 10),
+			// 'gmt_reserve_datetime' => gmdate('Y-m-d H:i:s', strtotime('+10 second', $current_datetime)),
+			
+			'commit_hash' => 'f9fd330',	
+			'comment' => '予定登録テスト001',	
+			'ver_no' => null,
+			'selected_id' => null
+		);
 
 		$main = new indigo\main( $options );
 		$initScn = new indigo\screen\initScreen( $main );
@@ -314,14 +314,15 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$options = $this->options;
 
 		// 画面入力項目の設定
-		$options['_POST'] = array('branch_select_value' => 'release/2018-04-01',	
-								'reserve_date' => null,
-								'reserve_time' => null,	
-								'commit_hash' => 'f9fd330',	
-								'comment' => 'phpUnitテスト001',	
-								'ver_no' => null,	
-								'selected_id' => null
-							);
+		$options['_POST'] = array(
+			'branch_select_value' => 'release/2018-04-01',	
+			'reserve_date' => null,
+			'reserve_time' => null,	
+			'commit_hash' => 'f9fd330',	
+			'comment' => 'phpUnitテスト001',	
+			'ver_no' => null,	
+			'selected_id' => null
+		);
 
 		$main = new indigo\main( $options );
 		$publish = new indigo\publish( $main );
@@ -362,14 +363,15 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$options = $this->options;
 
 		// 画面入力項目の設定
-		$options['_POST'] = array('branch_select_value' => 'release/2018-04-01',	
-								'reserve_date' => null,
-								'reserve_time' => null,	
-								'commit_hash' => 'f9fd330',	
-								'comment' => 'phpUnitテスト001',	
-								'ver_no' => null,	
-								'selected_id' => null
-							);
+		$options['_POST'] = array(
+			'branch_select_value' => 'release/2018-04-01',	
+			'reserve_date' => null,
+			'reserve_time' => null,	
+			'commit_hash' => 'f9fd330',	
+			'comment' => 'phpUnitテスト001',	
+			'ver_no' => null,	
+			'selected_id' => null
+		);
 
 		$main = new indigo\main( $options );
 		$publish = new indigo\publish( $main );
@@ -411,14 +413,15 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$options = $this->options;
 
 		// 画面入力項目の設定
-		$options['_POST'] = array('branch_select_value' => 'release/2018-04-01',	
-								'reserve_date' => null,
-								'reserve_time' => null,	
-								'commit_hash' => 'f9fd330',	
-								'comment' => 'phpUnitテスト001',	
-								'ver_no' => null,	
-								'selected_id' => null
-							);
+		$options['_POST'] = array(
+			'branch_select_value' => 'release/2018-04-01',	
+			'reserve_date' => null,
+			'reserve_time' => null,	
+			'commit_hash' => 'f9fd330',	
+			'comment' => 'phpUnitテスト001',	
+			'ver_no' => null,	
+			'selected_id' => null
+		);
 
 		$main = new indigo\main( $options );
 		$publish = new indigo\publish( $main );
@@ -454,18 +457,18 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 		// 画面入力項目の設定
 		$options['_POST'] = array(
-								'add_confirm' => 1,	
-								'branch_select_value' => 'release/2018-05-01',	
+			'add_confirm' => 1,	
+			'branch_select_value' => 'release/2018-05-01',	
 
-								'reserve_date' => date('Y-m-d', time() + 10),
-								'reserve_time' => date('H:i:s', time() + 10),
-								// 'gmt_reserve_datetime' => gmdate('Y-m-d H:i:s', strtotime('+10 second', $current_datetime)),
+			'reserve_date' => date('Y-m-d', time() + 10),
+			'reserve_time' => date('H:i:s', time() + 10),
+			// 'gmt_reserve_datetime' => gmdate('Y-m-d H:i:s', strtotime('+10 second', $current_datetime)),
 
-								'commit_hash' => '0c39b3d',	
-								'comment' => '予定登録テスト002',	
-								'ver_no' => null,
-								'selected_id' => null
-							);
+			'commit_hash' => '0c39b3d',	
+			'comment' => '予定登録テスト002',	
+			'ver_no' => null,
+			'selected_id' => null
+		);
 
 		$main = new indigo\main( $options );
 		$initScn = new indigo\screen\initScreen( $main );
@@ -491,6 +494,9 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$this->assertTrue( $result['status'] );
 		$this->assertEquals( 1, preg_match('/^[a-z0-9]+\-[a-z0-9]+\-[a-z0-9]+\-[a-z0-9]+\-[a-z0-9]+$/is', $result['output_id']) );
 		$this->assertEquals( 1, preg_match('/^[a-z0-9]+\-[a-z0-9]+\-[a-z0-9]+\-[a-z0-9]+\-[a-z0-9]+$/is', $result['backup_id']) );
+
+		$this->assertTrue( $this->fs->is_file(__DIR__.'/testdata/honban1/index.html') );
+		$this->assertTrue( $this->fs->is_file(__DIR__.'/testdata/honban2/index.html') );
 
 	}
 

@@ -212,7 +212,7 @@ function call_parameter () {
 		'max_backup_generation' => 5,
 
 		// 本番環境パス (同期先)
-		// ※ v0.2.0 時点では先頭の設定内容のみ有効
+		// 複数の同期先を設定できます。
 		'server' => array(
 			array(
 				// 任意の名前
@@ -238,7 +238,7 @@ function call_parameter () {
 		'git' => array(
 
 			// Gitリポジトリのurl（現在はhttpsプロトコルのみ対応）
-			'giturl' => 'https://github.com/gk-r/indigo-test-project.git',
+			'giturl' => 'https://github.com/foo/bar.git',
 
 			// ユーザ名
 			// Gitリポジトリのユーザ名を設定
@@ -261,7 +261,7 @@ function call_parameter () {
 ```php
 <?php
 
-require __DIR__ . '/../vendor/autoload.php';
+require_once('/path/to/vendor/autoload.php');
 // 6.1で作成したパラメタ記載ファイル
 require __DIR__ . '/parameter.php';
 
@@ -286,7 +286,7 @@ echo $indigo->run();
 ```php
 <?php
 
-require __DIR__ . '/../vendor/autoload.php';
+require_once('/path/to/vendor/autoload.php');
 
 // 6.1で作成したパラメタ記載ファイル
 require __DIR__ . '/parameter.php';
@@ -310,7 +310,7 @@ echo $indigo->ajax_run();
 ```php
 <?php
 
-require __DIR__ . '/../vendor/autoload.php';
+require_once('/path/to/vendor/autoload.php');
 
 // 6.1で作成したパラメタ記載ファイル
 require __DIR__ . '/parameter.php';
@@ -345,6 +345,7 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 
 ### lib-indigo v0.2.2 (リリース日未定)
 
+- 複数の本番サーバー設定を利用できるようになった。
 - 内部コードの細かい修正。
 
 ### lib-indigo v0.2.1 (2021年4月4日)

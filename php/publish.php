@@ -326,10 +326,21 @@ class publish
 				// runningディレクトリを本番環境へ同期
 				//============================================================
 				$from_realpath = $realpath_array['realpath_running'] . $running_dirname . '/';
-				$to_realpath = $this->main->options->server[0]->dist;
+				// $to_realpath = $this->main->options->server[0]->dist;
 				// $to_realpath = $realpath_array['realpath_server'];
 
-				$this->exec_sync($this->main->options->ignore, $from_realpath, $to_realpath);
+
+				foreach( $this->main->options->server as $server ){
+					if( !property_exists($server, 'type') ){
+						$server->type = 'directory';
+					}
+					switch( $server->type ){
+						case 'directory':
+						default:
+							$this->exec_sync($this->main->options->ignore, $from_realpath, $server->dist);
+							break;
+					}
+				}
 
 				//============================================================
 				// 公開済みのソースを「running」ディレクトリから「released」ディレクトリへ移動
