@@ -14,17 +14,6 @@ namespace indigo;
 class ajax
 {
 	private $main;
-	public $options;
-
-	/**
-	 * オブジェクト
-	 * @access private
-	 */
-	private $fs, $common;
-	
-	private $user_id;
-
-	private $ajax_log_path;
 
 	/**
 	 * コンストラクタ

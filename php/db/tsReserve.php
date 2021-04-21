@@ -121,8 +121,8 @@ class tsReserve
 		// バインド引数設定
 		$stmt->bindParam(1, $now, \PDO::PARAM_STR);
 
-		$this->main->common()->put_process_log_block('[Param]');
-		$this->main->common()->put_process_log_block(self::TS_RESERVE_DATETIME . " = " . $now);
+		$this->main->utils()->put_process_log_block('[Param]');
+		$this->main->utils()->put_process_log_block(self::TS_RESERVE_DATETIME . " = " . $now);
 
 		// SELECT実行
 		$ret_array = $this->main->pdoMgr()->execute_select($this->main->dbh(), $stmt);	
@@ -160,8 +160,8 @@ class tsReserve
 		$stmt->bindParam(1, $selected_id, \PDO::PARAM_STR);
 		$stmt->bindParam(2, $this->main->space_name, \PDO::PARAM_STR);
 
-		$this->main->common()->put_process_log_block('[Param]');
-		$this->main->common()->put_process_log_block(self::TS_RESERVE_ID_SEQ . " = " . $selected_id);
+		$this->main->utils()->put_process_log_block('[Param]');
+		$this->main->utils()->put_process_log_block(self::TS_RESERVE_ID_SEQ . " = " . $selected_id);
 
 		// SELECT実行
 		$ret_array = $this->main->pdoMgr()->execute_select_one($this->main->dbh(), $stmt);
@@ -204,7 +204,7 @@ class tsReserve
 		$stmt = $this->main->dbh()->prepare($insert_sql);
 
 		// 現在日時
-		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
+		$now = $this->main->utils()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 		
 		$uuid = \Ramsey\Uuid\Uuid::uuid1()->toString();
 
@@ -257,7 +257,7 @@ class tsReserve
 
 		$logstr = "[排他確認]データ取得時のバージョンNO：" . $form['ver_no'] . "\r\n";
 		$logstr .= "[排他確認]現時点のバージョンNO：" . $selected_ret[self::RESERVE_ENTITY_VER_NO];
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+		$this->main->utils()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		if ($selected_ret &&
 			$selected_ret[self::RESERVE_ENTITY_VER_NO] != $form['ver_no']) {
@@ -281,7 +281,7 @@ class tsReserve
 		$stmt = $this->main->dbh()->prepare($update_sql);
 
 		// 現在日時
-		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
+		$now = $this->main->utils()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 		
 		// バインド引数設定
 		$stmt->bindParam(1, $gmt_reserve_datetime, \PDO::PARAM_STR);
@@ -322,7 +322,7 @@ class tsReserve
 
 		$logstr = "[排他確認]データ取得時のバージョンNO：" . $ver_no . "\r\n";
 		$logstr .= "[排他確認]現時点のバージョンNO：" . $selected_ret[self::RESERVE_ENTITY_VER_NO];
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+		$this->main->utils()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 		if ($selected_ret &&
 			$selected_ret[self::RESERVE_ENTITY_VER_NO] != $ver_no) {
@@ -377,7 +377,7 @@ class tsReserve
 		$stmt = $this->main->dbh()->prepare($update_sql);
 
 		// 現在時刻
-		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
+		$now = $this->main->utils()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 
 		// バインド引数設定
 		$stmt->bindValue(1, define::DELETE_FLG_ON, \PDO::PARAM_STR);
@@ -405,11 +405,11 @@ class tsReserve
 		$conv_array[self::RESERVE_ENTITY_RESERVE_GMT] 	= $array[self::TS_RESERVE_DATETIME];
 
 		// 公開予定日時（タイムゾーン日時）
-		$tz_datetime = $this->main->common()->convert_to_timezone_datetime($array[self::TS_RESERVE_DATETIME]);
+		$tz_datetime = $this->main->utils()->convert_to_timezone_datetime($array[self::TS_RESERVE_DATETIME]);
 		$conv_array[self::RESERVE_ENTITY_RESERVE] = $tz_datetime;
-		$conv_array[self::RESERVE_ENTITY_RESERVE_DISP] = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
-		$conv_array[self::RESERVE_ENTITY_RESERVE_DATE] = $this->main->common()->format_datetime($tz_datetime, define::DATE_FORMAT_YMD);
-		$conv_array[self::RESERVE_ENTITY_RESERVE_TIME] = $this->main->common()->format_datetime($tz_datetime, define::TIME_FORMAT_HI);
+		$conv_array[self::RESERVE_ENTITY_RESERVE_DISP] = $this->main->utils()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
+		$conv_array[self::RESERVE_ENTITY_RESERVE_DATE] = $this->main->utils()->format_datetime($tz_datetime, define::DATE_FORMAT_YMD);
+		$conv_array[self::RESERVE_ENTITY_RESERVE_TIME] = $this->main->utils()->format_datetime($tz_datetime, define::TIME_FORMAT_HI);
 
 		// ブランチ名
 		$conv_array[self::RESERVE_ENTITY_BRANCH] = $array[self::TS_RESERVE_BRANCH];
@@ -421,12 +421,12 @@ class tsReserve
 		// 登録ユーザID
 		$conv_array[self::RESERVE_ENTITY_INSERT_USER_ID] = $array[self::TS_RESERVE_INSERT_USER_ID];
 		// 登録日時
-		$tz_datetime = $this->main->common()->convert_to_timezone_datetime($array[self::TS_RESERVE_INSERT_DATETIME]);
+		$tz_datetime = $this->main->utils()->convert_to_timezone_datetime($array[self::TS_RESERVE_INSERT_DATETIME]);
 		$conv_array[self::RESERVE_ENTITY_INSERT_DATETIME] = $tz_datetime;
 		// 更新ユーザID
 		$conv_array[self::RESERVE_ENTITY_UPDATE_USER_ID] = $array[self::TS_RESERVE_UPDATE_USER_ID];
 		// 更新日時
-		$tz_datetime = $this->main->common()->convert_to_timezone_datetime($array[self::TS_RESERVE_UPDATE_DATETIME]);
+		$tz_datetime = $this->main->utils()->convert_to_timezone_datetime($array[self::TS_RESERVE_UPDATE_DATETIME]);
 		$conv_array[self::RESERVE_ENTITY_UPDATE_DATETIME] = $tz_datetime;
 
 		// バージョンNO

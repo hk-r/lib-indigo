@@ -441,16 +441,16 @@ class initScreen
 			$realpath_waiting = $this->main->realpath_array['realpath_waiting'];
 
 			// 公開予定ディレクトリ名の取得
-			$dirname = $this->main->common()->get_reserve_dirname($gmt_reserve_datetime);
+			$dirname = $this->main->utils()->get_reserve_dirname($gmt_reserve_datetime);
 
-	 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　-----Git情報をwaitingへコピー-----');
+	 		$this->main->utils()->put_process_log(__METHOD__, __LINE__, '　-----Git情報をwaitingへコピー-----');
 			$this->main->gitMgr()->git_file_copy($this->main->options, $realpath_waiting, $dirname);
 
 		
 			//============================================================
 			// 入力情報を公開予定テーブルへ登録
 			//============================================================
-	 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　-----公開処理結果テーブルの登録処理-----');
+	 		$this->main->utils()->put_process_log(__METHOD__, __LINE__, '　-----公開処理結果テーブルの登録処理-----');
 			$this->tsReserve->insert_ts_reserve($form, $gmt_reserve_datetime, $this->main->user_id);
 			
 		} catch (\Exception $e) {
@@ -462,7 +462,7 @@ class initScreen
 			$logstr .= "[ERROR]" . "\r\n";
 			$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
 			$logstr .= "Error message:" . $e->getMessage() . "\r\n";
-			$this->main->common()->put_error_log($logstr);
+			$this->main->utils()->put_error_log($logstr);
 
 			return $result;
 		}
@@ -499,10 +499,10 @@ class initScreen
 			// 「waiting」ディレクトリの変更前の公開ソースディレクトリを削除
 			//============================================================
 			// 変更前の公開予定ディレクトリ名の取得
-			$before_dirname = $this->main->common()->get_reserve_dirname($this->main->options->_POST->before_gmt_reserve_datetime);
+			$before_dirname = $this->main->utils()->get_reserve_dirname($this->main->options->_POST->before_gmt_reserve_datetime);
 
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ 変更前の公開予定ディレクトリ：');
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, $before_dirname);
+			$this->main->utils()->put_process_log(__METHOD__, __LINE__, '　□ 変更前の公開予定ディレクトリ：');
+			$this->main->utils()->put_process_log(__METHOD__, __LINE__, $before_dirname);
 
 			// 変更前削除
 			$this->main->gitMgr()->file_delete($realpath_waiting, $before_dirname);
@@ -512,16 +512,16 @@ class initScreen
 			// 変更後ブランチのGit情報を「waiting」ディレクトリへコピー
 			//============================================================
 			// 公開予定ディレクトリ名の取得
-			$dirname = $this->main->common()->get_reserve_dirname($gmt_reserve_datetime);
+			$dirname = $this->main->utils()->get_reserve_dirname($gmt_reserve_datetime);
 
-	 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　-----Git情報をwaitingへコピー-----');
+	 		$this->main->utils()->put_process_log(__METHOD__, __LINE__, '　-----Git情報をwaitingへコピー-----');
 			$this->main->gitMgr()->git_file_copy($this->main->options, $realpath_waiting, $dirname);
 		
 
 			//============================================================
 			// 入力情報を公開予定テーブルへ更新
 			//============================================================
-	 		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　-----公開処理結果テーブルの更新処理-----');
+	 		$this->main->utils()->put_process_log(__METHOD__, __LINE__, '　-----公開処理結果テーブルの更新処理-----');
 			$this->tsReserve->update_ts_reserve($form['selected_id'], $form, $gmt_reserve_datetime, $this->main->user_id);
 			
 		} catch (\Exception $e) {
@@ -533,7 +533,7 @@ class initScreen
 			$logstr .= "[ERROR]" . "\r\n";
 			$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
 			$logstr .= "Error message:" . $e->getMessage() . "\r\n";
-			$this->main->common()->put_error_log($logstr);
+			$this->main->utils()->put_error_log($logstr);
 
 			return $result;
 		}
@@ -575,7 +575,7 @@ class initScreen
 				// 公開予定情報の論理削除
 				//============================================================
 
-				$this->main->common()->put_process_log(__METHOD__, __LINE__, '　□ -----公開予定情報の論理削除処理-----');
+				$this->main->utils()->put_process_log(__METHOD__, __LINE__, '　□ -----公開予定情報の論理削除処理-----');
 
 				$this->tsReserve->delete_reserve_table($this->main->user_id, $selected_id);
 
@@ -584,7 +584,7 @@ class initScreen
 				//============================================================
 				// 公開予定ディレクトリ名の取得
 				$selected_ret = $this->tsReserve->get_selected_ts_reserve($selected_id);
-				$dirname = $this->main->common()->get_reserve_dirname($selected_ret[tsReserve::RESERVE_ENTITY_RESERVE_GMT]);
+				$dirname = $this->main->utils()->get_reserve_dirname($selected_ret[tsReserve::RESERVE_ENTITY_RESERVE_GMT]);
 				
 				// コピー処理
 				$this->main->gitMgr()->file_delete($realpath_waiting, $dirname);
@@ -611,7 +611,7 @@ class initScreen
 			$logstr .= "[ERROR]" . "\r\n";
 			$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
 			$logstr .= "Error message:" . $e->getMessage() . "\r\n";
-			$this->main->common()->put_error_log($logstr);
+			$this->main->utils()->put_error_log($logstr);
 
 			return $result;
 		}
@@ -1181,7 +1181,7 @@ class initScreen
 		}
 		
 		if (!$ret) {
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, '入力チェック結果 -->' . $ret);
+			$this->main->utils()->put_process_log(__METHOD__, __LINE__, '入力チェック結果 -->' . $ret);
 		}
 
 		return $ret;
@@ -1282,14 +1282,14 @@ class initScreen
 		}
 
 
-		$this->main->common()->put_process_log_block('[form]');
-		$this->main->common()->put_process_log_block('branch_select_value:' .  $form['branch_select_value']);
-		$this->main->common()->put_process_log_block('reserve_date:' . $form['reserve_date']);
-		$this->main->common()->put_process_log_block('reserve_time:' . $form['reserve_time']);
-		$this->main->common()->put_process_log_block('commit_hash:' . $form['commit_hash']);
-		$this->main->common()->put_process_log_block('comment:' . $form['comment']);
-		$this->main->common()->put_process_log_block('ver_no:' . $form['ver_no']);
-		$this->main->common()->put_process_log_block('selected_id:' . $form['selected_id']);
+		$this->main->utils()->put_process_log_block('[form]');
+		$this->main->utils()->put_process_log_block('branch_select_value:' .  $form['branch_select_value']);
+		$this->main->utils()->put_process_log_block('reserve_date:' . $form['reserve_date']);
+		$this->main->utils()->put_process_log_block('reserve_time:' . $form['reserve_time']);
+		$this->main->utils()->put_process_log_block('commit_hash:' . $form['commit_hash']);
+		$this->main->utils()->put_process_log_block('comment:' . $form['comment']);
+		$this->main->utils()->put_process_log_block('ver_no:' . $form['ver_no']);
+		$this->main->utils()->put_process_log_block('selected_id:' . $form['selected_id']);
 
 
 		return $form;

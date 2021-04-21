@@ -98,8 +98,8 @@ class main
 	/** tomk79\filesystem のインスタンス */
 	private $fs;
 
-	/** indigo\common のインスタンス */
-	private $common;
+	/** indigo\utils のインスタンス */
+	private $utils;
 
 	/** indigo\gitManager のインスタンス */
 	private $gitMgr;
@@ -175,7 +175,7 @@ class main
 		  'filesystem_encoding' 	=> define::FILESYSTEM_ENCODING
 		));
 
-		$this->common = new common($this);
+		$this->utils = new utils($this);
 
 		$this->gitMgr = new gitManager($this);
 		$this->pdoMgr = new pdoManager($this);
@@ -207,7 +207,7 @@ class main
 			//============================================================
 			// 通常ログ出力登録
 			//============================================================	
-			$log_dirname = $this->common()->get_current_datetime_of_gmt("Ymd");
+			$log_dirname = $this->utils()->get_current_datetime_of_gmt("Ymd");
 			$this->process_log_path = $this->log_path . 'log_process_' . $log_dirname . '.log';
 
 		}
@@ -314,7 +314,7 @@ class main
 			\date_default_timezone_set($time_zone);
 
 			$logstr = "設定タイムゾーン：" . $time_zone;
-			$this->common()->put_process_log_block($logstr);
+			$this->utils()->put_process_log_block($logstr);
 
 
 			//============================================================
@@ -408,7 +408,7 @@ class main
 				throw new \ErrorException('パラメタが不足しています。');
 			}
 
-			$this->common()->put_process_log(__METHOD__, __LINE__, "■ run start");
+			$this->utils()->put_process_log(__METHOD__, __LINE__, "■ run start");
 
 	
 			//============================================================
@@ -417,19 +417,19 @@ class main
 			if (isset($this->options->_POST->add)) {
 				// 初期表示画面の「新規」ボタン押下
 
-				$this->common()->put_process_log(__METHOD__, __LINE__, "==========初期表示画面の「新規」ボタン押下==========");
+				$this->utils()->put_process_log(__METHOD__, __LINE__, "==========初期表示画面の「新規」ボタン押下==========");
 				$dialog_html = $this->initScn->do_disp_add_dialog();
 
 			} elseif (isset($this->options->_POST->add_check)) {
 				// 新規ダイアログの「確認」ボタン押下
 
-				$this->common()->put_process_log(__METHOD__, __LINE__, "==========新規ダイアログの「確認」ボタン押下==========");
+				$this->utils()->put_process_log(__METHOD__, __LINE__, "==========新規ダイアログの「確認」ボタン押下==========");
 				$dialog_html = $this->initScn->do_check_add();
 
 			} elseif (isset($this->options->_POST->add_confirm)) {
 				// 新規確認ダイアログの「確定」ボタン押下
 		
-				$this->common()->put_process_log(__METHOD__, __LINE__, "==========新規ダイアログの「確定」ボタン押下==========");
+				$this->utils()->put_process_log(__METHOD__, __LINE__, "==========新規ダイアログの「確定」ボタン押下==========");
 				$result = $this->initScn->do_confirm_add();	
 				$alert_message = $result['message'];
 				$dialog_html   = $result['dialog_html'];
@@ -437,7 +437,7 @@ class main
 			} elseif (isset($this->options->_POST->add_back)) {
 				// 新規確認ダイアログの「戻る」ボタン押下
 								
-				$this->common()->put_process_log(__METHOD__, __LINE__, "==========新規ダイアログの「戻る」ボタン押下==========");
+				$this->utils()->put_process_log(__METHOD__, __LINE__, "==========新規ダイアログの「戻る」ボタン押下==========");
 				$dialog_html = $this->initScn->do_back_add_dialog();
 
 			//============================================================
@@ -446,19 +446,19 @@ class main
 			} elseif (isset($this->options->_POST->update)) {
 				// 初期表示画面の「変更」ボタン押下
 							
-				$this->common()->put_process_log(__METHOD__, __LINE__, "==========初期表示画面の「変更」ボタン押下==========");
+				$this->utils()->put_process_log(__METHOD__, __LINE__, "==========初期表示画面の「変更」ボタン押下==========");
 				$dialog_html = $this->initScn->do_disp_update_dialog();
 
 			} elseif (isset($this->options->_POST->update_check)) {
 				// 変更ダイアログの「確認」ボタン押下
 				
-				$this->common()->put_process_log(__METHOD__, __LINE__, "==========変更ダイアログの「確認」ボタン押下==========");
+				$this->utils()->put_process_log(__METHOD__, __LINE__, "==========変更ダイアログの「確認」ボタン押下==========");
 				$dialog_html = $this->initScn->do_check_update();
 
 			} elseif (isset($this->options->_POST->update_confirm)) {
 				// 変更確認ダイアログの「確定」ボタン押下
 			
-				$this->common()->put_process_log(__METHOD__, __LINE__, "==========変更ダイアログの「確定」ボタン押下==========");
+				$this->utils()->put_process_log(__METHOD__, __LINE__, "==========変更ダイアログの「確定」ボタン押下==========");
 				$result = $this->initScn->do_confirm_update();	
 				$alert_message = $result['message'];
 				$dialog_html   = $result['dialog_html'];
@@ -466,7 +466,7 @@ class main
 			} elseif (isset($this->options->_POST->update_back)) {
 				// 変更確認ダイアログの「戻る」ボタン押下
 				
-				$this->common()->put_process_log(__METHOD__, __LINE__, "==========変更ダイアログの「戻る」ボタン押下==========");
+				$this->utils()->put_process_log(__METHOD__, __LINE__, "==========変更ダイアログの「戻る」ボタン押下==========");
 				$dialog_html = $this->initScn->do_back_update_dialog();
 
 
@@ -476,7 +476,7 @@ class main
 			} elseif (isset($this->options->_POST->delete)) {
 				// 初期表示画面の「削除」ボタン押下
 			
-				$this->common()->put_process_log(__METHOD__, __LINE__, "==========初期表示画面の「削除」ボタン押下==========");
+				$this->utils()->put_process_log(__METHOD__, __LINE__, "==========初期表示画面の「削除」ボタン押下==========");
 				$result = $this->initScn->do_delete();
 				$alert_message = $result['message'];
 
@@ -486,7 +486,7 @@ class main
 			} elseif (isset($this->options->_POST->restore)) {
 				// バックアップ一覧画面の「復元ボタン押下
 		
-				$this->common()->put_process_log(__METHOD__, __LINE__, "==========バックアップ一覧画面の「復元」ボタン押下==========");
+				$this->utils()->put_process_log(__METHOD__, __LINE__, "==========バックアップ一覧画面の「復元」ボタン押下==========");
 				$result = $this->publish->exec_publish(define::PUBLISH_TYPE_MANUAL_RESTORE, null);
 
 				// 画面アラート用のメッセージ
@@ -495,11 +495,11 @@ class main
 				if ( !$result['status'] ) {
 					// 処理失敗の場合、復元処理
 
-					$this->common()->put_process_log(__METHOD__, __LINE__, "** 手動復元公開処理エラー終了 **" . $result['message']);
+					$this->utils()->put_process_log(__METHOD__, __LINE__, "** 手動復元公開処理エラー終了 **" . $result['message']);
 
 					if ($result['backup_id']) {
 						// バックアップが作成されている場合
-						$this->common()->put_process_log(__METHOD__, __LINE__, "==========自動復元処理の呼び出し==========");
+						$this->utils()->put_process_log(__METHOD__, __LINE__, "==========自動復元処理の呼び出し==========");
 						$result = $this->publish->exec_publish(define::PUBLISH_TYPE_AUTO_RESTORE, $result['output_id']);
 
 						// 画面アラート用のメッセージ
@@ -508,7 +508,7 @@ class main
 						if ( !$result['status'] ) {
 							// 処理失敗の場合、復元処理
 							
-							$this->common()->put_process_log(__METHOD__, __LINE__, "** 自動復元公開処理エラー終了 **" . $result['message']);
+							$this->utils()->put_process_log(__METHOD__, __LINE__, "** 自動復元公開処理エラー終了 **" . $result['message']);
 						}
 					}
 				}
@@ -519,19 +519,19 @@ class main
 			} elseif (isset($this->options->_POST->immediate)) {
 				// 初期表示画面の「即時公開」ボタン押下
 
-				$this->common()->put_process_log(__METHOD__, __LINE__, "==========初期表示画面の「即時公開」ボタン押下==========");
+				$this->utils()->put_process_log(__METHOD__, __LINE__, "==========初期表示画面の「即時公開」ボタン押下==========");
 				$dialog_html = $this->initScn->do_disp_immediate_dialog();
 
 			} elseif (isset($this->options->_POST->immediate_check)) {
 				// 即時公開ダイアログの「確認」ボタン押下
 				
-				$this->common()->put_process_log(__METHOD__, __LINE__, "==========即時公開入力ダイアログの「確認」ボタン押下==========");
+				$this->utils()->put_process_log(__METHOD__, __LINE__, "==========即時公開入力ダイアログの「確認」ボタン押下==========");
 				$dialog_html = $this->initScn->do_check_immediate();
 
 			} elseif (isset($this->options->_POST->immediate_confirm)) {
 				// 即時公開確認ダイアログの「確定」ボタン押下
 				
-				$this->common()->put_process_log(__METHOD__, __LINE__, "==========即時公開確認ダイアログの「確定」ボタン押下==========");
+				$this->utils()->put_process_log(__METHOD__, __LINE__, "==========即時公開確認ダイアログの「確定」ボタン押下==========");
 				$result = $this->initScn->do_immediate_publish();
 
 				// 画面アラート用のメッセージ
@@ -541,11 +541,11 @@ class main
 				if ( !$result['status'] ) {
 					// 処理失敗の場合、復元処理
 
-					$this->common()->put_process_log(__METHOD__, __LINE__, "** 即時公開処理エラー終了 **" . $result['message']);
+					$this->utils()->put_process_log(__METHOD__, __LINE__, "** 即時公開処理エラー終了 **" . $result['message']);
 
 					if ($result['backup_id']) {
 						// バックアップが作成されている場合
-						$this->common()->put_process_log(__METHOD__, __LINE__, "==========自動復元処理の呼び出し==========");
+						$this->utils()->put_process_log(__METHOD__, __LINE__, "==========自動復元処理の呼び出し==========");
 						$result = $this->publish->exec_publish(define::PUBLISH_TYPE_AUTO_RESTORE, $result['output_id']);
 
 						// 画面アラート用のメッセージ
@@ -554,7 +554,7 @@ class main
 						if ( !$result['status'] ) {
 							// 処理失敗の場合、復元処理
 							
-							$this->common()->put_process_log(__METHOD__, __LINE__, "** 自動復元公開処理エラー終了 **" . $result['message']);
+							$this->utils()->put_process_log(__METHOD__, __LINE__, "** 自動復元公開処理エラー終了 **" . $result['message']);
 						}
 					}
 
@@ -565,7 +565,7 @@ class main
 			} elseif (isset($this->options->_POST->immediate_back)) {
 				// 即時公開確認ダイアログの「戻る」ボタン押下
 
-				$this->common()->put_process_log(__METHOD__, __LINE__, "==========即時公開確認ダイアログの「戻る」ボタン押下==========");
+				$this->utils()->put_process_log(__METHOD__, __LINE__, "==========即時公開確認ダイアログの「戻る」ボタン押下==========");
 				$dialog_html = $this->initScn->do_back_immediate_dialog();
 
 			//============================================================
@@ -574,7 +574,7 @@ class main
 			} elseif (isset($this->options->_POST->log)) {
 				// 履歴表示画面の「新規」ボタン押下
 				
-				$this->common()->put_process_log(__METHOD__, __LINE__, "==========履歴表示画面の「ログ」ボタン押下==========");
+				$this->utils()->put_process_log(__METHOD__, __LINE__, "==========履歴表示画面の「ログ」ボタン押下==========");
 				$dialog_html = $this->historyScn->do_disp_log_dialog();
 			}
 
@@ -584,10 +584,10 @@ class main
 				// $logstr = "**********************************************************************************" . "\r\n";
 				// $logstr .= " ステータスエラー " . "\r\n";
 				// $logstr .= "**********************************************************************************";
-				// $this->common()->put_process_log_block($logstr);
+				// $this->utils()->put_process_log_block($logstr);
 
 				$logstr = "[アラートメッセージ]" . $alert_message;
-				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+				$this->utils()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 				// エラーメッセージ表示
 				$dialog_html = '
@@ -607,7 +607,7 @@ class main
 				// 初期表示画面の「履歴」ボタン押下
 				
 				$logstr = "==========履歴画面の表示==========";
-				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+				$this->utils()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$disp = $this->historyScn->disp_history_screen();
 
@@ -615,7 +615,7 @@ class main
 				// 初期表示画面の「バックアップ一覧」ボタン押下
 
 				$logstr = "==========バックアップ一覧画面の表示==========";
-				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+				$this->utils()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$disp = $this->backupScn->disp_backup_screen();
 				
@@ -623,7 +623,7 @@ class main
 				// 初期表示画面の表示
 
 				$logstr = "==========初期表示画面の表示==========";
-				$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+				$this->utils()->put_process_log(__METHOD__, __LINE__, $logstr);
 			
 				$disp = $this->initScn->do_disp_init_screen();
  
@@ -644,7 +644,7 @@ class main
 				$logstr .= "[ErrorException]" . "\r\n";
 				$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
 				$logstr .= "Error message:" . $e->getMessage() . "\r\n";
-				$this->common()->put_error_log($logstr);
+				$this->utils()->put_error_log($logstr);
 			} else {
 				$alert_line = $e->getFile() . " in " . $e->getLine();
 				$alert_message = "Error message:" . $e->getMessage();
@@ -660,13 +660,13 @@ class main
 
 			$logstr = "** run() Exception caught **" . "\r\n";
 			$logstr .= $e->getMessage() . "\r\n";
-			$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+			$this->utils()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 			$logstr =  "***** EXCEPTION ERROR *****" . "\r\n";
 			$logstr .= "[Exception]" . "\r\n";
 			$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
 			$logstr .= "Error message:" . $e->getMessage() . "\r\n";
-			$this->common()->put_error_log($logstr);
+			$this->utils()->put_error_log($logstr);
 
 			// エラーメッセージ表示
 			$dialog_html = '<h3>'.  $alert_title . '</h3>';
@@ -678,7 +678,7 @@ class main
 		// データベース接続を閉じる
 		$this->pdoMgr->close();
 
-		$this->common()->put_process_log(__METHOD__, __LINE__, "■ run() end");
+		$this->utils()->put_process_log(__METHOD__, __LINE__, "■ run() end");
 
 		// 画面表示
 		return $disp . $disp_lock . $dialog_html;
@@ -790,7 +790,7 @@ class main
 	 */
 	public function cron_run(){
 	
-		$this->common()->put_process_log(__METHOD__, __LINE__, '■ [cron] run start');
+		$this->utils()->put_process_log(__METHOD__, __LINE__, '■ [cron] run start');
 
 		// 処理実行結果格納
 		$result = array('status' => true,
@@ -802,26 +802,26 @@ class main
 			$logstr = "===============================================" . "\r\n";
 			$logstr .= "予定公開処理開始" . "\r\n";
 			$logstr .= "===============================================";
-			$this->common()->put_process_log_block($logstr);
+			$this->utils()->put_process_log_block($logstr);
 
 			$result = $this->publish->exec_publish(define::PUBLISH_TYPE_RESERVE, null);
 	
 			if ( !$result['status'] ) {
 				// 予定公開処理失敗の場合
 
-				$this->common()->put_process_log(__METHOD__, __LINE__, "** 予定公開処理エラー終了 **" . $result['message']);
+				$this->utils()->put_process_log(__METHOD__, __LINE__, "** 予定公開処理エラー終了 **" . $result['message']);
 
 				if ($result['backup_id']) {
 					// バックアップが作成されている場合
 
-					$this->common()->put_process_log(__METHOD__, __LINE__, "==========自動復元処理の呼び出し==========");
+					$this->utils()->put_process_log(__METHOD__, __LINE__, "==========自動復元処理の呼び出し==========");
 
 					$result = $this->publish->exec_publish(define::PUBLISH_TYPE_AUTO_RESTORE, $result['output_id']);
 
 					if ( !$result['status'] ) {
 						// 自動復元処理失敗の場合
 
-						$this->common()->put_process_log(__METHOD__, __LINE__, "** 自動復元公開処理エラー終了 **" . $result['message']);
+						$this->utils()->put_process_log(__METHOD__, __LINE__, "** 自動復元公開処理エラー終了 **" . $result['message']);
 					}
 				}
 			}
@@ -835,7 +835,7 @@ class main
 				$logstr .= "[ErrorException]" . "\r\n";
 				$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
 				$logstr .= "Error message:" . $e->getMessage() . "\r\n";
-				$this->common()->put_error_log($logstr);
+				$this->utils()->put_error_log($logstr);
 			} else {
 				$alert_line = $e->getFile() . " in " . $e->getLine();
 				$alert_message = "Error message:" . $e->getMessage();
@@ -854,13 +854,13 @@ class main
 
 			$logstr = "** cron_run() Exception caught **" . "\r\n";
 			$logstr .= $e->getMessage() . "\r\n";
-			$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+			$this->utils()->put_process_log(__METHOD__, __LINE__, $logstr);
 
 			$logstr =  "***** EXCEPTION ERROR *****" . "\r\n";
 			$logstr .= "[Exception]" . "\r\n";
 			$logstr .= $e->getFile() . " in " . $e->getLine() . "\r\n";
 			$logstr .= "Error message:" . $e->getMessage() . "\r\n";
-			$this->common()->put_error_log($logstr);
+			$this->utils()->put_error_log($logstr);
 
 			// エラーメッセージ表示
 			$dialog_html = '<h3>'.  $alert_title . '</h3>';
@@ -875,9 +875,9 @@ class main
 		$logstr .= "===============================================" . "\r\n";
 		$logstr .= "予定公開処理終了" . "\r\n";
 		$logstr .= "===============================================";
-		$this->common()->put_process_log(__METHOD__, __LINE__, $logstr);
+		$this->utils()->put_process_log(__METHOD__, __LINE__, $logstr);
 
-		$this->common()->put_process_log(__METHOD__, __LINE__, '■ [cron] run end');
+		$this->utils()->put_process_log(__METHOD__, __LINE__, '■ [cron] run end');
 
 		return;
 	}
@@ -913,12 +913,12 @@ class main
 	}
 
 	/**
-	 * `$common` オブジェクトを取得する。
+	 * `$utils` オブジェクトを取得する。
 	 *
-	 * @return object $common オブジェクト
+	 * @return object $utils オブジェクト
 	 */
-	public function common(){
-		return $this->common;
+	public function utils(){
+		return $this->utils;
 	}
 
 	/**

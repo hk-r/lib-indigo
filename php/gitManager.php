@@ -46,17 +46,17 @@ class gitManager
 
 			// set remote as origin
 			$command = 'git remote add ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' ' . escapeshellarg($url_git_remote);
-			$this->main->common()->command_execute($command, true);
+			$this->main->utils()->command_execute($command, true);
 			$command = 'git remote set-url ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' ' . escapeshellarg($url_git_remote);
-			$this->main->common()->command_execute($command, true);
+			$this->main->utils()->command_execute($command, true);
 
 			// fetch
 			$command = 'git fetch';
-			$this->main->common()->command_execute($command, true);
+			$this->main->utils()->command_execute($command, true);
 
 			// ブランチの一覧取得
 			$command = 'git branch -r';
-			$ret = $this->main->common()->command_execute($command, true);
+			$ret = $this->main->utils()->command_execute($command, true);
 
 			foreach ((array)$ret['output'] as $key => $value) {
 				if( \strpos($value, '/HEAD') !== false ){
@@ -72,7 +72,7 @@ class gitManager
 
 			$url_git_remote = $this->get_git_remote_url( false );
 			$command = 'git remote set-url ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' ' . escapeshellarg($url_git_remote);
-			$this->main->common()->command_execute($command, true);
+			$this->main->utils()->command_execute($command, true);
 
 			\chdir($current_dir);
 
@@ -106,7 +106,7 @@ class gitManager
 		// すでに存在している場合はエラーメッセージを表示する。
 		$dir_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($path . $dirname));
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '【file copy path】 ' . $dir_real_path);
+		$this->main->utils()->put_process_log(__METHOD__, __LINE__, '【file copy path】 ' . $dir_real_path);
 
 		if (\file_exists($dir_real_path)) {
 			throw new \Exception('同日時に公開予定のGitファイルが既に存在しています。公開予定情報を確認してください。' . $dir_real_path);
@@ -128,7 +128,7 @@ class gitManager
 			// git init
 			//============================================================
 			$command = 'git init';
-			$this->main->common()->command_execute($command, true);
+			$this->main->utils()->command_execute($command, true);
 
 			//============================================================
 			// git urlのセット
@@ -137,25 +137,25 @@ class gitManager
 			
 			// initしたリポジトリに名前を付ける
 			$command = 'git remote add ' . escapeshellarg(define::GIT_REMOTE_NAME) .  ' ' . escapeshellarg($url_git_remote);
-			$this->main->common()->command_execute($command, true);
+			$this->main->utils()->command_execute($command, true);
 			$command = 'git remote set-url ' . escapeshellarg(define::GIT_REMOTE_NAME) .  ' ' . escapeshellarg($url_git_remote);
-			$this->main->common()->command_execute($command, true);
+			$this->main->utils()->command_execute($command, true);
 			
 			//============================================================
 			// git fetch（リモートリポジトリの指定ブランチの情報をローカルブランチへ反映）
 			//============================================================
 			$command = 'git fetch ' . escapeshellarg(define::GIT_REMOTE_NAME) .  ' ' . escapeshellarg($branch_name);
-			$this->main->common()->command_execute($command, true);
+			$this->main->utils()->command_execute($command, true);
 			
 			//============================================================
 			// git pull（リモート取得ブランチを任意のローカルブランチにマージするコマンド）
 			//============================================================
 			$command = 'git pull ' . escapeshellarg(define::GIT_REMOTE_NAME) .  ' ' . escapeshellarg($branch_name);
-			$this->main->common()->command_execute($command, true);
+			$this->main->utils()->command_execute($command, true);
 			
 			$url_git_remote = $this->get_git_remote_url( false );
 			$command = 'git remote set-url ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' ' . escapeshellarg($url_git_remote);
-			$this->main->common()->command_execute($command, true);
+			$this->main->utils()->command_execute($command, true);
 
 			\chdir($current_dir);
 
@@ -180,12 +180,12 @@ class gitManager
 		// 公開ソースディレクトリの絶対パスを取得
 		$dir_real_path = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($path . $dirname));
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '【file delete path】 ' . $dir_real_path);
+		$this->main->utils()->put_process_log(__METHOD__, __LINE__, '【file delete path】 ' . $dir_real_path);
 
 		if( $dir_real_path && is_dir( $dir_real_path ) && strlen($dir_real_path) > 3 ) {
 			// ディレクトリが存在する場合、削除コマンド実行
 			$command = 'rm -rf '. $dir_real_path;
-			$ret = $this->main->common()->command_execute($command, true);
+			$ret = $this->main->utils()->command_execute($command, true);
 
 			if ( $ret['return'] !== 0 ) {
 				throw new \Exception('Delete directory failed. ' . $dir_real_path);
@@ -229,27 +229,27 @@ class gitManager
 
 					// git セットアップ
 					$command = 'git init';
-					$this->main->common()->command_execute($command, true);
+					$this->main->utils()->command_execute($command, true);
 
 					// git urlのセット
 					$url_git_remote = $this->get_git_remote_url( true );
 
 					$command = 'git remote add ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' ' . escapeshellarg($url_git_remote);
-					$this->main->common()->command_execute($command, true);
+					$this->main->utils()->command_execute($command, true);
 					$command = 'git remote set-url ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' ' . escapeshellarg($url_git_remote);
-					$this->main->common()->command_execute($command, true);
+					$this->main->utils()->command_execute($command, true);
 
 					// git fetch
 					$command = 'git fetch ' . escapeshellarg(define::GIT_REMOTE_NAME);
-					$this->main->common()->command_execute($command, true);
+					$this->main->utils()->command_execute($command, true);
 
 					// git pull
 					$command = 'git pull ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' master';
-					$this->main->common()->command_execute($command, true);
+					$this->main->utils()->command_execute($command, true);
 
 					$url_git_remote = $this->get_git_remote_url( false );
 					$command = 'git remote set-url ' . escapeshellarg(define::GIT_REMOTE_NAME) . ' ' . escapeshellarg($url_git_remote);
-					$this->main->common()->command_execute($command, true);
+					$this->main->utils()->command_execute($command, true);
 
 					\chdir($current_dir);
 

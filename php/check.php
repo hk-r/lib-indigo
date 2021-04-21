@@ -145,7 +145,7 @@ class check
 		$ret = true;
 
 		// GMTの現在日時
-		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
+		$now = $this->main->utils()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 
 		if (\strtotime($now) >= \strtotime($datetime)) {
 			$ret = false;

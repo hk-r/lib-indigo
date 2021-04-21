@@ -87,8 +87,8 @@ class historyScreen
 				$backup_ret = $this->tsBackup->get_selected_ts_backup($array[tsOutput::OUTPUT_ENTITY_BACKUP_ID]);
 
 				if ($backup_ret && $backup_ret[tsBackup::TS_BACKUP_DATETIME]) {
-					$tz_datetime = $this->main->common()->convert_to_timezone_datetime($backup_ret[tsBackup::TS_BACKUP_DATETIME]);
-					$backup_datetime_disp = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
+					$tz_datetime = $this->main->utils()->convert_to_timezone_datetime($backup_ret[tsBackup::TS_BACKUP_DATETIME]);
+					$backup_datetime_disp = $this->main->utils()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
 				}
 				
 			}
@@ -151,7 +151,7 @@ class historyScreen
 
 		$start_datetime_gmt = $selected_ret[tsOutput::OUTPUT_ENTITY_START_GMT];
 		// 公開予定ディレクトリ名の取得
-		$dirname = $this->main->common()->format_gmt_datetime($start_datetime_gmt, define::DATETIME_FORMAT_SAVE);
+		$dirname = $this->main->utils()->format_gmt_datetime($start_datetime_gmt, define::DATETIME_FORMAT_SAVE);
 
 		// logディレクトリの絶対パスを取得。
 		$realpath_log = $this->main->fs()->normalize_path($this->main->fs()->get_realpath($this->main->realpath_array['realpath_log'] . $dirname . "/"));

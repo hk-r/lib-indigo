@@ -8,7 +8,7 @@ namespace indigo;
  * 各クラスで共通化できる処理をまとめたクラス。
  *
  */
-class common
+class utils
 {
 
 	private $main;
@@ -55,8 +55,8 @@ class common
 					'return' => 0
 			  	  );
 
-		$this->main->common()->put_process_log_block('[command]');
-		$this->main->common()->put_process_log_block($command);
+		$this->main->utils()->put_process_log_block('[command]');
+		$this->main->utils()->put_process_log_block($command);
 
 		// 標準出力とエラー出力を両方とも出力する
 		if ($captureStderr === true) {
@@ -283,7 +283,7 @@ class common
 
 		$ret = '';
 
-		$conv_reserve_datetime = $this->main->common()->format_gmt_datetime($datetime, define::DATETIME_FORMAT_SAVE);
+		$conv_reserve_datetime = $this->main->utils()->format_gmt_datetime($datetime, define::DATETIME_FORMAT_SAVE);
 
 		if (!$conv_reserve_datetime) {
 			throw new \Exception('Dirname create failed.');

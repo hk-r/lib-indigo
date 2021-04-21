@@ -108,11 +108,11 @@ class pdoManager
 				$option
 			);
 	
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ PDO connect success.');
+			$this->main->utils()->put_process_log(__METHOD__, __LINE__, '■ PDO connect success.');
 
 		} catch (\PDOException $e) {
 
-			$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ PDO connect failed.');
+			$this->main->utils()->put_process_log(__METHOD__, __LINE__, '■ PDO connect failed.');
 			// エラー情報表示
 			throw new \Exception("Pdo connection failed");
 		}
@@ -255,8 +255,8 @@ class pdoManager
 
 		$ret_array = null;
 
-		$this->main->common()->put_process_log_block('[SQL]');
-		$this->main->common()->put_process_log_block($stmt->queryString);
+		$this->main->utils()->put_process_log_block('[SQL]');
+		$this->main->utils()->put_process_log_block($stmt->queryString);
 
 		// 実行
 		if ($stmt->execute()) {
@@ -291,8 +291,8 @@ class pdoManager
 		$ret_array = null;
 		$rowcount = 0;
 
-		$this->main->common()->put_process_log_block('[SQL]');
-		$this->main->common()->put_process_log_block($stmt->queryString);
+		$this->main->utils()->put_process_log_block('[SQL]');
+		$this->main->utils()->put_process_log_block($stmt->queryString);
 
 		// 実行
 		if ($stmt->execute()) {
@@ -327,8 +327,8 @@ class pdoManager
 	 */
 	public function execute ($dbh, $stmt) {
 
-		$this->main->common()->put_process_log_block('[SQL]');
-		$this->main->common()->put_process_log_block($stmt->queryString);
+		$this->main->utils()->put_process_log_block('[SQL]');
+		$this->main->utils()->put_process_log_block($stmt->queryString);
 
 		// 実行
 		$stmt->execute();

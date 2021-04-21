@@ -76,7 +76,7 @@ class tsBackup
 	 */
 	public function get_ts_backup_list() {
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_ts_backup_list start');
+		$this->main->utils()->put_process_log(__METHOD__, __LINE__, '■ get_ts_backup_list start');
 
 		$select_sql = "SELECT " .
 				  $this->main->pdoMgr()->get_physical_table_name('TS_BACKUP')."." . self::TS_BACKUP_ID_SEQ 				. " as " . self::BACKUP_ENTITY_ID_SEQ . "," .
@@ -107,7 +107,7 @@ class tsBackup
 			$conv_ret_array[] = $this->convert_ts_backup_entity($array);
 		}
 	
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_ts_backup_list end');
+		$this->main->utils()->put_process_log(__METHOD__, __LINE__, '■ get_ts_backup_list end');
 
 		return $conv_ret_array;
 	}
@@ -127,9 +127,9 @@ class tsBackup
 	public function get_selected_ts_backup($selected_id) {
 
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup start');
+		$this->main->utils()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup start');
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '[パラメタ]selected_id：' . $selected_id);
+		$this->main->utils()->put_process_log(__METHOD__, __LINE__, '[パラメタ]selected_id：' . $selected_id);
 
 		if (!$selected_id) {
 			throw new \Exception('対象のバックアップIDが正しく取得できませんでした。 ');
@@ -148,7 +148,7 @@ class tsBackup
 		// SELECT実行
 		$ret_array = $this->main->pdoMgr()->execute_select_one($this->main->dbh(), $stmt);
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup end');
+		$this->main->utils()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup end');
 
 		return $ret_array;
 	}
@@ -168,9 +168,9 @@ class tsBackup
 	public function get_selected_ts_backup_by_output_id($output_id) {
 
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup_by_output_id start');
+		$this->main->utils()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup_by_output_id start');
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '　[パラメタ]output_id：' . $output_id);
+		$this->main->utils()->put_process_log(__METHOD__, __LINE__, '　[パラメタ]output_id：' . $output_id);
 
 		if (!$output_id) {
 			throw new \Exception('対象の公開処理結果IDが取得できませんでした。 ');
@@ -190,7 +190,7 @@ class tsBackup
 		// SELECT実行
 		$ret_array = $this->main->pdoMgr()->execute_select_one($this->main->dbh(), $stmt);
 
-		$this->main->common()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup_by_output_id end');
+		$this->main->utils()->put_process_log(__METHOD__, __LINE__, '■ get_selected_ts_backup_by_output_id end');
 
 		return $ret_array;
 	}
@@ -226,7 +226,7 @@ class tsBackup
 		$stmt = $this->main->dbh()->prepare($insert_sql);
 
 		// 現在時刻
-		$now = $this->main->common()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
+		$now = $this->main->utils()->get_current_datetime_of_gmt(define::DATETIME_FORMAT);
 
 		$uuid = \Ramsey\Uuid\Uuid::uuid1()->toString();
 
@@ -267,14 +267,14 @@ class tsBackup
 		// バックアップ日時（GMT日時）
 		$conv_array[self::BACKUP_ENTITY_DATETIME_GMT] = $array[self::BACKUP_ENTITY_DATETIME];
 		// バックアップ日時（タイムゾーン日時）
-		$tz_datetime = $this->main->common()->convert_to_timezone_datetime($array[self::BACKUP_ENTITY_DATETIME]);
+		$tz_datetime = $this->main->utils()->convert_to_timezone_datetime($array[self::BACKUP_ENTITY_DATETIME]);
 		$conv_array[self::BACKUP_ENTITY_DATETIME] = $tz_datetime;
-		$conv_array[self::BACKUP_ENTITY_DATETIME_DISP] = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
+		$conv_array[self::BACKUP_ENTITY_DATETIME_DISP] = $this->main->utils()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
 
 		// 公開予定日時（タイムゾーン日時）
-		$tz_datetime = $this->main->common()->convert_to_timezone_datetime($array[self::BACKUP_ENTITY_RESERVE]);
+		$tz_datetime = $this->main->utils()->convert_to_timezone_datetime($array[self::BACKUP_ENTITY_RESERVE]);
 		$conv_array[self::BACKUP_ENTITY_RESERVE] = $tz_datetime;
-		$conv_array[self::BACKUP_ENTITY_RESERVE_DISP] = $this->main->common()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
+		$conv_array[self::BACKUP_ENTITY_RESERVE_DISP] = $this->main->utils()->format_datetime($tz_datetime, define::DATETIME_FORMAT_DISP);
 
 		// ブランチ名
 		$conv_array[self::BACKUP_ENTITY_BRANCH] = $array[self::BACKUP_ENTITY_BRANCH];
@@ -283,7 +283,7 @@ class tsBackup
 		// コメント
 		$conv_array[self::BACKUP_ENTITY_COMMENT] = $array[self::BACKUP_ENTITY_COMMENT];
 		// 公開種別
-		$conv_array[self::BACKUP_ENTITY_PUBLISH_TYPE] = $this->main->common()->convert_publish_type($array[self::BACKUP_ENTITY_PUBLISH_TYPE]);	
+		$conv_array[self::BACKUP_ENTITY_PUBLISH_TYPE] = $this->main->utils()->convert_publish_type($array[self::BACKUP_ENTITY_PUBLISH_TYPE]);	
 		// 登録ユーザ
 		$conv_array[self::BACKUP_ENTITY_INSERT_USER_ID] = $array[self::BACKUP_ENTITY_INSERT_USER_ID];
 
