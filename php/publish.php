@@ -207,7 +207,8 @@ class publish
 					$this->exec_sync_move($from_realpath, $to_realpath);
 
 				} else {
-				// 即時公開、手動復元公開、自動復元公開の場合
+					// --------------------------------------
+					// 即時公開、手動復元公開、自動復元公開の場合
 
 					$backup_id = null;
 					$backup_dirname = '';
@@ -435,7 +436,7 @@ class publish
 	 * @param  string $from_realpath 	同期元の絶対パス
 	 * @param  string $to_realpath		同期先の絶対パス
 	 */
-	public function exec_sync($ignore, $from_realpath, $to_realpath) {
+	private function exec_sync($ignore, $from_realpath, $to_realpath) {
 
 		$logstr = "==========rsyncコマンドによるディレクトリの同期実行==========" . "\r\n";
 		$logstr .= "【同期元パス】" . $from_realpath . "\r\n";
@@ -470,7 +471,7 @@ class publish
 	 * @param  string $from_realpath 	コピー元の絶対パス
 	 * @param  string $to_realpath		コピー先の絶対パス
 	 */
-	public function exec_sync_copy($from_realpath, $to_realpath) {
+	private function exec_sync_copy($from_realpath, $to_realpath) {
 
 		$logstr = "==========rsyncコマンドによるディレクトリのコピー実行==========" . "\r\n";
 		$logstr .= "【コピー元パス】" . $from_realpath . "\r\n";
@@ -502,7 +503,7 @@ class publish
 	 * 
 	 * @throws Exception ディレクトリの削除が失敗した場合
 	 */
-	public function exec_sync_move($from_realpath, $to_realpath) {
+	private function exec_sync_move($from_realpath, $to_realpath) {
 
 		$logstr = "==========rsyncコマンドによるディレクトリの移動実行==========" . "\r\n";
 		$logstr .= "【移動元パス】 " . $from_realpath . "\r\n";
