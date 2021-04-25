@@ -1,6 +1,6 @@
 <?php
 
-namespace indigo;
+namespace pickles2\indigo;
 
 /**
  * Git操作クラス

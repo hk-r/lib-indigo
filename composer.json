@@ -37,7 +37,7 @@
     },
     "autoload": {
         "psr-4": {
-            "indigo\\" : "php/"
+            "pickles2\\indigo\\" : "php/"
         }
     },
     "extra": {

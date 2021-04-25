@@ -1,10 +1,10 @@
 <?php
 
-namespace indigo\screen;
+namespace pickles2\indigo\screen;
 
-use indigo\db\tsOutput as tsOutput;
-use indigo\db\tsBackup as tsBackup;
-use indigo\define as define;
+use pickles2\indigo\db\tsOutput as tsOutput;
+use pickles2\indigo\db\tsBackup as tsBackup;
+use pickles2\indigo\define as define;
 
 /**
  * 履歴一覧表示画面処理クラス

@@ -1,6 +1,6 @@
 <?php
 
-namespace indigo;
+namespace pickles2\indigo;
 
 /**
  * メイン実行クラス
@@ -181,9 +181,9 @@ class main
 		$this->pdoMgr = new pdoManager($this);
 		$this->publish = new publish($this);
 
-		$this->initScn = new \indigo\screen\initScreen($this);
-		$this->historyScn = new \indigo\screen\historyScreen($this);
-		$this->backupScn = new \indigo\screen\backupScreen($this);
+		$this->initScn = new screen\initScreen($this);
+		$this->historyScn = new screen\historyScreen($this);
+		$this->backupScn = new screen\backupScreen($this);
 
 
 		// ログディレクトリの作成

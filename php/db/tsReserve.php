@@ -1,8 +1,8 @@
 <?php
 
-namespace indigo\db;
+namespace pickles2\indigo\db;
 
-use indigo\define as define;
+use pickles2\indigo\define as define;
 
 /**
  * ts_reserveテーブルのデータベース処理クラス

@@ -14,7 +14,7 @@ if( !is_dir( __DIR__.'/../honban2/' ) ){
 // indigo options
 require(__DIR__.'/parameter.php');
 
-$indigo = new indigo\main( call_parameter() );
+$indigo = new pickles2\indigo\main( call_parameter() );
 $indigo_stdout = $indigo->run();
 ?>
 <html>

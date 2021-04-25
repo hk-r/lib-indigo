@@ -1,10 +1,10 @@
 <?php
 
-namespace indigo;
+namespace pickles2\indigo;
 
-use indigo\db\tsReserve as tsReserve;
-use indigo\db\tsOutput as tsOutput;
-use indigo\db\tsBackup as tsBackup;
+use pickles2\indigo\db\tsReserve as tsReserve;
+use pickles2\indigo\db\tsOutput as tsOutput;
+use pickles2\indigo\db\tsBackup as tsBackup;
 
 /**
  * 公開処理実行クラス

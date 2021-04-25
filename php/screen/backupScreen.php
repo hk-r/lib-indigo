@@ -1,9 +1,9 @@
 <?php
 
-namespace indigo\screen;
+namespace pickles2\indigo\screen;
 
-use indigo\db\tsBackup as tsBackup;
-use indigo\define as define;
+use pickles2\indigo\db\tsBackup as tsBackup;
+use pickles2\indigo\define as define;
 
 /**
  * バックアップ一覧画面処理クラス

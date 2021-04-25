@@ -133,7 +133,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 
 		$options = $this->options;
 		
-		$indigo = new indigo\main( $options );
+		$indigo = new pickles2\indigo\main( $options );
 		$stdout = $indigo->run();
 
 		$html = str_get_html( $stdout, true, true, DEFAULT_TARGET_CHARSET, false, DEFAULT_BR_TEXT, DEFAULT_SPAN_TEXT );
@@ -173,7 +173,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$options = $this->options;
 		$options['_POST'] = array('history' => 1);
 
-		$indigo = new indigo\main( $options );
+		$indigo = new pickles2\indigo\main( $options );
 
 		$stdout = $indigo->run();
 
@@ -199,7 +199,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$options = $this->options;
 		$options['_POST'] = array('backup' => 1);
 
-		$indigo = new indigo\main( $options );
+		$indigo = new pickles2\indigo\main( $options );
 
 		$stdout = $indigo->run();
 
@@ -258,8 +258,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 			'selected_id' => null
 		);
 
-		$main = new indigo\main( $options );
-		$initScn = new indigo\screen\initScreen( $main );
+		$main = new pickles2\indigo\main( $options );
+		$initScn = new pickles2\indigo\screen\initScreen( $main );
 
 		// var_dump($options);
 		//============================================================
@@ -276,7 +276,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		//============================================================
 		// 予定公開実行
 		//============================================================
-		$publish = new indigo\publish( $main );
+		$publish = new pickles2\indigo\publish( $main );
 
 		$result = $publish->exec_publish(1, null);
 
@@ -324,8 +324,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 			'selected_id' => null
 		);
 
-		$main = new indigo\main( $options );
-		$publish = new indigo\publish( $main );
+		$main = new pickles2\indigo\main( $options );
+		$publish = new pickles2\indigo\publish( $main );
 
 		$result = $publish->exec_publish(2, null);
 
@@ -373,8 +373,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 			'selected_id' => null
 		);
 
-		$main = new indigo\main( $options );
-		$publish = new indigo\publish( $main );
+		$main = new pickles2\indigo\main( $options );
+		$publish = new pickles2\indigo\publish( $main );
 
 		$result = $publish->exec_publish(3, null);
 
@@ -423,8 +423,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 			'selected_id' => null
 		);
 
-		$main = new indigo\main( $options );
-		$publish = new indigo\publish( $main );
+		$main = new pickles2\indigo\main( $options );
+		$publish = new pickles2\indigo\publish( $main );
 
 		$result = $publish->exec_publish(4, null);
 
@@ -470,8 +470,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 			'selected_id' => null
 		);
 
-		$main = new indigo\main( $options );
-		$initScn = new indigo\screen\initScreen( $main );
+		$main = new pickles2\indigo\main( $options );
+		$initScn = new pickles2\indigo\screen\initScreen( $main );
 		
 		//============================================================
 		// 入力情報を公開予定テーブルへ登録
@@ -487,7 +487,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		//============================================================
 		// 予定公開実行
 		//============================================================
-		$publish = new indigo\publish( $main );
+		$publish = new pickles2\indigo\publish( $main );
 
 		$result = $publish->exec_publish(1, null);
 		$this->assertEquals( '公開処理が成功しました。', $result['message'] );
@@ -515,8 +515,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$options = $this->options;
 		$options['_POST'] = array('immediate_confirm' => 1);	
 
-		$main = new indigo\main( $options );
-		$publish = new indigo\publish( $main );
+		$main = new pickles2\indigo\main( $options );
+		$publish = new pickles2\indigo\publish( $main );
 
 		$result = $publish->exec_publish(2, null);
 
@@ -541,8 +541,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 								'selected_id' => null
 							);
 
-		$main = new indigo\main( $options );
-		$publish = new indigo\publish( $main );
+		$main = new pickles2\indigo\main( $options );
+		$publish = new pickles2\indigo\publish( $main );
 
 		// 即時公開
 		$result = $publish->exec_publish(2, null);
@@ -573,8 +573,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		// $options['_POST'] = array('restore' => 1
 		// 					);
 
-		$main = new indigo\main( $options );
-		$publish = new indigo\publish( $main );
+		$main = new pickles2\indigo\main( $options );
+		$publish = new pickles2\indigo\publish( $main );
 
 		// 手動復元公開
 		$result = $publish->exec_publish(4, $output_id);
@@ -604,8 +604,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$options = $this->options;
 		$options['_POST'] = array('restore' => 1);	
 
-		$main = new indigo\main( $options );
-		$publish = new indigo\publish( $main );
+		$main = new pickles2\indigo\main( $options );
+		$publish = new pickles2\indigo\publish( $main );
 
 		$result = $publish->exec_publish(3, null);
 
@@ -617,8 +617,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		//============================================================
 		$options = $this->options;
 
-		$main = new indigo\main( $options );
-		$tsBackup = new \indigo\db\tsBackup($main);
+		$main = new pickles2\indigo\main( $options );
+		$tsBackup = new pickles2\indigo\db\tsBackup($main);
 		$backupList = $tsBackup->get_ts_backup_list();
 
 		// 画面入力項目の設定
@@ -626,8 +626,8 @@ class mainTest extends PHPUnit_Framework_TestCase{
 								'selected_id' => $backupList[1]['backup_id']	// backup_id(予定公開のブランチに戻る想定。即時公開の時に取得したバックアップデータに戻る。)
 							);
 
-		$main = new indigo\main( $options );
-		$publish = new indigo\publish( $main );
+		$main = new pickles2\indigo\main( $options );
+		$publish = new pickles2\indigo\publish( $main );
 
 		// 手動復元公開
 		$result = $publish->exec_publish(3, null);
@@ -653,7 +653,7 @@ class mainTest extends PHPUnit_Framework_TestCase{
 		$options = $this->options;
 		$options['_POST'] = array('add' => 1);	
 
-		$indigo = new indigo\main( $options );
+		$indigo = new pickles2\indigo\main( $options );
 
 
 		$stdout = $indigo->run();

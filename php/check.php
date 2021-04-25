@@ -1,8 +1,8 @@
 <?php
 
-namespace indigo;
+namespace pickles2\indigo;
 
-use indigo\db\tsReserve as tsReserve;
+use pickles2\indigo\db\tsReserve as tsReserve;
 
 /**
  * 入力チェック共通クラス

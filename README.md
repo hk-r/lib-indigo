@@ -3,37 +3,16 @@ pickles2/lib-indigo
 
 ## 導入方法 - Setup
 
-### 1. composerの設定
-
-#### 1-1. `composer.json` に `pickles2/lib-indigo` を設定する
-
-`require` の項目に、`pickles2/lib-indigo` を追加します。
-
-```json
-{
-	〜 中略 〜
-    "require": {
-        "php": ">=5.3.0" ,
-        "pickles2/lib-indigo": "^0.1"
-    },
-	〜 中略 〜
-}
-```
-
-#### 1-2. composer update を実行する
-
-1-1 の設定後は、`composer update` を実行して変更を反映することを忘れずに。
-
-実行すると `vendor` ディレクトリなどが作成されます。
+### 1. `pickles2/lib-indigo` をインストール
 
 ```
-$ composer update
+$ composer require pickles2/lib-indigo;
 ```
 
 
 ### 2. Resourceファイルを配置する
 
-indigoを動作させる上で必要となるResrouceファイルをプロジェクトに取込みます。
+indigo を動作させる上で必要となる Resrouceファイル をプロジェクトに取込みます。
 
 #### 2-1. Resourceファイル取込用スクリプトをプロジェクトへコピーする
 
@@ -268,8 +247,8 @@ require __DIR__ . '/parameter.php';
 // parameter.phpのcall_parameterメソッド
 $parameter = call_parameter();
 
-// load indigo\main
-$indigo = new indigo\main($parameter);
+// load main class
+$indigo = new pickles2\indigo\main( $parameter );
 
 // 実行する
 echo $indigo->run();
@@ -294,8 +273,8 @@ require __DIR__ . '/parameter.php';
 // parameter.phpのcall_parameterメソッド
 $parameter = call_parameter();
 
-// load indigo\ajax
-$indigo = new indigo\main($parameter);
+// load main class
+$indigo = new pickles2\indigo\main( $parameter );
 
 // 実行する
 echo $indigo->ajax_run();
@@ -318,8 +297,8 @@ require __DIR__ . '/parameter.php';
 // parameter.phpのcall_parameterメソッド
 $parameter = call_parameter();
 
-// load indigo\main
-$indigo = new indigo\main($parameter);
+// load main class
+$indigo = new pickles2\indigo\main( $parameter );
 
 // 実行する
 echo $indigo->cron_run();
@@ -343,8 +322,9 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 
 ## 更新履歴 - Change log
 
-### lib-indigo v0.2.2 (リリース日未定)
+### lib-indigo v0.3.0 (リリース日未定)
 
+- `namespace` を変更: `indigo\*` to `pickles2\indigo\*`
 - 複数の本番サーバー設定を利用できるようになった。
 - 内部コードの細かい修正。
 

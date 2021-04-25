@@ -1,12 +1,12 @@
 <?php
 
-namespace indigo\screen;
+namespace pickles2\indigo\screen;
 
-use indigo\db\tsReserve as tsReserve;
-use indigo\db\tsOutput as tsOutput;
-use indigo\db\tsBackup as tsBackup;
+use pickles2\indigo\db\tsReserve as tsReserve;
+use pickles2\indigo\db\tsOutput as tsOutput;
+use pickles2\indigo\db\tsBackup as tsBackup;
 
-use indigo\define as define;
+use pickles2\indigo\define as define;
 
 /**
  * 初期表示画面処理クラス
@@ -75,8 +75,8 @@ class initScreen
 		$this->tsOutput = new tsOutput($this->main);
 		$this->tsBackup = new tsBackup($this->main);
 		
-		$this->check = new \indigo\check($this->main);
-		$this->publish = new \indigo\publish($this->main);
+		$this->check = new \pickles2\indigo\check($this->main);
+		$this->publish = new \pickles2\indigo\publish($this->main);
 
 	}
 

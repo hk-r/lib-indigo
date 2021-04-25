@@ -1,11 +1,11 @@
 <?php
 
-namespace indigo;
+namespace pickles2\indigo\productionServerType;
 
 /**
  * ユーティリティ
  */
-class utils
+class directoory
 {
 
 	private $main;

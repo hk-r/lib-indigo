@@ -1,6 +1,6 @@
 <?php
 /**
- * test for pickles2\px2-sitemapexcel
+ * test for Indigo
  */
 
 class cleaningTest extends PHPUnit_Framework_TestCase{

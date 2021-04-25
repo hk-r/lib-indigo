@@ -1,6 +1,6 @@
 <?php
 
-namespace indigo;
+namespace pickles2\indigo;
 
 /**
  * コミットハッシュ値ajax取得クラス。

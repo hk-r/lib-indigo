@@ -29,7 +29,7 @@ class parameterTest extends PHPUnit_Framework_TestCase{
 		//============================================================
 		$options = $this->options;
 		
-		$indigo = new indigo\main( $options );
+		$indigo = new pickles2\indigo\main( $options );
 		
 		$stdout = $indigo->run();
 		
@@ -122,7 +122,7 @@ class parameterTest extends PHPUnit_Framework_TestCase{
 		//============================================================
 		$options = $this->options;
 		
-		$indigo = new indigo\main( $options );
+		$indigo = new pickles2\indigo\main( $options );
 		
 		$stdout = $indigo->run();
 		
@@ -216,7 +216,7 @@ class parameterTest extends PHPUnit_Framework_TestCase{
 		//============================================================
 		$options = $this->options;
 		
-		$indigo = new indigo\main( $options );
+		$indigo = new pickles2\indigo\main( $options );
 		
 		$stdout = $indigo->run();
 		
