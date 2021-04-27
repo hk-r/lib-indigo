@@ -322,17 +322,17 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 
 ## 更新履歴 - Change log
 
-### lib-indigo v0.3.0 (リリース日未定)
+### pickles2/lib-indigo v0.3.0 (2021年4月28日)
 
 - `namespace` を変更: `indigo\*` to `pickles2\indigo\*`
 - 複数の本番サーバー設定を利用できるようになった。
 - 内部コードの細かい修正。
 
-### lib-indigo v0.2.1 (2021年4月4日)
+### pickles2/lib-indigo v0.2.1 (2021年4月4日)
 
 - GitリモートURLの扱いに関する不具合を修正。
 
-### lib-indigo v0.2.0 (2020年11月9日)
+### pickles2/lib-indigo v0.2.0 (2020年11月9日)
 
 - Gitリモートの `username` と `password` オプションを省略可能になった。
 - 設定項目名 `realpath_ajax_call` を `url_ajax_call` に名称変更。
@@ -346,7 +346,7 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 - 出力先のパスの設定名を `real_path` から `dist` に変更。
 - 細かい不具合の修正。
 
-### lib-indigo v0.1.4 (2019年7月1日)
+### pickles2/lib-indigo v0.1.4 (2019年7月1日)
 
 - オプション `additional_params` を追加。
 - オプション `_GET`, `_POST` を省略可能とした。
@@ -356,17 +356,17 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 - 配信予約の更新に関する不具合を修正。
 - その他いくつかの細かい修正。
 
-### lib-indigo v0.1.3 (2018年8月31日)
+### pickles2/lib-indigo v0.1.3 (2018年8月31日)
 
 - エラーハンドラ登録処理の削除
 - indigo内で生成するディレクトリ名を一部修正
 - 不具合修正：グローバル関数にバックスラッシュ付与
 
-### lib-indigo v0.1.2 (2018年8月22日)
+### pickles2/lib-indigo v0.1.2 (2018年8月22日)
 
 - パラメタ不足パターンの対策
 
-### lib-indigo v0.1.1 (2018年8月21日)
+### pickles2/lib-indigo v0.1.1 (2018年8月21日)
 
 - SQLインジェクション対策実装
 - htmlspecialchars実装
@@ -374,7 +374,7 @@ $ */1 * * * * /usr/bin/php /var/www/html/sample-lib-indigo/htdocs/cron.php >>/va
 - 関数戻り値受け渡し時のjson変換を廃止
 - docコメント修正
 
-### lib-indigo v0.1.0 (2018年8月6日)
+### pickles2/lib-indigo v0.1.0 (2018年8月6日)
 
 - Initial Release.
 
